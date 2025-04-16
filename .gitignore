@@ -1,0 +1,101 @@
+# Archivos y carpetas del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos de IDE y editores
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+*.iml
+*.iws
+*.ipr
+.factorypath
+nbproject/
+.nb-gradle/
+
+# Backend (Java/Maven)
+backend/target/
+backend/bin/
+backend/build/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/src/main/**/target/
+backend/src/test/**/target/
+backend/src/main/**/bin/
+backend/src/test/**/bin/
+backend/logs/
+backend/*.log
+backend/*.log.*
+backend/hs_err_pid*
+backend/replay_pid*
+
+# Frontend (Node.js/React)
+frontend/node_modules/
+frontend/.pnp
+frontend/.pnp.js
+frontend/coverage/
+frontend/build/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.eslintcache
+frontend/.parcel-cache
+
+# Archivos de base de datos
+*.db
+*.sqlite
+*.sqlite3
+*.h2.db
+*.trace.db
+
+# Archivos de configuración con información sensible
+**/application-*.properties
+**/application-*.yml
+**/application.properties.local
+**/application.yml.local
+**/secrets.properties
+**/secrets.yml
+
+# Archivos de certificados y claves
+*.jks
+*.p12
+*.pem
+*.key
+*.crt
+
+# Archivos temporales
+*.tmp
+*.bak
+*.swp
+*~.nib
+*.orig
+*.rej
+*.swo
+*~
+
+# Archivos de dependencias
+.gradle/
+.m2/
+
+# Archivos de logs
+logs/
+*.log
+
+# Archivos de caché
+.cache/
+.npm/
+.yarn/
+
+# Archivos específicos del proyecto
+/data/
+/uploads/

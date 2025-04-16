@@ -1,0 +1,3 @@
+@echo off
+echo Probando conexión al servidor...
+curl -v http://localhost:8080/api/activities
