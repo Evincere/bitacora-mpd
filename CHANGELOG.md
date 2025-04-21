@@ -23,6 +23,13 @@
   - Corrección de problemas de visualización de botones de plantillas
   - Mejora de estilos de botones para mayor consistencia visual
 
+- Mejoras de seguridad y manejo de credenciales
+  - Actualización del archivo .gitignore para excluir archivos con información sensible
+  - Creación de plantillas de ejemplo para archivos de configuración (gcp.oauth.json.example)
+  - Documentación mejorada sobre manejo seguro de credenciales
+  - Actualización de .env.example con ejemplos más completos y seguros
+  - Prevención de exposición accidental de secretos en el repositorio
+
 - Implementación de vista de calendario para actividades
   - Creación de componente Calendar con múltiples vistas (mensual, semanal y diaria)
   - Visualización de actividades por día con indicadores de estado

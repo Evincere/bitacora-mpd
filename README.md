@@ -403,6 +403,41 @@ La aplicación utiliza autenticación basada en JWT (JSON Web Tokens) con los si
 3. Si el usuario no responde o elige cerrar sesión, el sistema cierra la sesión automáticamente.
 4. Si el usuario elige continuar, se reinicia el temporizador de inactividad.
 
+## Seguridad y Manejo de Credenciales
+
+### Archivos Sensibles
+
+El proyecto utiliza `.gitignore` para evitar que archivos con información sensible se suban al repositorio. Algunos archivos que nunca deben subirse al repositorio incluyen:
+
+- **Archivos de credenciales**: `gcp.oauth.json`, `*credentials*.json`, `*secret*.json`, etc.
+- **Archivos de configuración con secretos**: `.env` (excepto `.env.example`)
+- **Claves privadas**: `*.key`, `*.pem`, certificados, etc.
+- **Tokens de acceso**: Archivos que contengan tokens de acceso a servicios
+
+### Configuración Segura
+
+1. **Variables de Entorno**:
+   - Copie `.env.example` a `.env` y complete con sus valores reales
+   - Nunca suba el archivo `.env` al repositorio
+   - Use valores seguros y complejos para contraseñas y secretos
+
+2. **Credenciales de Google OAuth**:
+   - Si necesita usar autenticación con Google, cree un archivo `gcp.oauth.json` basado en la plantilla proporcionada
+   - Mantenga este archivo fuera del control de versiones
+   - Considere usar variables de entorno en lugar de archivos JSON para entornos de producción
+
+3. **Rotación de Secretos**:
+   - Cambie regularmente las contraseñas y secretos
+   - Utilice secretos diferentes para entornos de desarrollo, prueba y producción
+
+### Buenas Prácticas
+
+- No hardcodee credenciales en el código fuente
+- Use variables de entorno o archivos de configuración externos para secretos
+- Implemente el principio de privilegio mínimo para accesos
+- Revise regularmente los permisos y accesos
+- Utilice herramientas de análisis de seguridad como parte del CI/CD
+
 ## Principios de desarrollo
 
 - Arquitectura hexagonal en el backend
@@ -410,6 +445,7 @@ La aplicación utiliza autenticación basada en JWT (JSON Web Tokens) con los si
 - Principios SOLID y Clean Code
 - Patrones de diseño apropiados para cada contexto
 - Testing automatizado
+- Seguridad por diseño
 
 ## Implementación de Sprints
 

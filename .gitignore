@@ -53,6 +53,18 @@ frontend/.eslintcache
 frontend/.parcel-cache
 frontend/package-lock.json
 
+# Archivos de entorno y variables de entorno
+.env
+.env.*
+!.env.example
+!.env.template
+.envrc
+.direnv/
+*.env
+*.env.*
+!*.env.example
+!*.env.template
+
 # Archivos de base de datos
 *.db
 *.sqlite
@@ -67,6 +79,14 @@ frontend/package-lock.json
 **/application.yml.local
 **/secrets.properties
 **/secrets.yml
+**/gcp.oauth.json
+**/*.oauth.json
+**/*credentials*.json
+**/*secret*.json
+**/*token*.json
+**/*key*.json
+**/*auth*.json
+**/*config*.json
 
 # Archivos de certificados y claves
 *.jks
@@ -101,3 +121,37 @@ logs/
 # Archivos específicos del proyecto
 /data/
 /uploads/
+
+# Credenciales de servicios en la nube
+# Google Cloud Platform
+gcp.oauth.json
+gcp-*.json
+google-*.json
+**/google-services.json
+**/google-cloud-*.json
+**/firebase-*.json
+
+# AWS
+**/aws-*.json
+**/aws_*.json
+**/aws.*.json
+**/.aws/
+
+# Azure
+**/azure-*.json
+**/azure_*.json
+**/azure.*.json
+
+# Otros servicios
+**/*credential*.json
+**/*api-key*.json
+**/*apikey*.json
+**/*client-secret*.json
+**/*client_secret*.json
+**/*oauth*.json
+**/*token*.json
+**/*auth*.json
+**/*secret*.json
+**/*password*.json
+**/*private*.json
+**/*confidential*.json
