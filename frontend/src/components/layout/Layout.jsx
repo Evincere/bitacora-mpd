@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import Sidebar from './Sidebar'
 import Header from './Header'
 import Loader from '../common/Loader'
-import NotificationCenter from '../common/NotificationCenter'
+import { PageTransition } from '../ui/PageTransition'
 
 const LayoutContainer = styled.div`
   display: flex;
@@ -34,11 +34,15 @@ const Layout = () => {
         <Header />
         <MainContent>
           <ContentWrapper>
-            {loading ? <Loader /> : <Outlet />}
+            {loading ? <Loader /> : (
+              <PageTransition type="fade" duration={300}>
+                <Outlet />
+              </PageTransition>
+            )}
           </ContentWrapper>
         </MainContent>
       </div>
-      <NotificationCenter />
+      {/* El NotificationCenter ha sido reemplazado por ToastProvider en App.tsx */}
     </LayoutContainer>
   )
 }

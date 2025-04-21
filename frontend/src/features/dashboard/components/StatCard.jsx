@@ -45,7 +45,7 @@ const TrendWrapper = styled.div`
   display: flex;
   align-items: center;
   font-size: 12px;
-  color: ${({ theme, positive }) => positive ? theme.success : theme.error};
+  color: ${({ theme, $positive }) => $positive ? theme.success : theme.error};
 `
 
 const TrendIcon = styled.div`
@@ -65,7 +65,7 @@ const TrendLabel = styled.span`
 
 const StatCard = ({ title, value, icon, color, trend }) => {
   const isPositive = trend >= 0
-  
+
   return (
     <Card>
       <CardHeader>
@@ -74,10 +74,10 @@ const StatCard = ({ title, value, icon, color, trend }) => {
           {icon}
         </IconWrapper>
       </CardHeader>
-      
+
       <Value>{value}</Value>
-      
-      <TrendWrapper positive={isPositive}>
+
+      <TrendWrapper $positive={isPositive}>
         <TrendIcon>
           {isPositive ? <FiArrowUp size={12} /> : <FiArrowDown size={12} />}
         </TrendIcon>

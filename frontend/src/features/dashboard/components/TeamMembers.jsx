@@ -23,7 +23,7 @@ const Title = styled.h3`
 
 const MenuButton = styled.button`
   color: ${({ theme }) => theme.textSecondary};
-  
+
   &:hover {
     color: ${({ theme }) => theme.text};
   }
@@ -41,7 +41,7 @@ const MembersList = styled.div`
   flex-direction: column;
   gap: 12px;
   margin-bottom: 24px;
-  
+
   &:last-child {
     margin-bottom: 0;
   }
@@ -70,7 +70,7 @@ const StatusIndicator = styled.div`
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: ${({ online, theme }) => online ? theme.success : theme.textSecondary};
+  background-color: ${({ $online, theme }) => $online ? theme.success : theme.textSecondary};
   position: absolute;
   bottom: 0;
   right: 0;
@@ -131,7 +131,7 @@ const TeamMembers = () => {
       online: true
     }
   ]
-  
+
   const offlineMembers = [
     {
       id: 4,
@@ -146,7 +146,7 @@ const TeamMembers = () => {
       online: false
     }
   ]
-  
+
   return (
     <Card>
       <CardHeader>
@@ -155,7 +155,7 @@ const TeamMembers = () => {
           <FiMoreVertical size={20} />
         </MenuButton>
       </CardHeader>
-      
+
       <StatusTitle>ONLINE</StatusTitle>
       <MembersList>
         {onlineMembers.map((member, index) => (
@@ -164,7 +164,7 @@ const TeamMembers = () => {
               <Avatar color={getRandomColor(index)}>
                 {getInitials(member.name)}
               </Avatar>
-              <StatusIndicator online={member.online} />
+              <StatusIndicator $online={member.online} />
             </AvatarWrapper>
             <MemberInfo>
               <MemberName>{member.name}</MemberName>
@@ -173,7 +173,7 @@ const TeamMembers = () => {
           </MemberItem>
         ))}
       </MembersList>
-      
+
       <StatusTitle>OFFLINE</StatusTitle>
       <MembersList>
         {offlineMembers.map((member, index) => (
@@ -182,7 +182,7 @@ const TeamMembers = () => {
               <Avatar color={getRandomColor(index + onlineMembers.length)}>
                 {getInitials(member.name)}
               </Avatar>
-              <StatusIndicator online={member.online} />
+              <StatusIndicator $online={member.online} />
             </AvatarWrapper>
             <MemberInfo>
               <MemberName>{member.name}</MemberName>

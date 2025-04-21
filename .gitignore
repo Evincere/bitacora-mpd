@@ -17,6 +17,7 @@ desktop.ini
 .factorypath
 nbproject/
 .nb-gradle/
+bitacora-mpd.code-workspace
 
 # Backend (Java/Maven)
 backend/target/
@@ -50,6 +51,7 @@ frontend/yarn-debug.log*
 frontend/yarn-error.log*
 frontend/.eslintcache
 frontend/.parcel-cache
+frontend/package-lock.json
 
 # Archivos de base de datos
 *.db

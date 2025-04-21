@@ -40,9 +40,9 @@ const Title = styled.h3`
   display: flex;
   align-items: center;
   gap: 12px;
-  
+
   svg {
-    color: ${({ theme, danger }) => danger ? theme.error : theme.primary};
+    color: ${({ theme, $danger }) => $danger ? theme.error : theme.primary};
   }
 `
 
@@ -51,7 +51,7 @@ const CloseButton = styled.button`
   align-items: center;
   justify-content: center;
   color: ${({ theme }) => theme.textSecondary};
-  
+
   &:hover {
     color: ${({ theme }) => theme.text};
   }
@@ -82,34 +82,34 @@ const Button = styled.button`
   font-size: 14px;
   font-weight: 500;
   transition: background-color 0.2s;
-  
+
   &.cancel {
     background-color: ${({ theme }) => theme.backgroundSecondary};
     color: ${({ theme }) => theme.text};
-    
+
     &:hover {
       background-color: ${({ theme }) => theme.inputBackground};
     }
   }
-  
+
   &.confirm {
-    background-color: ${({ theme, danger }) => danger ? theme.error : theme.primary};
+    background-color: ${({ theme, $danger }) => $danger ? theme.error : theme.primary};
     color: white;
-    
+
     &:hover {
-      background-color: ${({ theme, danger }) => danger ? '#ff4d4d' : theme.buttonHover};
+      background-color: ${({ theme, $danger }) => $danger ? '#ff4d4d' : theme.buttonHover};
     }
   }
 `
 
-const ConfirmDialog = ({ 
-  title, 
-  message, 
-  confirmLabel = 'Confirmar', 
-  cancelLabel = 'Cancelar', 
+const ConfirmDialog = ({
+  title,
+  message,
+  confirmLabel = 'Confirmar',
+  cancelLabel = 'Cancelar',
   danger = false,
-  onConfirm, 
-  onCancel 
+  onConfirm,
+  onCancel
 }) => {
   useEffect(() => {
     const handleEscape = (e) => {
@@ -117,24 +117,24 @@ const ConfirmDialog = ({
         onCancel()
       }
     }
-    
+
     document.addEventListener('keydown', handleEscape)
     return () => {
       document.removeEventListener('keydown', handleEscape)
     }
   }, [onCancel])
-  
+
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onCancel()
     }
   }
-  
+
   return (
     <Overlay onClick={handleOverlayClick}>
       <DialogContainer>
         <DialogHeader>
-          <Title danger={danger}>
+          <Title $danger={danger}>
             {danger && <FiAlertTriangle size={20} />}
             {title}
           </Title>
@@ -142,16 +142,16 @@ const ConfirmDialog = ({
             <FiX size={20} />
           </CloseButton>
         </DialogHeader>
-        
+
         <DialogContent>
           <Message>{message}</Message>
         </DialogContent>
-        
+
         <DialogFooter>
           <Button className="cancel" onClick={onCancel}>
             {cancelLabel}
           </Button>
-          <Button className="confirm" danger={danger} onClick={onConfirm}>
+          <Button className="confirm" $danger={danger} onClick={onConfirm}>
             {confirmLabel}
           </Button>
         </DialogFooter>

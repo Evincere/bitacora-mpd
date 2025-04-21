@@ -1,0 +1,150 @@
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: bitacora-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-bitacoradb}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - bitacora-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend - Spring Boot
+  backend:
+    image: eclipse-temurin:21-jre-alpine
+    working_dir: /app
+    volumes:
+      - ./backend/target/bitacora-backend-0.0.1-SNAPSHOT.jar:/app/app.jar
+    container_name: bitacora-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-bitacoradb}
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - JWT_SECRET=${JWT_SECRET:-bitacoraSecretKey2023SecureApplicationWithLongSecretKey}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-86400000}
+    command: [
+      "java",
+      "-jar",
+      "-Djava.security.egd=file:/dev/./urandom",
+      "-Dspring.profiles.active=prod",
+      "-Xms512m",
+      "-Xmx1g",
+      "app.jar"
+    ]
+    networks:
+      - bitacora-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1.5G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Frontend - React con Nginx
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: bitacora-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-8090}:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080/api
+    volumes:
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - bitacora-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  # Prometheus - Monitoreo de métricas
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: bitacora-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    networks:
+      - bitacora-network
+
+  # Grafana - Visualización de métricas
+  grafana:
+    image: grafana/grafana:latest
+    container_name: bitacora-grafana
+    restart: unless-stopped
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    networks:
+      - bitacora-network
+    depends_on:
+      - prometheus
+
+  # Zipkin - Tracing distribuido
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: bitacora-zipkin
+    restart: unless-stopped
+    ports:
+      - "${ZIPKIN_PORT:-9411}:9411"
+    networks:
+      - bitacora-network
+
+networks:
+  bitacora-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  prometheus-data:
+  grafana-data:

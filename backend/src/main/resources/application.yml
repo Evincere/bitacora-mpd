@@ -1,40 +1,172 @@
 spring:
+  # Perfiles de aplicación
+  profiles:
+    active: dev
+
+  # Deshabilitar seguridad para pruebas
+  security:
+    basic:
+      enabled: false
+
+  # Configuración de base de datos común
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+  # Configuración de Flyway
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    out-of-order: true
+
+  # Configuración de caché
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=300s
+
+  # Configuración de correo electrónico
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS:false}
+
+# Configuraciones específicas por perfil
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  # Base de datos H2 para desarrollo
   datasource:
     url: jdbc:h2:mem:bitacoradb
     username: sa
-    password: 
+    password:
     driver-class-name: org.h2.Driver
-  
+
   h2:
     console:
       enabled: true
       path: /h2-console
-  
+
   jpa:
     hibernate:
-      ddl-auto: create-drop
-    show-sql: true
+      ddl-auto: update
     properties:
       hibernate:
-        format_sql: true
         dialect: org.hibernate.dialect.H2Dialect
     defer-datasource-initialization: true
-  
+
   sql:
     init:
       mode: always
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  # Base de datos PostgreSQL para producción
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:bitacoradb}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
   port: 8080
   servlet:
     context-path: /api
 
+# Configuración de Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,loggers,env,flyway,caches,mappings
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+    prometheus:
+      enabled: true
+  info:
+    env:
+      enabled: true
+    git:
+      mode: full
+    java:
+      enabled: true
+    build:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name:bitacora-backend}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms, 100ms, 200ms, 500ms
+  tracing:
+    enabled: false
+    sampling:
+      probability: 0.0
+    propagation:
+      type: w3c
+  zipkin:
+    tracing:
+      enabled: false
+      endpoint: http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans
+  # Deshabilitar completamente Zipkin para evitar advertencias
+  zipkin-enabled: false
+
+# Configuración de OpenAPI
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+  show-actuator: true
+
 logging:
   level:
     org.springframework.web: INFO
     org.hibernate: ERROR
     com.bitacora: DEBUG
+    org.springframework.cache: DEBUG
 
 jwt:
   secret: bitacoraSecretKey2023SecureApplicationWithLongSecretKey
   expiration: 86400000
+
+# Configuración de CORS
+cors:
+  allowed-origins: http://localhost:3000,http://localhost:3001,http://localhost:8080
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: "*"
+  exposed-headers: Authorization
+  allow-credentials: true
+  max-age: 3600

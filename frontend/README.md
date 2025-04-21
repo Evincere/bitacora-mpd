@@ -1,39 +1,8 @@
 # Frontend de Bitácora
 
-Este es el frontend de la aplicación Bitácora, desarrollado con React y Vite.
+> **Nota**: La documentación completa del proyecto se encuentra en el [README principal](../README.md).
 
-## Requisitos previos
-
-- Node.js 18+ instalado
-- npm 9+ instalado
-
-## Instalación
-
-1. Instalar las dependencias:
-
-```bash
-npm install
-```
-
-## Ejecución en desarrollo
-
-Para ejecutar la aplicación en modo desarrollo:
-
-```bash
-npm run dev
-```
-
-Esto iniciará el servidor de desarrollo en `http://localhost:3000`.
-
-## Construcción para producción
-
-Para construir la aplicación para producción:
-
-```bash
-npm run build
-```
-
-Los archivos generados se encontrarán en el directorio `dist`.
+Este directorio contiene el código fuente del frontend de la aplicación Bitácora, desarrollado con React y TypeScript.
 
 ## Estructura del proyecto
 
@@ -52,23 +21,23 @@ frontend/
 │   ├── store/           # Estado global (Redux)
 │   ├── styles/          # Estilos globales
 │   ├── utils/           # Utilidades
-│   ├── App.jsx          # Componente principal
-│   └── main.jsx         # Punto de entrada
+│   ├── App.tsx          # Componente principal
+│   └── main.tsx         # Punto de entrada
 ├── index.html           # Plantilla HTML
 └── vite.config.js       # Configuración de Vite
 ```
 
-## Características implementadas
+## Comandos principales
 
-- **Tema oscuro**: Interfaz moderna con tema oscuro
-- **Diseño responsive**: Adaptable a diferentes tamaños de pantalla
-- **Gestión de estado**: Utilizando Redux Toolkit
-- **Navegación**: Enrutamiento con React Router
-- **Componentes estilizados**: Usando Styled Components
-- **Datos de ejemplo**: Implementados para desarrollo
+```bash
+# Instalar dependencias
+npm install
 
-## Notas
+# Ejecutar en modo desarrollo
+npm run dev
 
-- La aplicación actualmente utiliza datos de ejemplo (mock data) para simular la interacción con el backend
-- Las llamadas a la API están simuladas con retrasos para emular el comportamiento real
-- Para conectar con un backend real, modificar los servicios en `src/features/*/services.js`
+# Construir para producción
+npm run build
+```
+
+Para más detalles sobre la arquitectura, características y uso del frontend, consulte el [README principal](../README.md).

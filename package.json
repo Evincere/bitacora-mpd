@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
+    "@tanstack/react-virtual": "^3.13.6",
+    "ky": "^1.8.1",
+    "react-hook-form": "^7.55.0",
+    "zod": "^3.24.3"
+  }
+}

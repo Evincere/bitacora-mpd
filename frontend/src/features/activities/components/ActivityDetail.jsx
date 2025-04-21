@@ -1,16 +1,18 @@
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import styled from 'styled-components'
-import { 
-  FiX, 
-  FiEdit2, 
-  FiCalendar, 
-  FiUser, 
-  FiMapPin, 
+import {
+  FiX,
+  FiEdit2,
+  FiCalendar,
+  FiUser,
+  FiMapPin,
   FiFileText,
   FiCheckCircle,
   FiClock,
   FiAlertCircle
 } from 'react-icons/fi'
+import StatusBadge from '../../../components/ui/StatusBadge'
+import TypeBadge from '../../../components/ui/TypeBadge'
 
 const Overlay = styled.div`
   position: fixed;
@@ -60,7 +62,7 @@ const CloseButton = styled.button`
   height: 32px;
   border-radius: 4px;
   color: ${({ theme }) => theme.textSecondary};
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.inputBackground};
     color: ${({ theme }) => theme.text};
@@ -73,40 +75,8 @@ const DetailContent = styled.div`
   flex: 1;
 `
 
-const TypeBadge = styled.span`
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  background-color: ${({ type, theme }) => {
-    switch (type) {
-      case 'Atención Personal':
-        return `${theme.primary}20`
-      case 'Atención Telefónica':
-        return `${theme.secondary}20`
-      case 'Concursos':
-        return `${theme.accent}20`
-      case 'Solicitud de info':
-        return `${theme.success}20`
-      default:
-        return `${theme.textSecondary}20`
-    }
-  }};
-  color: ${({ type, theme }) => {
-    switch (type) {
-      case 'Atención Personal':
-        return theme.primary
-      case 'Atención Telefónica':
-        return theme.secondary
-      case 'Concursos':
-        return theme.accent
-      case 'Solicitud de info':
-        return theme.success
-      default:
-        return theme.textSecondary
-    }
-  }};
+// Usando el componente global TypeBadge
+const TypeBadgeWrapper = styled.div`
   margin-bottom: 16px;
 `
 
@@ -127,7 +97,7 @@ const MetaSection = styled.div`
 const MetaItem = styled.div`
   display: flex;
   align-items: flex-start;
-  
+
   svg {
     margin-right: 8px;
     color: ${({ theme }) => theme.textSecondary};
@@ -154,7 +124,7 @@ const MetaValue = styled.span`
 
 const Section = styled.div`
   margin-bottom: 24px;
-  
+
   &:last-child {
     margin-bottom: 0;
   }
@@ -167,39 +137,7 @@ const SectionTitle = styled.h4`
   color: ${({ theme }) => theme.textSecondary};
 `
 
-const StatusBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  background-color: ${({ status, theme }) => {
-    switch (status) {
-      case 'Completado':
-        return `${theme.success}20`
-      case 'En progreso':
-        return `${theme.primary}20`
-      case 'Pendiente':
-        return `${theme.warning}20`
-      default:
-        return `${theme.textSecondary}20`
-    }
-  }};
-  color: ${({ status, theme }) => {
-    switch (status) {
-      case 'Completado':
-        return theme.success
-      case 'En progreso':
-        return theme.primary
-      case 'Pendiente':
-        return theme.warning
-      default:
-        return theme.textSecondary
-    }
-  }};
-`
+// Usando el componente global StatusBadge
 
 const DetailFooter = styled.div`
   display: flex;
@@ -218,7 +156,7 @@ const EditButton = styled.button`
   border-radius: 4px;
   font-weight: 500;
   transition: background-color 0.2s;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.buttonHover};
   }
@@ -239,21 +177,21 @@ const getStatusIcon = (status) => {
 
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
-  
+
   const date = new Date(dateString)
   return {
-    date: date.toLocaleDateString('es-ES', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: '2-digit' 
+    date: date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit'
     }),
-    time: date.toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    time: date.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit'
     }),
-    full: date.toLocaleDateString('es-ES', { 
-      day: '2-digit', 
-      month: '2-digit', 
+    full: date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -268,22 +206,22 @@ const ActivityDetail = ({ activity, onClose, onEdit }) => {
         onClose()
       }
     }
-    
+
     document.addEventListener('keydown', handleEscape)
     return () => {
       document.removeEventListener('keydown', handleEscape)
     }
   }, [onClose])
-  
+
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose()
     }
   }
-  
+
   const formattedDate = formatDate(activity.date)
   const formattedStatusDate = formatDate(activity.lastStatusChangeDate)
-  
+
   return (
     <Overlay onClick={handleOverlayClick}>
       <DetailContainer>
@@ -293,14 +231,16 @@ const ActivityDetail = ({ activity, onClose, onEdit }) => {
             <FiX size={20} />
           </CloseButton>
         </DetailHeader>
-        
+
         <DetailContent>
-          <TypeBadge type={activity.type}>
-            {activity.type}
-          </TypeBadge>
-          
+          <TypeBadgeWrapper>
+            <TypeBadge type={activity.type}>
+              {activity.type}
+            </TypeBadge>
+          </TypeBadgeWrapper>
+
           <Description>{activity.description}</Description>
-          
+
           <MetaSection>
             <MetaItem>
               <FiCalendar size={16} />
@@ -309,7 +249,7 @@ const ActivityDetail = ({ activity, onClose, onEdit }) => {
                 <MetaValue>{formattedDate.full}</MetaValue>
               </MetaContent>
             </MetaItem>
-            
+
             <MetaItem>
               <FiUser size={16} />
               <MetaContent>
@@ -317,7 +257,7 @@ const ActivityDetail = ({ activity, onClose, onEdit }) => {
                 <MetaValue>{activity.person || 'N/A'}</MetaValue>
               </MetaContent>
             </MetaItem>
-            
+
             <MetaItem>
               <FiMapPin size={16} />
               <MetaContent>
@@ -325,7 +265,7 @@ const ActivityDetail = ({ activity, onClose, onEdit }) => {
                 <MetaValue>{activity.role || 'N/A'}</MetaValue>
               </MetaContent>
             </MetaItem>
-            
+
             <MetaItem>
               <FiMapPin size={16} />
               <MetaContent>
@@ -334,17 +274,17 @@ const ActivityDetail = ({ activity, onClose, onEdit }) => {
               </MetaContent>
             </MetaItem>
           </MetaSection>
-          
+
           <Section>
             <SectionTitle>Situación</SectionTitle>
             <Description>{activity.situation || 'No hay información de situación'}</Description>
           </Section>
-          
+
           <Section>
             <SectionTitle>Resultado</SectionTitle>
             <Description>{activity.result || 'No hay información de resultado'}</Description>
           </Section>
-          
+
           <Section>
             <SectionTitle>Estado</SectionTitle>
             <MetaItem>
@@ -363,20 +303,20 @@ const ActivityDetail = ({ activity, onClose, onEdit }) => {
               </MetaItem>
             )}
           </Section>
-          
+
           {activity.comments && (
             <Section>
               <SectionTitle>Comentarios</SectionTitle>
               <Description>{activity.comments}</Description>
             </Section>
           )}
-          
+
           <Section>
             <SectionTitle>Agente</SectionTitle>
             <MetaValue>{activity.agent || 'No especificado'}</MetaValue>
           </Section>
         </DetailContent>
-        
+
         <DetailFooter>
           <EditButton onClick={onEdit}>
             <FiEdit2 size={16} />

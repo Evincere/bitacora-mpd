@@ -1,25 +1,41 @@
-import { useState } from 'react'
-import { useDispatch } from 'react-redux'
+import React, { useState } from 'react'
 import styled from 'styled-components'
-import { 
-  FiEdit2, 
-  FiTrash2, 
-  FiEye, 
+import {
+  FiEdit2,
+  FiTrash2,
+  FiEye,
   FiMoreVertical,
   FiCheckCircle,
   FiClock,
-  FiAlertCircle
+  FiAlertCircle,
+  FiChevronDown,
+  FiChevronUp,
+  FiCalendar,
+  FiUser,
+  FiFileText,
+  FiTag,
+  FiPhone,
+  FiMail,
+  FiUsers,
+  FiClipboard,
+  FiInfo
 } from 'react-icons/fi'
-import { deleteActivity } from '../activitiesSlice'
+import { glassCard, glassExpandable } from '../../../styles/glassmorphism'
+import { statusColors, typeColors } from '../../../styles/statusColors'
+import { useDeleteActivity } from '@/hooks/useActivities'
 import ActivityDetail from './ActivityDetail'
 import ActivityForm from './ActivityForm'
+import ExpandableActivityDetail from './ExpandableActivityDetail'
 import ConfirmDialog from '../../../components/common/ConfirmDialog'
+import StatusBadge from '../../../components/ui/StatusBadge'
+import TypeBadge from '../../../components/ui/TypeBadge'
 
 const ListContainer = styled.div`
-  background-color: ${({ theme }) => theme.cardBackground};
-  border-radius: 8px;
+  ${glassCard}
   overflow: hidden;
-  box-shadow: ${({ theme }) => theme.shadow};
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  margin-bottom: 24px;
 `
 
 const Table = styled.table`
@@ -28,16 +44,21 @@ const Table = styled.table`
 `
 
 const TableHead = styled.thead`
-  background-color: ${({ theme }) => theme.backgroundSecondary};
-  
+  background-color: rgba(42, 42, 48, 0.8);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
   th {
     padding: 16px;
     text-align: left;
     font-weight: 600;
     font-size: 14px;
     color: ${({ theme }) => theme.textSecondary};
-    border-bottom: 1px solid ${({ theme }) => theme.border};
-    
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+
     &:last-child {
       text-align: center;
     }
@@ -46,19 +67,23 @@ const TableHead = styled.thead`
 
 const TableBody = styled.tbody`
   tr {
+    transition: all 0.2s ease;
+    position: relative;
+
     &:hover {
-      background-color: ${({ theme }) => theme.backgroundSecondary};
+      background-color: rgba(42, 42, 48, 0.5);
     }
-    
+
     &:not(:last-child) {
-      border-bottom: 1px solid ${({ theme }) => theme.border};
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     }
   }
-  
+
   td {
     padding: 16px;
     font-size: 14px;
-    
+    transition: all 0.2s ease;
+
     &:last-child {
       text-align: center;
     }
@@ -72,88 +97,22 @@ const EmptyState = styled.div`
   justify-content: center;
   padding: 40px;
   text-align: center;
-  
+
   h3 {
     margin: 16px 0 8px;
     font-size: 18px;
     font-weight: 600;
   }
-  
+
   p {
     color: ${({ theme }) => theme.textSecondary};
     margin-bottom: 24px;
   }
 `
 
-const StatusBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  background-color: ${({ status, theme }) => {
-    switch (status) {
-      case 'Completado':
-        return `${theme.success}20`
-      case 'En progreso':
-        return `${theme.primary}20`
-      case 'Pendiente':
-        return `${theme.warning}20`
-      default:
-        return `${theme.textSecondary}20`
-    }
-  }};
-  color: ${({ status, theme }) => {
-    switch (status) {
-      case 'Completado':
-        return theme.success
-      case 'En progreso':
-        return theme.primary
-      case 'Pendiente':
-        return theme.warning
-      default:
-        return theme.textSecondary
-    }
-  }};
-`
+// StatusBadge ahora se importa desde components/ui/StatusBadge
 
-const TypeBadge = styled.span`
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  background-color: ${({ type, theme }) => {
-    switch (type) {
-      case 'Atención Personal':
-        return `${theme.primary}20`
-      case 'Atención Telefónica':
-        return `${theme.secondary}20`
-      case 'Concursos':
-        return `${theme.accent}20`
-      case 'Solicitud de info':
-        return `${theme.success}20`
-      default:
-        return `${theme.textSecondary}20`
-    }
-  }};
-  color: ${({ type, theme }) => {
-    switch (type) {
-      case 'Atención Personal':
-        return theme.primary
-      case 'Atención Telefónica':
-        return theme.secondary
-      case 'Concursos':
-        return theme.accent
-      case 'Solicitud de info':
-        return theme.success
-      default:
-        return theme.textSecondary
-    }
-  }};
-`
+// TypeBadge ahora se importa desde components/ui/TypeBadge
 
 const ActionsContainer = styled.div`
   position: relative;
@@ -168,7 +127,7 @@ const ActionButton = styled.button`
   height: 32px;
   border-radius: 4px;
   color: ${({ theme }) => theme.textSecondary};
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.inputBackground};
     color: ${({ theme }) => theme.text};
@@ -185,7 +144,7 @@ const ActionsMenu = styled.div`
   border-radius: 4px;
   box-shadow: ${({ theme }) => theme.shadow};
   overflow: hidden;
-  display: ${({ show }) => (show ? 'block' : 'none')};
+  display: ${({ $show }) => ($show ? 'block' : 'none')};
 `
 
 const MenuItem = styled.button`
@@ -195,12 +154,12 @@ const MenuItem = styled.button`
   padding: 8px 16px;
   font-size: 14px;
   text-align: left;
-  color: ${({ theme, danger }) => danger ? theme.error : theme.text};
-  
+  color: ${({ theme, $danger }) => $danger ? theme.error : theme.text};
+
   svg {
     margin-right: 8px;
   }
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.inputBackground};
   }
@@ -209,11 +168,11 @@ const MenuItem = styled.button`
 const DateCell = styled.div`
   display: flex;
   flex-direction: column;
-  
+
   .date {
     font-weight: 500;
   }
-  
+
   .time {
     font-size: 12px;
     color: ${({ theme }) => theme.textSecondary};
@@ -224,11 +183,11 @@ const DateCell = styled.div`
 const PersonCell = styled.div`
   display: flex;
   flex-direction: column;
-  
+
   .name {
     font-weight: 500;
   }
-  
+
   .role {
     font-size: 12px;
     color: ${({ theme }) => theme.textSecondary};
@@ -239,13 +198,34 @@ const PersonCell = styled.div`
 const getStatusIcon = (status) => {
   switch (status) {
     case 'Completado':
-      return <FiCheckCircle size={14} />
+      return <FiCheckCircle size={16} />
     case 'En progreso':
-      return <FiClock size={14} />
+      return <FiClock size={16} />
     case 'Pendiente':
-      return <FiAlertCircle size={14} />
+      return <FiAlertCircle size={16} />
     default:
       return null
+  }
+}
+
+const getTypeIcon = (type) => {
+  switch (type) {
+    case 'Atención Personal':
+      return <FiUser size={16} />
+    case 'Atención Telefónica':
+      return <FiPhone size={16} />
+    case 'Concursos':
+      return <FiUsers size={16} />
+    case 'Solicitud de info':
+      return <FiInfo size={16} />
+    case 'Mails':
+      return <FiMail size={16} />
+    case 'Multitareas':
+      return <FiClipboard size={16} />
+    case 'Tomo Nota':
+      return <FiFileText size={16} />
+    default:
+      return <FiTag size={16} />
   }
 }
 
@@ -257,41 +237,97 @@ const formatDate = (dateString) => {
   }
 }
 
+const RowContainer = styled.tr`
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+
+  &:hover {
+    background-color: rgba(42, 42, 48, 0.5);
+    transform: translateZ(5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  ${({ $expanded }) => $expanded && `
+    background-color: rgba(42, 42, 48, 0.7) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 5;
+  `}
+`
+
+const ExpandButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: rgba(108, 92, 231, 0.1);
+  color: ${({ theme }) => theme.primary};
+  margin-right: 10px;
+  transition: all 0.3s ease;
+  transform: ${({ $expanded }) => $expanded ? 'rotate(180deg)' : 'rotate(0)'};
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(108, 92, 231, 0.2);
+
+  &:hover {
+    background-color: rgba(108, 92, 231, 0.2);
+    color: ${({ theme }) => theme.primary};
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: ${({ $expanded }) => $expanded ? 'rotate(180deg) scale(1.1)' : 'rotate(0) scale(1.1)'};
+  }
+
+  &:active {
+    transform: ${({ $expanded }) => $expanded ? 'rotate(180deg) scale(0.95)' : 'rotate(0) scale(0.95)'};
+  }
+`
+
 const ActivityList = ({ activities }) => {
-  const dispatch = useDispatch()
+  const deleteActivity = useDeleteActivity()
   const [openMenuId, setOpenMenuId] = useState(null)
   const [selectedActivity, setSelectedActivity] = useState(null)
+  const [expandedActivityId, setExpandedActivityId] = useState(null)
   const [showDetail, setShowDetail] = useState(false)
   const [showEditForm, setShowEditForm] = useState(false)
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
-  
+
   const handleMenuToggle = (id) => {
     setOpenMenuId(openMenuId === id ? null : id)
   }
-  
+
+  const handleToggleExpand = (activity) => {
+    if (expandedActivityId === activity.id) {
+      setExpandedActivityId(null)
+    } else {
+      setExpandedActivityId(activity.id)
+      setSelectedActivity(activity)
+    }
+    setOpenMenuId(null)
+  }
+
   const handleViewDetail = (activity) => {
     setSelectedActivity(activity)
     setShowDetail(true)
     setOpenMenuId(null)
   }
-  
+
   const handleEdit = (activity) => {
     setSelectedActivity(activity)
     setShowEditForm(true)
     setOpenMenuId(null)
   }
-  
+
   const handleDelete = (activity) => {
     setSelectedActivity(activity)
     setShowConfirmDelete(true)
     setOpenMenuId(null)
   }
-  
+
   const confirmDelete = () => {
-    dispatch(deleteActivity(selectedActivity.id))
+    deleteActivity.mutate(selectedActivity.id)
     setShowConfirmDelete(false)
   }
-  
+
   if (activities.length === 0) {
     return (
       <ListContainer>
@@ -303,7 +339,7 @@ const ActivityList = ({ activities }) => {
       </ListContainer>
     )
   }
-  
+
   return (
     <>
       <ListContainer>
@@ -321,63 +357,79 @@ const ActivityList = ({ activities }) => {
           <TableBody>
             {activities.map(activity => {
               const formattedDate = formatDate(activity.date)
-              
+
               return (
-                <tr key={activity.id}>
-                  <td>
-                    <DateCell>
-                      <span className="date">{formattedDate.date}</span>
-                      <span className="time">{formattedDate.time}</span>
-                    </DateCell>
-                  </td>
-                  <td>
-                    <TypeBadge type={activity.type}>
-                      {activity.type}
-                    </TypeBadge>
-                  </td>
-                  <td>
-                    <PersonCell>
-                      <span className="name">{activity.person}</span>
-                      <span className="role">{activity.role}</span>
-                    </PersonCell>
-                  </td>
-                  <td>{activity.description.substring(0, 50)}...</td>
-                  <td>
-                    <StatusBadge status={activity.status}>
-                      {getStatusIcon(activity.status)}
-                      {activity.status}
-                    </StatusBadge>
-                  </td>
-                  <td>
-                    <ActionsContainer>
-                      <ActionButton onClick={() => handleMenuToggle(activity.id)}>
-                        <FiMoreVertical size={18} />
-                      </ActionButton>
-                      <ActionsMenu show={openMenuId === activity.id}>
-                        <MenuItem onClick={() => handleViewDetail(activity)}>
-                          <FiEye size={16} />
-                          Ver detalle
-                        </MenuItem>
-                        <MenuItem onClick={() => handleEdit(activity)}>
-                          <FiEdit2 size={16} />
-                          Editar
-                        </MenuItem>
-                        <MenuItem danger onClick={() => handleDelete(activity)}>
-                          <FiTrash2 size={16} />
-                          Eliminar
-                        </MenuItem>
-                      </ActionsMenu>
-                    </ActionsContainer>
-                  </td>
-                </tr>
+                <React.Fragment key={activity.id}>
+                  <RowContainer onClick={() => handleToggleExpand(activity)}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <ExpandButton $expanded={expandedActivityId === activity.id}>
+                          <FiChevronDown size={16} />
+                        </ExpandButton>
+                        <DateCell>
+                          <span className="date">{formattedDate.date}</span>
+                          <span className="time">{formattedDate.time}</span>
+                        </DateCell>
+                      </div>
+                    </td>
+                    <td>
+                      <TypeBadge type={activity.type}>
+                        {getTypeIcon(activity.type)}
+                        {activity.type}
+                      </TypeBadge>
+                    </td>
+                    <td>
+                      <PersonCell>
+                        <span className="name">{activity.person}</span>
+                        <span className="role">{activity.role}</span>
+                      </PersonCell>
+                    </td>
+                    <td>{activity.description.substring(0, 50)}...</td>
+                    <td>
+                      <StatusBadge status={activity.status}>
+                        {getStatusIcon(activity.status)}
+                        {activity.status}
+                      </StatusBadge>
+                    </td>
+                    <td>
+                      <ActionsContainer onClick={(e) => e.stopPropagation()}>
+                        <ActionButton onClick={() => handleMenuToggle(activity.id)}>
+                          <FiMoreVertical size={18} />
+                        </ActionButton>
+                        <ActionsMenu $show={openMenuId === activity.id}>
+                          <MenuItem onClick={() => handleEdit(activity)}>
+                            <FiEdit2 size={16} />
+                            Editar
+                          </MenuItem>
+                          <MenuItem $danger onClick={() => handleDelete(activity)}>
+                            <FiTrash2 size={16} />
+                            Eliminar
+                          </MenuItem>
+                        </ActionsMenu>
+                      </ActionsContainer>
+                    </td>
+                  </RowContainer>
+                  {expandedActivityId === activity.id && (
+                    <tr>
+                      <td colSpan="6" style={{ padding: 0 }}>
+                        <ExpandableActivityDetail
+                          activity={activity}
+                          expanded={expandedActivityId === activity.id}
+                          onEdit={() => handleEdit(activity)}
+                          onClose={() => setExpandedActivityId(null)}
+                        />
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               )
             })}
           </TableBody>
         </Table>
       </ListContainer>
-      
+
       {showDetail && selectedActivity && (
-        <ActivityDetail 
+        <ActivityDetail
           activity={selectedActivity}
           onClose={() => setShowDetail(false)}
           onEdit={() => {
@@ -386,14 +438,14 @@ const ActivityList = ({ activities }) => {
           }}
         />
       )}
-      
+
       {showEditForm && selectedActivity && (
-        <ActivityForm 
+        <ActivityForm
           activity={selectedActivity}
           onClose={() => setShowEditForm(false)}
         />
       )}
-      
+
       {showConfirmDelete && selectedActivity && (
         <ConfirmDialog
           title="Eliminar actividad"

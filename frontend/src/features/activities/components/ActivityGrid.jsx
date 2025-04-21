@@ -1,10 +1,9 @@
-import { useState } from 'react'
-import { useDispatch } from 'react-redux'
+import React, { useState } from 'react'
 import styled from 'styled-components'
-import { 
-  FiEdit2, 
-  FiTrash2, 
-  FiEye, 
+import {
+  FiEdit2,
+  FiTrash2,
+  FiEye,
   FiMoreVertical,
   FiCheckCircle,
   FiClock,
@@ -12,10 +11,12 @@ import {
   FiCalendar,
   FiUser
 } from 'react-icons/fi'
-import { deleteActivity } from '../activitiesSlice'
+import { useDeleteActivity } from '@/hooks/useActivities'
 import ActivityDetail from './ActivityDetail'
 import ActivityForm from './ActivityForm'
 import ConfirmDialog from '../../../components/common/ConfirmDialog'
+import StatusBadge from '../../../components/ui/StatusBadge'
+import TypeBadge from '../../../components/ui/TypeBadge'
 
 const GridContainer = styled.div`
   display: grid;
@@ -34,13 +35,13 @@ const EmptyState = styled.div`
   padding: 40px;
   text-align: center;
   box-shadow: ${({ theme }) => theme.shadow};
-  
+
   h3 {
     margin: 16px 0 8px;
     font-size: 18px;
     font-weight: 600;
   }
-  
+
   p {
     color: ${({ theme }) => theme.textSecondary};
     margin-bottom: 24px;
@@ -65,41 +66,7 @@ const CardHeader = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.border};
 `
 
-const TypeBadge = styled.span`
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  background-color: ${({ type, theme }) => {
-    switch (type) {
-      case 'Atención Personal':
-        return `${theme.primary}20`
-      case 'Atención Telefónica':
-        return `${theme.secondary}20`
-      case 'Concursos':
-        return `${theme.accent}20`
-      case 'Solicitud de info':
-        return `${theme.success}20`
-      default:
-        return `${theme.textSecondary}20`
-    }
-  }};
-  color: ${({ type, theme }) => {
-    switch (type) {
-      case 'Atención Personal':
-        return theme.primary
-      case 'Atención Telefónica':
-        return theme.secondary
-      case 'Concursos':
-        return theme.accent
-      case 'Solicitud de info':
-        return theme.success
-      default:
-        return theme.textSecondary
-    }
-  }};
-`
+// Usando el componente global TypeBadge
 
 const ActionsContainer = styled.div`
   position: relative;
@@ -113,7 +80,7 @@ const ActionButton = styled.button`
   height: 32px;
   border-radius: 4px;
   color: ${({ theme }) => theme.textSecondary};
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.inputBackground};
     color: ${({ theme }) => theme.text};
@@ -130,7 +97,7 @@ const ActionsMenu = styled.div`
   border-radius: 4px;
   box-shadow: ${({ theme }) => theme.shadow};
   overflow: hidden;
-  display: ${({ show }) => (show ? 'block' : 'none')};
+  display: ${({ $show }) => ($show ? 'block' : 'none')};
 `
 
 const MenuItem = styled.button`
@@ -140,12 +107,12 @@ const MenuItem = styled.button`
   padding: 8px 16px;
   font-size: 14px;
   text-align: left;
-  color: ${({ theme, danger }) => danger ? theme.error : theme.text};
-  
+  color: ${({ theme, $danger }) => $danger ? theme.error : theme.text};
+
   svg {
     margin-right: 8px;
   }
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.inputBackground};
   }
@@ -174,7 +141,7 @@ const MetaItem = styled.div`
   align-items: center;
   margin-bottom: 8px;
   font-size: 14px;
-  
+
   svg {
     margin-right: 8px;
     color: ${({ theme }) => theme.textSecondary};
@@ -185,11 +152,11 @@ const MetaItem = styled.div`
 const PersonInfo = styled.div`
   display: flex;
   flex-direction: column;
-  
+
   .name {
     font-weight: 500;
   }
-  
+
   .role {
     font-size: 12px;
     color: ${({ theme }) => theme.textSecondary};
@@ -205,39 +172,7 @@ const CardFooter = styled.div`
   background-color: ${({ theme }) => theme.backgroundSecondary};
 `
 
-const StatusBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  background-color: ${({ status, theme }) => {
-    switch (status) {
-      case 'Completado':
-        return `${theme.success}20`
-      case 'En progreso':
-        return `${theme.primary}20`
-      case 'Pendiente':
-        return `${theme.warning}20`
-      default:
-        return `${theme.textSecondary}20`
-    }
-  }};
-  color: ${({ status, theme }) => {
-    switch (status) {
-      case 'Completado':
-        return theme.success
-      case 'En progreso':
-        return theme.primary
-      case 'Pendiente':
-        return theme.warning
-      default:
-        return theme.textSecondary
-    }
-  }};
-`
+// Usando el componente global StatusBadge
 
 const DateInfo = styled.div`
   font-size: 12px;
@@ -266,43 +201,43 @@ const formatDate = (dateString) => {
 }
 
 const ActivityGrid = ({ activities }) => {
-  const dispatch = useDispatch()
+  const deleteActivity = useDeleteActivity()
   const [openMenuId, setOpenMenuId] = useState(null)
   const [selectedActivity, setSelectedActivity] = useState(null)
   const [showDetail, setShowDetail] = useState(false)
   const [showEditForm, setShowEditForm] = useState(false)
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
-  
+
   const handleMenuToggle = (id, e) => {
     e.stopPropagation()
     setOpenMenuId(openMenuId === id ? null : id)
   }
-  
+
   const handleViewDetail = (activity) => {
     setSelectedActivity(activity)
     setShowDetail(true)
     setOpenMenuId(null)
   }
-  
+
   const handleEdit = (activity, e) => {
     e.stopPropagation()
     setSelectedActivity(activity)
     setShowEditForm(true)
     setOpenMenuId(null)
   }
-  
+
   const handleDelete = (activity, e) => {
     e.stopPropagation()
     setSelectedActivity(activity)
     setShowConfirmDelete(true)
     setOpenMenuId(null)
   }
-  
+
   const confirmDelete = () => {
-    dispatch(deleteActivity(selectedActivity.id))
+    deleteActivity.mutate(selectedActivity.id)
     setShowConfirmDelete(false)
   }
-  
+
   if (activities.length === 0) {
     return (
       <GridContainer>
@@ -314,13 +249,13 @@ const ActivityGrid = ({ activities }) => {
       </GridContainer>
     )
   }
-  
+
   return (
     <>
       <GridContainer>
         {activities.map(activity => {
           const formattedDate = formatDate(activity.date)
-          
+
           return (
             <Card key={activity.id} onClick={() => handleViewDetail(activity)}>
               <CardHeader>
@@ -331,7 +266,7 @@ const ActivityGrid = ({ activities }) => {
                   <ActionButton onClick={(e) => handleMenuToggle(activity.id, e)}>
                     <FiMoreVertical size={18} />
                   </ActionButton>
-                  <ActionsMenu show={openMenuId === activity.id}>
+                  <ActionsMenu $show={openMenuId === activity.id}>
                     <MenuItem onClick={() => handleViewDetail(activity)}>
                       <FiEye size={16} />
                       Ver detalle
@@ -340,24 +275,24 @@ const ActivityGrid = ({ activities }) => {
                       <FiEdit2 size={16} />
                       Editar
                     </MenuItem>
-                    <MenuItem danger onClick={(e) => handleDelete(activity, e)}>
+                    <MenuItem $danger onClick={(e) => handleDelete(activity, e)}>
                       <FiTrash2 size={16} />
                       Eliminar
                     </MenuItem>
                   </ActionsMenu>
                 </ActionsContainer>
               </CardHeader>
-              
+
               <CardContent>
                 <Description>{activity.description}</Description>
-                
+
                 <MetaItem>
                   <FiCalendar size={16} />
                   <div>
                     {formattedDate.date} - {formattedDate.time}
                   </div>
                 </MetaItem>
-                
+
                 <MetaItem>
                   <FiUser size={16} />
                   <PersonInfo>
@@ -366,13 +301,13 @@ const ActivityGrid = ({ activities }) => {
                   </PersonInfo>
                 </MetaItem>
               </CardContent>
-              
+
               <CardFooter>
                 <StatusBadge status={activity.status}>
                   {getStatusIcon(activity.status)}
                   {activity.status}
                 </StatusBadge>
-                
+
                 <DateInfo>
                   Actualizado: {formattedDate.date}
                 </DateInfo>
@@ -381,9 +316,9 @@ const ActivityGrid = ({ activities }) => {
           )
         })}
       </GridContainer>
-      
+
       {showDetail && selectedActivity && (
-        <ActivityDetail 
+        <ActivityDetail
           activity={selectedActivity}
           onClose={() => setShowDetail(false)}
           onEdit={() => {
@@ -392,14 +327,14 @@ const ActivityGrid = ({ activities }) => {
           }}
         />
       )}
-      
+
       {showEditForm && selectedActivity && (
-        <ActivityForm 
+        <ActivityForm
           activity={selectedActivity}
           onClose={() => setShowEditForm(false)}
         />
       )}
-      
+
       {showConfirmDelete && selectedActivity && (
         <ConfirmDialog
           title="Eliminar actividad"

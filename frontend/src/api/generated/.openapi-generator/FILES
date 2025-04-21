@@ -1,0 +1,14 @@
+.gitignore
+.npmignore
+README.md
+package.json
+src/apis/AutenticacinApi.ts
+src/apis/index.ts
+src/index.ts
+src/models/AuthRequest.ts
+src/models/AuthResponse.ts
+src/models/AuthResponseUser.ts
+src/models/index.ts
+src/runtime.ts
+tsconfig.esm.json
+tsconfig.json

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import styled from 'styled-components'
 import {
   FiHome,
@@ -8,8 +8,11 @@ import {
   FiCalendar,
   FiFile,
   FiGrid,
-  FiUser
+  FiUser,
+  FiChevronLeft,
+  FiChevronRight
 } from 'react-icons/fi'
+import { toggleSidebar } from '../../store/uiSlice'
 
 const SidebarContainer = styled.aside`
   width: ${({ $isOpen }) => ($isOpen ? '240px' : '70px')};
@@ -21,11 +24,14 @@ const SidebarContainer = styled.aside`
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  position: relative;
 
   @media (max-width: 768px) {
     position: fixed;
     z-index: 1000;
     width: ${({ $isOpen }) => ($isOpen ? '240px' : '0')};
+    left: 0;
+    top: 0;
   }
 `
 
@@ -41,8 +47,15 @@ const Logo = styled.div`
     font-weight: 700;
     margin-left: ${({ $isOpen }) => ($isOpen ? '10px' : '0')};
     opacity: ${({ $isOpen }) => ($isOpen ? '1' : '0')};
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, margin-left 0.3s ease;
     white-space: nowrap;
+    overflow: hidden;
+  }
+
+  img {
+    transition: margin 0.3s ease;
+    margin-left: ${({ $isOpen }) => ($isOpen ? '0' : 'auto')};
+    margin-right: ${({ $isOpen }) => ($isOpen ? '0' : 'auto')};
   }
 `
 
@@ -62,12 +75,18 @@ const UserProfile = styled.div`
     justify-content: center;
     color: white;
     font-weight: bold;
+    transition: margin 0.3s ease;
+    margin-left: ${({ $isOpen }) => ($isOpen ? '0' : 'auto')};
+    margin-right: ${({ $isOpen }) => ($isOpen ? '0' : 'auto')};
   }
 
   .user-info {
     margin-left: 10px;
     opacity: ${({ $isOpen }) => ($isOpen ? '1' : '0')};
-    transition: opacity 0.3s ease;
+    visibility: ${({ $isOpen }) => ($isOpen ? 'visible' : 'hidden')};
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    width: ${({ $isOpen }) => ($isOpen ? 'auto' : '0')};
+    overflow: hidden;
     white-space: nowrap;
 
     h3 {
@@ -87,12 +106,40 @@ const NavMenu = styled.nav`
   flex: 1;
 `
 
+const ToggleButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 15px 0;
+  background-color: ${({ theme }) => theme.backgroundSecondary};
+  border-top: 1px solid ${({ theme }) => theme.border};
+  color: ${({ theme }) => theme.textSecondary};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => `${theme.primary}10`};
+    color: ${({ theme }) => theme.primary};
+  }
+
+  .toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: ${({ $isOpen }) => ($isOpen ? 'rotate(0deg)' : 'rotate(180deg)')};
+    transition: transform 0.3s ease;
+  }
+`
+
 const NavItem = styled(NavLink)`
   display: flex;
   align-items: center;
   padding: 12px 20px;
   color: ${({ theme }) => theme.textSecondary};
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+  text-decoration: none;
 
   &:hover {
     background-color: rgba(108, 92, 231, 0.1);
@@ -107,18 +154,32 @@ const NavItem = styled(NavLink)`
 
   .icon {
     min-width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: ${({ $isOpen }) => ($isOpen ? 'flex-start' : 'center')};
+    transition: justify-content 0.3s ease;
+    margin-left: ${({ $isOpen }) => ($isOpen ? '0' : 'auto')};
+    margin-right: ${({ $isOpen }) => ($isOpen ? '0' : 'auto')};
   }
 
   span {
     margin-left: ${({ $isOpen }) => ($isOpen ? '10px' : '0')};
     opacity: ${({ $isOpen }) => ($isOpen ? '1' : '0')};
-    transition: opacity 0.3s ease;
+    visibility: ${({ $isOpen }) => ($isOpen ? 'visible' : 'hidden')};
+    transition: opacity 0.3s ease, visibility 0.3s ease, margin-left 0.3s ease;
     white-space: nowrap;
+    overflow: hidden;
+    width: ${({ $isOpen }) => ($isOpen ? 'auto' : '0')};
   }
 `
 
 const Sidebar = () => {
+  const dispatch = useDispatch()
   const { sidebarOpen } = useSelector(state => state.ui)
+
+  const handleToggleSidebar = () => {
+    dispatch(toggleSidebar())
+  }
 
   return (
     <SidebarContainer $isOpen={sidebarOpen}>
@@ -163,6 +224,12 @@ const Sidebar = () => {
           <span>Aplicaciones</span>
         </NavItem>
       </NavMenu>
+
+      <ToggleButton onClick={handleToggleSidebar} $isOpen={sidebarOpen}>
+        <div className="toggle-icon">
+          {sidebarOpen ? <FiChevronLeft size={20} /> : <FiChevronRight size={20} />}
+        </div>
+      </ToggleButton>
     </SidebarContainer>
   )
 }

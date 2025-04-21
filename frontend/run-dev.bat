@@ -1,0 +1,3 @@
+@echo off
+echo Iniciando frontend en modo desarrollo...
+npm start

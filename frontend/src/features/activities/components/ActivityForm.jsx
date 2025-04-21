@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react'
-import { useDispatch } from 'react-redux'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { FiX, FiSave, FiHelpCircle } from 'react-icons/fi'
-import { createActivity, updateActivity } from '../activitiesSlice'
+import { useCreateActivity, useUpdateActivity } from '@/hooks/useActivities'
 
 const Overlay = styled.div`
   position: fixed;
@@ -52,7 +51,7 @@ const CloseButton = styled.button`
   height: 32px;
   border-radius: 4px;
   color: ${({ theme }) => theme.textSecondary};
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.inputBackground};
     color: ${({ theme }) => theme.text};
@@ -69,7 +68,7 @@ const FormGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -79,7 +78,7 @@ const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-  grid-column: ${({ fullWidth }) => fullWidth ? '1 / -1' : 'auto'};
+  grid-column: ${({ $fullWidth }) => $fullWidth ? '1 / -1' : 'auto'};
 `
 
 const FormLabel = styled.label`
@@ -89,17 +88,17 @@ const FormLabel = styled.label`
   display: flex;
   align-items: center;
   gap: 6px;
-  
+
   .tooltip {
     position: relative;
     display: inline-block;
-    
+
     &:hover .tooltip-text {
       visibility: visible;
       opacity: 1;
     }
   }
-  
+
   .tooltip-text {
     visibility: hidden;
     width: 200px;
@@ -118,7 +117,7 @@ const FormLabel = styled.label`
     box-shadow: ${({ theme }) => theme.shadow};
     font-weight: 400;
     font-size: 12px;
-    
+
     &::after {
       content: "";
       position: absolute;
@@ -139,12 +138,12 @@ const Input = styled.input`
   background-color: ${({ theme }) => theme.inputBackground};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
-  
+
   &:focus {
     outline: none;
     border-color: ${({ theme, error }) => error ? theme.error : theme.primary};
   }
-  
+
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
@@ -158,7 +157,7 @@ const Select = styled.select`
   background-color: ${({ theme }) => theme.inputBackground};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
-  
+
   &:focus {
     outline: none;
     border-color: ${({ theme, error }) => error ? theme.error : theme.primary};
@@ -174,7 +173,7 @@ const Textarea = styled.textarea`
   font-size: 14px;
   resize: vertical;
   min-height: 100px;
-  
+
   &:focus {
     outline: none;
     border-color: ${({ theme, error }) => error ? theme.error : theme.primary};
@@ -204,11 +203,11 @@ const SubmitButton = styled.button`
   border-radius: 4px;
   font-weight: 500;
   transition: background-color 0.2s;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.buttonHover};
   }
-  
+
   &:disabled {
     background-color: ${({ theme }) => theme.textSecondary};
     cursor: not-allowed;
@@ -225,7 +224,7 @@ const CancelButton = styled.button`
   border-radius: 4px;
   font-weight: 500;
   margin-right: 12px;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.inputBackground};
   }
@@ -233,22 +232,23 @@ const CancelButton = styled.button`
 
 const formatDateForInput = (dateString) => {
   if (!dateString) return ''
-  
+
   const date = new Date(dateString)
   return date.toISOString().split('T')[0]
 }
 
 const formatTimeForInput = (dateString) => {
   if (!dateString) return ''
-  
+
   const date = new Date(dateString)
   return date.toTimeString().slice(0, 5)
 }
 
 const ActivityForm = ({ activity, onClose }) => {
-  const dispatch = useDispatch()
+  const createActivity = useCreateActivity()
+  const updateActivity = useUpdateActivity()
   const isEditing = !!activity
-  
+
   const initialFormData = {
     date: formatDateForInput(activity?.date) || formatDateForInput(new Date()),
     time: formatTimeForInput(activity?.date) || formatTimeForInput(new Date()),
@@ -263,58 +263,58 @@ const ActivityForm = ({ activity, onClose }) => {
     comments: activity?.comments || '',
     agent: activity?.agent || ''
   }
-  
+
   const [formData, setFormData] = useState(initialFormData)
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  
+
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
         onClose()
       }
     }
-    
+
     document.addEventListener('keydown', handleEscape)
     return () => {
       document.removeEventListener('keydown', handleEscape)
     }
   }, [onClose])
-  
+
   const validateForm = () => {
     const newErrors = {}
-    
+
     if (!formData.date) {
       newErrors.date = 'La fecha es requerida'
     }
-    
+
     if (!formData.time) {
       newErrors.time = 'La hora es requerida'
     }
-    
+
     if (!formData.type) {
       newErrors.type = 'El tipo de actividad es requerido'
     }
-    
+
     if (!formData.description.trim()) {
       newErrors.description = 'La descripción es requerida'
     }
-    
+
     if (!formData.status) {
       newErrors.status = 'El estado es requerido'
     }
-    
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
-  
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
       [name]: value
     }))
-    
+
     // Clear error when field is edited
     if (errors[name]) {
       setErrors(prev => ({
@@ -323,37 +323,41 @@ const ActivityForm = ({ activity, onClose }) => {
       }))
     }
   }
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!validateForm()) {
       return
     }
-    
+
     setIsSubmitting(true)
-    
+
     try {
       // Combine date and time
       const dateTime = new Date(`${formData.date}T${formData.time}:00`)
-      
+
+      // Formatear la fecha en el formato que espera el backend (sin la Z al final)
+      const formattedDate = dateTime.toISOString().replace(/\.\d{3}Z$/, '')
+      const formattedNow = new Date().toISOString().replace(/\.\d{3}Z$/, '')
+
       const activityData = {
         ...formData,
-        date: dateTime.toISOString(),
-        lastStatusChangeDate: new Date().toISOString()
+        date: formattedDate,
+        lastStatusChangeDate: formattedNow
       }
-      
+
       delete activityData.time // Remove time field as it's now part of date
-      
+
       if (isEditing) {
-        await dispatch(updateActivity({ 
-          id: activity.id, 
+        await updateActivity.mutateAsync({
+          id: activity.id,
           activityData
-        }))
+        })
       } else {
-        await dispatch(createActivity(activityData))
+        await createActivity.mutateAsync(activityData)
       }
-      
+
       onClose()
     } catch (error) {
       console.error('Error saving activity:', error)
@@ -361,13 +365,13 @@ const ActivityForm = ({ activity, onClose }) => {
       setIsSubmitting(false)
     }
   }
-  
+
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose()
     }
   }
-  
+
   return (
     <Overlay onClick={handleOverlayClick}>
       <FormContainer>
@@ -377,7 +381,7 @@ const ActivityForm = ({ activity, onClose }) => {
             <FiX size={20} />
           </CloseButton>
         </FormHeader>
-        
+
         <FormContent>
           <form onSubmit={handleSubmit}>
             <FormGrid>
@@ -389,7 +393,7 @@ const ActivityForm = ({ activity, onClose }) => {
                     <span className="tooltip-text">Fecha en que se realizó la actividad</span>
                   </div>
                 </FormLabel>
-                <Input 
+                <Input
                   type="date"
                   name="date"
                   value={formData.date}
@@ -398,12 +402,12 @@ const ActivityForm = ({ activity, onClose }) => {
                 />
                 {errors.date && <ErrorMessage>{errors.date}</ErrorMessage>}
               </FormGroup>
-              
+
               <FormGroup>
                 <FormLabel>
                   Hora
                 </FormLabel>
-                <Input 
+                <Input
                   type="time"
                   name="time"
                   value={formData.time}
@@ -412,12 +416,12 @@ const ActivityForm = ({ activity, onClose }) => {
                 />
                 {errors.time && <ErrorMessage>{errors.time}</ErrorMessage>}
               </FormGroup>
-              
+
               <FormGroup>
                 <FormLabel>
                   Tipo de actividad
                 </FormLabel>
-                <Select 
+                <Select
                   name="type"
                   value={formData.type}
                   onChange={handleChange}
@@ -434,12 +438,12 @@ const ActivityForm = ({ activity, onClose }) => {
                 </Select>
                 {errors.type && <ErrorMessage>{errors.type}</ErrorMessage>}
               </FormGroup>
-              
+
               <FormGroup>
                 <FormLabel>
                   Estado
                 </FormLabel>
-                <Select 
+                <Select
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
@@ -451,12 +455,12 @@ const ActivityForm = ({ activity, onClose }) => {
                 </Select>
                 {errors.status && <ErrorMessage>{errors.status}</ErrorMessage>}
               </FormGroup>
-              
+
               <FormGroup>
                 <FormLabel>
                   Persona
                 </FormLabel>
-                <Input 
+                <Input
                   type="text"
                   name="person"
                   value={formData.person}
@@ -464,12 +468,12 @@ const ActivityForm = ({ activity, onClose }) => {
                   placeholder="Nombre de la persona relacionada"
                 />
               </FormGroup>
-              
+
               <FormGroup>
                 <FormLabel>
                   Cargo / Rol
                 </FormLabel>
-                <Input 
+                <Input
                   type="text"
                   name="role"
                   value={formData.role}
@@ -477,12 +481,12 @@ const ActivityForm = ({ activity, onClose }) => {
                   placeholder="Cargo o rol de la persona"
                 />
               </FormGroup>
-              
+
               <FormGroup>
                 <FormLabel>
                   Dependencia
                 </FormLabel>
-                <Input 
+                <Input
                   type="text"
                   name="dependency"
                   value={formData.dependency}
@@ -490,12 +494,12 @@ const ActivityForm = ({ activity, onClose }) => {
                   placeholder="Dependencia o área"
                 />
               </FormGroup>
-              
+
               <FormGroup>
                 <FormLabel>
                   Agente
                 </FormLabel>
-                <Input 
+                <Input
                   type="text"
                   name="agent"
                   value={formData.agent}
@@ -503,12 +507,12 @@ const ActivityForm = ({ activity, onClose }) => {
                   placeholder="Nombre del agente"
                 />
               </FormGroup>
-              
-              <FormGroup fullWidth>
+
+              <FormGroup $fullWidth>
                 <FormLabel>
                   Descripción
                 </FormLabel>
-                <Textarea 
+                <Textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
@@ -517,36 +521,36 @@ const ActivityForm = ({ activity, onClose }) => {
                 />
                 {errors.description && <ErrorMessage>{errors.description}</ErrorMessage>}
               </FormGroup>
-              
-              <FormGroup fullWidth>
+
+              <FormGroup $fullWidth>
                 <FormLabel>
                   Situación
                 </FormLabel>
-                <Textarea 
+                <Textarea
                   name="situation"
                   value={formData.situation}
                   onChange={handleChange}
                   placeholder="Situación o contexto"
                 />
               </FormGroup>
-              
-              <FormGroup fullWidth>
+
+              <FormGroup $fullWidth>
                 <FormLabel>
                   Resultado
                 </FormLabel>
-                <Textarea 
+                <Textarea
                   name="result"
                   value={formData.result}
                   onChange={handleChange}
                   placeholder="Resultado o resolución"
                 />
               </FormGroup>
-              
-              <FormGroup fullWidth>
+
+              <FormGroup $fullWidth>
                 <FormLabel>
                   Comentarios
                 </FormLabel>
-                <Textarea 
+                <Textarea
                   name="comments"
                   value={formData.comments}
                   onChange={handleChange}
@@ -556,7 +560,7 @@ const ActivityForm = ({ activity, onClose }) => {
             </FormGrid>
           </form>
         </FormContent>
-        
+
         <FormFooter>
           <CancelButton onClick={onClose}>
             Cancelar
