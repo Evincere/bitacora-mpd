@@ -55,7 +55,7 @@ public class SecurityConfig {
                         // Permitir acceso a endpoints de WebSocket
                         .requestMatchers("/api/ws/**", "/ws/**").permitAll()
                         // Permitir acceso a endpoints de actividades para pruebas
-                        .requestMatchers("/api/activities/**").permitAll()
+                        .requestMatchers("/api/activities/**", "/activities/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))

@@ -8,7 +8,9 @@ const REFRESH_TOKEN_KEY = 'bitacora_refresh_token';
 
 // Funciones para manejar el token
 export const getToken = (): string | null => {
-  return localStorage.getItem(TOKEN_KEY);
+  const token = localStorage.getItem(TOKEN_KEY);
+  console.log('auth.ts: Obteniendo token:', token ? `${token.substring(0, 10)}...` : 'null');
+  return token;
 };
 
 export const setToken = (token: string): void => {

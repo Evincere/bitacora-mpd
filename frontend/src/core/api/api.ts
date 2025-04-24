@@ -25,7 +25,24 @@ export const api = ky.create({
       async (request) => {
         const token = getToken();
         if (token) {
+          console.log('api.ts: Añadiendo token a la petición:', token.substring(0, 10) + '...');
           request.headers.set('Authorization', `Bearer ${token}`);
+        } else {
+          console.warn('api.ts: No se encontró token para la petición');
+
+          // Intentar obtener el token del usuario en localStorage como respaldo
+          const userStr = localStorage.getItem('bitacora_user');
+          if (userStr) {
+            try {
+              const user = JSON.parse(userStr);
+              if (user && user.token) {
+                console.log('api.ts: Usando token del objeto usuario como respaldo');
+                request.headers.set('Authorization', `Bearer ${user.token}`);
+              }
+            } catch (e) {
+              console.error('api.ts: Error al parsear usuario:', e);
+            }
+          }
         }
       }
     ],

@@ -71,7 +71,7 @@ spring:
 
   sql:
     init:
-      mode: always
+      mode: never # Deshabilitado para usar solo migraciones Flyway
 ---
 spring:
   config:

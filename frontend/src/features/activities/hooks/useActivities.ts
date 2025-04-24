@@ -21,19 +21,21 @@ export const useActivities = (params: ActivityQueryParams = {}) => {
     queryFn: async () => {
       const { page = 0, size = 10, ...restParams } = params;
       const queryParams = new URLSearchParams();
-      
+
       // Añadir parámetros de paginación
       queryParams.append('page', page.toString());
       queryParams.append('size', size.toString());
-      
+
       // Añadir otros parámetros si existen
       Object.entries(restParams).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
           queryParams.append(key, value.toString());
         }
       });
-      
-      const response = await api.get<Page<Activity>>(`/activities?${queryParams.toString()}`);
+
+      // Usar 'activities' sin barra inicial para evitar problemas con la URL base
+      const response = await api.get<Page<Activity>>(`activities?${queryParams.toString()}`);
+      console.log('useActivities: Respuesta recibida:', response.data);
       return response.data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutos
@@ -46,7 +48,9 @@ export const useActivity = (id: number | undefined) => {
     queryKey: ['activity', id],
     queryFn: async () => {
       if (!id) throw new Error('ID de actividad no proporcionado');
-      const response = await api.get<Activity>(`/activities/${id}`);
+      // Usar 'activities' sin barra inicial para evitar problemas con la URL base
+      const response = await api.get<Activity>(`activities/${id}`);
+      console.log(`useActivity: Respuesta recibida para ID ${id}:`, response.data);
       return response.data;
     },
     enabled: !!id, // Solo ejecutar si hay un ID
@@ -57,10 +61,12 @@ export const useActivity = (id: number | undefined) => {
 // Hook para crear una nueva actividad
 export const useCreateActivity = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (activityData: Omit<Activity, 'id'>) => {
-      const response = await api.post<Activity>('/activities', activityData);
+      // Usar 'activities' sin barra inicial para evitar problemas con la URL base
+      const response = await api.post<Activity>('activities', activityData);
+      console.log('useCreateActivity: Actividad creada:', response.data);
       return response.data;
     },
     onSuccess: () => {
@@ -73,10 +79,12 @@ export const useCreateActivity = () => {
 // Hook para actualizar una actividad existente
 export const useUpdateActivity = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, activityData }: { id: number; activityData: Partial<Activity> }) => {
-      const response = await api.put<Activity>(`/activities/${id}`, activityData);
+      // Usar 'activities' sin barra inicial para evitar problemas con la URL base
+      const response = await api.put<Activity>(`activities/${id}`, activityData);
+      console.log(`useUpdateActivity: Actividad ${id} actualizada:`, response.data);
       return response.data;
     },
     onSuccess: (data) => {
@@ -91,10 +99,12 @@ export const useUpdateActivity = () => {
 // Hook para eliminar una actividad
 export const useDeleteActivity = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (id: number) => {
-      await api.delete(`/activities/${id}`);
+      // Usar 'activities' sin barra inicial para evitar problemas con la URL base
+      await api.delete(`activities/${id}`);
+      console.log(`useDeleteActivity: Actividad ${id} eliminada`);
       return id;
     },
     onSuccess: (id) => {

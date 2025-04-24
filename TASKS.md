@@ -989,6 +989,13 @@ Este sprint se enfocará en mejorar el rendimiento de la aplicación, corregir e
   - [ ] Corregir advertencias de Checkstyle
   - [ ] Resolver problemas de código no utilizado
   - [ ] Corregir posibles null pointer exceptions
+  - [x] Refactorizar inicialización de datos de prueba
+    - [x] Consolidar datos de prueba en migraciones Flyway
+    - [x] Crear migración V3__Consolidated_Test_Data.sql
+    - [x] Deshabilitar mecanismo data.sql
+    - [x] Modificar DataInitializer para que solo se active con el perfil "data-init"
+    - [x] Implementar prueba unitaria para verificar la inicialización de datos
+    - [x] Documentar nuevo enfoque en README-DATA-INITIALIZATION.md
 - [x] 4.2 Corregir errores de código en el frontend
   - [x] Resolver advertencias de ESLint
   - [x] Corregir problemas de accesibilidad
@@ -1026,7 +1033,7 @@ Este sprint se enfocará en mejorar el rendimiento de la aplicación, corregir e
 - Realizar code reviews frecuentes
 - Mantener dependencias actualizadas
 
-## Sprint 15: Funcionalidades Avanzadas y Mejoras de Productividad (4 semanas)
+## Sprint 15: Implementación del Sistema de Gestión de Tareas (4 semanas)
 
 ### Objetivos del Sprint
 - Implementar sistema de reportes y analytics avanzados

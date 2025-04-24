@@ -24,6 +24,13 @@
     - Corrección de posibles null pointer exceptions
     - Resolución de advertencias de ESLint en el frontend
     - Mejora de la documentación del código
+  - Refactorización de la inicialización de datos de prueba
+    - Consolidación de datos de prueba en migraciones Flyway
+    - Creación de migración V3__Consolidated_Test_Data.sql
+    - Deshabilitación del mecanismo data.sql
+    - Modificación de DataInitializer para que solo se active con el perfil "data-init"
+    - Implementación de prueba unitaria para verificar la inicialización de datos
+    - Documentación del nuevo enfoque en README-DATA-INITIALIZATION.md
 
 ### Agregado
 - Implementación de visualización de estadísticas

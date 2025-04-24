@@ -2,7 +2,10 @@ import ky from 'ky';
 import { ApiError } from '@/types/api';
 
 // Obtener la URL base de la API desde las variables de entorno
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+
+// Mostrar la URL base para depuración
+console.log('api-ky.ts: API_BASE_URL configurada como:', API_BASE_URL);
 
 // Verificar si estamos en desarrollo o producción
 const isDevelopment = import.meta.env.DEV;
@@ -22,7 +25,24 @@ const api = ky.extend({
         // Obtener el token de autenticación del localStorage
         const token = localStorage.getItem('bitacora_token');
         if (token) {
+          console.log('api-ky.ts: Añadiendo token a la petición:', token.substring(0, 10) + '...');
           request.headers.set('Authorization', `Bearer ${token}`);
+        } else {
+          console.warn('api-ky.ts: No se encontró token para la petición');
+
+          // Intentar obtener el token del usuario en localStorage como respaldo
+          const userStr = localStorage.getItem('user');
+          if (userStr) {
+            try {
+              const user = JSON.parse(userStr);
+              if (user && user.token) {
+                console.log('api-ky.ts: Usando token del objeto usuario como respaldo');
+                request.headers.set('Authorization', `Bearer ${user.token}`);
+              }
+            } catch (e) {
+              console.error('api-ky.ts: Error al parsear usuario:', e);
+            }
+          }
         }
       }
     ],
@@ -53,6 +73,12 @@ export const apiRequest = async <T>(
     // Construir la URL completa para mostrar en logs
     // Asegurarse de que no haya doble slash
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+
+    // Verificar si la URL ya contiene /api/ para evitar duplicados
+    if (cleanEndpoint.startsWith('api/')) {
+      console.warn('api-ky.ts: La URL ya contiene el prefijo "api/", esto puede causar problemas. Endpoint:', cleanEndpoint);
+    }
+
     const fullUrl = API_BASE_URL ? `${API_BASE_URL}/${cleanEndpoint}` : `/${cleanEndpoint}`;
     console.log(`Realizando petición a: ${fullUrl}`);
     console.log(`Nota: Si hay problemas, verifica que la ruta '${cleanEndpoint}' exista en el backend`);

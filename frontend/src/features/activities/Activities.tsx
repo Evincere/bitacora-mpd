@@ -14,6 +14,7 @@ import {
 } from 'react-icons/fi';
 // Importar con aserción de tipo para evitar errores
 import authService from '../../services/authService.js';
+import { useAppSelector } from '@/core/store';
 import { useActivities } from '@/hooks/useActivities';
 import ActivityListSkeleton from './components/ActivityListSkeleton';
 import ActivityGridSkeleton from './components/ActivityGridSkeleton';
@@ -254,6 +255,13 @@ const Activities = () => {
       console.log('Datos recibidos del backend:', data);
       console.log('Estructura JSON:', JSON.stringify(data, null, 2));
 
+      // Verificar si estamos usando datos simulados
+      if (data.activities && data.activities.length > 0) {
+        console.log('Usando datos reales del backend');
+        localStorage.setItem('using-mock-data', 'false');
+        setUsingMockData(false);
+      }
+
       // Tipado seguro para data
       const typedData = data as ActivityResponse;
 
@@ -436,16 +444,24 @@ const Activities = () => {
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500); // Debounce de 500ms
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  // Usar el estado de autenticación del Redux store en lugar de un estado local
+  const { isAuthenticated } = useAppSelector(state => state.auth);
 
-  // Verificar autenticación al cargar el componente
+  // Verificar autenticación al cargar el componente y mostrar logs detallados
   useEffect(() => {
-    // Obtener el estado de autenticación del contexto global
-    const isAuth = authService.isAuthenticated();
-    setIsAuthenticated(isAuth);
+    // Obtener el estado de autenticación del servicio de autenticación
+    const isAuthFromService = authService.isAuthenticated();
+    const token = localStorage.getItem('bitacora_token');
+    const user = localStorage.getItem('bitacora_user');
+
+    console.log('Activities: Verificación de autenticación:');
+    console.log('- isAuthenticated (Redux):', isAuthenticated);
+    console.log('- isAuthenticated (Service):', isAuthFromService);
+    console.log('- Token en localStorage:', !!token);
+    console.log('- Usuario en localStorage:', !!user);
 
     // No redirigir aquí, ya que ProtectedRoute se encarga de eso
-  }, []);
+  }, [isAuthenticated]);
 
   // Efecto para aplicar la búsqueda con debounce
   useEffect(() => {
@@ -637,9 +653,7 @@ const Activities = () => {
       </ToolbarContainer>
 
       <ErrorBoundary onReset={refetch}>
-        {!isAuthenticated ? (
-          <AuthErrorState onLogin={() => navigate('/login')} />
-        ) : isLoadingData ? (
+        {isLoadingData ? (
           viewMode === 'list' ? <ActivityListSkeleton /> : <ActivityGridSkeleton />
         ) : isError ? (
           apiError?.status === 500 ? (
