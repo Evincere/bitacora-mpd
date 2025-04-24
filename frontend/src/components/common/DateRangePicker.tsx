@@ -114,7 +114,7 @@ const DateRangeContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: flex-start;
@@ -133,7 +133,7 @@ const DateInputLabel = styled.label`
   font-size: 14px;
   margin-bottom: 5px;
   color: ${({ theme }) => theme.textSecondary};
-  
+
   svg {
     color: ${({ theme }) => theme.primary};
   }
@@ -153,15 +153,15 @@ const DateInput = styled.input`
   background-color: ${({ theme }) => theme.inputBackground};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
-  
+
   &:focus {
     outline: none;
     border-color: ${({ theme }) => theme.primary};
     box-shadow: 0 0 0 2px ${({ theme }) => theme.primary}30;
   }
-  
+
   &::-webkit-calendar-picker-indicator {
-    filter: ${({ theme }) => theme.isDark ? 'invert(1)' : 'none'};
+    filter: ${({ theme }) => theme.background.includes('#1') || theme.background.includes('#2') || theme.background.includes('#0') ? 'invert(1)' : 'none'};
     cursor: pointer;
   }
 `;
@@ -178,7 +178,7 @@ const ClearButton = styled.button`
   justify-content: center;
   padding: 4px;
   border-radius: 50%;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.backgroundHover};
     color: ${({ theme }) => theme.text};
@@ -195,7 +195,7 @@ const DateSeparator = styled.div`
   font-size: 14px;
   color: ${({ theme }) => theme.textSecondary};
   padding: 0 5px;
-  
+
   @media (max-width: 768px) {
     align-self: center;
     padding: 5px 0;

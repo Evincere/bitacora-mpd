@@ -6,8 +6,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ErrorBoundary } from 'react-error-boundary';
 import App from './App';
-import { store } from './store';
-import './index.css';
+import { store } from './core/store';
+import './styles/index.css';
 
 // Configuración de React Query
 const queryClient = new QueryClient({

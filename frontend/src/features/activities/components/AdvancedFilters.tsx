@@ -44,13 +44,13 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
         setDateRange([new Date(initialFilters.dateFrom), new Date(initialFilters.dateTo)]);
       }
       if (initialFilters.types) {
-        setSelectedTypes(Array.isArray(initialFilters.types) 
-          ? initialFilters.types 
+        setSelectedTypes(Array.isArray(initialFilters.types)
+          ? initialFilters.types
           : [initialFilters.types]);
       }
       if (initialFilters.statuses) {
-        setSelectedStatuses(Array.isArray(initialFilters.statuses) 
-          ? initialFilters.statuses 
+        setSelectedStatuses(Array.isArray(initialFilters.statuses)
+          ? initialFilters.statuses
           : [initialFilters.statuses]);
       }
       // Cargar otros filtros iniciales...
@@ -63,7 +63,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
 
   const handleApplyFilters = () => {
     const filters: any = {};
-    
+
     if (dateRange[0]) filters.dateFrom = dateRange[0].toISOString();
     if (dateRange[1]) filters.dateTo = dateRange[1].toISOString();
     if (selectedTypes.length > 0) filters.types = selectedTypes;
@@ -71,7 +71,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
     if (selectedUsers.length > 0) filters.assignedTo = selectedUsers;
     if (selectedDepartments.length > 0) filters.departments = selectedDepartments;
     if (selectedTags.length > 0) filters.tags = selectedTags;
-    
+
     onApplyFilters(filters);
   };
 
@@ -124,7 +124,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
     if (filter.assignedTo) filters.assignedTo = filter.assignedTo;
     if (filter.departments) filters.departments = filter.departments;
     if (filter.tags) filters.tags = filter.tags;
-    
+
     onApplyFilters(filters);
     toast.info(`Filtro "${filter.name}" aplicado`);
   };
@@ -136,7 +136,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
 
   const handleApplyQuickFilter = (filterType: string) => {
     let filters: any = {};
-    
+
     switch (filterType) {
       case 'myActivities':
         // Asumiendo que tenemos el ID del usuario actual
@@ -149,8 +149,8 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
         today.setHours(0, 0, 0, 0);
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
-        
-        filters = { 
+
+        filters = {
           dateFrom: today.toISOString(),
           dateTo: tomorrow.toISOString(),
           statuses: [ActivityStatus.PENDIENTE]
@@ -162,7 +162,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
         const now = new Date();
         const nextWeek = new Date(now);
         nextWeek.setDate(nextWeek.getDate() + 7);
-        
+
         filters = {
           dateFrom: now.toISOString(),
           dateTo: nextWeek.toISOString()
@@ -170,7 +170,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
         setDateRange([now, nextWeek]);
         break;
     }
-    
+
     onApplyFilters(filters);
   };
 
@@ -322,7 +322,7 @@ const FiltersTitle = styled.h3`
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   svg {
     color: ${({ theme }) => theme.primary};
   }
@@ -334,7 +334,7 @@ const ExpandButton = styled.button`
   color: ${({ theme }) => theme.primary};
   cursor: pointer;
   font-size: 14px;
-  
+
   &:hover {
     text-decoration: underline;
   }
@@ -355,7 +355,7 @@ const FilterSectionTitle = styled.h4`
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   svg {
     color: ${({ theme }) => theme.primary};
   }
@@ -373,12 +373,12 @@ const SaveFilterDialog = styled.div`
   padding: 15px;
   background-color: ${({ theme }) => theme.backgroundTertiary};
   border-radius: 8px;
-  
+
   h4 {
     margin-top: 0;
     margin-bottom: 10px;
   }
-  
+
   input {
     width: 100%;
     padding: 8px 12px;
@@ -388,7 +388,7 @@ const SaveFilterDialog = styled.div`
     color: ${({ theme }) => theme.text};
     margin-bottom: 15px;
   }
-  
+
   div {
     display: flex;
     gap: 10px;
@@ -417,11 +417,11 @@ const QuickFilterButton = styled.button`
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s ease;
-  
+
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
   }
-  
+
   svg {
     color: ${({ theme }) => theme.primary};
   }
@@ -450,7 +450,7 @@ const SavedFilterItem = styled.div`
 const SavedFilterName = styled.div`
   cursor: pointer;
   flex: 1;
-  
+
   &:hover {
     text-decoration: underline;
   }
@@ -465,7 +465,7 @@ const DeleteFilterButton = styled.button`
   align-items: center;
   padding: 4px;
   border-radius: 4px;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.dangerLight};
   }

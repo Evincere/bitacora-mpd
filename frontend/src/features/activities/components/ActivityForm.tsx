@@ -1,20 +1,21 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import styled from 'styled-components';
-import { FiX, FiSave, FiHelpCircle, FiAlertTriangle, FiFileText, FiInfo } from 'react-icons/fi';
+import { FiX, FiSave, FiHelpCircle, FiAlertTriangle, FiFileText, FiInfo, FiCode } from 'react-icons/fi';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCreateActivity, useUpdateActivity, useActivities } from '@/hooks/useActivities';
+import { useActivities, useCreateActivity, useUpdateActivity } from '@/features/activities/hooks';
 import { activityCreateSchema, ActivityFormData } from '../schemas/activitySchema';
-import { Activity, ActivityStatus, ActivityType } from '@/types/models';
-import PresenceIndicator from '@/components/ui/Collaboration/PresenceIndicator';
-import { useActivityPresence } from '@/hooks/useActivityPresence';
-import useActivityTemplates, { ActivityTemplate } from '@/hooks/useActivityTemplates';
-import useFrequentData from '@/hooks/useFrequentData';
-import AutocompleteInput from '@/components/common/AutocompleteInput';
+import { Activity, ActivityStatus, ActivityType } from '@/core/types/models';
+import PresenceIndicator from '@/shared/components/ui/Collaboration/PresenceIndicator';
+import { useActivityPresence, useActivityTemplates, useFrequentData } from '@/features/activities/hooks';
+import type { ActivityTemplate } from '@/features/activities/hooks';
+import AutocompleteInput from '@/shared/components/common/AutocompleteInput';
 import TemplateSelector from './TemplateSelector';
 import TemplateManager from './TemplateManager';
 import SaveTemplateDialog from './SaveTemplateDialog';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/core/hooks/useToast';
+import { debugLog, isDebugMode } from '@/core/utils/debug';
+import DebugPanel from './DebugPanel';
 
 const Overlay = styled.div`
   position: fixed;
@@ -26,7 +27,7 @@ const Overlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999; /* Valor muy alto para asegurar que esté por encima de todo */
   padding: 20px;
 `;
 
@@ -224,6 +225,21 @@ const FormFooter = styled.div`
   gap: 16px;
   position: relative;
   z-index: 1;
+  width: 100%;
+  overflow: visible;
+  background-color: ${({ theme }) => theme.backgroundSecondary};
+
+  & > div:first-child {
+    min-width: 200px;
+    flex-shrink: 0;
+  }
+
+  & > div:last-child {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    flex-grow: 1;
+  }
 `;
 
 const SubmitButton = styled.button`
@@ -241,12 +257,12 @@ const SubmitButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: ${({ theme }) => theme.primaryHover};
+    background-color: ${({ theme }) => theme.buttonHover};
   }
 
   &:disabled {
-    background-color: ${({ theme }) => theme.backgroundDisabled};
-    color: ${({ theme }) => theme.textDisabled};
+    background-color: ${({ theme }) => theme.inputBackground};
+    color: ${({ theme }) => theme.textSecondary};
     cursor: not-allowed;
   }
 `;
@@ -264,10 +280,43 @@ const CancelButton = styled.button`
   height: 36px;
   font-size: 14px;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: fit-content;
 
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
     color: ${({ theme }) => theme.primary};
+    border-color: ${({ theme }) => theme.primary};
+  }
+`;
+
+const TemplateButton = styled(CancelButton)`
+  background-color: ${({ theme }) => theme.backgroundSecondary};
+  border: 1px dashed ${({ theme }) => theme.primary};
+  color: ${({ theme }) => theme.primary};
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: ${({ theme }) => theme.primary};
+    opacity: 0.05;
+    z-index: -1;
+  }
+
+  &:hover {
+    background-color: ${({ theme }) => theme.inputBackground};
+    color: ${({ theme }) => theme.primary};
+    border: 1px dashed ${({ theme }) => theme.primary};
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
   }
 `;
 
@@ -315,9 +364,23 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
   // Estados para gestionar plantillas
   const [showTemplateManager, setShowTemplateManager] = useState(false);
   const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+
+  // Referencia para el contador de renderizaciones (depuración)
+  const renderCountRef = useRef(0);
 
   // Usar el hook de plantillas
-  const { templates } = useActivityTemplates();
+  const { templates, isLoading: templatesLoading } = useActivityTemplates();
+
+  // Depuración
+  useEffect(() => {
+    renderCountRef.current += 1;
+    debugLog('ActivityForm', `Renderizado #${renderCountRef.current}`, {
+      isEditing,
+      templatesCount: templates.length,
+      templatesLoading
+    });
+  });
 
   // Usar el hook de datos frecuentes
   const {
@@ -362,7 +425,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
     setValue,
     watch
   } = useForm<ActivityFormData>({
-    resolver: zodResolver(activityCreateSchema),
+    resolver: zodResolver(activityCreateSchema) as any,
     defaultValues: {
       date: formatDateForInput(activity?.date) || formatDateForInput(new Date().toISOString()),
       time: formatTimeForInput(activity?.date) || formatTimeForInput(new Date().toISOString()),
@@ -604,7 +667,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                       placeholder="Nombre de la persona relacionada"
                       error={errors.person?.message}
                       suggestions={frequentData.persons}
-                      onSuggestionSelected={(suggestion) => {
+                      onSuggestionSelected={(suggestion: string) => {
                         // Al seleccionar una sugerencia, actualizar el campo
                         field.onChange(suggestion);
                       }}
@@ -631,7 +694,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                       placeholder="Cargo o rol de la persona"
                       error={errors.role?.message}
                       suggestions={getRolesForPerson(currentPerson)}
-                      onSuggestionSelected={(suggestion) => {
+                      onSuggestionSelected={(suggestion: string) => {
                         field.onChange(suggestion);
                         // Si hay una persona seleccionada, guardar la relación
                         if (currentPerson) {
@@ -667,7 +730,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                       placeholder="Dependencia o área"
                       error={errors.dependency?.message}
                       suggestions={getDependenciesForPerson(currentPerson)}
-                      onSuggestionSelected={(suggestion) => {
+                      onSuggestionSelected={(suggestion: string) => {
                         field.onChange(suggestion);
                         // Si hay una persona seleccionada, guardar la relación
                         if (currentPerson) {
@@ -703,7 +766,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                       placeholder="Agente responsable"
                       error={errors.agent?.message}
                       suggestions={frequentData.agents}
-                      onSuggestionSelected={(suggestion) => {
+                      onSuggestionSelected={(suggestion: string) => {
                         field.onChange(suggestion);
                       }}
                       {...field}
@@ -792,17 +855,24 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
         </FormContent>
 
         <FormFooter>
-          <div style={{ width: '200px', zIndex: 2 }}>
+          <div style={{ minWidth: '200px', zIndex: 10, position: 'relative' }}>
+            {/* Selector de plantillas */}
             <TemplateSelector
               onSelectTemplate={handleSelectTemplate}
               onManageTemplates={handleManageTemplates}
             />
           </div>
-          <div style={{ display: 'flex', gap: '12px', zIndex: 1 }}>
-            <CancelButton onClick={handleSaveAsTemplate}>
+          <div style={{ display: 'flex', gap: '12px', zIndex: 10 }}>
+            <TemplateButton onClick={handleSaveAsTemplate}>
               <FiFileText size={16} />
-              Guardar como plantilla
-            </CancelButton>
+              <span>Guardar como plantilla</span>
+            </TemplateButton>
+            {isDebugMode() && (
+              <TemplateButton onClick={() => setShowDebugPanel(!showDebugPanel)} style={{ borderColor: '#ff9900' }}>
+                <FiCode size={16} />
+                <span>Depuración</span>
+              </TemplateButton>
+            )}
             <CancelButton onClick={onClose}>
               Cancelar
             </CancelButton>
@@ -815,6 +885,13 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
             </SubmitButton>
           </div>
         </FormFooter>
+
+        {/* Mensaje de depuración para verificar que los componentes de plantillas están cargados */}
+        {isDebugMode() && (
+          <div style={{ padding: '10px', textAlign: 'center', fontSize: '12px', color: '#666', borderTop: '1px dashed #ddd' }}>
+            Plantillas disponibles: {templates.length} | Estado de carga: {templatesLoading ? 'Cargando...' : 'Completado'} | Renderizaciones: {renderCountRef.current}
+          </div>
+        )}
 
         {/* Diálogos de plantillas */}
         {showSaveTemplateDialog && (
@@ -832,6 +909,11 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
           <TemplateManager
             onClose={() => setShowTemplateManager(false)}
           />
+        )}
+
+        {/* Panel de depuración */}
+        {showDebugPanel && (
+          <DebugPanel onClose={() => setShowDebugPanel(false)} />
         )}
       </FormContainer>
     </Overlay>

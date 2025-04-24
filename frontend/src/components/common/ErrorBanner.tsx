@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FiAlertCircle, FiAlertTriangle, FiInfo, FiX } from 'react-icons/fi';
 
-const BannerContainer = styled.div<{ type: string }>`
+const BannerContainer = styled.div<{ $type: string }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  background-color: ${({ theme, type }) => {
-    switch (type) {
+  background-color: ${({ theme, $type }) => {
+    switch ($type) {
       case 'error':
         return theme.error || '#f44336';
       case 'warning':
@@ -24,7 +24,7 @@ const BannerContainer = styled.div<{ type: string }>`
   margin-bottom: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   animation: slideDown 0.3s ease-out;
-  
+
   @keyframes slideDown {
     from {
       transform: translateY(-20px);
@@ -52,7 +52,7 @@ const IconContainer = styled.div`
 
 const Message = styled.div`
   font-size: 14px;
-  
+
   strong {
     font-weight: 600;
   }
@@ -69,7 +69,7 @@ const CloseButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   &:hover {
     opacity: 1;
   }
@@ -81,20 +81,20 @@ interface ErrorBannerProps {
   onClose?: () => void;
 }
 
-const ErrorBanner: React.FC<ErrorBannerProps> = ({ 
+const ErrorBanner: React.FC<ErrorBannerProps> = ({
   message,
   type = 'error',
   onClose
 }) => {
   const [isVisible, setIsVisible] = useState(true);
-  
+
   if (!isVisible) return null;
-  
+
   const handleClose = () => {
     setIsVisible(false);
     if (onClose) onClose();
   };
-  
+
   const getIcon = () => {
     switch (type) {
       case 'error':
@@ -107,9 +107,9 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({
         return <FiInfo size={20} />;
     }
   };
-  
+
   return (
-    <BannerContainer type={type}>
+    <BannerContainer $type={type}>
       <Content>
         <IconContainer>
           {getIcon()}

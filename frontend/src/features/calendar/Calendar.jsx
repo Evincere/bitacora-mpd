@@ -29,8 +29,7 @@ import {
 import { es } from 'date-fns/locale';
 import { FiChevronLeft, FiChevronRight, FiCalendar, FiFilter, FiPlus, FiGrid, FiList, FiClock, FiRefreshCw, FiInfo } from 'react-icons/fi';
 import { useActivitiesQuery } from '../../hooks/useActivitiesQuery';
-import StatusBadge from '../../components/ui/StatusBadge';
-import TypeBadge from '../../components/ui/TypeBadge';
+import { StatusBadge, TypeBadge } from '@/shared/components/ui';
 import ActivityTooltip from '../../components/ui/ActivityTooltip';
 import CalendarLegend from '../../components/ui/CalendarLegend';
 import { useNavigate } from 'react-router-dom';

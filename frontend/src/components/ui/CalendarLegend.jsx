@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import StatusBadge from './StatusBadge';
-import TypeBadge from './TypeBadge';
+import { StatusBadge, TypeBadge } from '@/shared/components/ui';
 
 const LegendContainer = styled.div`
   background-color: ${({ theme }) => `${theme.backgroundSecondary}F0`};

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FiX, FiEdit2, FiTrash2, FiFileText, FiClock, FiSearch, FiInfo } from 'react-icons/fi';
-import useActivityTemplates, { ActivityTemplate } from '@/hooks/useActivityTemplates';
+import useActivityTemplates, { ActivityTemplate } from '@/features/activities/hooks/useActivityTemplates';
 import { formatDistanceToNow, format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useToast } from '@/hooks/useToast';
-import ConfirmDialog from '@/components/common/ConfirmDialog';
+import { useToast } from '@/core/hooks/useToast';
+import ConfirmDialog from '../../../shared/components/common/ConfirmDialog';
 import EditTemplateDialog from './EditTemplateDialog';
 
 interface TemplateManagerProps {
@@ -22,7 +22,7 @@ const Overlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1100;
+  z-index: 10000;
   padding: 20px;
 `;
 
@@ -86,7 +86,7 @@ const SearchContainer = styled.div`
   align-items: center;
   padding: 12px 20px;
   border-bottom: 1px solid ${({ theme }) => theme.border};
-  background-color: ${({ theme }) => theme.backgroundPrimary};
+  background-color: ${({ theme }) => theme.background};
 `;
 
 const SearchInput = styled.input`
@@ -127,7 +127,7 @@ const TemplateItem = styled.div`
   transition: all 0.2s;
 
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
   }
 `;
 
@@ -264,7 +264,7 @@ const CloseFooterButton = styled.button`
   transition: all 0.2s;
 
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
     color: ${({ theme }) => theme.text};
   }
 `;
@@ -305,7 +305,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({ onClose }) => {
   };
 
   // Filtrar plantillas según la búsqueda
-  const filteredTemplates = templates.filter(template => 
+  const filteredTemplates = templates.filter(template =>
     template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     template.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -345,8 +345,8 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({ onClose }) => {
               </EmptyStateIcon>
               <EmptyStateTitle>No hay plantillas</EmptyStateTitle>
               <EmptyStateDescription>
-                {searchQuery 
-                  ? 'No se encontraron plantillas que coincidan con tu búsqueda.' 
+                {searchQuery
+                  ? 'No se encontraron plantillas que coincidan con tu búsqueda.'
                   : 'Aún no has creado ninguna plantilla. Puedes crear plantillas al guardar actividades.'}
               </EmptyStateDescription>
             </EmptyState>
@@ -360,13 +360,13 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({ onClose }) => {
                       <TemplateDescription>{template.description}</TemplateDescription>
                     </TemplateInfo>
                     <TemplateActions>
-                      <ActionButton 
+                      <ActionButton
                         onClick={() => handleEditTemplate(template)}
                         title="Editar plantilla"
                       >
                         <FiEdit2 size={16} />
                       </ActionButton>
-                      <ActionButton 
+                      <ActionButton
                         onClick={() => handleDeleteTemplate(template.id)}
                         title="Eliminar plantilla"
                       >
@@ -390,16 +390,16 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({ onClose }) => {
                     {Object.entries(template.data).map(([key, value]) => {
                       // No mostrar campos vacíos
                       if (!value) return null;
-                      
+
                       // Formatear el nombre del campo
                       const fieldName = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
-                      
+
                       return (
                         <TemplateField key={key}>
                           <FieldLabel>{fieldName}</FieldLabel>
                           <FieldValue>
-                            {typeof value === 'string' && value.length > 30 
-                              ? `${value.substring(0, 30)}...` 
+                            {typeof value === 'string' && value.length > 30
+                              ? `${value.substring(0, 30)}...`
                               : value}
                           </FieldValue>
                         </TemplateField>
@@ -421,12 +421,14 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({ onClose }) => {
 
       {templateToDelete && (
         <ConfirmDialog
+          isOpen={true}
           title="Eliminar plantilla"
           message="¿Estás seguro de que deseas eliminar esta plantilla? Esta acción no se puede deshacer."
-          confirmLabel="Eliminar"
-          cancelLabel="Cancelar"
+          confirmText="Eliminar"
+          cancelText="Cancelar"
           onConfirm={confirmDeleteTemplate}
           onCancel={() => setTemplateToDelete(null)}
+          type="danger"
         />
       )}
 

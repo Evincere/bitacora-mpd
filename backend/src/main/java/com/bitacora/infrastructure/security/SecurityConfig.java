@@ -52,6 +52,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/api-docs/**", "/api/swagger-ui/**", "/api/swagger-ui.html").permitAll()
                         .requestMatchers("/api/actuator/**").permitAll()
                         .requestMatchers("/api/h2-console/**", "/h2-console/**").permitAll()
+                        // Permitir acceso a endpoints de WebSocket
+                        .requestMatchers("/api/ws/**", "/ws/**").permitAll()
                         // Permitir acceso a endpoints de actividades para pruebas
                         .requestMatchers("/api/activities/**").permitAll()
                         .anyRequest().authenticated())

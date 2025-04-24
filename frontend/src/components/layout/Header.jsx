@@ -257,7 +257,7 @@ const SubmenuItem = styled.div`
   }
 
   &.active {
-    background-color: ${({ theme }) => theme.backgroundActive || theme.backgroundHover};
+    background-color: ${({ theme }) => theme.backgroundAlt};
     color: ${({ theme }) => theme.primary};
 
     .icon {

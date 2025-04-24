@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { FiFileText, FiChevronDown, FiEdit2, FiTrash2, FiClock } from 'react-icons/fi';
-import useActivityTemplates, { ActivityTemplate } from '@/hooks/useActivityTemplates';
+import useActivityTemplates, { ActivityTemplate } from '@/features/activities/hooks/useActivityTemplates';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useToast } from '@/hooks/useToast';
-import ConfirmDialog from '@/components/common/ConfirmDialog';
+import { useToast } from '@/core/hooks/useToast';
+import ConfirmDialog from '../../../shared/components/common/ConfirmDialog';
 
 interface TemplateSelectorProps {
   onSelectTemplate: (template: ActivityTemplate) => void;
@@ -15,6 +15,8 @@ interface TemplateSelectorProps {
 const SelectorContainer = styled.div`
   position: relative;
   width: 100%;
+  display: block;
+  min-width: 180px;
 `;
 
 const SelectorButton = styled.button`
@@ -24,20 +26,37 @@ const SelectorButton = styled.button`
   width: 100%;
   padding: 10px 12px;
   border-radius: 4px;
-  border: 1px solid ${({ theme }) => theme.border};
+  border: 1px solid ${({ theme }) => theme.primary};
   background-color: ${({ theme }) => theme.backgroundSecondary};
-  color: ${({ theme }) => theme.text};
+  color: ${({ theme }) => theme.primary};
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   height: 36px;
-  z-index: 1;
+  z-index: 5; /* Aumentado para asegurar visibilidad */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: ${({ theme }) => theme.primary};
+    opacity: 0.05;
+    z-index: -1;
+  }
 
   &:hover {
     border-color: ${({ theme }) => theme.primary};
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
     color: ${({ theme }) => theme.primary};
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
   }
 
   .left {
@@ -55,25 +74,51 @@ const DropdownMenu = styled.div<{ isOpen: boolean }>`
   max-height: 300px;
   overflow-y: auto;
   background-color: ${({ theme }) => theme.backgroundSecondary};
-  border-radius: 4px;
+  border-radius: 8px;
   border: 1px solid ${({ theme }) => theme.border};
-  box-shadow: ${({ theme }) => theme.shadow};
-  z-index: 10;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  z-index: 100; /* Valor alto para asegurar que esté por encima de otros elementos */
   display: ${({ isOpen }) => (isOpen ? 'block' : 'none')};
+  min-width: 280px; /* Asegurar un ancho mínimo */
+  animation: ${({ isOpen }) => isOpen ? 'dropdownFadeIn 0.2s ease-out' : 'none'};
+  transform-origin: top center;
+
+  @keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 `;
 
 const TemplateItem = styled.div`
-  padding: 10px 12px;
+  padding: 12px 16px;
   cursor: pointer;
   transition: all 0.2s;
   border-bottom: 1px solid ${({ theme }) => theme.border};
+  position: relative;
+  overflow: hidden;
 
   &:last-child {
     border-bottom: none;
   }
 
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background-color: ${({ theme }) => theme.primary};
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover::after {
+    opacity: 1;
   }
 `;
 
@@ -108,7 +153,7 @@ const ActionButton = styled.button`
   transition: all 0.2s;
 
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
     color: ${({ theme }) => theme.text};
   }
 `;
@@ -137,7 +182,7 @@ const EmptyState = styled.div`
 const ManageButton = styled.button`
   display: block;
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   text-align: center;
   background-color: ${({ theme }) => theme.backgroundTertiary};
   border: none;
@@ -146,10 +191,34 @@ const ManageButton = styled.button`
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: ${({ theme }) => theme.primary};
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+  }
 
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
+  }
+
+  &:hover::before {
+    opacity: 0.05;
+  }
+
+  span {
+    position: relative;
+    z-index: 1;
   }
 `;
 
@@ -242,18 +311,20 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ onSelectTemplate, o
           ))
         )}
         <ManageButton onClick={handleManageTemplates}>
-          Gestionar plantillas
+          <span>Gestionar plantillas</span>
         </ManageButton>
       </DropdownMenu>
 
       {templateToDelete && (
         <ConfirmDialog
+          isOpen={true}
           title="Eliminar plantilla"
           message="¿Estás seguro de que deseas eliminar esta plantilla? Esta acción no se puede deshacer."
-          confirmLabel="Eliminar"
-          cancelLabel="Cancelar"
+          confirmText="Eliminar"
+          cancelText="Cancelar"
           onConfirm={confirmDeleteTemplate}
           onCancel={() => setTemplateToDelete(null)}
+          type="danger"
         />
       )}
     </SelectorContainer>

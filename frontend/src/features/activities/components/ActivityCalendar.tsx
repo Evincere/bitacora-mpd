@@ -58,11 +58,11 @@ const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
   const handleDrop = (e: React.DragEvent, date: Date) => {
     e.preventDefault();
     const activityId = parseInt(e.dataTransfer.getData('text/plain'), 10);
-    
+
     if (draggedActivity && onMoveActivity) {
       onMoveActivity(draggedActivity, date);
     }
-    
+
     setDraggedActivity(null);
   };
 
@@ -70,34 +70,34 @@ const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
-    
+
     // Agrupar actividades por día
     const activitiesByDay: Record<string, Activity[]> = {};
-    
+
     activities.forEach(activity => {
       const activityDate = parseISO(activity.date);
       const dateKey = format(activityDate, 'yyyy-MM-dd');
-      
+
       if (!activitiesByDay[dateKey]) {
         activitiesByDay[dateKey] = [];
       }
-      
+
       activitiesByDay[dateKey].push(activity);
     });
-    
+
     return (
       <MonthGrid>
         {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(day => (
           <DayHeader key={day}>{day}</DayHeader>
         ))}
-        
+
         {days.map(day => {
           const dateKey = format(day, 'yyyy-MM-dd');
           const dayActivities = activitiesByDay[dateKey] || [];
           const isCurrentMonth = isSameMonth(day, currentDate);
-          
+
           return (
-            <DayCell 
+            <DayCell
               key={dateKey}
               $isCurrentMonth={isCurrentMonth}
               $isToday={isToday(day)}
@@ -107,15 +107,15 @@ const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
               <DayNumber>{format(day, 'd')}</DayNumber>
               <ActivitiesContainer>
                 {dayActivities.slice(0, 3).map(activity => (
-                  <ActivityItem 
+                  <ActivityItem
                     key={activity.id}
                     $status={activity.status}
                     onClick={() => onSelectActivity(activity)}
                     draggable={!!onMoveActivity}
                     onDragStart={(e) => handleDragStart(e, activity)}
                   >
-                    {activity.description.length > 20 
-                      ? `${activity.description.substring(0, 20)}...` 
+                    {activity.description.length > 20
+                      ? `${activity.description.substring(0, 20)}...`
                       : activity.description}
                   </ActivityItem>
                 ))}
@@ -149,32 +149,32 @@ const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
           <FiCalendar />
           {format(currentDate, 'MMMM yyyy', { locale: es })}
         </CalendarTitle>
-        
+
         <CalendarControls>
           <ViewToggle>
-            <ViewButton 
-              $active={currentView === 'month'} 
+            <ViewButton
+              $active={currentView === 'month'}
               onClick={() => setCurrentView('month')}
             >
               <FiGrid />
               Mes
             </ViewButton>
-            <ViewButton 
-              $active={currentView === 'week'} 
+            <ViewButton
+              $active={currentView === 'week'}
               onClick={() => setCurrentView('week')}
             >
               <FiList />
               Semana
             </ViewButton>
-            <ViewButton 
-              $active={currentView === 'day'} 
+            <ViewButton
+              $active={currentView === 'day'}
               onClick={() => setCurrentView('day')}
             >
               <FiClock />
               Día
             </ViewButton>
           </ViewToggle>
-          
+
           <NavigationControls>
             <NavButton onClick={navigatePrevious}>
               <FiChevronLeft />
@@ -188,7 +188,7 @@ const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
           </NavigationControls>
         </CalendarControls>
       </CalendarHeader>
-      
+
       <CalendarContent>
         {currentView === 'month' && renderMonthView()}
         {currentView === 'week' && renderWeekView()}
@@ -211,7 +211,7 @@ const CalendarHeader = styled.div`
   align-items: center;
   padding: 15px 20px;
   border-bottom: 1px solid ${({ theme }) => theme.borderColor};
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 10px;
@@ -225,7 +225,7 @@ const CalendarTitle = styled.h3`
   align-items: center;
   gap: 8px;
   text-transform: capitalize;
-  
+
   svg {
     color: ${({ theme }) => theme.primary};
   }
@@ -235,7 +235,7 @@ const CalendarControls = styled.div`
   display: flex;
   align-items: center;
   gap: 20px;
-  
+
   @media (max-width: 768px) {
     width: 100%;
     justify-content: space-between;
@@ -259,14 +259,14 @@ const ViewButton = styled.button<{ $active: boolean }>`
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
-    background-color: ${({ theme, $active }) => $active ? theme.primary : theme.backgroundHover};
+    background-color: ${({ theme, $active }) => $active ? theme.primary : theme.inputBackground};
   }
-  
+
   @media (max-width: 576px) {
     padding: 6px 8px;
-    
+
     span {
       display: none;
     }
@@ -291,9 +291,9 @@ const NavButton = styled.button`
   color: ${({ theme }) => theme.text};
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
   }
 `;
 
@@ -305,9 +305,9 @@ const TodayButton = styled.button`
   color: ${({ theme }) => theme.text};
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
   }
 `;
 
@@ -335,17 +335,17 @@ const DayHeader = styled.div`
 const DayCell = styled.div<{ $isCurrentMonth: boolean; $isToday: boolean }>`
   min-height: 100px;
   padding: 5px;
-  background-color: ${({ theme, $isCurrentMonth, $isToday }) => 
-    $isToday 
-      ? `${theme.primary}15` 
-      : $isCurrentMonth 
-        ? theme.backgroundSecondary 
+  background-color: ${({ theme, $isCurrentMonth, $isToday }) =>
+    $isToday
+      ? `${theme.primary}15`
+      : $isCurrentMonth
+        ? theme.backgroundSecondary
         : theme.backgroundTertiary};
   opacity: ${({ $isCurrentMonth }) => $isCurrentMonth ? 1 : 0.5};
   transition: background-color 0.2s ease;
-  
+
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
   }
 `;
 
@@ -391,7 +391,7 @@ const ActivityItem = styled.div<{ $status: ActivityStatus }>`
         return theme.info;
     }
   }};
-  
+
   &:hover {
     filter: brightness(1.1);
   }

@@ -7,18 +7,12 @@ import {
 } from '@/types/api';
 import { Activity } from '@/types/models';
 import { apiRequest } from '@/utils/api-ky';
-import mockService from './mockService';
 
-const API_URL = 'api/activities';
-
-// Variable para controlar si se usa el servicio simulado - leer de variables de entorno
-const USE_MOCK_SERVICE = import.meta.env.VITE_USE_MOCK_DATA === 'true';
-
-// Verificar si el servicio simulado está disponible
-const isMockServiceAvailable = typeof mockService !== 'undefined' && mockService !== null;
+// Asegurarse de que la URL no incluya el prefijo /app
+const API_URL = '/api/activities';
 
 // Mostrar información sobre el modo de servicio
-console.log(`Servicio de actividades configurado en modo ${USE_MOCK_SERVICE ? 'simulado' : 'real'}`);
+console.log(`Servicio de actividades configurado en modo real`);
 console.log(`API URL: ${API_URL}`);
 
 // Verificar si estamos en modo de desarrollo
@@ -63,26 +57,10 @@ const getActivities = async (params?: ActivityQueryParams): Promise<ActivitiesRe
   // Generar clave de caché para esta petición
   const cacheKey = getCacheKey('GET', API_URL, params);
 
-  // Verificar si la petición ya está en curso
+  // Verificar si la petición ya está en caché
   if (requestCache.has(cacheKey)) {
     console.log(`Usando resultado en caché para: ${cacheKey}`);
     return requestCache.get(cacheKey);
-  }
-
-  // Si estamos usando el servicio simulado y está disponible, usarlo
-  if (USE_MOCK_SERVICE && isMockServiceAvailable) {
-    try {
-      console.log('Usando servicio simulado para getActivities');
-      const result = mockService.getActivities(params);
-      // Almacenar en caché
-      requestCache.set(cacheKey, result);
-      // Eliminar de la caché después de un tiempo
-      setTimeout(() => requestCache.delete(cacheKey), 2000);
-      return await result;
-    } catch (error) {
-      console.error('Error en servicio simulado:', error);
-      throw error;
-    }
   }
 
   // Si no, usar el servicio real
@@ -173,23 +151,11 @@ const getActivities = async (params?: ActivityQueryParams): Promise<ActivitiesRe
       console.error('Error de conexión con el servidor');
     }
 
-    // Si estamos en modo de desarrollo o el error es grave, usar datos simulados
-    if (USE_MOCK_SERVICE || isDevelopment || apiError.status >= 500 || apiError.status === 0) {
-      console.log('Error al obtener actividades de la API, usando datos de prueba:', error);
-      if (isMockServiceAvailable) {
-        return await mockService.getActivities(params);
-      } else {
-        // Si el servicio simulado no está disponible, crear una respuesta vacía
-        console.warn('Servicio simulado no disponible, devolviendo datos vacíos');
-        return {
-          activities: [],
-          totalCount: 0
-        };
-      }
-    }
-
-    // Si no estamos en modo de desarrollo y el error no es grave, propagar el error
-    throw error;
+    // Crear una respuesta vacía en caso de error
+    return {
+      activities: [],
+      totalCount: 0
+    };
   }
 };
 
@@ -199,18 +165,6 @@ const getActivities = async (params?: ActivityQueryParams): Promise<ActivitiesRe
  * @returns Actividad
  */
 const getActivityById = async (id: number): Promise<Activity> => {
-  // Si estamos usando el servicio simulado y está disponible, usarlo
-  if (USE_MOCK_SERVICE && isMockServiceAvailable) {
-    try {
-      console.log(`Usando servicio simulado para getActivityById(${id})`);
-      return await mockService.getActivityById(id);
-    } catch (error) {
-      console.error('Error en servicio simulado:', error);
-      throw error;
-    }
-  }
-
-  // Si no, usar el servicio real
   try {
     return await apiRequest<Activity>(`${API_URL}/${id}`);
   } catch (error) {
@@ -228,19 +182,7 @@ const getActivityById = async (id: number): Promise<Activity> => {
       console.error('Error de conexión con el servidor');
     }
 
-    // Si estamos en modo de desarrollo o el error es grave, usar datos simulados
-    if (USE_MOCK_SERVICE || isDevelopment || apiError.status >= 500 || apiError.status === 0) {
-      console.log(`Error en API real, usando servicio simulado como fallback para ID ${id}:`, error);
-      if (isMockServiceAvailable) {
-        return await mockService.getActivityById(id);
-      } else {
-        // Si el servicio simulado no está disponible, lanzar error
-        console.warn('Servicio simulado no disponible');
-        throw new Error(`No se pudo obtener la actividad con ID ${id}`);
-      }
-    }
-
-    // Si no estamos en modo de desarrollo y el error no es grave, propagar el error
+    // Propagar el error para que se maneje en el componente
     throw error;
   }
 };
@@ -251,18 +193,6 @@ const getActivityById = async (id: number): Promise<Activity> => {
  * @returns Actividad creada
  */
 const createActivity = async (activityData: ActivityCreateRequest): Promise<Activity> => {
-  // Si estamos usando el servicio simulado y está disponible, usarlo
-  if (USE_MOCK_SERVICE && isMockServiceAvailable) {
-    try {
-      console.log('Usando servicio simulado para createActivity');
-      return await mockService.createActivity(activityData);
-    } catch (error) {
-      console.error('Error en servicio simulado:', error);
-      throw error;
-    }
-  }
-
-  // Si no, usar el servicio real
   try {
     return await apiRequest<Activity>(API_URL, {
       method: 'POST',
@@ -286,19 +216,7 @@ const createActivity = async (activityData: ActivityCreateRequest): Promise<Acti
       console.error('Error de conexión con el servidor');
     }
 
-    // Si estamos en modo de desarrollo o el error es grave, usar datos simulados
-    if (USE_MOCK_SERVICE || isDevelopment || apiError.status >= 500 || apiError.status === 0) {
-      console.log('Error en API real, usando servicio simulado como fallback:', error);
-      if (isMockServiceAvailable) {
-        return await mockService.createActivity(activityData);
-      } else {
-        // Si el servicio simulado no está disponible, lanzar error
-        console.warn('Servicio simulado no disponible, no se puede crear la actividad');
-        throw new Error('No se pudo crear la actividad');
-      }
-    }
-
-    // Si no estamos en modo de desarrollo y el error no es grave, propagar el error
+    // Propagar el error para que se maneje en el componente
     throw error;
   }
 };
@@ -310,18 +228,6 @@ const createActivity = async (activityData: ActivityCreateRequest): Promise<Acti
  * @returns Actividad actualizada
  */
 const updateActivity = async (id: number, activityData: ActivityUpdateRequest): Promise<Activity> => {
-  // Si estamos usando el servicio simulado y está disponible, usarlo
-  if (USE_MOCK_SERVICE && isMockServiceAvailable) {
-    try {
-      console.log(`Usando servicio simulado para updateActivity(${id})`);
-      return await mockService.updateActivity(id, activityData);
-    } catch (error) {
-      console.error('Error en servicio simulado:', error);
-      throw error;
-    }
-  }
-
-  // Si no, usar el servicio real
   try {
     return await apiRequest<Activity>(`${API_URL}/${id}`, {
       method: 'PUT',
@@ -347,19 +253,7 @@ const updateActivity = async (id: number, activityData: ActivityUpdateRequest): 
       console.error('Error de conexión con el servidor');
     }
 
-    // Si estamos en modo de desarrollo o el error es grave, usar datos simulados
-    if (USE_MOCK_SERVICE || isDevelopment || apiError.status >= 500 || apiError.status === 0) {
-      console.log(`Error en API real, usando servicio simulado como fallback para ID ${id}:`, error);
-      if (isMockServiceAvailable) {
-        return await mockService.updateActivity(id, activityData);
-      } else {
-        // Si el servicio simulado no está disponible, lanzar error
-        console.warn(`Servicio simulado no disponible, no se puede actualizar la actividad ${id}`);
-        throw new Error(`No se pudo actualizar la actividad con ID ${id}`);
-      }
-    }
-
-    // Si no estamos en modo de desarrollo y el error no es grave, propagar el error
+    // Propagar el error para que se maneje en el componente
     throw error;
   }
 };
@@ -370,18 +264,6 @@ const updateActivity = async (id: number, activityData: ActivityUpdateRequest): 
  * @returns Respuesta vacía
  */
 const deleteActivity = async (id: number): Promise<void> => {
-  // Si estamos usando el servicio simulado y está disponible, usarlo
-  if (USE_MOCK_SERVICE && isMockServiceAvailable) {
-    try {
-      console.log(`Usando servicio simulado para deleteActivity(${id})`);
-      return await mockService.deleteActivity(id);
-    } catch (error) {
-      console.error('Error en servicio simulado:', error);
-      throw error;
-    }
-  }
-
-  // Si no, usar el servicio real
   try {
     return await apiRequest<void>(`${API_URL}/${id}`, {
       method: 'DELETE'
@@ -401,19 +283,48 @@ const deleteActivity = async (id: number): Promise<void> => {
       console.error('Error de conexión con el servidor');
     }
 
-    // Si estamos en modo de desarrollo o el error es grave, usar datos simulados
-    if (USE_MOCK_SERVICE || isDevelopment || apiError.status >= 500 || apiError.status === 0) {
-      console.log(`Error en API real, usando servicio simulado como fallback para ID ${id}:`, error);
-      if (isMockServiceAvailable) {
-        return await mockService.deleteActivity(id);
-      } else {
-        // Si el servicio simulado no está disponible, lanzar error
-        console.warn(`Servicio simulado no disponible, no se puede eliminar la actividad ${id}`);
-        throw new Error(`No se pudo eliminar la actividad con ID ${id}`);
-      }
-    }
+    // Propagar el error para que se maneje en el componente
+    throw error;
+  }
+};
 
-    // Si no estamos en modo de desarrollo y el error no es grave, propagar el error
+/**
+ * Obtiene estadísticas de actividades por tipo
+ * @returns Estadísticas de actividades por tipo
+ */
+const getStatsByType = async (): Promise<any[]> => {
+  try {
+    return await apiRequest<any[]>(`${API_URL}/stats/by-type`);
+  } catch (error) {
+    console.error('Error al obtener estadísticas por tipo:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtiene estadísticas de actividades por estado
+ * @returns Estadísticas de actividades por estado
+ */
+const getStatsByStatus = async (): Promise<any[]> => {
+  try {
+    return await apiRequest<any[]>(`${API_URL}/stats/by-status`);
+  } catch (error) {
+    console.error('Error al obtener estadísticas por estado:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtiene resúmenes de actividades con paginación
+ * @param page Número de página
+ * @param size Tamaño de página
+ * @returns Resúmenes de actividades
+ */
+const getActivitySummaries = async (page: number = 0, size: number = 10): Promise<any> => {
+  try {
+    return await apiRequest<any>(`${API_URL}/summaries?page=${page}&size=${size}`);
+  } catch (error) {
+    console.error('Error al obtener resúmenes de actividades:', error);
     throw error;
   }
 };
@@ -423,7 +334,10 @@ const activitiesService = {
   getActivityById,
   createActivity,
   updateActivity,
-  deleteActivity
+  deleteActivity,
+  getStatsByType,
+  getStatsByStatus,
+  getActivitySummaries
 };
 
 export default activitiesService;

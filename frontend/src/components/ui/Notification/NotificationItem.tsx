@@ -12,7 +12,9 @@ import {
   FiCalendar,
   FiMessageSquare,
   FiUsers,
-  FiZap
+  FiZap,
+  FiEye,
+  FiX
 } from 'react-icons/fi';
 import {
   RealTimeNotification,
@@ -948,8 +950,40 @@ const StatusBadge = styled.div<{ $color: string }>`
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
-  background-color: ${({ theme, $color }) => `${theme[$color]}20`};
-  color: ${({ theme, $color }) => theme[$color]};
+  background-color: ${({ theme, $color }) => {
+    // Usar un switch para manejar los diferentes colores
+    switch ($color) {
+      case 'success':
+        return `${theme.success}20`;
+      case 'primary':
+        return `${theme.primary}20`;
+      case 'warning':
+        return `${theme.warning}20`;
+      case 'error':
+        return `${theme.error}20`;
+      case 'info':
+        return `${theme.info}20`;
+      default:
+        return theme.backgroundAlt;
+    }
+  }};
+  color: ${({ theme, $color }) => {
+    // Usar un switch para manejar los diferentes colores
+    switch ($color) {
+      case 'success':
+        return theme.success;
+      case 'primary':
+        return theme.primary;
+      case 'warning':
+        return theme.warning;
+      case 'error':
+        return theme.error;
+      case 'info':
+        return theme.info;
+      default:
+        return theme.textSecondary;
+    }
+  }};
 `;
 
 const StatusArrow = styled.div`

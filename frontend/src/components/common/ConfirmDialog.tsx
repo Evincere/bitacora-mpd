@@ -33,7 +33,7 @@ const DialogContainer = styled.div`
   max-width: 480px;
   overflow: hidden;
   animation: fadeIn 0.2s ease-out;
-  
+
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
@@ -55,7 +55,7 @@ const Title = styled.h3`
   display: flex;
   align-items: center;
   gap: 12px;
-  
+
   svg {
     color: ${({ theme }) => theme.warning};
   }
@@ -69,7 +69,7 @@ const CloseButton = styled.button`
   height: 32px;
   border-radius: 4px;
   color: ${({ theme }) => theme.textSecondary};
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.inputBackground};
     color: ${({ theme }) => theme.text};
@@ -92,27 +92,27 @@ const DialogFooter = styled.div`
   background-color: ${({ theme }) => theme.backgroundSecondary};
 `;
 
-const Button = styled.button<{ primary?: boolean; danger?: boolean }>`
+const Button = styled.button<{ $primary?: boolean; $danger?: boolean }>`
   padding: 8px 16px;
   border-radius: 4px;
   font-size: 14px;
   font-weight: 500;
   transition: background-color 0.2s;
-  
-  background-color: ${({ primary, danger, theme }) => 
-    danger ? theme.error : 
-    primary ? theme.primary : 
+
+  background-color: ${({ $primary, $danger, theme }) =>
+    $danger ? theme.error :
+    $primary ? theme.primary :
     theme.backgroundSecondary
   };
-  
-  color: ${({ primary, danger, theme }) => 
-    (primary || danger) ? 'white' : theme.text
+
+  color: ${({ $primary, $danger, theme }) =>
+    ($primary || $danger) ? 'white' : theme.text
   };
-  
+
   &:hover {
-    background-color: ${({ primary, danger, theme }) => 
-      danger ? theme.errorHover : 
-      primary ? theme.buttonHover : 
+    background-color: ${({ $primary, $danger, theme }) =>
+      $danger ? theme.errorHover :
+      $primary ? theme.buttonHover :
       theme.inputBackground
     };
   }
@@ -134,16 +134,16 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         onCancel();
       }
     };
-    
+
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onCancel]);
-  
+
   // Prevenir que el clic en el diálogo cierre el modal
   const handleDialogClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
-  
+
   return (
     <Overlay onClick={onCancel}>
       <DialogContainer onClick={handleDialogClick}>
@@ -156,16 +156,16 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             <FiX size={20} />
           </CloseButton>
         </DialogHeader>
-        
+
         <DialogContent>
           {message}
         </DialogContent>
-        
+
         <DialogFooter>
           <Button onClick={onCancel}>
             {cancelLabel}
           </Button>
-          <Button primary danger={danger} onClick={onConfirm}>
+          <Button $primary $danger={danger} onClick={onConfirm}>
             {confirmLabel}
           </Button>
         </DialogFooter>

@@ -16,7 +16,7 @@ const pulse = keyframes`
 
 // Componente base de esqueleto
 const SkeletonBase = styled.div`
-  background-color: ${({ theme }) => theme.skeletonBackground || theme.backgroundAlt};
+  background-color: ${({ theme }) => theme.skeletonBackground};
   border-radius: ${({ $borderRadius }) => $borderRadius || '4px'};
   width: ${({ width }) => width || '100%'};
   height: ${({ height }) => height || '16px'};
@@ -51,20 +51,20 @@ const SkeletonBase = styled.div`
 
 /**
  * Componente de esqueleto para mostrar durante la carga
- * 
+ *
  * @param {string} width - Ancho del esqueleto (por defecto: '100%')
  * @param {string} height - Altura del esqueleto (por defecto: '16px')
  * @param {string} marginBottom - Margen inferior (por defecto: '0')
  * @param {string} borderRadius - Radio de borde (por defecto: '4px')
  * @param {Object} style - Estilos adicionales
  */
-const Skeleton = ({ 
-  width, 
-  height, 
-  marginBottom, 
-  borderRadius, 
-  style, 
-  ...props 
+const Skeleton = ({
+  width,
+  height,
+  marginBottom,
+  borderRadius,
+  style,
+  ...props
 }) => {
   return (
     <SkeletonBase

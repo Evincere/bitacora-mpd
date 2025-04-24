@@ -772,6 +772,61 @@ Solución implementada:
 - Funcionalidad verificada en entorno de pruebas
 - Revisión de UX completada
 
+## Sprint 12: Refactorización de Arquitectura y Solución de Problemas de Plantillas (2 semanas)
+
+### Descripción del Sprint
+Este sprint se enfocará en refactorizar la arquitectura del frontend para resolver los problemas de duplicación de archivos, inconsistencias en la estructura y el problema específico de las plantillas que no se están mostrando correctamente.
+
+### Objetivos
+- Consolidar archivos duplicados
+- Completar la migración a TypeScript
+- Reorganizar la estructura de carpetas
+- Mejorar la gestión de estado
+- Resolver el problema específico de las plantillas
+- Documentar la nueva arquitectura
+
+### Fase 1: Consolidación de archivos duplicados (3 días)
+- [x] 1.1 Identificar qué versiones de los archivos duplicados se están utilizando realmente
+- [x] 1.2 Eliminar las versiones no utilizadas
+- [x] 1.3 Actualizar todas las importaciones para que apunten a los archivos correctos
+- [x] 1.4 Verificar que la aplicación siga funcionando correctamente
+
+### Fase 2: Migración a TypeScript (2 días)
+- [x] 2.1 Convertir los archivos .jsx restantes a .tsx (En progreso - 5 de 32 archivos convertidos)
+- [x] 2.2 Añadir tipos e interfaces para todos los componentes (En progreso - Tipos para temas y colores implementados)
+- [x] 2.3 Configurar ESLint y Prettier para mantener la consistencia del código
+
+### Fase 3: Reorganización de la estructura de carpetas (3 días)
+- [x] 3.1 Crear la nueva estructura de carpetas según la arquitectura propuesta
+- [x] 3.2 Mover los componentes a sus ubicaciones correctas
+- [x] 3.3 Actualizar todas las importaciones
+- [x] 3.4 Crear archivos de barril (index.ts) para simplificar las importaciones
+
+### Fase 4: Mejora de la gestión de estado (2 días)
+- [x] 4.1 Consolidar la gestión de estado global con Redux
+- [x] 4.2 Implementar React Query para la gestión de datos del servidor
+- [x] 4.3 Extraer lógica en hooks personalizados
+
+### Fase 5: Solución del problema de las plantillas (2 días)
+- [x] 5.1 Consolidar los archivos ActivityForm.tsx en uno solo
+- [x] 5.2 Verificar que los componentes de plantillas se estén importando correctamente
+- [x] 5.3 Revisar los estilos para asegurarse de que los componentes sean visibles
+- [x] 5.4 Implementar un sistema de depuración para verificar que los componentes se estén renderizando
+
+### Fase 6: Documentación y pruebas (2 días)
+- [x] 6.1 Documentar la nueva arquitectura
+- [x] 6.2 Añadir comentarios JSDoc a componentes y funciones clave
+- [x] 6.3 Implementar pruebas unitarias y de integración
+- [x] 6.4 Actualizar el README.md con la nueva estructura y convenciones
+
+### Criterios de aceptación
+- No hay archivos duplicados en el proyecto
+- Todos los archivos están en TypeScript
+- La estructura de carpetas sigue la arquitectura propuesta
+- La funcionalidad de plantillas funciona correctamente
+- La aplicación funciona sin errores
+- La documentación está actualizada
+
 ## Backlog Futuro
 
 ### Nuevas Características
@@ -789,6 +844,181 @@ Solución implementada:
 - [ ] Mejoras en UX/UI
 - [ ] Optimizaciones de rendimiento adicionales
 
+## Sprint 13: Unificación de Estilos y Corrección de Errores TypeScript (2 semanas)
+
+### Descripción del Sprint
+Este sprint se enfocará en unificar los archivos de estilos duplicados, corregir errores de TypeScript y mejorar la estructura general del proyecto para facilitar el mantenimiento y desarrollo futuro.
+
+### Objetivos
+- Unificar archivos de estilos duplicados (statusColors.ts, theme.ts)
+- Corregir errores de TypeScript en interfaces y temas
+- Mejorar la estructura de carpetas para componentes y utilidades
+- Documentar la estructura del proyecto
+
+### Fase 1: Unificación de archivos de estilos (3 días)
+- [x] 1.1 Analizar los archivos duplicados de statusColors.ts
+  - [x] Identificar las diferencias entre las versiones
+  - [x] Determinar qué versión es la más completa y actualizada
+- [x] 1.2 Consolidar los archivos statusColors.ts en una única ubicación
+  - [x] Crear una versión unificada en shared/styles
+  - [x] Actualizar todas las importaciones para usar la versión unificada
+  - [x] Eliminar las versiones duplicadas
+- [x] 1.3 Analizar los archivos duplicados de theme.ts
+  - [x] Identificar las diferencias entre las versiones
+  - [x] Determinar qué versión es la más completa y actualizada
+- [x] 1.4 Consolidar los archivos theme.ts en una única ubicación
+  - [x] Crear una versión unificada en shared/styles
+  - [x] Actualizar todas las importaciones para usar la versión unificada
+  - [x] Eliminar las versiones duplicadas
+
+### Fase 2: Corrección de errores de TypeScript (4 días)
+- [x] 2.1 Corregir errores en interfaces de tema
+  - [x] Revisar y corregir la interfaz DefaultTheme en styled.d.ts
+  - [x] Asegurar que todas las propiedades tengan tipos consistentes
+  - [x] Eliminar propiedades duplicadas o conflictivas
+- [x] 2.2 Corregir errores en interfaces de colores
+  - [x] Revisar y corregir las interfaces ColorScheme, StatusColorMap y TypeColorMap
+  - [x] Asegurar que todas las propiedades tengan tipos consistentes
+  - [x] Eliminar propiedades duplicadas o conflictivas
+- [x] 2.3 Corregir errores en componentes que usan temas
+  - [x] Identificar componentes que acceden a propiedades inexistentes del tema
+  - [x] Actualizar los componentes para usar las propiedades correctas
+  - [x] Implementar fallbacks para propiedades opcionales
+- [ ] 2.4 Implementar pruebas de tipo para verificar la corrección
+  - [ ] Crear pruebas para verificar que los temas implementen correctamente la interfaz
+  - [ ] Verificar que los componentes accedan correctamente a las propiedades del tema
+
+### Fase 3: Mejora de la estructura de carpetas (3 días)
+- [x] 3.1 Analizar la estructura actual de carpetas
+  - [x] Identificar inconsistencias y duplicaciones
+  - [x] Determinar la estructura óptima para el proyecto
+- [x] 3.2 Reorganizar componentes compartidos
+  - [x] Mover componentes UI comunes a shared/components/ui
+  - [x] Mover componentes de layout a shared/components/layout
+  - [x] Crear archivos de barril (index.ts) para simplificar importaciones
+- [x] 3.3 Reorganizar utilidades y hooks
+  - [x] Mover utilidades comunes a shared/utils
+  - [x] Mover hooks comunes a shared/hooks
+  - [x] Crear archivos de barril (index.ts) para simplificar importaciones
+- [x] 3.4 Eliminar código obsoleto
+  - [x] Identificar código que ya no se utiliza
+  - [ ] Eliminar archivos y código obsoleto
+  - [ ] Verificar que la aplicación siga funcionando correctamente
+
+### Fase 4: Documentación y pruebas (2 días)
+- [ ] 4.1 Actualizar README.md con la nueva estructura
+  - [ ] Documentar la estructura de carpetas
+  - [ ] Explicar las convenciones de código
+  - [ ] Documentar el sistema de temas y estilos
+- [ ] 4.2 Crear guías de estilo para el desarrollo futuro
+  - [ ] Documentar cómo usar el sistema de temas
+  - [ ] Explicar cómo crear nuevos componentes
+  - [ ] Documentar cómo extender el sistema de estilos
+- [ ] 4.3 Implementar pruebas para verificar la corrección
+  - [ ] Crear pruebas para verificar que los componentes se rendericen correctamente
+  - [ ] Verificar que los estilos se apliquen correctamente
+
+### Criterios de aceptación
+- No hay archivos duplicados de estilos en el proyecto
+- No hay errores de TypeScript relacionados con temas o estilos
+- La estructura de carpetas es coherente y sigue las mejores prácticas
+- La documentación está actualizada y es clara
+- La aplicación funciona sin errores
+
+## Sprint 14: Mejoras de Rendimiento y Correcciones de Errores (2 semanas)
+
+### Descripción del Sprint
+Este sprint se enfocará en mejorar el rendimiento de la aplicación, corregir errores identificados y mejorar la calidad del código tanto en el frontend como en el backend.
+
+### Objetivos
+- Corregir errores de autenticación y permisos
+- Mejorar el rendimiento de la aplicación
+- Implementar pruebas automatizadas
+- Corregir errores de código y advertencias
+
+### Fase 1: Corrección de errores de autenticación (3 días)
+- [x] 1.1 Corregir problemas con el token de autenticación
+  - [x] Revisar el flujo de autenticación en el frontend
+  - [x] Corregir la forma en que se obtiene y almacena el token
+  - [x] Implementar manejo de errores más robusto para problemas de autenticación
+- [ ] 1.2 Mejorar la gestión de permisos
+  - [ ] Implementar verificación de permisos en el frontend
+  - [ ] Mostrar/ocultar elementos de la interfaz según los permisos del usuario
+  - [ ] Implementar redirección a página de acceso denegado cuando corresponda
+- [ ] 1.3 Corregir problemas con el cierre de sesión
+  - [ ] Asegurar que los tokens se invaliden correctamente en el backend
+  - [ ] Limpiar correctamente el estado y el almacenamiento local al cerrar sesión
+  - [ ] Implementar cierre de sesión automático por inactividad
+
+### Fase 2: Mejoras de rendimiento (4 días)
+- [ ] 2.1 Optimizar consultas de base de datos
+  - [ ] Implementar índices adicionales en tablas críticas
+  - [ ] Refactorizar consultas para usar proyecciones específicas
+  - [ ] Implementar caché de segundo nivel en Hibernate
+- [ ] 2.2 Mejorar el rendimiento del frontend
+  - [ ] Implementar React.memo para componentes puros
+  - [ ] Optimizar uso de useCallback y useMemo
+  - [ ] Refactorizar componentes con muchos re-renderizados
+- [ ] 2.3 Implementar técnicas avanzadas de virtualización
+  - [ ] Mejorar componentes virtualizados existentes
+  - [ ] Implementar virtualización para todas las listas grandes
+  - [ ] Añadir soporte para elementos de altura variable
+- [x] 2.4 Implementar visualización de estadísticas
+  - [x] Crear componente para mostrar estadísticas por tipo de actividad usando getStatsByType
+  - [x] Crear componente para mostrar estadísticas por estado de actividad usando getStatsByStatus
+  - [x] Integrar componentes de estadísticas en el dashboard
+  - [x] Actualizar ActivityChart para usar datos reales en lugar de datos estáticos
+  - [x] Actualizar StatCard para usar datos reales en lugar de datos estáticos
+
+### Fase 3: Implementación de pruebas automatizadas (3 días)
+- [ ] 3.1 Configurar entorno de pruebas
+  - [ ] Configurar Jest y React Testing Library para el frontend
+  - [ ] Configurar JUnit y Mockito para el backend
+  - [ ] Configurar GitHub Actions para ejecutar pruebas automáticamente
+- [ ] 3.2 Implementar pruebas unitarias
+  - [ ] Crear pruebas para componentes comunes del frontend
+  - [ ] Implementar pruebas para hooks personalizados
+  - [ ] Crear pruebas para servicios y controladores del backend
+- [ ] 3.3 Implementar pruebas de integración
+  - [ ] Crear pruebas para flujos críticos de la aplicación
+  - [ ] Implementar pruebas para la API REST
+  - [ ] Crear pruebas para la capa de persistencia
+
+### Fase 4: Corrección de errores y advertencias (4 días)
+- [ ] 4.1 Corregir errores de código en el backend
+  - [ ] Corregir advertencias de Checkstyle
+  - [ ] Resolver problemas de código no utilizado
+  - [ ] Corregir posibles null pointer exceptions
+- [x] 4.2 Corregir errores de código en el frontend
+  - [x] Resolver advertencias de ESLint
+  - [x] Corregir problemas de accesibilidad
+  - [x] Eliminar código no utilizado y datos mockeados
+  - [x] Eliminar archivos duplicados y consolidar componentes
+    - [x] Consolidar componentes StatusBadge y TypeBadge
+    - [x] Consolidar componentes PageTransition y AnimatedRoutes
+  - [x] Corregir errores en el Dashboard
+    - [x] Solucionar error en gráficos de Chart.js
+      - [x] Corregir manejo de colores en ActivityTypeStats.tsx
+      - [x] Corregir manejo de colores en ActivityStatusStats.tsx
+    - [x] Corregir URLs con doble slash en peticiones API
+    - [x] Solucionar error de formateo de fechas inválidas
+    - [x] Implementar función de utilidad para manejo seguro de fechas
+- [ ] 4.3 Mejorar la documentación del código
+  - [ ] Añadir comentarios JSDoc a componentes y funciones clave
+  - [ ] Documentar APIs públicas
+  - [ ] Actualizar README.md con la nueva estructura y convenciones
+- [x] 4.4 Implementar componentes para resúmenes de actividades
+  - [x] Crear componente para mostrar resúmenes de actividades usando getActivitySummaries
+  - [x] Integrar componente de resúmenes en el dashboard
+  - [x] Actualizar RecentActivities para usar datos reales en lugar de datos estáticos
+
+### Criterios de aceptación
+- No hay errores de autenticación o permisos
+- El rendimiento de la aplicación ha mejorado significativamente
+- Las pruebas automatizadas cubren al menos el 70% del código
+- No hay errores o advertencias de código
+- La documentación está actualizada y es clara
+
 ## Notas y Consideraciones
 - Mantener compatibilidad hacia atrás durante la migración
 - Seguir principios SOLID y Clean Architecture
@@ -796,4 +1026,202 @@ Solución implementada:
 - Realizar code reviews frecuentes
 - Mantener dependencias actualizadas
 
+## Sprint 15: Funcionalidades Avanzadas y Mejoras de Productividad (4 semanas)
 
+### Objetivos del Sprint
+- Implementar sistema de reportes y analytics avanzados
+- Integrar calendario y sistema de recordatorios
+- Mejorar la colaboración entre usuarios
+- Implementar gestión de recursos y tiempo
+- Añadir automatizaciones y workflows
+- Mejorar la experiencia de usuario
+- Integrar inteligencia artificial
+- Implementar sistema de documentación integrado
+
+### 1. Sistema de Reportes y Analytics (1 semana)
+
+#### 1.1 Dashboard Personalizable (3 días)
+- [ ] Implementar sistema de widgets personalizables
+  - [ ] Crear componentes base para diferentes tipos de gráficos
+  - [ ] Implementar sistema de arrastrar y soltar para organizar widgets
+  - [ ] Añadir opciones de personalización para cada widget
+- [ ] Desarrollar visualizaciones de datos
+  - [ ] Implementar gráficos de actividades por período
+  - [ ] Crear visualizaciones de métricas de productividad
+  - [ ] Desarrollar KPIs personalizables
+- [ ] Implementar exportación de datos
+  - [ ] Añadir exportación a PDF
+  - [ ] Implementar exportación a Excel
+  - [ ] Crear plantillas personalizables para exportación
+
+#### 1.2 Análisis Predictivo (2 días)
+- [ ] Implementar estimación de tiempos
+  - [ ] Desarrollar algoritmo de estimación basado en datos históricos
+  - [ ] Crear visualización de estimaciones vs. tiempos reales
+  - [ ] Implementar ajuste automático de estimaciones
+- [ ] Desarrollar análisis de patrones
+  - [ ] Implementar detección de patrones de productividad
+  - [ ] Crear visualización de tendencias
+  - [ ] Desarrollar sistema de alertas para desviaciones
+
+### 2. Integración con Calendario y Recordatorios (3 días)
+
+#### 2.1 Sincronización con Calendarios Externos
+- [ ] Implementar integración con Google Calendar
+  - [ ] Configurar OAuth para autenticación
+  - [ ] Implementar sincronización bidireccional
+  - [ ] Manejar conflictos de sincronización
+- [ ] Implementar integración con Outlook
+  - [ ] Configurar Microsoft Graph API
+  - [ ] Implementar sincronización bidireccional
+  - [ ] Manejar conflictos de sincronización
+
+#### 2.2 Sistema de Recordatorios
+- [ ] Implementar notificaciones push
+  - [ ] Configurar servicio de notificaciones push
+  - [ ] Implementar manejo de permisos
+  - [ ] Crear sistema de priorización de notificaciones
+- [ ] Desarrollar sistema de recordatorios por correo
+  - [ ] Implementar plantillas de correo personalizables
+  - [ ] Crear sistema de programación de recordatorios
+  - [ ] Implementar gestión de preferencias de notificación
+
+### 3. Sistema de Colaboración (4 días)
+
+#### 3.1 Espacios de Trabajo Compartidos
+- [ ] Implementar sistema de equipos
+  - [ ] Crear modelo de datos para equipos y roles
+  - [ ] Implementar gestión de permisos por equipo
+  - [ ] Desarrollar interfaz de administración de equipos
+- [ ] Implementar compartición de actividades
+  - [ ] Crear sistema de invitaciones
+  - [ ] Implementar control de acceso granular
+  - [ ] Desarrollar sistema de notificaciones de cambios
+
+#### 3.2 Sistema de Comentarios y Menciones
+- [ ] Implementar sistema de comentarios
+  - [ ] Crear modelo de datos para comentarios y hilos
+  - [ ] Implementar sistema de reacciones
+  - [ ] Desarrollar notificaciones de menciones
+- [ ] Implementar sistema de menciones
+  - [ ] Crear selector de usuarios con @
+  - [ ] Implementar resaltado de menciones
+  - [ ] Desarrollar notificaciones de menciones
+
+### 4. Gestión de Recursos y Tiempo (3 días)
+
+#### 4.1 Time Tracking
+- [ ] Implementar cronómetro integrado
+  - [ ] Crear componente de cronómetro
+  - [ ] Implementar registro automático de tiempo
+  - [ ] Desarrollar reportes de tiempo
+- [ ] Implementar reportes de tiempo
+  - [ ] Crear visualizaciones de tiempo invertido
+  - [ ] Implementar exportación de reportes
+  - [ ] Desarrollar análisis de productividad
+
+#### 4.2 Gestión de Recursos
+- [ ] Implementar control de disponibilidad
+  - [ ] Crear calendario de disponibilidad
+  - [ ] Implementar sistema de solicitudes
+  - [ ] Desarrollar notificaciones de cambios
+- [ ] Implementar sistema de alertas
+  - [ ] Crear sistema de detección de sobrecarga
+  - [ ] Implementar notificaciones de sobrecarga
+  - [ ] Desarrollar sugerencias de reasignación
+
+### 5. Automatizaciones y Workflows (3 días)
+
+#### 5.1 Constructor de Flujos de Trabajo
+- [ ] Implementar editor visual de workflows
+  - [ ] Crear interfaz de arrastrar y soltar
+  - [ ] Implementar validación de flujos
+  - [ ] Desarrollar sistema de versionado
+- [ ] Implementar sistema de triggers
+  - [ ] Crear sistema de eventos
+  - [ ] Implementar condiciones personalizables
+  - [ ] Desarrollar acciones automáticas
+
+#### 5.2 Plantillas de Actividades
+- [ ] Implementar sistema de plantillas
+  - [ ] Crear editor de plantillas
+  - [ ] Implementar variables en plantillas
+  - [ ] Desarrollar sistema de versionado
+- [ ] Implementar checklists automáticas
+  - [ ] Crear sistema de checklists dinámicas
+  - [ ] Implementar validación de checklists
+  - [ ] Desarrollar notificaciones de completitud
+
+### 6. Mejoras en UX/UI (2 días)
+
+#### 6.1 Modo Offline
+- [ ] Implementar sincronización offline
+  - [ ] Crear sistema de cola de operaciones
+  - [ ] Implementar resolución de conflictos
+  - [ ] Desarrollar indicador de estado
+- [ ] Implementar caché avanzado
+  - [ ] Crear sistema de caché inteligente
+  - [ ] Implementar limpieza automática
+  - [ ] Desarrollar gestión de espacio
+
+#### 6.2 Personalización Avanzada
+- [ ] Implementar temas personalizables
+  - [ ] Crear editor de temas
+  - [ ] Implementar exportación/importación
+  - [ ] Desarrollar temas dinámicos
+- [ ] Implementar layouts ajustables
+  - [ ] Crear sistema de layouts personalizables
+  - [ ] Implementar guardado de layouts
+  - [ ] Desarrollar layouts responsivos
+
+### 7. Inteligencia Artificial (3 días)
+
+#### 7.1 Asistente Virtual
+- [ ] Implementar sugerencias de priorización
+  - [ ] Crear modelo de aprendizaje automático
+  - [ ] Implementar análisis de contexto
+  - [ ] Desarrollar interfaz de sugerencias
+- [ ] Implementar análisis de sentimiento
+  - [ ] Crear sistema de análisis de texto
+  - [ ] Implementar detección de emociones
+  - [ ] Desarrollar visualización de análisis
+
+#### 7.2 Automatización Inteligente
+- [ ] Implementar categorización automática
+  - [ ] Crear sistema de clasificación
+  - [ ] Implementar aprendizaje automático
+  - [ ] Desarrollar ajuste manual
+- [ ] Implementar detección de duplicados
+  - [ ] Crear sistema de comparación
+  - [ ] Implementar sugerencias de fusión
+  - [ ] Desarrollar manejo de conflictos
+
+### 8. Sistema de Documentación Integrado (2 días)
+
+#### 8.1 Base de Conocimiento
+- [ ] Implementar wiki integrada
+  - [ ] Crear editor de wiki
+  - [ ] Implementar sistema de versionado
+  - [ ] Desarrollar búsqueda avanzada
+- [ ] Implementar vinculación con actividades
+  - [ ] Crear sistema de referencias
+  - [ ] Implementar navegación contextual
+  - [ ] Desarrollar sugerencias de documentación
+
+#### 8.2 Gestión de Archivos
+- [ ] Implementar almacenamiento local
+  - [ ] Crear sistema de archivos
+  - [ ] Implementar compresión
+  - [ ] Desarrollar búsqueda de archivos
+- [ ] Implementar versionado de documentos
+  - [ ] Crear sistema de versiones
+  - [ ] Implementar comparación de versiones
+  - [ ] Desarrollar restauración de versiones
+
+### Criterios de Aceptación
+- Todas las funcionalidades implementadas y probadas
+- Documentación completa y actualizada
+- Pruebas automatizadas implementadas
+- Rendimiento optimizado
+- Experiencia de usuario mejorada
+- Seguridad y privacidad garantizadas

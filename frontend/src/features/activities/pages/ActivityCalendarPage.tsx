@@ -16,7 +16,7 @@ const ActivityCalendarPage: React.FC = () => {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
-  
+
   const { data: activities, isLoading, error } = useActivities(filters);
   const updateActivity = useUpdateActivity();
   const toast = useToast();
@@ -32,12 +32,12 @@ const ActivityCalendarPage: React.FC = () => {
         ...activity,
         date: newDate.toISOString()
       };
-      
+
       await updateActivity.mutateAsync({
         id: activity.id,
         activityData: updatedActivity
       });
-      
+
       toast.success('Actividad movida correctamente');
     } catch (error) {
       toast.error('Error al mover la actividad');
@@ -72,7 +72,7 @@ const ActivityCalendarPage: React.FC = () => {
         </PageTitle>
       </PageHeader>
 
-      <AdvancedFilters 
+      <AdvancedFilters
         onApplyFilters={handleApplyFilters}
         initialFilters={filters}
       />
@@ -80,7 +80,7 @@ const ActivityCalendarPage: React.FC = () => {
       <ErrorBoundary>
         {isLoading ? (
           <LoadingContainer>
-            <LoadingSpinner size="large" />
+            <LoadingSpinner size={60} />
           </LoadingContainer>
         ) : error ? (
           <ErrorContainer>
@@ -88,9 +88,9 @@ const ActivityCalendarPage: React.FC = () => {
             <ErrorMessage>Error al cargar las actividades</ErrorMessage>
             <ErrorDetails>{(error as Error).message}</ErrorDetails>
           </ErrorContainer>
-        ) : activities && activities.length > 0 ? (
-          <ActivityCalendar 
-            activities={activities}
+        ) : activities && activities.activities && activities.activities.length > 0 ? (
+          <ActivityCalendar
+            activities={activities.activities}
             onSelectActivity={handleSelectActivity}
             onMoveActivity={handleMoveActivity}
           />
@@ -104,7 +104,7 @@ const ActivityCalendarPage: React.FC = () => {
       </ErrorBoundary>
 
       {showDetail && selectedActivity && (
-        <ActivityDetail 
+        <ActivityDetail
           activity={selectedActivity}
           onClose={handleCloseDetail}
           onEdit={handleEdit}
@@ -112,7 +112,7 @@ const ActivityCalendarPage: React.FC = () => {
       )}
 
       {showEditForm && selectedActivity && (
-        <ActivityForm 
+        <ActivityForm
           activity={selectedActivity}
           onClose={handleCloseForm}
         />
@@ -135,7 +135,7 @@ const PageTitle = styled.h1`
   display: flex;
   align-items: center;
   gap: 10px;
-  
+
   svg {
     color: ${({ theme }) => theme.primary};
   }
@@ -158,7 +158,7 @@ const ErrorContainer = styled.div`
   border-radius: 8px;
   padding: 30px;
   text-align: center;
-  
+
   svg {
     color: ${({ theme }) => theme.danger};
     margin-bottom: 20px;
@@ -185,7 +185,7 @@ const EmptyContainer = styled.div`
   border-radius: 8px;
   padding: 30px;
   text-align: center;
-  
+
   svg {
     color: ${({ theme }) => theme.info};
     margin-bottom: 20px;
