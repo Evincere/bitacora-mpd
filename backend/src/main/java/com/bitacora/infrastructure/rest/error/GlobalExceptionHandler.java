@@ -2,11 +2,9 @@ package com.bitacora.infrastructure.rest.error;
 
 import com.bitacora.domain.exception.DomainException;
 import com.bitacora.domain.exception.EntityNotFoundException;
-import com.bitacora.infrastructure.exception.ErrorCode;
 import com.bitacora.infrastructure.exception.InvalidTokenException;
 import com.bitacora.infrastructure.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

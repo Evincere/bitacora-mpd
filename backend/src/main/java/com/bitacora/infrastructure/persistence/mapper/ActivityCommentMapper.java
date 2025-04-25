@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 /**
  * Mapper para convertir entre ActivityComment y ActivityCommentEntity.
  */
-@Component
+@Component("activityCommentEntityMapper")
 public class ActivityCommentMapper {
-    
+
     /**
      * Convierte una entidad ActivityCommentEntity a un modelo de dominio ActivityComment.
-     * 
+     *
      * @param entity La entidad ActivityCommentEntity
      * @return El modelo de dominio ActivityComment
      */
@@ -20,7 +20,7 @@ public class ActivityCommentMapper {
         if (entity == null) {
             return null;
         }
-        
+
         return ActivityComment.builder()
                 .id(entity.getId())
                 .activityId(entity.getActivityId())
@@ -31,10 +31,10 @@ public class ActivityCommentMapper {
                 .updatedAt(entity.getUpdatedAt())
                 .build();
     }
-    
+
     /**
      * Convierte un modelo de dominio ActivityComment a una entidad ActivityCommentEntity.
-     * 
+     *
      * @param domain El modelo de dominio ActivityComment
      * @return La entidad ActivityCommentEntity
      */
@@ -42,7 +42,7 @@ public class ActivityCommentMapper {
         if (domain == null) {
             return null;
         }
-        
+
         return ActivityCommentEntity.builder()
                 .id(domain.getId())
                 .activityId(domain.getActivityId())

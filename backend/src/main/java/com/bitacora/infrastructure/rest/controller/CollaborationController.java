@@ -1,7 +1,6 @@
 package com.bitacora.infrastructure.rest.controller;
 
 import com.bitacora.application.notification.CollaborationService;
-import com.bitacora.infrastructure.rest.dto.CollaborationRequestDTO;
 import com.bitacora.infrastructure.rest.dto.CommentRequestDTO;
 import com.bitacora.infrastructure.security.CurrentUser;
 import com.bitacora.infrastructure.security.UserPrincipal;

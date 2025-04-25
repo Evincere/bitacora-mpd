@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 /**
  * Mapper para convertir entre ActivityAttachment y ActivityAttachmentEntity.
  */
-@Component
+@Component("activityAttachmentEntityMapper")
 public class ActivityAttachmentMapper {
-    
+
     /**
      * Convierte una entidad ActivityAttachmentEntity a un modelo de dominio ActivityAttachment.
-     * 
+     *
      * @param entity La entidad ActivityAttachmentEntity
      * @return El modelo de dominio ActivityAttachment
      */
@@ -20,7 +20,7 @@ public class ActivityAttachmentMapper {
         if (entity == null) {
             return null;
         }
-        
+
         return ActivityAttachment.builder()
                 .id(entity.getId())
                 .activityId(entity.getActivityId())
@@ -33,10 +33,10 @@ public class ActivityAttachmentMapper {
                 .uploadedAt(entity.getUploadedAt())
                 .build();
     }
-    
+
     /**
      * Convierte un modelo de dominio ActivityAttachment a una entidad ActivityAttachmentEntity.
-     * 
+     *
      * @param domain El modelo de dominio ActivityAttachment
      * @return La entidad ActivityAttachmentEntity
      */
@@ -44,7 +44,7 @@ public class ActivityAttachmentMapper {
         if (domain == null) {
             return null;
         }
-        
+
         return ActivityAttachmentEntity.builder()
                 .id(domain.getId())
                 .activityId(domain.getActivityId())

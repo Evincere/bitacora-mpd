@@ -290,36 +290,6 @@ const CancelButton = styled.button`
   }
 `;
 
-const TemplateButton = styled(CancelButton)`
-  background-color: ${({ theme }) => theme.backgroundSecondary};
-  border: 1px dashed ${({ theme }) => theme.primary};
-  color: ${({ theme }) => theme.primary};
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: ${({ theme }) => theme.primary};
-    opacity: 0.05;
-    z-index: -1;
-  }
-
-  &:hover {
-    background-color: ${({ theme }) => theme.inputBackground};
-    color: ${({ theme }) => theme.primary};
-    border: 1px dashed ${({ theme }) => theme.primary};
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
-  }
-`;
-
 const TemplateButton = styled.button`
   display: flex;
   align-items: center;

@@ -37,10 +37,10 @@ public class SessionController {
 
     private final UserSessionService sessionService;
     private final JwtTokenProvider jwtTokenProvider;
-    
+
     /**
      * Obtiene todas las sesiones activas del usuario autenticado.
-     * 
+     *
      * @param authentication La autenticación del usuario
      * @return Lista de sesiones activas
      */
@@ -48,16 +48,16 @@ public class SessionController {
     public ResponseEntity<List<SessionDTO>> getActiveSessions(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         Long userId = jwtTokenProvider.getUserIdFromUsername(userDetails.getUsername());
-        
+
         List<UserSession> sessions = sessionService.getActiveSessions(userId);
         List<SessionDTO> sessionDTOs = mapToSessionDTOs(sessions);
-        
+
         return ResponseEntity.ok(sessionDTOs);
     }
-    
+
     /**
      * Obtiene todas las sesiones del usuario autenticado.
-     * 
+     *
      * @param authentication La autenticación del usuario
      * @return Lista de sesiones
      */
@@ -65,16 +65,16 @@ public class SessionController {
     public ResponseEntity<List<SessionDTO>> getAllSessions(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         Long userId = jwtTokenProvider.getUserIdFromUsername(userDetails.getUsername());
-        
+
         List<UserSession> sessions = sessionService.getAllSessions(userId);
         List<SessionDTO> sessionDTOs = mapToSessionDTOs(sessions);
-        
+
         return ResponseEntity.ok(sessionDTOs);
     }
-    
+
     /**
      * Cierra todas las sesiones del usuario autenticado excepto la sesión actual.
-     * 
+     *
      * @param authentication La autenticación del usuario
      * @param token El token JWT de la sesión actual
      * @return Respuesta con el número de sesiones cerradas
@@ -83,25 +83,25 @@ public class SessionController {
     public ResponseEntity<ApiResponse> closeOtherSessions(
             Authentication authentication,
             @RequestBody String token) {
-        
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         Long userId = jwtTokenProvider.getUserIdFromUsername(userDetails.getUsername());
-        
+
         // Obtener el ID de la sesión actual
         UserSession currentSession = sessionService.updateLastActivity(token)
                 .orElseThrow(() -> new IllegalArgumentException("Sesión no encontrada"));
-        
+
         int closedSessions = sessionService.closeOtherSessions(userId, currentSession.getId());
-        
+
         return ResponseEntity.ok(new ApiResponse(
                 true,
                 "Se han cerrado " + closedSessions + " sesiones",
                 closedSessions));
     }
-    
+
     /**
      * Cierra una sesión específica.
-     * 
+     *
      * @param authentication La autenticación del usuario
      * @param sessionId El ID de la sesión a cerrar
      * @return Respuesta indicando el resultado de la operación
@@ -110,27 +110,27 @@ public class SessionController {
     public ResponseEntity<ApiResponse> closeSession(
             Authentication authentication,
             @PathVariable Long sessionId) {
-        
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         Long userId = jwtTokenProvider.getUserIdFromUsername(userDetails.getUsername());
-        
+
         // Verificar que la sesión pertenezca al usuario
-        UserSession session = sessionService.getAllSessions(userId).stream()
+        sessionService.getAllSessions(userId).stream()
                 .filter(s -> s.getId().equals(sessionId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Sesión no encontrada o no autorizada"));
-        
+
         sessionService.revokeSession(sessionId, "Cerrada por el usuario");
-        
+
         return ResponseEntity.ok(new ApiResponse(
                 true,
                 "Sesión cerrada correctamente",
                 null));
     }
-    
+
     /**
      * Obtiene todas las sesiones sospechosas (solo para administradores).
-     * 
+     *
      * @return Lista de sesiones sospechosas
      */
     @GetMapping("/suspicious")
@@ -138,13 +138,13 @@ public class SessionController {
     public ResponseEntity<List<SessionDTO>> getSuspiciousSessions() {
         List<UserSession> sessions = sessionService.getSuspiciousSessions();
         List<SessionDTO> sessionDTOs = mapToSessionDTOs(sessions);
-        
+
         return ResponseEntity.ok(sessionDTOs);
     }
-    
+
     /**
      * Revoca una sesión (solo para administradores).
-     * 
+     *
      * @param sessionId El ID de la sesión a revocar
      * @param request La solicitud de revocación
      * @return Respuesta indicando el resultado de la operación
@@ -154,19 +154,19 @@ public class SessionController {
     public ResponseEntity<ApiResponse> revokeSession(
             @PathVariable Long sessionId,
             @Valid @RequestBody SessionRevokeRequest request) {
-        
+
         sessionService.revokeSession(sessionId, request.getReason())
                 .orElseThrow(() -> new IllegalArgumentException("Sesión no encontrada"));
-        
+
         return ResponseEntity.ok(new ApiResponse(
                 true,
                 "Sesión revocada correctamente",
                 null));
     }
-    
+
     /**
      * Convierte una lista de entidades UserSession a DTOs.
-     * 
+     *
      * @param sessions Lista de entidades UserSession
      * @return Lista de DTOs
      */

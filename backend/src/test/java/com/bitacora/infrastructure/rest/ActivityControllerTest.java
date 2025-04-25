@@ -7,7 +7,7 @@ import com.bitacora.domain.port.ActivityRepository;
 import com.bitacora.infrastructure.rest.dto.ActivityCreateDto;
 import com.bitacora.infrastructure.rest.dto.ActivityUpdateDto;
 import com.bitacora.infrastructure.security.JwtTokenProvider;
-import com.bitacora.infrastructure.security.UserPrincipal;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,13 +16,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -86,10 +87,7 @@ class ActivityControllerTest {
                 when(activityRepository.count()).thenReturn(1L);
 
                 // Configurar el mock del proveedor de tokens JWT
-                List<SimpleGrantedAuthority> authorities = Arrays.asList(
-                                new SimpleGrantedAuthority("READ_ACTIVITIES"),
-                                new SimpleGrantedAuthority("WRITE_ACTIVITIES"));
-                UserPrincipal userPrincipal = new UserPrincipal(1L, "testuser", "", authorities);
+                // Nota: No necesitamos configurar autoridades ya que estamos usando @WithMockUser
                 when(jwtTokenProvider.getAuthentication(any())).thenReturn(null);
         }
 

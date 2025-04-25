@@ -1,7 +1,5 @@
 package com.bitacora.domain.model.shared;
 
-import java.util.Objects;
-
 /**
  * Clase base abstracta para Value Objects que proporciona implementaciones por defecto
  * de equals, hashCode y toString.

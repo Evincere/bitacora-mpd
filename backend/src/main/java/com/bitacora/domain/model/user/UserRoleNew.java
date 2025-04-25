@@ -9,7 +9,7 @@ import java.util.Set;
  * Enumeración que representa los diferentes roles de usuario en el sistema de gestión de tareas.
  */
 public enum UserRoleNew {
-    ADMIN("Administrador", 
+    ADMIN("Administrador",
           new HashSet<>(Arrays.asList(
               Permission.READ_ACTIVITIES,
               Permission.WRITE_ACTIVITIES,
@@ -19,26 +19,26 @@ public enum UserRoleNew {
               Permission.DELETE_USERS,
               Permission.GENERATE_REPORTS
           ))),
-    
-    ASIGNADOR("Asignador", 
+
+    ASIGNADOR("Asignador",
           new HashSet<>(Arrays.asList(
               Permission.READ_ACTIVITIES,
               Permission.WRITE_ACTIVITIES,
               Permission.READ_USERS,
               Permission.GENERATE_REPORTS
           ))),
-    
-    SOLICITANTE("Solicitante", 
+
+    SOLICITANTE("Solicitante",
           new HashSet<>(Arrays.asList(
               Permission.READ_ACTIVITIES,
               Permission.WRITE_ACTIVITIES
           ))),
-    
-    EJECUTOR("Ejecutor", 
+
+    EJECUTOR("Ejecutor",
           new HashSet<>(Arrays.asList(
               Permission.READ_ACTIVITIES,
               Permission.WRITE_ACTIVITIES
-          ))));
+          )));
 
     private final String displayName;
     private final Set<Permission> permissions;
@@ -69,7 +69,7 @@ public enum UserRoleNew {
         }
 
         for (UserRoleNew role : UserRoleNew.values()) {
-            if (role.name().equalsIgnoreCase(text) || 
+            if (role.name().equalsIgnoreCase(text) ||
                 role.getDisplayName().equalsIgnoreCase(text)) {
                 return role;
             }

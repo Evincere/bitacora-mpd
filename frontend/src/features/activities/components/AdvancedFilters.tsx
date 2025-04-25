@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FiFilter, FiSave, FiTrash2, FiClock, FiCalendar, FiUser, FiTag, FiList, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
-import { AuthContext } from '@/contexts/AuthContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { ActivityType, ActivityStatus } from '@/types/models';
 import DateRangePicker from '@/components/common/DateRangePicker';
 import MultiSelect from '@/components/common/MultiSelect';
 import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
+import { useAppSelector } from '@/core/store';
 
 export interface FilterConfig {
   id: string;
@@ -38,7 +38,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [activeQuickFilter, setActiveQuickFilter] = useState<string | null>(null);
   const toast = useToast();
-  const { currentUser } = useContext(AuthContext);
+  const { user } = useAppSelector(state => state.auth);
 
   // Cargar filtros iniciales si existen
   useEffect(() => {
@@ -140,10 +140,29 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
   const handleApplyQuickFilter = (filterType: string) => {
     let filters: any = {};
 
+    // Limpiar filtros anteriores
+    setDateRange([null, null]);
+    setSelectedTypes([]);
+    setSelectedStatuses([]);
+    setSelectedUsers([]);
+    setSelectedDepartments([]);
+    setSelectedTags([]);
+
+    // Si el filtro ya está activo, desactivarlo
+    if (activeQuickFilter === filterType) {
+      setActiveQuickFilter(null);
+      onApplyFilters({});
+      toast.info('Filtro rápido desactivado');
+      return;
+    }
+
+    // Establecer el filtro activo
+    setActiveQuickFilter(filterType);
+
     switch (filterType) {
       case 'myActivities':
-        // Obtener el ID del usuario actual del contexto de autenticación
-        const currentUserId = currentUser?.id || 1;
+        // Obtener el ID del usuario actual del estado de Redux
+        const currentUserId = user?.id || 1;
         filters = { assignedTo: [currentUserId] };
         setSelectedUsers([currentUserId]);
         toast.info('Mostrando solo mis actividades');

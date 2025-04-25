@@ -28,6 +28,7 @@ public final class OpenApiGenerator {
      *
      * @param args Argumentos de línea de comandos (no utilizados)
      */
+    @SuppressWarnings("unchecked")
     public static void main(String[] args) {
         try {
             System.out.println("Generando especificación OpenAPI...");
@@ -55,12 +56,12 @@ public final class OpenApiGenerator {
                     .operationId("login");
 
             // Agregar el cuerpo de la solicitud
-            io.swagger.v3.oas.models.media.Schema authRequestSchema = new io.swagger.v3.oas.models.media.Schema<>()
+            io.swagger.v3.oas.models.media.Schema<Object> authRequestSchema = new io.swagger.v3.oas.models.media.Schema<>()
                     .type("object")
                     .addProperty("username", new io.swagger.v3.oas.models.media.Schema<>().type("string"))
                     .addProperty("password", new io.swagger.v3.oas.models.media.Schema<>().type("string"));
 
-            io.swagger.v3.oas.models.media.Schema userSchema = new io.swagger.v3.oas.models.media.Schema<>()
+            io.swagger.v3.oas.models.media.Schema<Object> userSchema = new io.swagger.v3.oas.models.media.Schema<>()
                     .type("object")
                     .addProperty("id", new io.swagger.v3.oas.models.media.Schema<>().type("string"))
                     .addProperty("username", new io.swagger.v3.oas.models.media.Schema<>().type("string"))
@@ -69,7 +70,7 @@ public final class OpenApiGenerator {
                     .addProperty("lastName", new io.swagger.v3.oas.models.media.Schema<>().type("string"))
                     .addProperty("role", new io.swagger.v3.oas.models.media.Schema<>().type("string"));
 
-            io.swagger.v3.oas.models.media.Schema authResponseSchema = new io.swagger.v3.oas.models.media.Schema<>()
+            io.swagger.v3.oas.models.media.Schema<Object> authResponseSchema = new io.swagger.v3.oas.models.media.Schema<>()
                     .type("object")
                     .addProperty("accessToken", new io.swagger.v3.oas.models.media.Schema<>().type("string"))
                     .addProperty("refreshToken", new io.swagger.v3.oas.models.media.Schema<>().type("string"))

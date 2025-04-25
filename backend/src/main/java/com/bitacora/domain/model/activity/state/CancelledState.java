@@ -1,6 +1,5 @@
 package com.bitacora.domain.model.activity.state;
 
-import com.bitacora.domain.model.activity.ActivityExtended;
 import com.bitacora.domain.model.activity.ActivityStatusNew;
 
 /**

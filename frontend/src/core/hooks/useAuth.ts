@@ -83,8 +83,8 @@ export const useAuth = () => {
       console.log('Intentando iniciar sesión con:', { username: credentials.username, password: credentials.password });
       console.log('URL de login:', `${AUTH_URL}/login`);
 
-      // Usar directamente la URL completa para evitar problemas con el proxy
-      const response = await fetch(`${AUTH_URL}/login`, {
+      // Usar la URL relativa para que el proxy funcione correctamente
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

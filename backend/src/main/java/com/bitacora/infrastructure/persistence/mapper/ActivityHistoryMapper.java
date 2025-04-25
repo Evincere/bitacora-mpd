@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 /**
  * Mapper para convertir entre ActivityHistory y ActivityHistoryEntity.
  */
-@Component
+@Component("activityHistoryEntityMapper")
 public class ActivityHistoryMapper {
-    
+
     /**
      * Convierte una entidad ActivityHistoryEntity a un modelo de dominio ActivityHistory.
-     * 
+     *
      * @param entity La entidad ActivityHistoryEntity
      * @return El modelo de dominio ActivityHistory
      */
@@ -20,7 +20,7 @@ public class ActivityHistoryMapper {
         if (entity == null) {
             return null;
         }
-        
+
         return ActivityHistory.builder()
                 .id(entity.getId())
                 .activityId(entity.getActivityId())
@@ -32,10 +32,10 @@ public class ActivityHistoryMapper {
                 .notes(entity.getNotes())
                 .build();
     }
-    
+
     /**
      * Convierte un modelo de dominio ActivityHistory a una entidad ActivityHistoryEntity.
-     * 
+     *
      * @param domain El modelo de dominio ActivityHistory
      * @return La entidad ActivityHistoryEntity
      */
@@ -43,7 +43,7 @@ public class ActivityHistoryMapper {
         if (domain == null) {
             return null;
         }
-        
+
         return ActivityHistoryEntity.builder()
                 .id(domain.getId())
                 .activityId(domain.getActivityId())

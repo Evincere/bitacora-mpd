@@ -16,13 +16,13 @@ import java.util.stream.Collectors;
  */
 @Repository
 public class ActivityCategoryRepositoryImpl implements ActivityCategoryRepository {
-    
+
     private final ActivityCategoryJpaRepository activityCategoryJpaRepository;
     private final ActivityCategoryMapper activityCategoryMapper;
-    
+
     /**
      * Constructor.
-     * 
+     *
      * @param activityCategoryJpaRepository Repositorio JPA para ActivityCategoryEntity
      * @param activityCategoryMapper Mapper para convertir entre ActivityCategory y ActivityCategoryEntity
      */
@@ -32,41 +32,41 @@ public class ActivityCategoryRepositoryImpl implements ActivityCategoryRepositor
         this.activityCategoryJpaRepository = activityCategoryJpaRepository;
         this.activityCategoryMapper = activityCategoryMapper;
     }
-    
+
     @Override
     public ActivityCategory save(ActivityCategory category) {
         var entity = activityCategoryMapper.toEntity(category);
         var savedEntity = activityCategoryJpaRepository.save(entity);
         return activityCategoryMapper.toDomain(savedEntity);
     }
-    
+
     @Override
     public Optional<ActivityCategory> findById(Long id) {
         return activityCategoryJpaRepository.findById(id)
                 .map(activityCategoryMapper::toDomain);
     }
-    
+
     @Override
     public List<ActivityCategory> findAll() {
         return activityCategoryJpaRepository.findAll().stream()
                 .map(activityCategoryMapper::toDomain)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     public List<ActivityCategory> findByNameContaining(String name) {
         return activityCategoryJpaRepository.findByNameContainingIgnoreCase(name).stream()
                 .map(activityCategoryMapper::toDomain)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     public List<ActivityCategory> findDefaultCategories() {
         return activityCategoryJpaRepository.findByIsDefaultTrue().stream()
                 .map(activityCategoryMapper::toDomain)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     public List<ActivityCategory> findByCreatorId(Long creatorId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -74,22 +74,38 @@ public class ActivityCategoryRepositoryImpl implements ActivityCategoryRepositor
                 .map(activityCategoryMapper::toDomain)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     public Optional<ActivityCategory> findByName(String name) {
         return activityCategoryJpaRepository.findByNameIgnoreCase(name)
                 .map(activityCategoryMapper::toDomain);
     }
-    
+
     @Override
     public void deleteById(Long id) {
         activityCategoryJpaRepository.deleteById(id);
     }
-    
+
     @Override
     public List<ActivityCategory> search(String query, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return activityCategoryJpaRepository.search(query, pageable).stream()
+                .map(activityCategoryMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public long countByIsDefaultTrue() {
+        return activityCategoryJpaRepository.findByIsDefaultTrue().size();
+    }
+
+    @Override
+    public List<ActivityCategory> saveAll(List<ActivityCategory> categories) {
+        var entities = categories.stream()
+                .map(activityCategoryMapper::toEntity)
+                .collect(Collectors.toList());
+        var savedEntities = activityCategoryJpaRepository.saveAll(entities);
+        return savedEntities.stream()
                 .map(activityCategoryMapper::toDomain)
                 .collect(Collectors.toList());
     }

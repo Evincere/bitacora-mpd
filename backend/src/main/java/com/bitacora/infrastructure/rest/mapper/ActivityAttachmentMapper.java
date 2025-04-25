@@ -10,12 +10,12 @@ import java.util.stream.Collectors;
 /**
  * Mapper para convertir entre ActivityAttachment y ActivityAttachmentDTO.
  */
-@Component
+@Component("activityAttachmentDtoMapper")
 public class ActivityAttachmentMapper {
-    
+
     /**
      * Convierte un modelo de dominio ActivityAttachment a un DTO ActivityAttachmentDTO.
-     * 
+     *
      * @param attachment El modelo de dominio ActivityAttachment
      * @return El DTO ActivityAttachmentDTO
      */
@@ -23,7 +23,7 @@ public class ActivityAttachmentMapper {
         if (attachment == null) {
             return null;
         }
-        
+
         return ActivityAttachmentDTO.builder()
                 .id(attachment.getId())
                 .activityId(attachment.getActivityId())
@@ -36,10 +36,10 @@ public class ActivityAttachmentMapper {
                 .uploadedAt(attachment.getUploadedAt())
                 .build();
     }
-    
+
     /**
      * Convierte una lista de modelos de dominio ActivityAttachment a una lista de DTOs ActivityAttachmentDTO.
-     * 
+     *
      * @param attachments Lista de modelos de dominio ActivityAttachment
      * @return Lista de DTOs ActivityAttachmentDTO
      */
@@ -47,7 +47,7 @@ public class ActivityAttachmentMapper {
         if (attachments == null) {
             return null;
         }
-        
+
         return attachments.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());

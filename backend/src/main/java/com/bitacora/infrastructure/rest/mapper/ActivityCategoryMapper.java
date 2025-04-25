@@ -10,12 +10,12 @@ import java.util.stream.Collectors;
 /**
  * Mapper para convertir entre ActivityCategory y ActivityCategoryDTO.
  */
-@Component
+@Component("activityCategoryDtoMapper")
 public class ActivityCategoryMapper {
-    
+
     /**
      * Convierte un modelo de dominio ActivityCategory a un DTO ActivityCategoryDTO.
-     * 
+     *
      * @param category El modelo de dominio ActivityCategory
      * @return El DTO ActivityCategoryDTO
      */
@@ -23,7 +23,7 @@ public class ActivityCategoryMapper {
         if (category == null) {
             return null;
         }
-        
+
         return ActivityCategoryDTO.builder()
                 .id(category.getId())
                 .name(category.getName())
@@ -35,10 +35,10 @@ public class ActivityCategoryMapper {
                 .updatedAt(category.getUpdatedAt())
                 .build();
     }
-    
+
     /**
      * Convierte una lista de modelos de dominio ActivityCategory a una lista de DTOs ActivityCategoryDTO.
-     * 
+     *
      * @param categories Lista de modelos de dominio ActivityCategory
      * @return Lista de DTOs ActivityCategoryDTO
      */
@@ -46,7 +46,7 @@ public class ActivityCategoryMapper {
         if (categories == null) {
             return null;
         }
-        
+
         return categories.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());

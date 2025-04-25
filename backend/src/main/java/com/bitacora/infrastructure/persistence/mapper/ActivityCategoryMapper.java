@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 /**
  * Mapper para convertir entre ActivityCategory y ActivityCategoryEntity.
  */
-@Component
+@Component("activityCategoryPersistenceMapper")
 public class ActivityCategoryMapper {
-    
+
     /**
      * Convierte una entidad ActivityCategoryEntity a un modelo de dominio ActivityCategory.
-     * 
+     *
      * @param entity La entidad ActivityCategoryEntity
      * @return El modelo de dominio ActivityCategory
      */
@@ -20,7 +20,7 @@ public class ActivityCategoryMapper {
         if (entity == null) {
             return null;
         }
-        
+
         return ActivityCategory.builder()
                 .id(entity.getId())
                 .name(entity.getName())
@@ -32,10 +32,10 @@ public class ActivityCategoryMapper {
                 .updatedAt(entity.getUpdatedAt())
                 .build();
     }
-    
+
     /**
      * Convierte un modelo de dominio ActivityCategory a una entidad ActivityCategoryEntity.
-     * 
+     *
      * @param domain El modelo de dominio ActivityCategory
      * @return La entidad ActivityCategoryEntity
      */
@@ -43,7 +43,7 @@ public class ActivityCategoryMapper {
         if (domain == null) {
             return null;
         }
-        
+
         return ActivityCategoryEntity.builder()
                 .id(domain.getId())
                 .name(domain.getName())

@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 /**
  * Mapper para convertir entre la entidad ActivityEntity y el modelo de dominio Activity.
  */
-@Component
+@Component("activityEntityMapper")
 public class ActivityMapper {
-    
+
     /**
      * Convierte una entidad ActivityEntity a un modelo de dominio Activity.
-     * 
+     *
      * @param entity La entidad ActivityEntity
      * @return El modelo de dominio Activity
      */
@@ -22,7 +22,7 @@ public class ActivityMapper {
         if (entity == null) {
             return null;
         }
-        
+
         return Activity.builder()
                 .id(entity.getId())
                 .date(entity.getDate())
@@ -42,10 +42,10 @@ public class ActivityMapper {
                 .userId(entity.getUserId())
                 .build();
     }
-    
+
     /**
      * Convierte un modelo de dominio Activity a una entidad ActivityEntity.
-     * 
+     *
      * @param domain El modelo de dominio Activity
      * @return La entidad ActivityEntity
      */
@@ -53,7 +53,7 @@ public class ActivityMapper {
         if (domain == null) {
             return null;
         }
-        
+
         return ActivityEntity.builder()
                 .id(domain.getId())
                 .date(domain.getDate())

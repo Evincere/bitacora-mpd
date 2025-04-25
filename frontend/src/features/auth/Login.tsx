@@ -100,6 +100,38 @@ const ErrorMessage = styled.div`
   text-align: center;
 `;
 
+const HelpText = styled.div`
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid ${({ theme }) => theme.borderColor || '#e0e0e0'};
+  font-size: 14px;
+  color: ${({ theme }) => theme.textSecondary || '#666'};
+
+  p {
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    margin-bottom: 5px;
+  }
+
+  a {
+    color: ${({ theme }) => theme.primary};
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
+
 /**
  * Componente de página de inicio de sesión
  *
@@ -234,6 +266,15 @@ const Login: React.FC = () => {
         <Button type="submit" disabled={isLoggingIn}>
           {isLoggingIn ? 'Iniciando sesión...' : 'Iniciar sesión'}
         </Button>
+
+        <HelpText>
+          <p>Usuarios de prueba:</p>
+          <ul>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); setUsername('admin'); setPassword('Admin@123'); }}>admin / Admin@123</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); setUsername('usuario'); setPassword('Usuario@123'); }}>usuario / Usuario@123</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); setUsername('testuser'); setPassword('test123'); }}>testuser / test123</a></li>
+          </ul>
+        </HelpText>
       </Form>
     </LoginContainer>
   );
