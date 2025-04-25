@@ -1,0 +1,17 @@
+spring:
+  # Configuración de base de datos para PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bitacora
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  
+  # Configuración de Flyway para PostgreSQL
+  flyway:
+    locations: classpath:db/migration,classpath:db/migration/postgresql
+    
+  # Configuración de JPA para PostgreSQL
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

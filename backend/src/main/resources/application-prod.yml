@@ -1,0 +1,20 @@
+spring:
+  # Configuración de Flyway para PostgreSQL
+  flyway:
+    locations: classpath:db/migration,classpath:db/migration/prod
+    ignore-migration-patterns: V*__*H2*
+    out-of-order: true
+    baseline-on-migrate: true
+
+  # Configuración de PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bitacora
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  # Configuración de JPA para PostgreSQL
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

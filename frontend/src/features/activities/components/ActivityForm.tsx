@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
-import { FiX, FiSave, FiHelpCircle, FiAlertTriangle, FiFileText, FiInfo } from 'react-icons/fi';
+import { FiX, FiSave, FiHelpCircle, FiAlertTriangle, FiFileText, FiInfo, FiPlus, FiStar } from 'react-icons/fi';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateActivity, useUpdateActivity, useActivities } from '@/hooks/useActivities';
@@ -267,6 +267,31 @@ const CancelButton = styled.button`
 
   &:hover {
     background-color: ${({ theme }) => theme.backgroundHover};
+    color: ${({ theme }) => theme.primary};
+  }
+`;
+
+const TemplateButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: ${({ theme }) => theme.backgroundTertiary};
+  color: ${({ theme }) => theme.primary};
+  border-radius: 4px;
+  font-weight: 500;
+  border: 1px solid ${({ theme }) => theme.primary + '40'};
+  height: 36px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  &:hover {
+    background-color: ${({ theme }) => theme.primary + '15'};
+    border-color: ${({ theme }) => theme.primary};
+  }
+
+  svg {
     color: ${({ theme }) => theme.primary};
   }
 `;
@@ -792,17 +817,19 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
         </FormContent>
 
         <FormFooter>
-          <div style={{ width: '200px', zIndex: 2 }}>
-            <TemplateSelector
-              onSelectTemplate={handleSelectTemplate}
-              onManageTemplates={handleManageTemplates}
-            />
+          <div style={{ display: 'flex', gap: '12px', zIndex: 2 }}>
+            <div style={{ width: '200px' }}>
+              <TemplateSelector
+                onSelectTemplate={handleSelectTemplate}
+                onManageTemplates={handleManageTemplates}
+              />
+            </div>
+            <TemplateButton onClick={handleSaveAsTemplate}>
+              <FiStar size={16} />
+              Guardar como plantilla
+            </TemplateButton>
           </div>
           <div style={{ display: 'flex', gap: '12px', zIndex: 1 }}>
-            <CancelButton onClick={handleSaveAsTemplate}>
-              <FiFileText size={16} />
-              Guardar como plantilla
-            </CancelButton>
             <CancelButton onClick={onClose}>
               Cancelar
             </CancelButton>

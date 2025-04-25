@@ -70,6 +70,7 @@ export interface Activity {
   lastStatusChangeDate?: string;
   comments?: string;
   agent?: string;
+  duration?: number; // Duración en minutos
   createdAt: string;
   updatedAt: string;
   userId: number;

@@ -1,0 +1,18 @@
+spring:
+  # Configuración específica para resolver el problema de dependencia circular
+  # entre Flyway y JPA
+  
+  # Desactivar la configuración automática de Flyway
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+  
+  # Configuración de JPA
+  jpa:
+    properties:
+      hibernate:
+        # Evitar que Hibernate intente crear el esquema
+        hbm2ddl:
+          auto: none
+    # Desactivar la inicialización de datos después de JPA
+    defer-datasource-initialization: false

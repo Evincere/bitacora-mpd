@@ -18,6 +18,11 @@ public class BitacoraApplication {
      * @param args Argumentos de línea de comandos
      */
     public static void main(String[] args) {
-        SpringApplication.run(BitacoraApplication.class, args);
+        SpringApplication application = new SpringApplication(BitacoraApplication.class);
+
+        // Agregar el perfil de flyway para resolver la dependencia circular
+        application.setAdditionalProfiles("flyway");
+
+        application.run(args);
     }
 }

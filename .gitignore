@@ -73,8 +73,9 @@ frontend/package-lock.json
 *.trace.db
 
 # Archivos de configuración con información sensible
-**/application-*.properties
-**/application-*.yml
+# Excluimos application-dev.yml y application-prod.yml para que estén en el repositorio
+# **/application-*.properties
+# **/application-*.yml
 **/application.properties.local
 **/application.yml.local
 **/secrets.properties

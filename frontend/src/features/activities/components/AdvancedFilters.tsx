@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
-import { FiFilter, FiSave, FiTrash2, FiClock, FiCalendar, FiUser, FiTag, FiList } from 'react-icons/fi';
+import { FiFilter, FiSave, FiTrash2, FiClock, FiCalendar, FiUser, FiTag, FiList, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
+import { AuthContext } from '@/contexts/AuthContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { ActivityType, ActivityStatus } from '@/types/models';
 import DateRangePicker from '@/components/common/DateRangePicker';
@@ -35,7 +36,9 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
   const [savedFilters, setSavedFilters] = useLocalStorage<FilterConfig[]>('saved-filters', []);
   const [filterName, setFilterName] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [activeQuickFilter, setActiveQuickFilter] = useState<string | null>(null);
   const toast = useToast();
+  const { currentUser } = useContext(AuthContext);
 
   // Cargar filtros iniciales si existen
   useEffect(() => {
@@ -44,13 +47,13 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
         setDateRange([new Date(initialFilters.dateFrom), new Date(initialFilters.dateTo)]);
       }
       if (initialFilters.types) {
-        setSelectedTypes(Array.isArray(initialFilters.types) 
-          ? initialFilters.types 
+        setSelectedTypes(Array.isArray(initialFilters.types)
+          ? initialFilters.types
           : [initialFilters.types]);
       }
       if (initialFilters.statuses) {
-        setSelectedStatuses(Array.isArray(initialFilters.statuses) 
-          ? initialFilters.statuses 
+        setSelectedStatuses(Array.isArray(initialFilters.statuses)
+          ? initialFilters.statuses
           : [initialFilters.statuses]);
       }
       // Cargar otros filtros iniciales...
@@ -63,7 +66,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
 
   const handleApplyFilters = () => {
     const filters: any = {};
-    
+
     if (dateRange[0]) filters.dateFrom = dateRange[0].toISOString();
     if (dateRange[1]) filters.dateTo = dateRange[1].toISOString();
     if (selectedTypes.length > 0) filters.types = selectedTypes;
@@ -71,7 +74,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
     if (selectedUsers.length > 0) filters.assignedTo = selectedUsers;
     if (selectedDepartments.length > 0) filters.departments = selectedDepartments;
     if (selectedTags.length > 0) filters.tags = selectedTags;
-    
+
     onApplyFilters(filters);
   };
 
@@ -124,7 +127,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
     if (filter.assignedTo) filters.assignedTo = filter.assignedTo;
     if (filter.departments) filters.departments = filter.departments;
     if (filter.tags) filters.tags = filter.tags;
-    
+
     onApplyFilters(filters);
     toast.info(`Filtro "${filter.name}" aplicado`);
   };
@@ -136,41 +139,63 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
 
   const handleApplyQuickFilter = (filterType: string) => {
     let filters: any = {};
-    
+
+    // Limpiar filtros anteriores
+    setDateRange([null, null]);
+    setSelectedTypes([]);
+    setSelectedStatuses([]);
+    setSelectedUsers([]);
+    setSelectedDepartments([]);
+    setSelectedTags([]);
+
+    // Si el filtro ya está activo, desactivarlo
+    if (activeQuickFilter === filterType) {
+      setActiveQuickFilter(null);
+      onApplyFilters({});
+      toast.info('Filtro rápido desactivado');
+      return;
+    }
+
+    // Establecer el filtro activo
+    setActiveQuickFilter(filterType);
+
     switch (filterType) {
       case 'myActivities':
-        // Asumiendo que tenemos el ID del usuario actual
-        const currentUserId = 1; // Esto debería venir de un contexto de autenticación
+        // Obtener el ID del usuario actual del contexto de autenticación
+        const currentUserId = currentUser?.id || 1;
         filters = { assignedTo: [currentUserId] };
         setSelectedUsers([currentUserId]);
+        toast.info('Mostrando solo mis actividades');
         break;
       case 'pendingToday':
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
-        
-        filters = { 
+
+        filters = {
           dateFrom: today.toISOString(),
           dateTo: tomorrow.toISOString(),
           statuses: [ActivityStatus.PENDIENTE]
         };
         setDateRange([today, tomorrow]);
         setSelectedStatuses([ActivityStatus.PENDIENTE]);
+        toast.info('Mostrando actividades pendientes para hoy');
         break;
       case 'upcoming':
         const now = new Date();
         const nextWeek = new Date(now);
         nextWeek.setDate(nextWeek.getDate() + 7);
-        
+
         filters = {
           dateFrom: now.toISOString(),
           dateTo: nextWeek.toISOString()
         };
         setDateRange([now, nextWeek]);
+        toast.info('Mostrando actividades próximas a vencer (7 días)');
         break;
     }
-    
+
     onApplyFilters(filters);
   };
 
@@ -181,6 +206,26 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
           <FiFilter />
           Filtros
         </FiltersTitle>
+        <QuickFiltersRow>
+          <QuickFilterPill
+            $active={activeQuickFilter === 'myActivities'}
+            onClick={() => handleApplyQuickFilter('myActivities')}
+          >
+            <FiUser /> Mis actividades
+          </QuickFilterPill>
+          <QuickFilterPill
+            $active={activeQuickFilter === 'pendingToday'}
+            onClick={() => handleApplyQuickFilter('pendingToday')}
+          >
+            <FiAlertCircle /> Pendientes hoy
+          </QuickFilterPill>
+          <QuickFilterPill
+            $active={activeQuickFilter === 'upcoming'}
+            onClick={() => handleApplyQuickFilter('upcoming')}
+          >
+            <FiClock /> Próximas a vencer
+          </QuickFilterPill>
+        </QuickFiltersRow>
         <ExpandButton onClick={handleToggleExpand}>
           {isExpanded ? 'Ocultar filtros avanzados' : 'Mostrar filtros avanzados'}
         </ExpandButton>
@@ -262,20 +307,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
             </SaveFilterDialog>
           )}
 
-          <QuickFiltersSection>
-            <FilterSectionTitle>Filtros rápidos</FilterSectionTitle>
-            <QuickFiltersContainer>
-              <QuickFilterButton onClick={() => handleApplyQuickFilter('myActivities')}>
-                <FiUser /> Mis actividades
-              </QuickFilterButton>
-              <QuickFilterButton onClick={() => handleApplyQuickFilter('pendingToday')}>
-                <FiClock /> Pendientes hoy
-              </QuickFilterButton>
-              <QuickFilterButton onClick={() => handleApplyQuickFilter('upcoming')}>
-                <FiCalendar /> Próximas a vencer
-              </QuickFilterButton>
-            </QuickFiltersContainer>
-          </QuickFiltersSection>
+          {/* Los filtros rápidos ahora están en el encabezado para mayor visibilidad */}
 
           {savedFilters.length > 0 && (
             <SavedFiltersSection>
@@ -310,10 +342,17 @@ const FiltersContainer = styled.div`
 
 const FiltersHeader = styled.div`
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
   border-bottom: 1px solid ${({ theme }) => theme.borderColor};
+  gap: 10px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;
 
 const FiltersTitle = styled.h3`
@@ -322,7 +361,7 @@ const FiltersTitle = styled.h3`
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   svg {
     color: ${({ theme }) => theme.primary};
   }
@@ -334,7 +373,7 @@ const ExpandButton = styled.button`
   color: ${({ theme }) => theme.primary};
   cursor: pointer;
   font-size: 14px;
-  
+
   &:hover {
     text-decoration: underline;
   }
@@ -355,7 +394,7 @@ const FilterSectionTitle = styled.h4`
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   svg {
     color: ${({ theme }) => theme.primary};
   }
@@ -373,12 +412,12 @@ const SaveFilterDialog = styled.div`
   padding: 15px;
   background-color: ${({ theme }) => theme.backgroundTertiary};
   border-radius: 8px;
-  
+
   h4 {
     margin-top: 0;
     margin-bottom: 10px;
   }
-  
+
   input {
     width: 100%;
     padding: 8px 12px;
@@ -388,42 +427,48 @@ const SaveFilterDialog = styled.div`
     color: ${({ theme }) => theme.text};
     margin-bottom: 15px;
   }
-  
+
   div {
     display: flex;
     gap: 10px;
   }
 `;
 
-const QuickFiltersSection = styled.div`
-  margin-top: 20px;
-`;
-
-const QuickFiltersContainer = styled.div`
+const QuickFiltersRow = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
+  margin-right: auto;
+  margin-left: 20px;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
 `;
 
-const QuickFilterButton = styled.button`
+const QuickFilterPill = styled.button<{ $active: boolean }>`
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background-color: ${({ theme }) => theme.backgroundTertiary};
-  border: 1px solid ${({ theme }) => theme.borderColor};
-  border-radius: 4px;
-  color: ${({ theme }) => theme.text};
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: ${({ theme, $active }) => $active ? theme.primary + '20' : theme.backgroundTertiary};
+  border: 1px solid ${({ theme, $active }) => $active ? theme.primary : theme.borderColor};
+  border-radius: 20px;
+  color: ${({ theme, $active }) => $active ? theme.primary : theme.text};
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: ${({ $active }) => $active ? '500' : 'normal'};
   transition: all 0.2s ease;
-  
+
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme, $active }) => $active ? theme.primary + '30' : theme.backgroundHover};
+    border-color: ${({ theme, $active }) => $active ? theme.primary : theme.primary + '50'};
   }
-  
+
   svg {
-    color: ${({ theme }) => theme.primary};
+    color: ${({ theme, $active }) => $active ? theme.primary : theme.textSecondary};
   }
 `;
 
@@ -450,7 +495,7 @@ const SavedFilterItem = styled.div`
 const SavedFilterName = styled.div`
   cursor: pointer;
   flex: 1;
-  
+
   &:hover {
     text-decoration: underline;
   }
@@ -465,7 +510,7 @@ const DeleteFilterButton = styled.button`
   align-items: center;
   padding: 4px;
   border-radius: 4px;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.dangerLight};
   }

@@ -1,15 +1,15 @@
 -- Insertar usuario administrador
 INSERT INTO users (
-    username, 
-    password, 
-    email, 
-    first_name, 
-    last_name, 
-    role, 
-    position, 
-    department, 
-    active, 
-    created_at, 
+    username,
+    password,
+    email,
+    first_name,
+    last_name,
+    role,
+    position,
+    department,
+    active,
+    created_at,
     updated_at
 ) VALUES (
     'admin',
@@ -27,7 +27,7 @@ INSERT INTO users (
 );
 
 -- Insertar permisos para el administrador
-INSERT INTO user_permissions (user_id, permission) VALUES 
+INSERT INTO user_permissions (user_id, permission) VALUES
 (1, 'READ_ACTIVITIES'),
 (1, 'WRITE_ACTIVITIES'),
 (1, 'DELETE_ACTIVITIES'),
@@ -38,16 +38,16 @@ INSERT INTO user_permissions (user_id, permission) VALUES
 
 -- Insertar usuario de prueba
 INSERT INTO users (
-    username, 
-    password, 
-    email, 
-    first_name, 
-    last_name, 
-    role, 
-    position, 
-    department, 
-    active, 
-    created_at, 
+    username,
+    password,
+    email,
+    first_name,
+    last_name,
+    role,
+    position,
+    department,
+    active,
+    created_at,
     updated_at
 ) VALUES (
     'usuario',
@@ -65,7 +65,7 @@ INSERT INTO users (
 );
 
 -- Insertar permisos para el usuario de prueba
-INSERT INTO user_permissions (user_id, permission) VALUES 
+INSERT INTO user_permissions (user_id, permission) VALUES
 (2, 'READ_ACTIVITIES'),
 (2, 'WRITE_ACTIVITIES');
 
@@ -85,7 +85,7 @@ INSERT INTO activities (
     agent,
     user_id
 ) VALUES (
-    CURRENT_TIMESTAMP - INTERVAL '2 days',
+    DATEADD('DAY', -2, CURRENT_TIMESTAMP),
     'REUNION',
     'Reunión con el equipo de desarrollo',
     'Juan Pérez',
@@ -94,7 +94,7 @@ INSERT INTO activities (
     'Planificación del sprint',
     'Se definieron las tareas para el próximo sprint',
     'COMPLETADA',
-    CURRENT_TIMESTAMP - INTERVAL '1 day',
+    DATEADD('DAY', -1, CURRENT_TIMESTAMP),
     'La reunión fue productiva',
     'María López',
     1
@@ -115,7 +115,7 @@ INSERT INTO activities (
     agent,
     user_id
 ) VALUES (
-    CURRENT_TIMESTAMP - INTERVAL '1 day',
+    DATEADD('DAY', -1, CURRENT_TIMESTAMP),
     'AUDIENCIA',
     'Audiencia de conciliación',
     'Pedro Gómez',
@@ -145,7 +145,7 @@ INSERT INTO activities (
     agent,
     user_id
 ) VALUES (
-    CURRENT_TIMESTAMP + INTERVAL '1 day',
+    DATEADD('DAY', 1, CURRENT_TIMESTAMP),
     'ENTREVISTA',
     'Entrevista con el cliente',
     'Laura Martínez',
