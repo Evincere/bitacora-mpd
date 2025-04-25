@@ -432,7 +432,7 @@ const ViewButton = styled.button<{ $active: boolean }>`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: ${({ theme, $active }) => $active ? theme.primary : theme.backgroundHover};
+    background-color: ${({ theme, $active }) => $active ? theme.primary : theme.inputBackground};
   }
 
   @media (max-width: 576px) {
@@ -464,7 +464,7 @@ const NavButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
   }
 `;
 
@@ -478,7 +478,7 @@ const TodayButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
   }
 `;
 
@@ -516,7 +516,7 @@ const DayCell = styled.div<{ $isCurrentMonth: boolean; $isToday: boolean }>`
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
   }
 `;
 

@@ -2,8 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import StatusBadge from './StatusBadge';
-import TypeBadge from './TypeBadge';
+import { StatusBadge, TypeBadge } from '@/shared/components/ui';
 
 const TooltipContainer = styled.div`
   position: absolute;

@@ -7,6 +7,7 @@ import NotificationCategories from './NotificationCategories';
 import NotificationPreferences from './NotificationPreferences';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { RealTimeNotification } from '../../../types/notifications';
 
 // Animaciones
 const slideIn = keyframes`
@@ -200,7 +201,7 @@ const ConnectionStatus = styled.div<{ $connected: boolean }>`
   font-size: 12px;
   text-align: center;
   background-color: ${({ $connected, theme }) =>
-    $connected ? theme.backgroundSuccess : theme.backgroundError};
+    $connected ? `${theme.success}20` : `${theme.error}20`};
   color: ${({ $connected, theme }) =>
     $connected ? theme.success : theme.error};
   display: flex;

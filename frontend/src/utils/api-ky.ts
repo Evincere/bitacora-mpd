@@ -19,9 +19,10 @@ const api = ky.extend({
   hooks: {
     beforeRequest: [
       request => {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        if (user && user.token) {
-          request.headers.set('Authorization', `${user.tokenType || 'Bearer'} ${user.token}`);
+        // Obtener el token de autenticación del localStorage
+        const token = localStorage.getItem('bitacora_token');
+        if (token) {
+          request.headers.set('Authorization', `Bearer ${token}`);
         }
       }
     ],
@@ -50,12 +51,14 @@ export const apiRequest = async <T>(
 ): Promise<T> => {
   try {
     // Construir la URL completa para mostrar en logs
-    const fullUrl = API_BASE_URL ? `${API_BASE_URL}/${endpoint}` : `/${endpoint}`;
+    // Asegurarse de que no haya doble slash
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+    const fullUrl = API_BASE_URL ? `${API_BASE_URL}/${cleanEndpoint}` : `/${cleanEndpoint}`;
     console.log(`Realizando petición a: ${fullUrl}`);
-    console.log(`Nota: Si hay problemas, verifica que la ruta '${endpoint}' exista en el backend`);
+    console.log(`Nota: Si hay problemas, verifica que la ruta '${cleanEndpoint}' exista en el backend`);
 
     // Intentar realizar la petición
-    return await api(endpoint, options).json<T>();
+    return await api(cleanEndpoint, options).json<T>();
   } catch (error) {
     const kyError = error as Error;
     console.error('Error en petición API:', kyError);

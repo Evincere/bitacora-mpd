@@ -140,25 +140,6 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onApplyFilters, initi
   const handleApplyQuickFilter = (filterType: string) => {
     let filters: any = {};
 
-    // Limpiar filtros anteriores
-    setDateRange([null, null]);
-    setSelectedTypes([]);
-    setSelectedStatuses([]);
-    setSelectedUsers([]);
-    setSelectedDepartments([]);
-    setSelectedTags([]);
-
-    // Si el filtro ya está activo, desactivarlo
-    if (activeQuickFilter === filterType) {
-      setActiveQuickFilter(null);
-      onApplyFilters({});
-      toast.info('Filtro rápido desactivado');
-      return;
-    }
-
-    // Establecer el filtro activo
-    setActiveQuickFilter(filterType);
-
     switch (filterType) {
       case 'myActivities':
         // Obtener el ID del usuario actual del contexto de autenticación
@@ -463,8 +444,7 @@ const QuickFilterPill = styled.button<{ $active: boolean }>`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: ${({ theme, $active }) => $active ? theme.primary + '30' : theme.backgroundHover};
-    border-color: ${({ theme, $active }) => $active ? theme.primary : theme.primary + '50'};
+    background-color: ${({ theme }) => theme.inputBackground};
   }
 
   svg {

@@ -86,7 +86,7 @@ const EmptyState = styled.div`
   }
 `;
 
-const StatusBadge = styled.span<{ status: string }>`
+const StatusBadge = styled.span<{ $status: string }>`
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -94,8 +94,8 @@ const StatusBadge = styled.span<{ status: string }>`
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
-  background-color: ${({ status, theme }) => {
-    switch (status) {
+  background-color: ${({ $status, theme }) => {
+    switch ($status) {
       case ActivityStatus.COMPLETADA:
         return `${theme.success}20`;
       case ActivityStatus.EN_PROGRESO:
@@ -106,8 +106,8 @@ const StatusBadge = styled.span<{ status: string }>`
         return `${theme.textSecondary}20`;
     }
   }};
-  color: ${({ status, theme }) => {
-    switch (status) {
+  color: ${({ $status, theme }) => {
+    switch ($status) {
       case ActivityStatus.COMPLETADA:
         return theme.success;
       case ActivityStatus.EN_PROGRESO:
@@ -120,14 +120,14 @@ const StatusBadge = styled.span<{ status: string }>`
   }};
 `;
 
-const TypeBadge = styled.span<{ type: string }>`
+const TypeBadge = styled.span<{ $type: string }>`
   display: inline-block;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
-  background-color: ${({ type, theme }) => {
-    switch (type) {
+  background-color: ${({ $type, theme }) => {
+    switch ($type) {
       case ActivityType.REUNION:
         return `${theme.primary}20`;
       case ActivityType.AUDIENCIA:
@@ -140,8 +140,8 @@ const TypeBadge = styled.span<{ type: string }>`
         return `${theme.textSecondary}20`;
     }
   }};
-  color: ${({ type, theme }) => {
-    switch (type) {
+  color: ${({ $type, theme }) => {
+    switch ($type) {
       case ActivityType.REUNION:
         return theme.primary;
       case ActivityType.AUDIENCIA:
@@ -176,7 +176,7 @@ const ActionButton = styled.button`
   }
 `;
 
-const ActionsMenu = styled.div<{ show: boolean }>`
+const ActionsMenu = styled.div<{ $show: boolean }>`
   position: absolute;
   top: 100%;
   right: 0;
@@ -186,17 +186,17 @@ const ActionsMenu = styled.div<{ show: boolean }>`
   border-radius: 4px;
   box-shadow: ${({ theme }) => theme.shadow};
   overflow: hidden;
-  display: ${({ show }) => (show ? 'block' : 'none')};
+  display: ${({ $show }) => ($show ? 'block' : 'none')};
 `;
 
-const MenuItem = styled.button<{ danger?: boolean }>`
+const MenuItem = styled.button<{ $danger?: boolean }>`
   display: flex;
   align-items: center;
   width: 100%;
   padding: 8px 16px;
   font-size: 14px;
   text-align: left;
-  color: ${({ theme, danger }) => danger ? theme.error : theme.text};
+  color: ${({ theme, $danger }) => $danger ? theme.error : theme.text};
 
   svg {
     margin-right: 8px;
@@ -410,7 +410,7 @@ const ActivityList = ({ activities }: ActivityListProps) => {
             />
           </td>
           <td>
-            <TypeBadge type={activity.type || 'OTRO'}>
+            <TypeBadge $type={activity.type || 'OTRO'}>
               {activity.type || 'OTRO'}
             </TypeBadge>
           </td>
@@ -422,7 +422,7 @@ const ActivityList = ({ activities }: ActivityListProps) => {
           </td>
           <td>{truncatedDescription}</td>
           <td>
-            <StatusBadge status={activity.status || 'PENDIENTE'}>
+            <StatusBadge $status={activity.status || 'PENDIENTE'}>
               {getStatusIcon(activity.status || 'PENDIENTE')}
               {activity.status || 'PENDIENTE'}
             </StatusBadge>
@@ -432,7 +432,7 @@ const ActivityList = ({ activities }: ActivityListProps) => {
               <ActionButton onClick={() => handleMenuToggle(activity.id)}>
                 <FiMoreVertical size={18} />
               </ActionButton>
-              <ActionsMenu show={openMenuId === activity.id}>
+              <ActionsMenu $show={openMenuId === activity.id}>
                 <MenuItem onClick={() => handleViewDetail(activity)}>
                   <FiEye size={16} />
                   Ver detalle
@@ -441,7 +441,7 @@ const ActivityList = ({ activities }: ActivityListProps) => {
                   <FiEdit2 size={16} />
                   Editar
                 </MenuItem>
-                <MenuItem danger onClick={() => handleDelete(activity)}>
+                <MenuItem $danger onClick={() => handleDelete(activity)}>
                   <FiTrash2 size={16} />
                   Eliminar
                 </MenuItem>
@@ -509,7 +509,7 @@ const ActivityList = ({ activities }: ActivityListProps) => {
           message={`¿Estás seguro de que deseas eliminar la actividad "${selectedActivity.description.substring(0, 30)}..."? Esta acción no se puede deshacer.`}
           confirmLabel="Eliminar"
           cancelLabel="Cancelar"
-          danger
+          $danger
           onConfirm={confirmDelete}
           onCancel={() => setShowConfirmDelete(false)}
         />

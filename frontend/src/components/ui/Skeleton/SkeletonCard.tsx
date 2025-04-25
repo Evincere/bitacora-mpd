@@ -20,7 +20,7 @@ export interface SkeletonCardProps {
   style?: React.CSSProperties;
 }
 
-const CardContainer = styled.div<{ $rounded?: boolean }>`
+const CardContainer = styled.div<{ $rounded?: boolean; width?: string | number; height?: string | number }>`
   width: ${({ width }) => (typeof width === 'number' ? `${width}px` : width || '100%')};
   height: ${({ height }) => (typeof height === 'number' ? `${height}px` : height || 'auto')};
   background-color: ${({ theme }) => theme.cardBackground || '#ffffff'};

@@ -18,9 +18,8 @@ import {
   FiInfo
 } from 'react-icons/fi'
 import { glassExpandable } from '../../../styles/glassmorphism'
-import { statusColors, typeColors } from '../../../styles/statusColors'
-import StatusBadge from '../../../components/ui/StatusBadge'
-import TypeBadge from '../../../components/ui/TypeBadge'
+import { statusColors, typeColors } from '@/shared/styles'
+import { StatusBadge, TypeBadge } from '@/shared/components/ui'
 
 const DetailContainer = styled.div`
   ${glassExpandable}

@@ -32,6 +32,8 @@ Bitácora es una plataforma moderna para la gestión de actividades y tareas del
 
 ## Arquitectura
 
+La aplicación sigue una arquitectura moderna y modular, diseñada para facilitar el mantenimiento, la escalabilidad y la colaboración entre desarrolladores. Para más detalles, consulte la [documentación de arquitectura](docs/ARCHITECTURE.md).
+
 ### Backend
 - Java 21
 - Arquitectura Hexagonal
@@ -52,6 +54,7 @@ Bitácora es una plataforma moderna para la gestión de actividades y tareas del
 - Arquitectura modular basada en features
 - Styled Components
 - React Query para gestión de estado del servidor y caché
+- Redux para estado global
 - Hooks personalizados para operaciones CRUD
 - Sistema de notificaciones toast accesible y personalizable
 - Validación de parámetros para prevenir errores
@@ -68,23 +71,39 @@ Bitácora es una plataforma moderna para la gestión de actividades y tareas del
 ```
 frontend/
 ├── public/              # Archivos estáticos
-├── src/
-│   ├── assets/          # Imágenes, fuentes, etc.
-│   ├── components/      # Componentes reutilizables
-│   ├── features/        # Módulos por funcionalidad
-│   │   ├── activities/  # Gestión de actividades
-│   │   ├── auth/        # Autenticación
-│   │   └── dashboard/   # Dashboard principal
-│   ├── hooks/           # Custom hooks
-│   ├── services/        # Servicios de API
-│   ├── store/           # Estado global (Redux)
-│   ├── styles/          # Estilos globales
-│   ├── utils/           # Utilidades
+├── src/                 # Código fuente
+│   ├── core/            # Núcleo de la aplicación
+│   │   ├── api/         # Configuración y utilidades para API
+│   │   ├── hooks/       # Hooks personalizados globales
+│   │   ├── store/       # Estado global (Redux)
+│   │   ├── types/       # Tipos e interfaces globales
+│   │   └── utils/       # Utilidades y funciones auxiliares
+│   ├── features/        # Características/módulos de la aplicación
+│   │   ├── activities/  # Módulo de actividades
+│   │   │   ├── components/  # Componentes específicos
+│   │   │   ├── hooks/       # Hooks específicos
+│   │   │   ├── pages/       # Páginas/vistas
+│   │   │   ├── schemas/     # Esquemas de validación
+│   │   │   └── services/    # Servicios específicos
+│   │   ├── auth/        # Módulo de autenticación
+│   │   ├── calendar/    # Módulo de calendario
+│   │   └── notifications/ # Módulo de notificaciones
+│   ├── shared/          # Componentes y utilidades compartidas
+│   │   ├── components/  # Componentes reutilizables
+│   │   │   ├── common/  # Componentes básicos (Loader, ErrorBoundary, etc.)
+│   │   │   ├── layout/  # Componentes de layout (Layout, Header, Sidebar)
+│   │   │   └── ui/      # Componentes de UI (StatusBadge, PageTransition, etc.)
+│   │   └── styles/      # Estilos globales y temas (theme.ts, statusColors.ts, etc.)
+│   ├── components/       # Alias para componentes compartidos (exporta desde shared)
+│   ├── hooks/           # Alias para hooks compartidos (exporta desde core/hooks)
+│   ├── styles/           # Alias para estilos compartidos (exporta desde shared/styles)
 │   ├── App.tsx          # Componente principal
 │   └── main.tsx         # Punto de entrada
 ├── index.html           # Plantilla HTML
 └── vite.config.js       # Configuración de Vite
 ```
+
+> **Nota**: Las carpetas `components`, `hooks` y `styles` en la raíz de `src` son alias que exportan desde las ubicaciones reales en `shared` y `core`. Esto facilita la migración y mantiene la compatibilidad con el código existente.
 
 ### DevOps
 - CI/CD con GitHub Actions
@@ -575,7 +594,32 @@ El sistema incluye un mecanismo de notificaciones en tiempo real basado en WebSo
 
 ## Próximos Pasos
 
-### Mejoras Avanzadas del Sistema de Actividades (En Progreso - Sprint 11)
+### Mejoras de Rendimiento y Correcciones de Errores (En Progreso - Sprint 14)
+
+- ⏳ Corrección de errores de autenticación y permisos
+  - ✅ Revisar el flujo de autenticación en el frontend
+  - ✅ Corregir la forma en que se obtiene y almacena el token
+  - ⏳ Implementar manejo de errores más robusto para problemas de autenticación
+  - ⏳ Implementar verificación de permisos en el frontend
+  - ⏳ Mostrar/ocultar elementos de la interfaz según los permisos del usuario
+- ⏳ Mejoras de rendimiento
+  - ⏳ Optimizar consultas de base de datos
+  - ⏳ Implementar índices adicionales en tablas críticas
+  - ⏳ Mejorar el rendimiento del frontend
+  - ⏳ Implementar técnicas avanzadas de virtualización
+- ⏳ Implementación de pruebas automatizadas
+  - ⏳ Configurar Jest y React Testing Library para el frontend
+  - ⏳ Configurar JUnit y Mockito para el backend
+  - ⏳ Implementar pruebas unitarias para componentes comunes
+  - ⏳ Crear pruebas para flujos críticos de la aplicación
+- ⏳ Corrección de errores y advertencias
+  - ⏳ Corregir advertencias de Checkstyle en el backend
+  - ⏳ Resolver problemas de código no utilizado
+  - ⏳ Corregir posibles null pointer exceptions
+  - ⏳ Resolver advertencias de ESLint en el frontend
+  - ⏳ Mejorar la documentación del código
+
+### Mejoras Avanzadas del Sistema de Actividades (Completado - Sprint 11)
 
 - ✅ Implementación de filtros avanzados para actividades
   - Filtros por rango de fechas con selección visual
@@ -592,16 +636,16 @@ El sistema incluye un mecanismo de notificaciones en tiempo real basado en WebSo
   - Confirmación al mover actividades entre fechas
 - ✅ Mejoras en formularios de actividades
   - Autoguardado de borradores
-  - ⏳ Sistema de plantillas para actividades frecuentes (pendiente)
+  - Sistema de plantillas para actividades frecuentes
 - ✅ Mejoras en la visualización de detalles de actividades
   - Panel expandible en la vista de lista
   - Modal en la vista de cuadrícula
   - Mejor experiencia de usuario al visualizar detalles
-- ⏳ Optimización de rendimiento
+- ⏳ Optimización de rendimiento (pendiente para futuros sprints)
   - Mejoras en consultas de base de datos
   - Paginación con cursor para grandes volúmenes de datos
   - Técnicas avanzadas de virtualización
-- ⏳ Nuevas funcionalidades
+- ⏳ Nuevas funcionalidades (pendiente para futuros sprints)
   - Sistema de comentarios con menciones a usuarios
   - Etiquetas y categorización jerárquica
   - Exportación e importación de datos
@@ -618,11 +662,37 @@ El sistema incluye un mecanismo de notificaciones en tiempo real basado en WebSo
 - ✅ Mejora del centro de notificaciones con categorización
 - ✅ Optimización de WebSockets con reconexión automática
 
-### Pruebas Automatizadas
+### Unificación de Estilos y Corrección de Errores TypeScript (Completado - Sprint 13)
 
-- Implementar pruebas unitarias para la capa de dominio y aplicación
-- Implementar pruebas de integración para adaptadores y controladores
-- Configurar CI/CD para ejecutar pruebas automáticamente
+- ✅ Unificación de archivos de estilos duplicados
+  - Consolidación de archivos statusColors.ts en una única ubicación
+  - Consolidación de archivos theme.ts en una única ubicación
+- ✅ Corrección de errores en interfaces de tema
+  - Revisión y corrección de la interfaz DefaultTheme
+  - Corrección de interfaces ColorScheme, StatusColorMap y TypeColorMap
+- ✅ Mejora de la estructura de carpetas
+  - Reorganización de componentes compartidos
+  - Reorganización de utilidades y hooks
+  - Creación de archivos de barril (index.ts) para simplificar importaciones
+
+### Refactorización de Arquitectura y Solución de Problemas de Plantillas (Completado - Sprint 12)
+
+- ✅ Consolidación de archivos duplicados
+  - Identificación de versiones utilizadas realmente
+  - Eliminación de versiones no utilizadas
+  - Actualización de importaciones
+- ✅ Migración completa a TypeScript
+  - Conversión de archivos .jsx restantes a .tsx
+  - Adición de tipos e interfaces para todos los componentes
+- ✅ Reorganización de la estructura de carpetas
+  - Creación de nueva estructura según arquitectura propuesta
+  - Movimiento de componentes a ubicaciones correctas
+- ✅ Mejora de la gestión de estado
+  - Consolidación de estado global con Redux
+  - Implementación de React Query para datos del servidor
+- ✅ Solución del problema de las plantillas
+  - Consolidación de archivos ActivityForm.tsx
+  - Verificación de importaciones de componentes de plantillas
 
 ### Mejoras de Experiencia de Usuario
 

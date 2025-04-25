@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FiX, FiSave, FiFileText } from 'react-icons/fi';
 import { ActivityFormData } from '../schemas/activitySchema';
-import useActivityTemplates from '@/hooks/useActivityTemplates';
-import { useToast } from '@/hooks/useToast';
+import useActivityTemplates from '@/features/activities/hooks/useActivityTemplates';
+import { useToast } from '@/core/hooks/useToast';
 
 interface SaveTemplateDialogProps {
   formData: ActivityFormData;
@@ -21,7 +21,7 @@ const Overlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1100;
+  z-index: 10000;
   padding: 20px;
 `;
 
@@ -99,7 +99,7 @@ const Input = styled.input<{ hasError?: boolean }>`
   padding: 10px 12px;
   border-radius: 4px;
   border: 1px solid ${({ theme, hasError }) => hasError ? theme.danger : theme.border};
-  background-color: ${({ theme }) => theme.backgroundPrimary};
+  background-color: ${({ theme }) => theme.background};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
   transition: border-color 0.2s;
@@ -115,7 +115,7 @@ const Textarea = styled.textarea<{ hasError?: boolean }>`
   padding: 10px 12px;
   border-radius: 4px;
   border: 1px solid ${({ theme, hasError }) => hasError ? theme.danger : theme.border};
-  background-color: ${({ theme }) => theme.backgroundPrimary};
+  background-color: ${({ theme }) => theme.background};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
   min-height: 80px;
@@ -154,7 +154,7 @@ const CancelButton = styled.button`
   transition: all 0.2s;
 
   &:hover {
-    background-color: ${({ theme }) => theme.backgroundHover};
+    background-color: ${({ theme }) => theme.inputBackground};
     color: ${({ theme }) => theme.text};
   }
 `;
@@ -174,12 +174,12 @@ const SaveButton = styled.button`
   gap: 8px;
 
   &:hover {
-    background-color: ${({ theme }) => theme.primaryHover};
+    background-color: ${({ theme }) => theme.buttonHover};
   }
 
   &:disabled {
-    background-color: ${({ theme }) => theme.backgroundDisabled};
-    color: ${({ theme }) => theme.textDisabled};
+    background-color: ${({ theme }) => theme.inputBackground};
+    color: ${({ theme }) => theme.textSecondary};
     cursor: not-allowed;
   }
 `;
@@ -189,7 +189,7 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({ formData, onClo
   const [description, setDescription] = useState('');
   const [errors, setErrors] = useState<{ name?: string; description?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const { saveTemplate } = useActivityTemplates();
   const toast = useToast();
 
@@ -201,24 +201,24 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({ formData, onClo
 
   const validate = () => {
     const newErrors: { name?: string; description?: string } = {};
-    
+
     if (!name.trim()) {
       newErrors.name = 'El nombre es obligatorio';
     }
-    
+
     if (!description.trim()) {
       newErrors.description = 'La descripción es obligatoria';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = () => {
     if (!validate()) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       saveTemplate(name, description, formData);
       toast.success('Plantilla guardada correctamente', 'Plantilla guardada');
@@ -244,7 +244,7 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({ formData, onClo
             <FiX size={20} />
           </CloseButton>
         </DialogHeader>
-        
+
         <DialogContent>
           <FormGroup>
             <FormLabel htmlFor="template-name">Nombre de la plantilla</FormLabel>
@@ -257,7 +257,7 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({ formData, onClo
             />
             {errors.name && <ErrorMessage>{errors.name}</ErrorMessage>}
           </FormGroup>
-          
+
           <FormGroup>
             <FormLabel htmlFor="template-description">Descripción</FormLabel>
             <Textarea
@@ -270,7 +270,7 @@ const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({ formData, onClo
             {errors.description && <ErrorMessage>{errors.description}</ErrorMessage>}
           </FormGroup>
         </DialogContent>
-        
+
         <DialogFooter>
           <CancelButton onClick={onClose}>
             Cancelar

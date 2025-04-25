@@ -68,20 +68,20 @@ const ActionButtons = styled.div`
   }
 `;
 
-const Button = styled.button<{ primary?: boolean }>`
+const Button = styled.button<{ $primary?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   padding: 8px 16px;
-  background-color: ${({ primary, theme }) => primary ? theme.primary : theme.backgroundSecondary};
-  color: ${({ primary, theme }) => primary ? 'white' : theme.text};
+  background-color: ${({ $primary, theme }) => $primary ? theme.primary : theme.backgroundSecondary};
+  color: ${({ $primary, theme }) => $primary ? 'white' : theme.text};
   border-radius: 4px;
   font-weight: 500;
   transition: background-color 0.2s, opacity 0.2s;
 
   &:hover:not(:disabled) {
-    background-color: ${({ primary, theme }) => primary ? theme.buttonHover : theme.inputBackground};
+    background-color: ${({ $primary, theme }) => $primary ? theme.buttonHover : theme.inputBackground};
   }
 
   &:disabled {
@@ -90,7 +90,7 @@ const Button = styled.button<{ primary?: boolean }>`
   }
 
   @media (max-width: 768px) {
-    flex: ${({ primary }) => primary ? '1' : 'initial'};
+    flex: ${({ $primary }) => $primary ? '1' : 'initial'};
   }
 `;
 
@@ -136,13 +136,13 @@ const SearchIcon = styled.div`
   color: ${({ theme }) => theme.textSecondary};
 `;
 
-const ClearButton = styled.button<{ show: boolean }>`
+const ClearButton = styled.button<{ $show: boolean }>`
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
   color: ${({ theme }) => theme.textSecondary};
-  display: ${({ show }) => show ? 'flex' : 'none'};
+  display: ${({ $show }) => $show ? 'flex' : 'none'};
   align-items: center;
   justify-content: center;
 
@@ -157,19 +157,19 @@ const ViewToggle = styled.div`
   overflow: hidden;
 `;
 
-const ViewButton = styled.button<{ active: boolean }>`
+const ViewButton = styled.button<{ $active: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
-  background-color: ${({ active, theme }) => active ? theme.primary : theme.backgroundSecondary};
-  color: ${({ active, theme }) => active ? 'white' : theme.textSecondary};
+  background-color: ${({ $active, theme }) => $active ? theme.primary : theme.backgroundSecondary};
+  color: ${({ $active, theme }) => $active ? 'white' : theme.textSecondary};
   transition: background-color 0.2s, color 0.2s, opacity 0.2s;
 
   &:hover:not(:disabled) {
-    background-color: ${({ active, theme }) => active ? theme.buttonHover : theme.inputBackground};
-    color: ${({ active, theme }) => active ? 'white' : theme.text};
+    background-color: ${({ $active, theme }) => $active ? theme.buttonHover : theme.inputBackground};
+    color: ${({ $active, theme }) => $active ? 'white' : theme.text};
   }
 
   &:disabled {
@@ -208,19 +208,19 @@ const PaginationControls = styled.div`
 
 
 
-const PageButton = styled.button<{ active?: boolean }>`
+const PageButton = styled.button<{ $active?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
   border-radius: 4px;
-  background-color: ${({ active, theme }) => active ? theme.primary : theme.backgroundSecondary};
-  color: ${({ active, theme }) => active ? 'white' : theme.text};
-  font-weight: ${({ active }) => active ? '600' : '400'};
+  background-color: ${({ $active, theme }) => $active ? theme.primary : theme.backgroundSecondary};
+  color: ${({ $active, theme }) => $active ? 'white' : theme.text};
+  font-weight: ${({ $active }) => $active ? '600' : '400'};
 
   &:hover {
-    background-color: ${({ active, theme }) => active ? theme.buttonHover : theme.inputBackground};
+    background-color: ${({ $active, theme }) => $active ? theme.buttonHover : theme.inputBackground};
   }
 
   &:disabled {
@@ -440,16 +440,11 @@ const Activities = () => {
 
   // Verificar autenticación al cargar el componente
   useEffect(() => {
-    const checkAuth = () => {
-      const isAuth = authService.isAuthenticated();
-      setIsAuthenticated(isAuth);
+    // Obtener el estado de autenticación del contexto global
+    const isAuth = authService.isAuthenticated();
+    setIsAuthenticated(isAuth);
 
-      if (!isAuth) {
-        console.warn('Usuario no autenticado. Redirigiendo a login...');
-      }
-    };
-
-    checkAuth();
+    // No redirigir aquí, ya que ProtectedRoute se encarga de eso
   }, []);
 
   // Efecto para aplicar la búsqueda con debounce
@@ -519,7 +514,7 @@ const Activities = () => {
       pages.push(
         <PageButton
           key={i}
-          active={i === currentPage}
+          $active={i === currentPage}
           onClick={() => handlePageChange(i)}
         >
           {i}
@@ -576,7 +571,7 @@ const Activities = () => {
             Filtros
           </Button>
           <Button
-            primary
+            $primary
             onClick={() => setShowForm(true)}
             disabled={isLoading || !isAuthenticated}
           >
@@ -609,7 +604,7 @@ const Activities = () => {
             />
           </form>
           <ClearButton
-            show={searchQuery.length > 0}
+            $show={searchQuery.length > 0}
             onClick={handleClearSearch}
           >
             <FiX size={16} />
@@ -618,21 +613,21 @@ const Activities = () => {
 
         <ViewToggle>
           <ViewButton
-            active={viewMode === 'list'}
+            $active={viewMode === 'list'}
             onClick={() => setViewMode('list')}
             disabled={isLoading || !isAuthenticated}
           >
             <FiList size={18} />
           </ViewButton>
           <ViewButton
-            active={viewMode === 'grid'}
+            $active={viewMode === 'grid'}
             onClick={() => setViewMode('grid')}
             disabled={isLoading || !isAuthenticated}
           >
             <FiGrid size={18} />
           </ViewButton>
           <ViewButton
-            active={false}
+            $active={false}
             onClick={handleViewCalendar}
             disabled={!isAuthenticated}
           >

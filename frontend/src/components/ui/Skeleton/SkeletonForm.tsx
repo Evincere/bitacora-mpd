@@ -18,7 +18,7 @@ export interface SkeletonFormProps {
   style?: React.CSSProperties;
 }
 
-const FormContainer = styled.div`
+const FormContainer = styled.div<{ spacing?: string | number }>`
   width: 100%;
   display: flex;
   flex-direction: column;

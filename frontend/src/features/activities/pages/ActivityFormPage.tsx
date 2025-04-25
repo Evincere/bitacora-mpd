@@ -17,7 +17,7 @@ const ActivityFormPage: React.FC = () => {
   // Obtener la actividad si estamos editando
   const { data: activity, isLoading, error } = useQuery({
     queryKey: ['activity', activityId],
-    queryFn: () => activitiesService.getActivity(activityId as number),
+    queryFn: () => activitiesService.getActivityById(activityId as number),
     enabled: !!activityId
   });
 
@@ -34,9 +34,9 @@ const ActivityFormPage: React.FC = () => {
   }
 
   return (
-    <ActivityForm 
-      activity={isEditing ? (activity as Activity) : undefined} 
-      onClose={handleClose} 
+    <ActivityForm
+      activity={isEditing ? (activity as Activity) : undefined}
+      onClose={handleClose}
     />
   );
 };

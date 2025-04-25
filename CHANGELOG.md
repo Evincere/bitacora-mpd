@@ -3,6 +3,103 @@
 ## [Unreleased]
 
 ### Agregado
+- Inicio del Sprint 14: Mejoras de Rendimiento y Correcciones de Errores
+  - Corrección de problemas con el token de autenticación
+    - Revisión del flujo de autenticación en el frontend
+    - Corrección de la forma en que se obtiene y almacena el token
+    - Implementación de manejo de errores más robusto para problemas de autenticación
+  - Planificación de mejoras de rendimiento
+    - Optimización de consultas de base de datos
+    - Implementación de índices adicionales en tablas críticas
+    - Mejora del rendimiento del frontend
+    - Implementación de técnicas avanzadas de virtualización
+  - Planificación de pruebas automatizadas
+    - Configuración de Jest y React Testing Library para el frontend
+    - Configuración de JUnit y Mockito para el backend
+    - Implementación de pruebas unitarias para componentes comunes
+    - Creación de pruebas para flujos críticos de la aplicación
+  - Planificación de corrección de errores y advertencias
+    - Corrección de advertencias de Checkstyle en el backend
+    - Resolución de problemas de código no utilizado
+    - Corrección de posibles null pointer exceptions
+    - Resolución de advertencias de ESLint en el frontend
+    - Mejora de la documentación del código
+
+### Agregado
+- Implementación de visualización de estadísticas
+  - Creación de componente ActivityTypeStats para mostrar estadísticas por tipo de actividad
+  - Creación de componente ActivityStatusStats para mostrar estadísticas por estado de actividad
+  - Creación de componente ActivitySummaryList para mostrar resúmenes de actividades
+  - Integración de componentes de estadísticas en el dashboard
+  - Implementación de hooks personalizados para obtener estadísticas del backend
+
+### Corregido
+- Problema con la autenticación en el frontend
+  - Corrección de la forma en que se obtiene el token de autenticación en api-ky.ts
+  - Simplificación de la verificación de autenticación en Activities.tsx
+  - Corrección del hook useSocket para usar useRealTimeNotifications
+  - Integración del ToastProvider en App.tsx para resolver errores en el calendario
+  - Eliminación de datos mockeados y mejora de la integración con el backend
+  - Implementación de manejo de errores más robusto en el servicio de actividades
+- Error en el componente ActivitySummaryList
+  - Creación del componente TypeBadge.tsx faltante
+  - Actualización del archivo de exportación para incluir el nuevo componente
+  - Eliminación de archivos duplicados de StatusBadge y TypeBadge
+  - Eliminación de archivos duplicados de PageTransition y AnimatedRoutes
+  - Actualización de importaciones en componentes que usaban las versiones antiguas
+- Corrección de errores en el Dashboard
+  - Solución del error "value.toString is not a function" en los gráficos de Chart.js
+    - Corrección en ActivityTypeStats.tsx
+    - Corrección en ActivityStatusStats.tsx
+  - Corrección de URLs con doble slash en las peticiones API
+  - Solución del error "Invalid time value" en el formateo de fechas
+  - Implementación de función formatDistanceToNowSafe para manejo seguro de fechas
+
+## [0.14.0] - 2025-04-24
+
+### Agregado
+- Completado el Sprint 13: Unificación de Estilos y Corrección de Errores TypeScript
+  - Unificación de archivos statusColors.ts en shared/styles
+  - Unificación de archivos theme.ts en shared/styles
+  - Corrección de errores en interfaces de tema
+  - Corrección de errores en interfaces de colores
+  - Corrección de componentes que acceden a propiedades inexistentes del tema
+  - Mejora de la estructura de carpetas
+
+## [0.13.1] - 2025-04-23
+
+### Agregado
+- Completado el Sprint 12: Refactorización de Arquitectura y Solución de Problemas de Plantillas
+  - Consolidación de archivos duplicados
+  - Migración completa a TypeScript
+  - Reorganización de la estructura de carpetas
+  - Mejora de la gestión de estado
+  - Solución del problema de las plantillas
+  - Documentación y pruebas
+  - Corrección de errores de dependencias faltantes
+  - Implementación de sistema de notificaciones toast con react-toastify
+  - Corrección de problemas de autenticación y duplicación de rutas API
+  - Corrección de errores de TypeScript en componentes
+  - Deshabilitación completa de Zipkin para evitar errores de conexión
+
+## [0.13.0] - 2025-04-22
+
+### Cambios
+- Inicio del Sprint 13: Unificación de Estilos y Corrección de Errores TypeScript
+- Unificación de archivos statusColors.ts en shared/styles
+- Actualización de importaciones para usar la versión unificada de statusColors.ts
+- Unificación de archivos theme.ts en shared/styles
+- Actualización de importaciones para usar la versión unificada de theme.ts
+- Mejora de las interfaces ColorScheme, StatusColorMap y TypeColorMap con tipos más precisos
+- Corrección de componentes que acceden a propiedades inexistentes del tema
+
+### Corregido
+- Corrección de errores de TypeScript en theme.ts y styled.d.ts
+- Corrección de propiedades duplicadas en statusColors.ts
+- Corrección de importaciones en shared/styles/index.ts
+- Corrección de referencias a propiedades inexistentes del tema en componentes
+
+### Agregado
 - Mejoras en formularios de actividades con validación y asistencia
   - Implementación de componente AutocompleteInput para sugerencias mientras se escribe
   - Sistema de sugerencias contextuales basadas en datos históricos

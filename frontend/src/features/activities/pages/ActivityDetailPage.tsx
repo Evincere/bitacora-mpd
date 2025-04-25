@@ -16,7 +16,7 @@ const ActivityDetailPage: React.FC = () => {
   // Obtener la actividad
   const { data: activity, isLoading, error } = useQuery({
     queryKey: ['activity', activityId],
-    queryFn: () => activitiesService.getActivity(activityId),
+    queryFn: () => activitiesService.getActivityById(activityId),
     enabled: !!activityId
   });
 
@@ -37,10 +37,10 @@ const ActivityDetailPage: React.FC = () => {
   }
 
   return (
-    <ActivityDetail 
-      activity={activity as Activity} 
-      onClose={handleClose} 
-      onEdit={handleEdit} 
+    <ActivityDetail
+      activity={activity as Activity}
+      onClose={handleClose}
+      onEdit={handleEdit}
     />
   );
 };

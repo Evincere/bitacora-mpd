@@ -40,23 +40,23 @@ const SkeletonBase = styled.div<SkeletonBaseProps & { $animation?: 'shimmer' | '
   height: ${({ height }) => (typeof height === 'number' ? `${height}px` : height || '16px')};
   margin: ${({ margin }) => margin || '0'};
   border-radius: 4px;
-  
+
   /* Animación de shimmer (por defecto) */
-  ${({ $animation }) => $animation === 'shimmer' || !$animation ? `
-    background: ${({ theme }) => theme.skeletonBackground || '#f0f0f0'};
+  ${({ $animation, theme }) => $animation === 'shimmer' || !$animation ? `
+    background: ${theme.skeletonBackground || '#f0f0f0'};
     background-image: linear-gradient(
       90deg,
-      ${({ theme }) => theme.skeletonBackground || '#f0f0f0'} 25%,
-      ${({ theme }) => theme.skeletonHighlight || '#e0e0e0'} 50%,
-      ${({ theme }) => theme.skeletonBackground || '#f0f0f0'} 75%
+      ${theme.skeletonBackground || '#f0f0f0'} 25%,
+      ${theme.skeletonHighlight || '#e0e0e0'} 50%,
+      ${theme.skeletonBackground || '#f0f0f0'} 75%
     );
     background-size: 200% 100%;
     animation: ${shimmerAnimation} 1.5s infinite linear;
   ` : ''}
-  
+
   /* Animación de pulso */
-  ${({ $animation }) => $animation === 'pulse' ? `
-    background-color: ${({ theme }) => theme.skeletonBackground || '#f0f0f0'};
+  ${({ $animation, theme }) => $animation === 'pulse' ? `
+    background-color: ${theme.skeletonBackground || '#f0f0f0'};
     animation: ${pulseAnimation} 1.5s ease-in-out infinite;
   ` : ''}
 `;
@@ -113,7 +113,6 @@ const Skeleton: React.FC<SkeletonProps> = ({
           height={height}
           margin={margin}
           $animation={animation}
-          style={variantProps.style}
           {...variantProps}
         />
       ))}

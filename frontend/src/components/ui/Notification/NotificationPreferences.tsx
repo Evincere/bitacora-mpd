@@ -529,8 +529,27 @@ const UrgencyOption = styled.button<{ $active: boolean; $urgencyLevel: UrgencyLe
   transition: all 0.2s;
 
   ${({ $urgencyLevel, $active, theme }) => {
-    const level = getUrgencyColor($urgencyLevel);
-    const color = theme[level];
+    // Determinar el color basado en el nivel de urgencia
+    let colorKey: string;
+    switch ($urgencyLevel) {
+      case UrgencyLevel.LOW:
+        colorKey = 'info';
+        break;
+      case UrgencyLevel.MEDIUM:
+        colorKey = 'primary';
+        break;
+      case UrgencyLevel.HIGH:
+        colorKey = 'warning';
+        break;
+      case UrgencyLevel.CRITICAL:
+        colorKey = 'error';
+        break;
+      default:
+        colorKey = 'primary';
+    }
+
+    // Acceder a las propiedades del tema de forma segura
+    const color = theme[colorKey as keyof typeof theme] as string || theme.primary;
     const bgColor = `${color}20`;
 
     if ($active) {

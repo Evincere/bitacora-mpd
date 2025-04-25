@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { FiArrowUp, FiArrowDown } from 'react-icons/fi'
+import { FiArrowUp, FiArrowDown, FiLoader } from 'react-icons/fi'
 
 const Card = styled.div`
   background-color: ${({ theme }) => theme.cardBackground};
@@ -39,6 +39,9 @@ const Value = styled.div`
   font-size: 32px;
   font-weight: 700;
   margin-bottom: 8px;
+  height: 38px; /* Altura fija para evitar saltos durante la carga */
+  display: flex;
+  align-items: center;
 `
 
 const TrendWrapper = styled.div`
@@ -63,7 +66,17 @@ const TrendLabel = styled.span`
   margin-left: 4px;
 `
 
-const StatCard = ({ title, value, icon, color, trend }) => {
+const LoadingSpinner = styled(FiLoader)`
+  animation: spin 1s linear infinite;
+  color: ${({ theme }) => theme.textSecondary};
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const StatCard = ({ title, value, icon, color, trend, isLoading = false }) => {
   const isPositive = trend >= 0
 
   return (
@@ -75,14 +88,20 @@ const StatCard = ({ title, value, icon, color, trend }) => {
         </IconWrapper>
       </CardHeader>
 
-      <Value>{value}</Value>
+      <Value>
+        {isLoading ? <LoadingSpinner size={24} /> : value}
+      </Value>
 
       <TrendWrapper $positive={isPositive}>
-        <TrendIcon>
-          {isPositive ? <FiArrowUp size={12} /> : <FiArrowDown size={12} />}
-        </TrendIcon>
-        <TrendValue>{Math.abs(trend)}%</TrendValue>
-        <TrendLabel>vs. semana anterior</TrendLabel>
+        {!isLoading && (
+          <>
+            <TrendIcon>
+              {isPositive ? <FiArrowUp size={12} /> : <FiArrowDown size={12} />}
+            </TrendIcon>
+            <TrendValue>{Math.abs(trend)}%</TrendValue>
+            <TrendLabel>vs. semana anterior</TrendLabel>
+          </>
+        )}
       </TrendWrapper>
     </Card>
   )
