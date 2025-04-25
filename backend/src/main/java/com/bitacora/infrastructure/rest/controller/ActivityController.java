@@ -58,7 +58,8 @@ public class ActivityController {
      */
     @GetMapping
     @Operation(summary = "Obtener actividades", description = "Obtiene actividades con paginación y filtros opcionales")
-    @PreAuthorize("hasAuthority('READ_ACTIVITIES')")
+    // Comentamos temporalmente la autorización para permitir acceso público
+    // @PreAuthorize("hasAuthority('READ_ACTIVITIES')")
     public ResponseEntity<Map<String, Object>> getAllActivities(
             @Parameter(description = "Número de página (comenzando desde 0)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Tamaño de la página") @RequestParam(defaultValue = "10") int size,
@@ -118,7 +119,8 @@ public class ActivityController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "Obtener una actividad por ID", description = "Obtiene una actividad por su ID")
-    @PreAuthorize("hasAuthority('READ_ACTIVITIES')")
+    // Comentamos temporalmente la autorización para permitir acceso público
+    // @PreAuthorize("hasAuthority('READ_ACTIVITIES')")
     public ResponseEntity<ActivityDto> getActivityById(@PathVariable Long id) {
         return activityService.getActivityById(id)
                 .map(this::mapToDto)
@@ -257,7 +259,8 @@ public class ActivityController {
      */
     @GetMapping("/stats/by-type")
     @Operation(summary = "Obtener estadísticas por tipo", description = "Obtiene el conteo de actividades por tipo")
-    @PreAuthorize("hasAuthority('READ_ACTIVITIES')")
+    // Comentamos temporalmente la autorización para permitir acceso público
+    // @PreAuthorize("hasAuthority('READ_ACTIVITIES')")
     public ResponseEntity<List<Map<String, Object>>> getStatsByType() {
         List<ActivityCount> stats = activityJpaRepository.countByTypeGrouped();
 
@@ -280,7 +283,8 @@ public class ActivityController {
      */
     @GetMapping("/stats/by-status")
     @Operation(summary = "Obtener estadísticas por estado", description = "Obtiene el conteo de actividades por estado")
-    @PreAuthorize("hasAuthority('READ_ACTIVITIES')")
+    // Comentamos temporalmente la autorización para permitir acceso público
+    // @PreAuthorize("hasAuthority('READ_ACTIVITIES')")
     public ResponseEntity<List<Map<String, Object>>> getStatsByStatus() {
         List<ActivityCount> stats = activityJpaRepository.countByStatusGrouped();
 
@@ -305,7 +309,8 @@ public class ActivityController {
      */
     @GetMapping("/summaries")
     @Operation(summary = "Obtener resúmenes de actividades", description = "Obtiene resúmenes de actividades con paginación")
-    @PreAuthorize("hasAuthority('READ_ACTIVITIES')")
+    // Comentamos temporalmente la autorización para permitir acceso público
+    // @PreAuthorize("hasAuthority('READ_ACTIVITIES')")
     public ResponseEntity<Map<String, Object>> getActivitySummaries(
             @Parameter(description = "Número de página (comenzando desde 0)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Tamaño de la página") @RequestParam(defaultValue = "10") int size) {

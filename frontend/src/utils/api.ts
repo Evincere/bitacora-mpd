@@ -15,9 +15,21 @@ const api = axios.create({
 // Interceptor para agregar token de autenticación
 api.interceptors.request.use(
   (config) => {
+    // Intentar obtener el token directamente
+    const token = localStorage.getItem('bitacora_token');
+    if (token) {
+      console.log('api.ts: Añadiendo token a la petición:', token.substring(0, 10) + '...');
+      config.headers.Authorization = `Bearer ${token}`;
+      return config;
+    }
+
+    // Si no hay token directo, intentar obtenerlo del objeto usuario
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (user && user.token) {
+      console.log('api.ts: Usando token del objeto usuario:', user.token.substring(0, 10) + '...');
       config.headers.Authorization = `${user.tokenType || 'Bearer'} ${user.token}`;
+    } else {
+      console.warn('api.ts: No se encontró token para la petición');
     }
     return config;
   },

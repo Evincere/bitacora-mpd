@@ -498,6 +498,30 @@ El proyecto utiliza `.gitignore` para evitar que archivos con información sensi
 
 ### Sprint 5: Documentación y Calidad
 
+- ✅ Documentación completa de la API con OpenAPI
+- ✅ Mejora de la documentación del código
+- ✅ Implementación de análisis de calidad con SonarCloud
+- ✅ Corrección de problemas de calidad detectados
+
+### Sprint 15: Sistema de Gestión de Tareas
+
+- ✅ Implementación del modelo de datos para el sistema de gestión de tareas
+  - ✅ Creación de nuevos roles de usuario (ADMIN, ASIGNADOR, SOLICITANTE, EJECUTOR)
+  - ✅ Creación de nuevos estados de actividad (REQUESTED, ASSIGNED, IN_PROGRESS, COMPLETED, APPROVED, REJECTED, CANCELLED)
+  - ✅ Implementación de entidades de soporte (ActivityCategory, ActivityHistory, ActivityComment, ActivityAttachment)
+  - ✅ Migración de base de datos para nuevas entidades y campos
+- ✅ Implementación del flujo de trabajo para SOLICITANTES, ASIGNADORES y EJECUTORES
+  - ✅ Implementación del patrón State para estados de actividad
+  - ✅ Creación de clases concretas para cada estado
+  - ✅ Implementación de reglas de transición entre estados
+  - ✅ Desarrollo de validaciones para cada transición
+  - ✅ Implementación de servicio para gestionar el flujo de trabajo
+- ⏳ Implementación de sistema de categorización y priorización de tareas
+- ⏳ Creación de interfaces específicas para cada rol
+- ⏳ Implementación de sistema de notificaciones para el flujo de trabajo
+- ⏳ Desarrollo de reportes y métricas para seguimiento de tareas
+- ⏳ Preparación para integración futura con Google Calendar y Drive
+
 - ✅ Documentación completa de arquitectura (diagramas, flujos, componentes)
 - ✅ Mejora de la documentación de API con OpenAPI/Swagger
 - ✅ Creación de guías de desarrollo y contribución

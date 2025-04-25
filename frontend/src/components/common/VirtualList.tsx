@@ -129,6 +129,10 @@ function VirtualList<T>({
   // Obtener los elementos virtuales
   const virtualItems = virtualizer.getVirtualItems();
 
+  // Agregar logs para depuración
+  console.log('VirtualList: Renderizando lista con', items.length, 'elementos');
+  console.log('VirtualList: Elementos virtuales:', virtualItems.length);
+
   return (
     <ListContainer
       ref={parentRef}
@@ -137,18 +141,26 @@ function VirtualList<T>({
       data-testid="virtual-list-container"
     >
       <div style={{ height: totalHeight, position: 'relative' }}>
-        {virtualItems.map(virtualItem => (
-          <ListItem
-            key={virtualItem.key}
-            data-index={virtualItem.index}
-            style={{
-              height: dynamicSize ? 'auto' : `${virtualItem.size}px`,
-              transform: `translateY(${virtualItem.start}px)`
-            }}
-          >
-            {renderItem(items[virtualItem.index], virtualItem.index)}
-          </ListItem>
-        ))}
+        {virtualItems.map(virtualItem => {
+          // Verificar que el índice sea válido
+          if (virtualItem.index >= items.length) {
+            console.error('Índice fuera de rango:', virtualItem.index, 'para array de tamaño', items.length);
+            return null;
+          }
+
+          return (
+            <ListItem
+              key={virtualItem.key}
+              data-index={virtualItem.index}
+              style={{
+                height: dynamicSize ? 'auto' : `${virtualItem.size}px`,
+                transform: `translateY(${virtualItem.start}px)`
+              }}
+            >
+              {renderItem(items[virtualItem.index], virtualItem.index)}
+            </ListItem>
+          );
+        })}
       </div>
     </ListContainer>
   );

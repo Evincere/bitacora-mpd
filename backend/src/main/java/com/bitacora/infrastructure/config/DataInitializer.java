@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -20,10 +21,18 @@ import java.util.Set;
 
 /**
  * Clase para inicializar datos de prueba en la aplicación.
+ *
+ * NOTA: Esta clase está deshabilitada por defecto ya que los datos de prueba
+ * ahora se inicializan mediante migraciones de Flyway. Se mantiene como
+ * mecanismo
+ * de respaldo y solo se activa con el perfil "data-init".
+ *
+ * @see backend/README-DATA-INITIALIZATION.md para más información.
  */
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
+@Profile("data-init") // Solo se activa con el perfil "data-init"
 public class DataInitializer {
 
     private final UserRepository userRepository;
@@ -37,7 +46,10 @@ public class DataInitializer {
     @Bean
     public CommandLineRunner initData() {
         return args -> {
-            log.info("Inicializando datos de prueba...");
+            log.info("Inicializando datos de prueba mediante DataInitializer (perfil 'data-init' activo)...");
+            log.warn(
+                    "NOTA: Este mecanismo está obsoleto. Se recomienda usar las migraciones de Flyway para inicializar datos.");
+            log.warn("Ver backend/README-DATA-INITIALIZATION.md para más información.");
 
             // Crear un usuario de prueba con una contraseña conocida
             // Primero eliminamos el usuario si ya existe
@@ -86,7 +98,7 @@ public class DataInitializer {
 
         // Crear usuario administrador
         // Usar el hash generado por el depurador de autenticación
-        String adminPassword = "Admin@123";
+        // Contraseña: Admin@123
         String adminHashedPassword = "$2a$10$bieh3BVExvsBBABMSR.oduEksKK2jQhTd.r0lJQ/.HEqjPsVhH4fe";
 
         User adminUser = User.builder()

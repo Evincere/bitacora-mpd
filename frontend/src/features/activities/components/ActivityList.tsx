@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import {
   FiEdit2,
@@ -15,7 +15,7 @@ import ActivityForm from './ActivityForm';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import VirtualList from '@/components/common/VirtualList';
 import PresenceIndicator from '@/components/ui/Collaboration/PresenceIndicator';
-import { useActivityPresence } from '@/hooks/useActivityPresence';
+// Ya no necesitamos importar useActivityPresence porque no lo usamos directamente en renderActivityRow
 import { Activity, ActivityStatus, ActivityType } from '@/types/models';
 
 const ListContainer = styled.div`
@@ -242,6 +242,31 @@ const VirtualTableContainer = styled.div`
   overflow: hidden;
 `;
 
+// Estilos para la tabla virtual basada en divs
+const VirtualTableStyles = styled.div`
+  .virtual-table-row {
+    display: flex;
+    border-bottom: 1px solid ${({ theme }) => theme.border};
+    &:hover {
+      background-color: ${({ theme }) => theme.backgroundSecondary};
+    }
+  }
+
+  .virtual-table-cell {
+    padding: 16px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+
+    &:nth-child(1) { width: 15%; } /* Fecha */
+    &:nth-child(2) { width: 12%; } /* Tipo */
+    &:nth-child(3) { width: 18%; } /* Persona */
+    &:nth-child(4) { width: 30%; } /* Descripción */
+    &:nth-child(5) { width: 15%; } /* Estado */
+    &:nth-child(6) { width: 10%; justify-content: center; } /* Acciones */
+  }
+`;
+
 const getStatusIcon = (status: string) => {
   switch (status) {
     case ActivityStatus.COMPLETADA:
@@ -361,6 +386,21 @@ const ActivityList = ({ activities }: ActivityListProps) => {
     );
   }
 
+  // Crear un mapa para almacenar la presencia de actividades
+  // Esto evita llamar al hook dentro de renderActivityRow
+  const activityPresenceMap = useMemo(() => {
+    const map = new Map<number, string[]>();
+
+    // Inicializar el mapa con arrays vacíos
+    activities.forEach(activity => {
+      if (activity && activity.id) {
+        map.set(activity.id, []);
+      }
+    });
+
+    return map;
+  }, [activities]);
+
   const renderActivityRow = (activity: Activity) => {
     // Verificar que la actividad tenga los campos necesarios
     if (!activity || !activity.id) {
@@ -368,8 +408,8 @@ const ActivityList = ({ activities }: ActivityListProps) => {
       return null;
     }
 
-    // Usar el hook de presencia para esta actividad
-    const { userNames } = useActivityPresence(activity.id);
+    // Obtener los nombres de usuario del mapa
+    const userNames = activityPresenceMap.get(activity.id) || [];
 
     try {
       // Intentar formatear la fecha con manejo de errores
@@ -456,6 +496,104 @@ const ActivityList = ({ activities }: ActivityListProps) => {
     }
   };
 
+  // Renderizar una fila de actividad como un div con estructura de tabla
+  const renderActivityRowAsDiv = (activity: Activity) => {
+    // Verificar que la actividad tenga los campos necesarios
+    if (!activity || !activity.id) {
+      console.error('Actividad inválida:', activity);
+      return null;
+    }
+
+    // Obtener los nombres de usuario del mapa
+    const userNames = activityPresenceMap.get(activity.id) || [];
+
+    try {
+      // Intentar formatear la fecha con manejo de errores
+      let formattedDate = { date: 'N/A', time: 'N/A' };
+      try {
+        if (activity.date) {
+          formattedDate = formatDate(activity.date);
+        } else if (activity.createdAt) {
+          formattedDate = formatDate(activity.createdAt);
+          console.warn('Usando createdAt en lugar de date para la actividad:', activity.id);
+        }
+      } catch (error) {
+        console.error('Error al formatear fecha:', error);
+      }
+
+      // Asegurar que la descripción sea una cadena
+      const description = typeof activity.description === 'string'
+        ? activity.description
+        : 'Sin descripción';
+
+      // Truncar la descripción de manera segura
+      const truncatedDescription = description.length > 50
+        ? `${description.substring(0, 50)}...`
+        : description;
+
+      return (
+        <div className="virtual-table-row" key={activity.id}>
+          <div className="virtual-table-cell" style={{ position: 'relative' }}>
+            <DateCell>
+              <span className="date">{formattedDate.date}</span>
+              <span className="time">{formattedDate.time}</span>
+            </DateCell>
+            <PresenceIndicator
+              activityId={activity.id}
+              size="small"
+              position="top-right"
+              userNames={userNames}
+            />
+          </div>
+          <div className="virtual-table-cell">
+            <TypeBadge $type={activity.type || 'OTRO'}>
+              {activity.type || 'OTRO'}
+            </TypeBadge>
+          </div>
+          <div className="virtual-table-cell">
+            <PersonCell>
+              <span className="name">{activity.person || 'N/A'}</span>
+              <span className="role">{activity.role || 'N/A'}</span>
+            </PersonCell>
+          </div>
+          <div className="virtual-table-cell">{
+            truncatedDescription}
+          </div>
+          <div className="virtual-table-cell">
+            <StatusBadge $status={activity.status || 'PENDIENTE'}>
+              {getStatusIcon(activity.status || 'PENDIENTE')}
+              {activity.status || 'PENDIENTE'}
+            </StatusBadge>
+          </div>
+          <div className="virtual-table-cell">
+            <ActionsContainer>
+              <ActionButton onClick={() => handleMenuToggle(activity.id)}>
+                <FiMoreVertical size={18} />
+              </ActionButton>
+              <ActionsMenu $show={openMenuId === activity.id}>
+                <MenuItem onClick={() => handleViewDetail(activity)}>
+                  <FiEye size={16} />
+                  Ver detalle
+                </MenuItem>
+                <MenuItem onClick={() => handleEdit(activity)}>
+                  <FiEdit2 size={16} />
+                  Editar
+                </MenuItem>
+                <MenuItem $danger onClick={() => handleDelete(activity)}>
+                  <FiTrash2 size={16} />
+                  Eliminar
+                </MenuItem>
+              </ActionsMenu>
+            </ActionsContainer>
+          </div>
+        </div>
+      );
+    } catch (error) {
+      console.error('Error al renderizar actividad:', error, activity);
+      return null;
+    }
+  };
+
   return (
     <>
       <ListContainer>
@@ -473,15 +611,17 @@ const ActivityList = ({ activities }: ActivityListProps) => {
         </Table>
 
         <VirtualTableContainer>
-          <VirtualList
-            items={activities}
-            height={500}
-            estimateSize={80}
-            dynamicSize={true}
-            renderItem={renderActivityRow}
-            overscan={10}
-            itemKey={(index) => activities[index]?.id || index}
-          />
+          <VirtualTableStyles>
+            <VirtualList
+              items={activities}
+              height={500}
+              estimateSize={80}
+              dynamicSize={true}
+              renderItem={renderActivityRowAsDiv}
+              overscan={10}
+              itemKey={(index) => activities[index]?.id || index}
+            />
+          </VirtualTableStyles>
         </VirtualTableContainer>
       </ListContainer>
 

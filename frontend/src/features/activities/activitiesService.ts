@@ -9,7 +9,9 @@ import { Activity } from '@/types/models';
 import { apiRequest } from '@/utils/api-ky';
 
 // Asegurarse de que la URL no incluya el prefijo /app
-const API_URL = '/api/activities';
+const API_URL = 'activities';
+
+// Nota: No incluimos '/api/' porque ya está en la configuración base de la API
 
 // Mostrar información sobre el modo de servicio
 console.log(`Servicio de actividades configurado en modo real`);
@@ -166,6 +168,7 @@ const getActivities = async (params?: ActivityQueryParams): Promise<ActivitiesRe
  */
 const getActivityById = async (id: number): Promise<Activity> => {
   try {
+    // Asegurarse de que la URL no tenga barras duplicadas
     return await apiRequest<Activity>(`${API_URL}/${id}`);
   } catch (error) {
     console.error(`Error al obtener actividad con ID ${id}:`, error);
@@ -294,6 +297,7 @@ const deleteActivity = async (id: number): Promise<void> => {
  */
 const getStatsByType = async (): Promise<any[]> => {
   try {
+    // Asegurarse de que la URL no tenga barras duplicadas
     return await apiRequest<any[]>(`${API_URL}/stats/by-type`);
   } catch (error) {
     console.error('Error al obtener estadísticas por tipo:', error);
@@ -307,6 +311,7 @@ const getStatsByType = async (): Promise<any[]> => {
  */
 const getStatsByStatus = async (): Promise<any[]> => {
   try {
+    // Asegurarse de que la URL no tenga barras duplicadas
     return await apiRequest<any[]>(`${API_URL}/stats/by-status`);
   } catch (error) {
     console.error('Error al obtener estadísticas por estado:', error);
@@ -322,6 +327,7 @@ const getStatsByStatus = async (): Promise<any[]> => {
  */
 const getActivitySummaries = async (page: number = 0, size: number = 10): Promise<any> => {
   try {
+    // Asegurarse de que la URL no tenga barras duplicadas
     return await apiRequest<any>(`${API_URL}/summaries?page=${page}&size=${size}`);
   } catch (error) {
     console.error('Error al obtener resúmenes de actividades:', error);
