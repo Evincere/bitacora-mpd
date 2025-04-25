@@ -1036,199 +1036,233 @@ Este sprint se enfocará en mejorar el rendimiento de la aplicación, corregir e
 ## Sprint 15: Implementación del Sistema de Gestión de Tareas (4 semanas)
 
 ### Objetivos del Sprint
-- Implementar sistema de reportes y analytics avanzados
-- Integrar calendario y sistema de recordatorios
-- Mejorar la colaboración entre usuarios
-- Implementar gestión de recursos y tiempo
-- Añadir automatizaciones y workflows
-- Mejorar la experiencia de usuario
-- Integrar inteligencia artificial
-- Implementar sistema de documentación integrado
+- Implementar el nuevo modelo de datos para el sistema de gestión de tareas
+- Desarrollar el flujo de trabajo para SOLICITANTES, ASIGNADORES y EJECUTORES
+- Implementar sistema de categorización y priorización de tareas
+- Crear interfaces específicas para cada rol
+- Implementar sistema de notificaciones para el flujo de trabajo
+- Desarrollar reportes y métricas para seguimiento de tareas
+- Preparar integración futura con Google Calendar y Drive
 
-### 1. Sistema de Reportes y Analytics (1 semana)
+### 1. Actualización del Modelo de Datos (1 semana)
 
-#### 1.1 Dashboard Personalizable (3 días)
-- [ ] Implementar sistema de widgets personalizables
-  - [ ] Crear componentes base para diferentes tipos de gráficos
-  - [ ] Implementar sistema de arrastrar y soltar para organizar widgets
-  - [ ] Añadir opciones de personalización para cada widget
-- [ ] Desarrollar visualizaciones de datos
-  - [ ] Implementar gráficos de actividades por período
-  - [ ] Crear visualizaciones de métricas de productividad
-  - [ ] Desarrollar KPIs personalizables
-- [ ] Implementar exportación de datos
-  - [ ] Añadir exportación a PDF
-  - [ ] Implementar exportación a Excel
-  - [ ] Crear plantillas personalizables para exportación
+#### 1.1 Implementación de Entidades Principales (3 días)
+- [x] Actualizar modelo de Usuario (User)
+  - [x] Agregar enum UserRole con roles ADMIN, ASIGNADOR, SOLICITANTE, EJECUTOR
+  - [x] Actualizar repositorio y servicios de usuario
+  - [x] Implementar migración de base de datos para nuevos roles
+- [x] Ampliar modelo de Actividad (Activity)
+  - [x] Agregar campos para flujo de trabajo: requesterId, assignerId, executorId
+  - [x] Agregar campos de fechas: requestDate, assignmentDate, startDate, completionDate, approvalDate
+  - [x] Agregar campos para seguimiento: requestNotes, assignmentNotes, executionNotes, completionNotes, approvalNotes
+  - [x] Agregar campos para métricas: estimatedHours, actualHours, priority
+  - [x] Implementar migración de base de datos para nuevos campos
+- [x] Implementar enum ActivityStatus
+  - [x] Definir estados: REQUESTED, ASSIGNED, IN_PROGRESS, COMPLETED, APPROVED, REJECTED, CANCELLED
+  - [x] Actualizar servicios y controladores para manejar nuevos estados
 
-#### 1.2 Análisis Predictivo (2 días)
-- [ ] Implementar estimación de tiempos
-  - [ ] Desarrollar algoritmo de estimación basado en datos históricos
-  - [ ] Crear visualización de estimaciones vs. tiempos reales
-  - [ ] Implementar ajuste automático de estimaciones
-- [ ] Desarrollar análisis de patrones
-  - [ ] Implementar detección de patrones de productividad
-  - [ ] Crear visualización de tendencias
-  - [ ] Desarrollar sistema de alertas para desviaciones
+#### 1.2 Implementación de Entidades de Soporte (2 días)
+- [x] Crear entidad ActivityHistory
+  - [x] Implementar campos para seguimiento de cambios de estado
+  - [x] Crear repositorio y servicios para historial
+  - [x] Implementar migración de base de datos
+- [x] Crear entidad ActivityComment
+  - [x] Implementar campos para comentarios en actividades
+  - [x] Crear repositorio y servicios para comentarios
+  - [x] Implementar migración de base de datos
+- [x] Crear entidad ActivityAttachment
+  - [x] Implementar campos para archivos adjuntos
+  - [x] Crear repositorio y servicios para adjuntos
+  - [x] Implementar migración de base de datos
+- [x] Implementar servicios de aplicación
+  - [x] Crear servicios en la capa de aplicación para cada entidad
+  - [x] Implementar DTOs y mappers para la API REST
+  - [x] Crear controladores REST para exponer la funcionalidad
 
-### 2. Integración con Calendario y Recordatorios (3 días)
+### 2. Implementación del Flujo de Trabajo (1 semana)
 
-#### 2.1 Sincronización con Calendarios Externos
-- [ ] Implementar integración con Google Calendar
-  - [ ] Configurar OAuth para autenticación
-  - [ ] Implementar sincronización bidireccional
-  - [ ] Manejar conflictos de sincronización
-- [ ] Implementar integración con Outlook
-  - [ ] Configurar Microsoft Graph API
-  - [ ] Implementar sincronización bidireccional
-  - [ ] Manejar conflictos de sincronización
+#### 2.1 Desarrollo de Servicios de Flujo de Trabajo (3 días)
+- [x] Implementar patrón State para estados de actividad
+  - [x] Crear interfaz ActivityState y clases concretas para cada estado
+  - [x] Implementar reglas de transición entre estados
+  - [x] Desarrollar validaciones para cada transición
+- [x] Implementar servicios para el flujo de trabajo
+  - [x] Crear servicio para solicitud de actividades (SOLICITANTE)
+  - [x] Crear servicio para asignación de actividades (ASIGNADOR)
+  - [x] Crear servicio para ejecución de actividades (EJECUTOR)
+  - [x] Implementar servicio para aprobación/rechazo de actividades
 
-#### 2.2 Sistema de Recordatorios
-- [ ] Implementar notificaciones push
-  - [ ] Configurar servicio de notificaciones push
-  - [ ] Implementar manejo de permisos
-  - [ ] Crear sistema de priorización de notificaciones
-- [ ] Desarrollar sistema de recordatorios por correo
-  - [ ] Implementar plantillas de correo personalizables
-  - [ ] Crear sistema de programación de recordatorios
-  - [ ] Implementar gestión de preferencias de notificación
+#### 2.2 Desarrollo de Endpoints de API (2 días)
+- [ ] Implementar endpoints para el flujo de trabajo
+  - [ ] POST /api/activities/request - Crear solicitud (SOLICITANTE)
+  - [ ] POST /api/activities/{id}/assign - Asignar tarea (ASIGNADOR)
+  - [ ] POST /api/activities/{id}/start - Iniciar tarea (EJECUTOR)
+  - [ ] POST /api/activities/{id}/complete - Completar tarea (EJECUTOR)
+  - [ ] POST /api/activities/{id}/approve - Aprobar tarea (ASIGNADOR)
+  - [ ] POST /api/activities/{id}/reject - Rechazar tarea (ASIGNADOR)
+- [ ] Implementar endpoints para comentarios y adjuntos
+  - [ ] Endpoints CRUD para comentarios en actividades
+  - [ ] Endpoints para gestión de archivos adjuntos
+  - [ ] Endpoints para consultar historial de actividades
 
-### 3. Sistema de Colaboración (4 días)
+### 3. Sistema de Categorización y Priorización (1 semana)
 
-#### 3.1 Espacios de Trabajo Compartidos
-- [ ] Implementar sistema de equipos
-  - [ ] Crear modelo de datos para equipos y roles
-  - [ ] Implementar gestión de permisos por equipo
-  - [ ] Desarrollar interfaz de administración de equipos
-- [ ] Implementar compartición de actividades
-  - [ ] Crear sistema de invitaciones
-  - [ ] Implementar control de acceso granular
-  - [ ] Desarrollar sistema de notificaciones de cambios
+#### 3.1 Implementación de Categorías (3 días)
+- [ ] Desarrollar modelo de categorías
+  - [ ] Crear entidad ActivityCategory con campos name, description, color
+  - [ ] Implementar repositorio y servicios para categorías
+  - [ ] Desarrollar endpoints REST para gestión de categorías
+- [ ] Implementar sistema de categorías extensible
+  - [ ] Permitir a ASIGNADORES crear nuevas categorías
+  - [ ] Implementar categorías predefinidas por defecto
+  - [ ] Desarrollar interfaz para gestión de categorías
 
-#### 3.2 Sistema de Comentarios y Menciones
-- [ ] Implementar sistema de comentarios
-  - [ ] Crear modelo de datos para comentarios y hilos
-  - [ ] Implementar sistema de reacciones
-  - [ ] Desarrollar notificaciones de menciones
-- [ ] Implementar sistema de menciones
-  - [ ] Crear selector de usuarios con @
-  - [ ] Implementar resaltado de menciones
-  - [ ] Desarrollar notificaciones de menciones
+#### 3.2 Implementación de Priorización (2 días)
+- [ ] Desarrollar sistema de prioridades
+  - [ ] Implementar enum ActivityPriority con niveles CRITICAL, HIGH, MEDIUM, LOW, TRIVIAL
+  - [ ] Crear servicios para gestión de prioridades
+  - [ ] Desarrollar visualización de prioridades en la interfaz
+- [ ] Implementar sistema de etiquetas (tags)
+  - [ ] Crear entidad ActivityTag con campos name y color
+  - [ ] Implementar repositorio y servicios para etiquetas
+  - [ ] Desarrollar endpoints REST para gestión de etiquetas
 
-### 4. Gestión de Recursos y Tiempo (3 días)
+### 4. Interfaces Específicas por Rol (1 semana)
 
-#### 4.1 Time Tracking
-- [ ] Implementar cronómetro integrado
-  - [ ] Crear componente de cronómetro
-  - [ ] Implementar registro automático de tiempo
-  - [ ] Desarrollar reportes de tiempo
-- [ ] Implementar reportes de tiempo
-  - [ ] Crear visualizaciones de tiempo invertido
-  - [ ] Implementar exportación de reportes
-  - [ ] Desarrollar análisis de productividad
+#### 4.1 Desarrollo de Vistas para SOLICITANTE (2 días)
+- [ ] Implementar dashboard para SOLICITANTE
+  - [ ] Crear componente de resumen de solicitudes por estado
+  - [ ] Implementar visualización de tiempos de respuesta
+  - [ ] Desarrollar lista de solicitudes recientes
+- [ ] Implementar formulario de solicitud
+  - [ ] Crear formulario para nuevas solicitudes
+  - [ ] Implementar selección de categoría y prioridad
+  - [ ] Desarrollar sistema de adjuntos para solicitudes
 
-#### 4.2 Gestión de Recursos
-- [ ] Implementar control de disponibilidad
-  - [ ] Crear calendario de disponibilidad
-  - [ ] Implementar sistema de solicitudes
-  - [ ] Desarrollar notificaciones de cambios
-- [ ] Implementar sistema de alertas
-  - [ ] Crear sistema de detección de sobrecarga
-  - [ ] Implementar notificaciones de sobrecarga
-  - [ ] Desarrollar sugerencias de reasignación
+#### 4.2 Desarrollo de Vistas para ASIGNADOR (2 días)
+- [ ] Implementar dashboard para ASIGNADOR
+  - [ ] Crear bandeja de entrada de solicitudes pendientes
+  - [ ] Implementar visualización de tareas asignadas por ejecutor
+  - [ ] Desarrollar gráficos de distribución de carga
+- [ ] Implementar formulario de asignación
+  - [ ] Crear interfaz para asignar tareas a ejecutores
+  - [ ] Implementar selección de prioridad y fecha límite
+  - [ ] Desarrollar sistema de notas para la asignación
 
-### 5. Automatizaciones y Workflows (3 días)
+#### 4.3 Desarrollo de Vistas para EJECUTOR (2 días)
+- [ ] Implementar dashboard para EJECUTOR
+  - [ ] Crear lista de tareas asignadas por prioridad
+  - [ ] Implementar visualización de progreso de tareas actuales
+  - [ ] Desarrollar calendario de vencimientos
+- [ ] Implementar formulario de progreso
+  - [ ] Crear interfaz para actualizar el progreso de tareas
+  - [ ] Implementar sistema para registrar tiempo dedicado
+  - [ ] Desarrollar interfaz para completar tareas con resultados
 
-#### 5.1 Constructor de Flujos de Trabajo
-- [ ] Implementar editor visual de workflows
-  - [ ] Crear interfaz de arrastrar y soltar
-  - [ ] Implementar validación de flujos
-  - [ ] Desarrollar sistema de versionado
-- [ ] Implementar sistema de triggers
-  - [ ] Crear sistema de eventos
-  - [ ] Implementar condiciones personalizables
-  - [ ] Desarrollar acciones automáticas
+### 5. Sistema de Notificaciones para el Flujo de Trabajo (3 días)
 
-#### 5.2 Plantillas de Actividades
-- [ ] Implementar sistema de plantillas
-  - [ ] Crear editor de plantillas
-  - [ ] Implementar variables en plantillas
-  - [ ] Desarrollar sistema de versionado
-- [ ] Implementar checklists automáticas
-  - [ ] Crear sistema de checklists dinámicas
-  - [ ] Implementar validación de checklists
-  - [ ] Desarrollar notificaciones de completitud
+#### 5.1 Implementación de Notificaciones en Tiempo Real (2 días)
+- [ ] Desarrollar sistema de notificaciones para cambios de estado
+  - [ ] Implementar notificaciones para nuevas solicitudes (ASIGNADOR)
+  - [ ] Implementar notificaciones para tareas asignadas (EJECUTOR)
+  - [ ] Implementar notificaciones para tareas completadas (ASIGNADOR)
+  - [ ] Implementar notificaciones para tareas aprobadas/rechazadas (SOLICITANTE, EJECUTOR)
+- [ ] Implementar sistema de presencia para colaboración
+  - [ ] Crear sistema para detectar usuarios viendo/editando tareas
+  - [ ] Implementar indicadores visuales de presencia
+  - [ ] Desarrollar notificaciones de edición simultánea
 
-### 6. Mejoras en UX/UI (2 días)
+#### 5.2 Implementación de Centro de Notificaciones (1 día)
+- [ ] Desarrollar interfaz de centro de notificaciones
+  - [ ] Crear componente para mostrar notificaciones por categoría
+  - [ ] Implementar filtros y búsqueda de notificaciones
+  - [ ] Desarrollar sistema de marcado como leído/no leído
+- [ ] Implementar preferencias de notificaciones
+  - [ ] Crear panel de preferencias por tipo de notificación
+  - [ ] Implementar opciones de activación/desactivación
+  - [ ] Desarrollar configuración de métodos de entrega
 
-#### 6.1 Modo Offline
-- [ ] Implementar sincronización offline
-  - [ ] Crear sistema de cola de operaciones
-  - [ ] Implementar resolución de conflictos
-  - [ ] Desarrollar indicador de estado
-- [ ] Implementar caché avanzado
-  - [ ] Crear sistema de caché inteligente
-  - [ ] Implementar limpieza automática
-  - [ ] Desarrollar gestión de espacio
+### 6. Reportes y Métricas (3 días)
 
-#### 6.2 Personalización Avanzada
-- [ ] Implementar temas personalizables
-  - [ ] Crear editor de temas
-  - [ ] Implementar exportación/importación
-  - [ ] Desarrollar temas dinámicos
-- [ ] Implementar layouts ajustables
-  - [ ] Crear sistema de layouts personalizables
-  - [ ] Implementar guardado de layouts
-  - [ ] Desarrollar layouts responsivos
+#### 6.1 Implementación de Reportes Básicos (2 días)
+- [ ] Desarrollar reportes por estado
+  - [ ] Crear endpoint para obtener actividades por estado
+  - [ ] Implementar visualización gráfica de distribución por estado
+  - [ ] Desarrollar filtros por período
+- [ ] Implementar reportes por usuario
+  - [ ] Crear endpoint para obtener actividades por usuario
+  - [ ] Implementar visualización de carga de trabajo por usuario
+  - [ ] Desarrollar métricas de rendimiento individual
+- [ ] Desarrollar reportes por categoría
+  - [ ] Crear endpoint para obtener actividades por categoría
+  - [ ] Implementar visualización de distribución por categoría
+  - [ ] Desarrollar análisis de tendencias por categoría
 
-### 7. Inteligencia Artificial (3 días)
+#### 6.2 Implementación de Métricas Avanzadas (1 día)
+- [ ] Desarrollar métricas de tiempo de respuesta
+  - [ ] Implementar cálculo de tiempo entre solicitud y asignación
+  - [ ] Crear visualización de tiempos promedio por ASIGNADOR
+  - [ ] Desarrollar alertas para tiempos excesivos
+- [ ] Implementar métricas de tiempo de finalización
+  - [ ] Calcular tiempo entre asignación y completitud
+  - [ ] Crear visualización de tiempos promedio por EJECUTOR
+  - [ ] Desarrollar comparativa entre tiempo estimado y real
 
-#### 7.1 Asistente Virtual
-- [ ] Implementar sugerencias de priorización
-  - [ ] Crear modelo de aprendizaje automático
-  - [ ] Implementar análisis de contexto
-  - [ ] Desarrollar interfaz de sugerencias
-- [ ] Implementar análisis de sentimiento
-  - [ ] Crear sistema de análisis de texto
-  - [ ] Implementar detección de emociones
-  - [ ] Desarrollar visualización de análisis
+### 7. Preparación para Integraciones Futuras (2 días)
 
-#### 7.2 Automatización Inteligente
-- [ ] Implementar categorización automática
-  - [ ] Crear sistema de clasificación
-  - [ ] Implementar aprendizaje automático
-  - [ ] Desarrollar ajuste manual
-- [ ] Implementar detección de duplicados
-  - [ ] Crear sistema de comparación
-  - [ ] Implementar sugerencias de fusión
-  - [ ] Desarrollar manejo de conflictos
+#### 7.1 Preparación para Google Calendar (1 día)
+- [ ] Diseñar interfaces para integración con Google Calendar
+  - [ ] Crear interfaz CalendarIntegrationService
+  - [ ] Definir métodos para crear, actualizar y eliminar eventos
+  - [ ] Diseñar estructura de datos para eventos de calendario
+- [ ] Implementar configuración para OAuth
+  - [ ] Crear estructura para almacenar credenciales de OAuth
+  - [ ] Diseñar flujo de autorización
+  - [ ] Preparar endpoints para callback de OAuth
 
-### 8. Sistema de Documentación Integrado (2 días)
+#### 7.2 Preparación para Google Drive (1 día)
+- [ ] Diseñar interfaces para integración con Google Drive
+  - [ ] Crear interfaz DriveIntegrationService
+  - [ ] Definir métodos para subir, descargar y eliminar archivos
+  - [ ] Diseñar estructura de datos para archivos en Drive
+- [ ] Implementar estructura para almacenamiento de archivos
+  - [ ] Crear entidad para almacenar referencias a archivos externos
+  - [ ] Diseñar sistema de permisos para archivos
+  - [ ] Preparar interfaz para gestión de archivos
 
-#### 8.1 Base de Conocimiento
-- [ ] Implementar wiki integrada
-  - [ ] Crear editor de wiki
-  - [ ] Implementar sistema de versionado
-  - [ ] Desarrollar búsqueda avanzada
-- [ ] Implementar vinculación con actividades
-  - [ ] Crear sistema de referencias
-  - [ ] Implementar navegación contextual
-  - [ ] Desarrollar sugerencias de documentación
+### 8. Pruebas y Documentación (1 semana)
 
-#### 8.2 Gestión de Archivos
-- [ ] Implementar almacenamiento local
-  - [ ] Crear sistema de archivos
-  - [ ] Implementar compresión
-  - [ ] Desarrollar búsqueda de archivos
-- [ ] Implementar versionado de documentos
-  - [ ] Crear sistema de versiones
-  - [ ] Implementar comparación de versiones
-  - [ ] Desarrollar restauración de versiones
+#### 8.1 Implementación de Pruebas (3 días)
+- [ ] Desarrollar pruebas unitarias
+  - [ ] Implementar pruebas para la capa de dominio
+  - [ ] Implementar pruebas para la capa de aplicación
+  - [ ] Desarrollar pruebas para servicios y utilidades
+- [ ] Implementar pruebas de integración
+  - [ ] Crear pruebas para el flujo de trabajo completo
+  - [ ] Implementar pruebas para la API REST
+  - [ ] Desarrollar pruebas para la capa de persistencia
+- [ ] Implementar pruebas de interfaz de usuario
+  - [ ] Crear pruebas para componentes principales
+  - [ ] Implementar pruebas para flujos de usuario
+  - [ ] Desarrollar pruebas de accesibilidad
+
+#### 8.2 Documentación (2 días)
+- [ ] Crear documentación técnica
+  - [ ] Documentar arquitectura del sistema
+  - [ ] Crear diagramas UML para entidades y relaciones
+  - [ ] Documentar API REST con OpenAPI/Swagger
+- [ ] Desarrollar guías de usuario
+  - [ ] Crear guías para cada rol (SOLICITANTE, ASIGNADOR, EJECUTOR)
+  - [ ] Implementar tutoriales interactivos
+  - [ ] Desarrollar documentación de ayuda contextual
 
 ### Criterios de Aceptación
-- Todas las funcionalidades implementadas y probadas
-- Documentación completa y actualizada
+- Modelo de datos implementado y probado
+- Flujo de trabajo funcionando correctamente para todos los roles
+- Sistema de categorización y priorización implementado
+- Interfaces específicas para cada rol desarrolladas
+- Sistema de notificaciones funcionando correctamente
+- Reportes y métricas implementados
+- Preparación para integraciones futuras completada
 - Pruebas automatizadas implementadas
-- Rendimiento optimizado
-- Experiencia de usuario mejorada
-- Seguridad y privacidad garantizadas
+- Documentación completa y actualizada

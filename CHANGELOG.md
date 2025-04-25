@@ -3,6 +3,32 @@
 ## [Unreleased]
 
 ### Agregado
+- Inicio del Sprint 15: Implementación del Sistema de Gestión de Tareas
+  - Implementación del nuevo modelo de datos para el sistema de gestión de tareas
+    - Creación de enum UserRoleNew con roles ADMIN, ASIGNADOR, SOLICITANTE, EJECUTOR
+    - Creación de enum ActivityStatusNew con estados REQUESTED, ASSIGNED, IN_PROGRESS, COMPLETED, APPROVED, REJECTED, CANCELLED
+    - Creación de enum ActivityPriority con niveles CRITICAL, HIGH, MEDIUM, LOW, TRIVIAL
+    - Ampliación del modelo Activity con campos para flujo de trabajo, seguimiento y métricas
+    - Creación de entidades ActivityCategory, ActivityHistory, ActivityComment y ActivityAttachment
+    - Implementación de migración de base de datos V3__Add_Task_Management_Fields.sql
+    - Creación de entidades JPA y repositorios para las nuevas entidades
+    - Implementación de mappers para convertir entre entidades JPA y modelos de dominio
+    - Creación de interfaces de repositorio en la capa de dominio
+    - Implementación de repositorios en la capa de infraestructura
+    - Creación de servicios de dominio para gestionar las entidades
+    - Implementación de servicios de aplicación para exponer la funcionalidad
+    - Creación de DTOs y mappers para la API REST
+    - Implementación de controladores REST para exponer la funcionalidad
+  - Implementación del flujo de trabajo para actividades
+    - Implementación del patrón State para estados de actividad
+    - Creación de clases concretas para cada estado (RequestedState, AssignedState, InProgressState, etc.)
+    - Implementación de reglas de transición entre estados
+    - Desarrollo de validaciones para cada transición
+    - Implementación de servicio para gestionar el flujo de trabajo de actividades
+
+## [0.14.1] - 2025-04-25
+
+### Agregado
 - Inicio del Sprint 14: Mejoras de Rendimiento y Correcciones de Errores
   - Corrección de problemas con el token de autenticación
     - Revisión del flujo de autenticación en el frontend

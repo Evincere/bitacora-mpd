@@ -1,0 +1,178 @@
+package com.bitacora.application.activity;
+
+import com.bitacora.domain.model.activity.ActivityCategory;
+import com.bitacora.domain.port.repository.ActivityCategoryRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Servicio de aplicación para gestionar categorías de actividades.
+ */
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class ActivityCategoryService {
+    
+    private final ActivityCategoryRepository activityCategoryRepository;
+    
+    /**
+     * Crea una nueva categoría.
+     * 
+     * @param name Nombre de la categoría
+     * @param description Descripción de la categoría
+     * @param color Color de la categoría
+     * @param creatorId ID del usuario creador
+     * @return La categoría creada
+     */
+    @Transactional
+    public ActivityCategory createCategory(String name, String description, String color, Long creatorId) {
+        log.debug("Creando categoría: {}", name);
+        
+        // Verificar si ya existe una categoría con el mismo nombre
+        Optional<ActivityCategory> existingCategory = activityCategoryRepository.findByName(name);
+        if (existingCategory.isPresent()) {
+            throw new IllegalArgumentException("Ya existe una categoría con el nombre: " + name);
+        }
+        
+        ActivityCategory category = ActivityCategory.createCustom(name, description, color, creatorId);
+        return activityCategoryRepository.save(category);
+    }
+    
+    /**
+     * Actualiza una categoría existente.
+     * 
+     * @param id ID de la categoría
+     * @param name Nuevo nombre
+     * @param description Nueva descripción
+     * @param color Nuevo color
+     * @return La categoría actualizada
+     */
+    @Transactional
+    public ActivityCategory updateCategory(Long id, String name, String description, String color) {
+        log.debug("Actualizando categoría con ID: {}", id);
+        
+        ActivityCategory category = activityCategoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró la categoría con ID: " + id));
+        
+        // Verificar si el nuevo nombre ya está en uso por otra categoría
+        if (!category.getName().equals(name)) {
+            Optional<ActivityCategory> existingCategory = activityCategoryRepository.findByName(name);
+            if (existingCategory.isPresent() && !existingCategory.get().getId().equals(id)) {
+                throw new IllegalArgumentException("Ya existe otra categoría con el nombre: " + name);
+            }
+        }
+        
+        // No permitir modificar categorías predeterminadas
+        if (category.isDefault()) {
+            throw new IllegalArgumentException("No se pueden modificar las categorías predeterminadas");
+        }
+        
+        category.setName(name);
+        category.setDescription(description);
+        category.setColor(color);
+        category.setUpdatedAt(LocalDateTime.now());
+        
+        return activityCategoryRepository.save(category);
+    }
+    
+    /**
+     * Obtiene una categoría por su ID.
+     * 
+     * @param id ID de la categoría
+     * @return La categoría encontrada
+     */
+    @Transactional(readOnly = true)
+    public ActivityCategory getCategoryById(Long id) {
+        log.debug("Obteniendo categoría con ID: {}", id);
+        return activityCategoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró la categoría con ID: " + id));
+    }
+    
+    /**
+     * Obtiene todas las categorías.
+     * 
+     * @return Lista de todas las categorías
+     */
+    @Transactional(readOnly = true)
+    public List<ActivityCategory> getAllCategories() {
+        log.debug("Obteniendo todas las categorías");
+        return activityCategoryRepository.findAll();
+    }
+    
+    /**
+     * Obtiene las categorías predeterminadas.
+     * 
+     * @return Lista de categorías predeterminadas
+     */
+    @Transactional(readOnly = true)
+    public List<ActivityCategory> getDefaultCategories() {
+        log.debug("Obteniendo categorías predeterminadas");
+        return activityCategoryRepository.findDefaultCategories();
+    }
+    
+    /**
+     * Obtiene las categorías creadas por un usuario.
+     * 
+     * @param creatorId ID del usuario creador
+     * @param page Número de página (0-based)
+     * @param size Tamaño de página
+     * @return Lista de categorías
+     */
+    @Transactional(readOnly = true)
+    public List<ActivityCategory> getCategoriesByCreator(Long creatorId, int page, int size) {
+        log.debug("Obteniendo categorías creadas por usuario con ID: {}", creatorId);
+        return activityCategoryRepository.findByCreatorId(creatorId, page, size);
+    }
+    
+    /**
+     * Busca categorías por nombre.
+     * 
+     * @param name Nombre a buscar
+     * @return Lista de categorías
+     */
+    @Transactional(readOnly = true)
+    public List<ActivityCategory> searchCategoriesByName(String name) {
+        log.debug("Buscando categorías por nombre: {}", name);
+        return activityCategoryRepository.findByNameContaining(name);
+    }
+    
+    /**
+     * Busca categorías por texto libre.
+     * 
+     * @param query Texto a buscar
+     * @param page Número de página (0-based)
+     * @param size Tamaño de página
+     * @return Lista de categorías
+     */
+    @Transactional(readOnly = true)
+    public List<ActivityCategory> searchCategories(String query, int page, int size) {
+        log.debug("Buscando categorías por texto: {}", query);
+        return activityCategoryRepository.search(query, page, size);
+    }
+    
+    /**
+     * Elimina una categoría.
+     * 
+     * @param id ID de la categoría
+     */
+    @Transactional
+    public void deleteCategory(Long id) {
+        log.debug("Eliminando categoría con ID: {}", id);
+        
+        ActivityCategory category = activityCategoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró la categoría con ID: " + id));
+        
+        // No permitir eliminar categorías predeterminadas
+        if (category.isDefault()) {
+            throw new IllegalArgumentException("No se pueden eliminar las categorías predeterminadas");
+        }
+        
+        activityCategoryRepository.deleteById(id);
+    }
+}
