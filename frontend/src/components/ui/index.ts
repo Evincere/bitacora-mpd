@@ -18,6 +18,16 @@ export {
 export { default as Button } from './Button';
 export { default as Card } from './Card';
 export { default as Skeleton } from './Skeleton';
+export {
+  TextSkeleton,
+  CircleSkeleton,
+  RectSkeleton,
+  ActivityCardSkeleton,
+  ActivitiesListSkeleton,
+  ActivityDetailSkeleton,
+  ActivityFormSkeleton,
+  ProfileSkeleton
+} from './Skeleton';
 export { default as Badge } from './Badge';
 export { default as Pagination } from './Pagination';
 export { default as EmptyState } from './EmptyState';

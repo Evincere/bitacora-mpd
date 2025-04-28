@@ -29,31 +29,31 @@ public class AuthenticationDebugger {
     public CommandLineRunner debugAuthentication() {
         return args -> {
             log.info("Iniciando depuración de autenticación...");
-            
+
             // Contraseñas de prueba
-            String[] passwords = {"Admin@123", "Usuario@123", "test123", "Test@1234"};
-            
+            String[] passwords = { "Admin@123", "Usuario@123", "test123", "Test@1234" };
+
             // Hash conocido para Admin@123
-            String knownHash = "$2a$10$rPiEAgQNIT1TCoKi3Eqq8eVaRaAhaDkVr2lR5DYtYEg3iJZ1L/Wn6";
-            
+            String knownHash = "$2a$10$WpD2XYoCOJRS/4sMniLhGeEuAhvjmjQafgnP1kWHf537L/tBRD0fy";
+
             log.info("Verificando hash conocido para 'Admin@123': {}", knownHash);
-            
+
             // Verificar cada contraseña contra el hash conocido
             for (String password : passwords) {
                 boolean matches = passwordEncoder.matches(password, knownHash);
                 log.info("¿La contraseña '{}' coincide con el hash conocido? {}", password, matches);
-                
+
                 // Generar un nuevo hash para cada contraseña
                 String newHash = passwordEncoder.encode(password);
                 log.info("Nuevo hash para '{}': {}", password, newHash);
-                
+
                 // Verificar que la contraseña coincide con el nuevo hash
                 boolean matchesNewHash = passwordEncoder.matches(password, newHash);
                 log.info("¿La contraseña '{}' coincide con el nuevo hash? {}", password, matchesNewHash);
-                
+
                 log.info("---");
             }
-            
+
             log.info("Depuración de autenticación completada");
         };
     }

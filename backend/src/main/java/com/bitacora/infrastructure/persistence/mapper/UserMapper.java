@@ -1,6 +1,11 @@
 package com.bitacora.infrastructure.persistence.mapper;
 
-import com.bitacora.domain.model.user.*;
+import com.bitacora.domain.model.user.Email;
+import com.bitacora.domain.model.user.Password;
+import com.bitacora.domain.model.user.Permission;
+import com.bitacora.domain.model.user.PersonName;
+import com.bitacora.domain.model.user.User;
+import com.bitacora.domain.model.user.UserRole;
 import com.bitacora.infrastructure.persistence.entity.UserEntity;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +14,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Mapper para convertir entre la entidad UserEntity y el modelo de dominio User.
+ * Mapper para convertir entre la entidad UserEntity y el modelo de dominio
+ * User.
  */
 @Component("userEntityMapper")
 public class UserMapper {

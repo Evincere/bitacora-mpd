@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * Entidad de dominio que representa un registro en el historial de cambios de una actividad.
+ * Entidad de dominio que representa un registro en el historial de cambios de
+ * una actividad.
  */
 @Data
 @Builder
@@ -23,26 +24,26 @@ public class ActivityHistory {
     private String newStatus;
     private LocalDateTime changeDate;
     private String notes;
-    
+
     /**
      * Crea un nuevo registro de historial para un cambio de estado.
-     * 
-     * @param activityId ID de la actividad
-     * @param userId ID del usuario que realizó el cambio
-     * @param userName Nombre del usuario que realizó el cambio
+     *
+     * @param activityId     ID de la actividad
+     * @param userId         ID del usuario que realizó el cambio
+     * @param userName       Nombre del usuario que realizó el cambio
      * @param previousStatus Estado anterior
-     * @param newStatus Nuevo estado
-     * @param notes Notas sobre el cambio
+     * @param newStatus      Nuevo estado
+     * @param notes          Notas sobre el cambio
      * @return Un nuevo registro de historial
      */
     public static ActivityHistory createStatusChange(
-            Long activityId, 
-            Long userId, 
-            String userName, 
-            ActivityStatusNew previousStatus, 
-            ActivityStatusNew newStatus, 
-            String notes) {
-        
+            final Long activityId,
+            final Long userId,
+            final String userName,
+            final ActivityStatusNew previousStatus,
+            final ActivityStatusNew newStatus,
+            final String notes) {
+
         return ActivityHistory.builder()
                 .activityId(activityId)
                 .userId(userId)

@@ -15,11 +15,33 @@ export enum ActivityType {
  * Enumeración de estados de actividad
  */
 export enum ActivityStatus {
-  PENDIENTE = 'PENDIENTE',
-  EN_PROGRESO = 'EN_PROGRESO',
-  COMPLETADA = 'COMPLETADA',
-  CANCELADA = 'CANCELADA',
-  ARCHIVADA = 'ARCHIVADA'
+  REQUESTED = 'REQUESTED',
+  ASSIGNED = 'ASSIGNED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  CANCELLED = 'CANCELLED',
+  ARCHIVED = 'ARCHIVED'
+}
+
+/**
+ * Interfaz para categorías de actividad
+ */
+export interface ActivityCategory {
+  id: number;
+  name: string;
+  description: string;
+  color: string;
+}
+
+/**
+ * Interfaz para prioridades de actividad
+ */
+export interface ActivityPriority {
+  name: string;
+  displayName: string;
+  color: string;
 }
 
 /**
@@ -29,7 +51,10 @@ export enum UserRole {
   ADMIN = 'ADMIN',
   SUPERVISOR = 'SUPERVISOR',
   USUARIO = 'USUARIO',
-  CONSULTA = 'CONSULTA'
+  CONSULTA = 'CONSULTA',
+  SOLICITANTE = 'SOLICITANTE',
+  ASIGNADOR = 'ASIGNADOR',
+  EJECUTOR = 'EJECUTOR'
 }
 
 /**
@@ -58,8 +83,9 @@ export interface User {
  */
 export interface Activity {
   id: number;
+  title?: string;
   date: string;
-  type: ActivityType;
+  type?: ActivityType;
   description: string;
   person?: string;
   role?: string;
@@ -74,6 +100,46 @@ export interface Activity {
   createdAt: string;
   updatedAt: string;
   userId: number;
+
+  // Campos adicionales para el flujo de solicitudes
+  category?: string;
+  priority?: string;
+  dueDate?: string;
+  requestDate?: string;
+  requesterId?: number;
+  requesterName?: string;
+  assignerId?: number;
+  assignerName?: string;
+  executorId?: number;
+  executorName?: string;
+  attachments?: ActivityAttachment[];
+  commentList?: ActivityComment[];
+}
+
+/**
+ * Interfaz para archivos adjuntos de actividad
+ */
+export interface ActivityAttachment {
+  id: number;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  uploadDate: string;
+  downloadUrl: string;
+  uploadedBy: string;
+}
+
+/**
+ * Interfaz para comentarios de actividad
+ */
+export interface ActivityComment {
+  id: number;
+  activityId: number;
+  userId: number;
+  userName: string;
+  userRole: string;
+  comment: string;
+  createdAt: string;
 }
 
 /**

@@ -94,11 +94,11 @@ const FormGrid = styled.div`
   }
 `;
 
-const FormGroup = styled.div<{ fullWidth?: boolean }>`
+const FormGroup = styled.div<{ $fullWidth?: boolean }>`
   display: flex;
   flex-direction: column;
   gap: 8px;
-  grid-column: ${({ fullWidth }) => fullWidth ? '1 / -1' : 'auto'};
+  grid-column: ${({ $fullWidth }) => $fullWidth ? '1 / -1' : 'auto'};
 `;
 
 const FormLabel = styled.label`
@@ -151,17 +151,19 @@ const FormLabel = styled.label`
   }
 `;
 
-const Input = styled.input<{ hasError?: boolean }>`
+const Input = styled.input<{ $hasError?: boolean }>`
   padding: 10px 12px;
   border-radius: 4px;
-  border: 1px solid ${({ theme, hasError }) => hasError ? theme.error : theme.border};
-  background-color: ${({ theme }) => theme.inputBackground};
+  border: 1px solid ${({ theme, $hasError }) => $hasError ? theme.error : theme.border};
+  background-color: ${({ theme }) => theme.backgroundTertiary};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
+  transition: all 0.2s;
 
   &:focus {
     outline: none;
-    border-color: ${({ theme, hasError }) => hasError ? theme.error : theme.primary};
+    border-color: ${({ theme, $hasError }) => $hasError ? theme.error : theme.primary};
+    box-shadow: 0 0 0 2px ${({ theme, $hasError }) => $hasError ? `${theme.error}30` : `${theme.primary}30`};
   }
 
   &:disabled {
@@ -170,33 +172,43 @@ const Input = styled.input<{ hasError?: boolean }>`
   }
 `;
 
-const Select = styled.select<{ hasError?: boolean }>`
+const Select = styled.select<{ $hasError?: boolean }>`
   padding: 10px 12px;
   border-radius: 4px;
-  border: 1px solid ${({ theme, hasError }) => hasError ? theme.error : theme.border};
-  background-color: ${({ theme }) => theme.inputBackground};
+  border: 1px solid ${({ theme, $hasError }) => $hasError ? theme.error : theme.border};
+  background-color: ${({ theme }) => theme.backgroundTertiary};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
+  transition: all 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 30px;
 
   &:focus {
     outline: none;
-    border-color: ${({ theme, hasError }) => hasError ? theme.error : theme.primary};
+    border-color: ${({ theme, $hasError }) => $hasError ? theme.error : theme.primary};
+    box-shadow: 0 0 0 2px ${({ theme, $hasError }) => $hasError ? `${theme.error}30` : `${theme.primary}30`};
   }
 `;
 
-const Textarea = styled.textarea<{ hasError?: boolean }>`
+const Textarea = styled.textarea<{ $hasError?: boolean }>`
   padding: 10px 12px;
   border-radius: 4px;
-  border: 1px solid ${({ theme, hasError }) => hasError ? theme.error : theme.border};
-  background-color: ${({ theme }) => theme.inputBackground};
+  border: 1px solid ${({ theme, $hasError }) => $hasError ? theme.error : theme.border};
+  background-color: ${({ theme }) => theme.backgroundTertiary};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
   resize: vertical;
   min-height: 100px;
+  transition: all 0.2s;
 
   &:focus {
     outline: none;
-    border-color: ${({ theme, hasError }) => hasError ? theme.error : theme.primary};
+    border-color: ${({ theme, $hasError }) => $hasError ? theme.error : theme.primary};
+    box-shadow: 0 0 0 2px ${({ theme, $hasError }) => $hasError ? `${theme.error}30` : `${theme.primary}30`};
   }
 `;
 
@@ -573,7 +585,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                     <Input
                       id="date"
                       type="date"
-                      hasError={!!errors.date}
+                      $hasError={!!errors.date}
                       {...field}
                     />
                   )}
@@ -592,7 +604,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                     <Input
                       id="time"
                       type="time"
-                      hasError={!!errors.time}
+                      $hasError={!!errors.time}
                       {...field}
                     />
                   )}
@@ -610,7 +622,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                   render={({ field }) => (
                     <Select
                       id="type"
-                      hasError={!!errors.type}
+                      $hasError={!!errors.type}
                       {...field}
                     >
                       <option value="">Seleccionar tipo</option>
@@ -633,7 +645,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                   render={({ field }) => (
                     <Select
                       id="status"
-                      hasError={!!errors.status}
+                      $hasError={!!errors.status}
                       {...field}
                     >
                       {Object.values(ActivityStatus).map(status => (
@@ -770,7 +782,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                 />
               </FormGroup>
 
-              <FormGroup fullWidth>
+              <FormGroup $fullWidth>
                 <FormLabel htmlFor="description">
                   Descripción
                 </FormLabel>
@@ -781,7 +793,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                     <Textarea
                       id="description"
                       placeholder="Descripción detallada de la actividad"
-                      hasError={!!errors.description}
+                      $hasError={!!errors.description}
                       {...field}
                     />
                   )}
@@ -789,7 +801,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                 {errors.description && <ErrorMessage>{errors.description.message}</ErrorMessage>}
               </FormGroup>
 
-              <FormGroup fullWidth>
+              <FormGroup $fullWidth>
                 <FormLabel htmlFor="situation">
                   Situación
                 </FormLabel>
@@ -800,7 +812,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                     <Textarea
                       id="situation"
                       placeholder="Situación o contexto"
-                      hasError={!!errors.situation}
+                      $hasError={!!errors.situation}
                       {...field}
                     />
                   )}
@@ -808,7 +820,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                 {errors.situation && <ErrorMessage>{errors.situation.message}</ErrorMessage>}
               </FormGroup>
 
-              <FormGroup fullWidth>
+              <FormGroup $fullWidth>
                 <FormLabel htmlFor="result">
                   Resultado
                 </FormLabel>
@@ -819,7 +831,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                     <Textarea
                       id="result"
                       placeholder="Resultado de la actividad"
-                      hasError={!!errors.result}
+                      $hasError={!!errors.result}
                       {...field}
                     />
                   )}
@@ -827,7 +839,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                 {errors.result && <ErrorMessage>{errors.result.message}</ErrorMessage>}
               </FormGroup>
 
-              <FormGroup fullWidth>
+              <FormGroup $fullWidth>
                 <FormLabel htmlFor="comments">
                   Comentarios
                 </FormLabel>
@@ -838,7 +850,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
                     <Textarea
                       id="comments"
                       placeholder="Comentarios adicionales"
-                      hasError={!!errors.comments}
+                      $hasError={!!errors.comments}
                       {...field}
                     />
                   )}
@@ -850,7 +862,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ activity, onClose }) => {
         </FormContent>
 
         <FormFooter>
-          <div style={{ minWidth: '200px', zIndex: 10, position: 'relative' }}>
+          <div style={{ minWidth: '200px', zIndex: 1000, position: 'relative' }}>
             {/* Selector de plantillas */}
             <TemplateSelector
               onSelectTemplate={handleSelectTemplate}

@@ -7,7 +7,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  * Esta clase se puede ejecutar directamente para generar un hash BCrypt para
  * una contraseña.
  */
-public class PasswordHashGenerator {
+public final class PasswordHashGenerator {
+
+    /**
+     * Constructor privado para evitar instanciación.
+     * Esta es una clase de utilidad que solo debe usarse a través de sus métodos
+     * estáticos.
+     */
+    private PasswordHashGenerator() {
+        throw new UnsupportedOperationException("Esta es una clase de utilidad y no debe ser instanciada");
+    }
 
     /**
      * Método principal que genera un hash BCrypt para una contraseña.

@@ -15,39 +15,44 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JwtResponse {
-    
+
     /**
      * Token JWT.
      */
     private String token;
-    
+
     /**
      * Token de refresco.
      */
     private String refreshToken;
-    
+
     /**
      * Tipo de token.
      */
     private String tokenType;
-    
+
     /**
      * ID del usuario.
      */
     private Long userId;
-    
+
     /**
      * Nombre de usuario.
      */
     private String username;
-    
+
     /**
      * Correo electrónico del usuario.
      */
     private String email;
-    
+
     /**
-     * Roles del usuario.
+     * Rol del usuario.
      */
-    private List<String> roles;
+    private String role;
+
+    /**
+     * Permisos del usuario.
+     */
+    private List<String> permissions;
 }

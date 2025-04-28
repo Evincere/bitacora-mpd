@@ -53,8 +53,12 @@ const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
         username: response.username,
         name: response.fullName,
         email: response.email,
-        roles: [response.role]
+        role: response.role, // Guardar el rol como un valor único
+        permissions: response.permissions || [] // Guardar los permisos
       };
+
+      // Depuración
+      console.log('authService: Datos del usuario a guardar en localStorage:', userData);
 
       localStorage.setItem('bitacora_user', JSON.stringify(userData));
 

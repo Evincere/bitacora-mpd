@@ -24,31 +24,37 @@ public class CacheConfig {
     public static final String USERS_CACHE = "users";
     public static final String ACTIVITY_TYPES_CACHE = "activityTypes";
     public static final String ACTIVITY_STATUSES_CACHE = "activityStatuses";
-    
+
+    /**
+     * Constantes de configuración de caché.
+     */
+    private static final int CACHE_INITIAL_CAPACITY = 100;
+    private static final int CACHE_MAXIMUM_SIZE = 500;
+    private static final int CACHE_EXPIRATION_MINUTES = 10;
+
     /**
      * Configura el gestor de caché con Caffeine.
-     * 
+     *
      * @return El gestor de caché configurado
      */
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-        
+
         // Configura las cachés disponibles
         cacheManager.setCacheNames(Arrays.asList(
                 ACTIVITIES_CACHE,
                 USERS_CACHE,
                 ACTIVITY_TYPES_CACHE,
-                ACTIVITY_STATUSES_CACHE
-        ));
-        
+                ACTIVITY_STATUSES_CACHE));
+
         // Configura Caffeine
         cacheManager.setCaffeine(Caffeine.newBuilder()
-                .initialCapacity(100)
-                .maximumSize(500)
-                .expireAfterWrite(10, TimeUnit.MINUTES)
+                .initialCapacity(CACHE_INITIAL_CAPACITY)
+                .maximumSize(CACHE_MAXIMUM_SIZE)
+                .expireAfterWrite(CACHE_EXPIRATION_MINUTES, TimeUnit.MINUTES)
                 .recordStats());
-        
+
         return cacheManager;
     }
 }

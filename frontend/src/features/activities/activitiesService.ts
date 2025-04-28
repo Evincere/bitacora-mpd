@@ -301,7 +301,8 @@ const getStatsByType = async (): Promise<any[]> => {
     return await apiRequest<any[]>(`${API_URL}/stats/by-type`);
   } catch (error) {
     console.error('Error al obtener estadísticas por tipo:', error);
-    throw error;
+    // En caso de error, devolver un array vacío
+    return [];
   }
 };
 
@@ -315,7 +316,8 @@ const getStatsByStatus = async (): Promise<any[]> => {
     return await apiRequest<any[]>(`${API_URL}/stats/by-status`);
   } catch (error) {
     console.error('Error al obtener estadísticas por estado:', error);
-    throw error;
+    // En caso de error, devolver un array vacío
+    return [];
   }
 };
 
@@ -331,7 +333,13 @@ const getActivitySummaries = async (page: number = 0, size: number = 10): Promis
     return await apiRequest<any>(`${API_URL}/summaries?page=${page}&size=${size}`);
   } catch (error) {
     console.error('Error al obtener resúmenes de actividades:', error);
-    throw error;
+    // En caso de error, devolver un objeto con estructura vacía
+    return {
+      summaries: [],
+      totalCount: 0,
+      totalPages: 0,
+      currentPage: page
+    };
   }
 };
 

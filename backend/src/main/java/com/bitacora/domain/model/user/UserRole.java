@@ -9,40 +9,53 @@ import java.util.Set;
  * Enumeración que representa los diferentes roles de usuario en el sistema.
  */
 public enum UserRole {
-    ADMIN("Administrador", 
-          new HashSet<>(Arrays.asList(
-              Permission.READ_ACTIVITIES,
-              Permission.WRITE_ACTIVITIES,
-              Permission.DELETE_ACTIVITIES,
-              Permission.READ_USERS,
-              Permission.WRITE_USERS,
-              Permission.DELETE_USERS,
-              Permission.GENERATE_REPORTS
-          ))),
-    
-    SUPERVISOR("Supervisor", 
-          new HashSet<>(Arrays.asList(
-              Permission.READ_ACTIVITIES,
-              Permission.WRITE_ACTIVITIES,
-              Permission.READ_USERS,
-              Permission.GENERATE_REPORTS
-          ))),
-    
-    USUARIO("Usuario", 
-          new HashSet<>(Arrays.asList(
-              Permission.READ_ACTIVITIES,
-              Permission.WRITE_ACTIVITIES
-          ))),
-    
-    CONSULTA("Consulta", 
-          new HashSet<>(Arrays.asList(
-              Permission.READ_ACTIVITIES
-          )));
+    ADMIN("Administrador",
+            new HashSet<>(Arrays.asList(
+                    Permission.READ_ACTIVITIES,
+                    Permission.WRITE_ACTIVITIES,
+                    Permission.DELETE_ACTIVITIES,
+                    Permission.READ_USERS,
+                    Permission.WRITE_USERS,
+                    Permission.DELETE_USERS,
+                    Permission.GENERATE_REPORTS))),
+
+    SUPERVISOR("Supervisor",
+            new HashSet<>(Arrays.asList(
+                    Permission.READ_ACTIVITIES,
+                    Permission.WRITE_ACTIVITIES,
+                    Permission.READ_USERS,
+                    Permission.GENERATE_REPORTS))),
+
+    USUARIO("Usuario",
+            new HashSet<>(Arrays.asList(
+                    Permission.READ_ACTIVITIES,
+                    Permission.WRITE_ACTIVITIES))),
+
+    CONSULTA("Consulta",
+            new HashSet<>(Arrays.asList(
+                    Permission.READ_ACTIVITIES))),
+
+    ASIGNADOR("Asignador",
+            new HashSet<>(Arrays.asList(
+                    Permission.READ_ACTIVITIES,
+                    Permission.WRITE_ACTIVITIES,
+                    Permission.READ_USERS,
+                    Permission.GENERATE_REPORTS))),
+
+    SOLICITANTE("Solicitante",
+            new HashSet<>(Arrays.asList(
+                    Permission.READ_ACTIVITIES,
+                    Permission.WRITE_ACTIVITIES))),
+
+    EJECUTOR("Ejecutor",
+            new HashSet<>(Arrays.asList(
+                    Permission.READ_ACTIVITIES,
+                    Permission.WRITE_ACTIVITIES)));
 
     private final String displayName;
     private final Set<Permission> permissions;
 
-    UserRole(String displayName, Set<Permission> permissions) {
+    UserRole(final String displayName, final Set<Permission> permissions) {
         this.displayName = displayName;
         this.permissions = Collections.unmodifiableSet(permissions);
     }
@@ -56,23 +69,37 @@ public enum UserRole {
     }
 
     /**
-     * Convierte un string en un UserRole, ignorando mayúsculas/minúsculas y acentos.
+     * Convierte un string en un UserRole, ignorando mayúsculas/minúsculas y
+     * acentos.
      * Si no se encuentra una coincidencia, devuelve USUARIO.
      *
      * @param text El texto a convertir
      * @return El UserRole correspondiente o USUARIO si no hay coincidencia
      */
-    public static UserRole fromString(String text) {
+    public static UserRole fromString(final String text) {
         if (text == null || text.trim().isEmpty()) {
             return USUARIO;
         }
 
-        for (UserRole role : UserRole.values()) {
-            if (role.name().equalsIgnoreCase(text) || 
-                role.getDisplayName().equalsIgnoreCase(text)) {
+        for (final UserRole role : UserRole.values()) {
+            if (role.name().equalsIgnoreCase(text)
+                    || role.getDisplayName().equalsIgnoreCase(text)) {
                 return role;
             }
         }
+
+        // Manejar casos específicos para compatibilidad
+        if ("ASIGNADOR".equalsIgnoreCase(text)
+                || "Asignador".equalsIgnoreCase(text)) {
+            return ASIGNADOR;
+        } else if ("SOLICITANTE".equalsIgnoreCase(text)
+                || "Solicitante".equalsIgnoreCase(text)) {
+            return SOLICITANTE;
+        } else if ("EJECUTOR".equalsIgnoreCase(text)
+                || "Ejecutor".equalsIgnoreCase(text)) {
+            return EJECUTOR;
+        }
+
         return USUARIO;
     }
 }

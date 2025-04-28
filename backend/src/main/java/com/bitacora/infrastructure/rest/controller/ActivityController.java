@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 import com.bitacora.infrastructure.persistence.projection.ActivityCount;
 import com.bitacora.infrastructure.persistence.projection.ActivitySummary;
@@ -35,10 +37,11 @@ import com.bitacora.infrastructure.persistence.repository.ActivityJpaRepository;
  * Controlador REST para la gestión de actividades.
  */
 @RestController
-@RequestMapping("/activities")
+@RequestMapping(path = { "/activities", "/api/activities" })
 @RequiredArgsConstructor
 @Tag(name = "Actividades", description = "API para la gestión de actividades")
 @SecurityRequirement(name = "JWT")
+@Slf4j
 public class ActivityController {
 
     private final ActivityService activityService;
@@ -262,18 +265,35 @@ public class ActivityController {
     // Comentamos temporalmente la autorización para permitir acceso público
     // @PreAuthorize("hasAuthority('READ_ACTIVITIES')")
     public ResponseEntity<List<Map<String, Object>>> getStatsByType() {
-        List<ActivityCount> stats = activityJpaRepository.countByTypeGrouped();
+        try {
+            List<ActivityCount> stats = activityJpaRepository.countByTypeGrouped();
 
-        List<Map<String, Object>> result = stats.stream()
-                .map(stat -> {
-                    Map<String, Object> item = new HashMap<>();
-                    item.put("type", stat.getCategory());
-                    item.put("count", stat.getCount());
-                    return item;
-                })
-                .collect(Collectors.toList());
+            if (stats == null || stats.isEmpty()) {
+                // Si no hay datos, devolver una lista vacía
+                return ResponseEntity.ok(new ArrayList<>());
+            }
 
-        return ResponseEntity.ok(result);
+            List<Map<String, Object>> result = stats.stream()
+                    .map(stat -> {
+                        Map<String, Object> item = new HashMap<>();
+                        item.put("type", stat.getCategory());
+                        item.put("count", stat.getCount());
+                        return item;
+                    })
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error al obtener estadísticas por tipo: {}", e.getMessage(), e);
+            Map<String, Object> errorItem = new HashMap<>();
+            errorItem.put("error", "Error al procesar estadísticas por tipo");
+            errorItem.put("message", e.getMessage());
+
+            List<Map<String, Object>> errorResult = new ArrayList<>();
+            errorResult.add(errorItem);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResult);
+        }
     }
 
     /**
@@ -286,18 +306,35 @@ public class ActivityController {
     // Comentamos temporalmente la autorización para permitir acceso público
     // @PreAuthorize("hasAuthority('READ_ACTIVITIES')")
     public ResponseEntity<List<Map<String, Object>>> getStatsByStatus() {
-        List<ActivityCount> stats = activityJpaRepository.countByStatusGrouped();
+        try {
+            List<ActivityCount> stats = activityJpaRepository.countByStatusGrouped();
 
-        List<Map<String, Object>> result = stats.stream()
-                .map(stat -> {
-                    Map<String, Object> item = new HashMap<>();
-                    item.put("status", stat.getCategory());
-                    item.put("count", stat.getCount());
-                    return item;
-                })
-                .collect(Collectors.toList());
+            if (stats == null || stats.isEmpty()) {
+                // Si no hay datos, devolver una lista vacía
+                return ResponseEntity.ok(new ArrayList<>());
+            }
 
-        return ResponseEntity.ok(result);
+            List<Map<String, Object>> result = stats.stream()
+                    .map(stat -> {
+                        Map<String, Object> item = new HashMap<>();
+                        item.put("status", stat.getCategory());
+                        item.put("count", stat.getCount());
+                        return item;
+                    })
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error al obtener estadísticas por estado: {}", e.getMessage(), e);
+            Map<String, Object> errorItem = new HashMap<>();
+            errorItem.put("error", "Error al procesar estadísticas por estado");
+            errorItem.put("message", e.getMessage());
+
+            List<Map<String, Object>> errorResult = new ArrayList<>();
+            errorResult.add(errorItem);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResult);
+        }
     }
 
     /**
@@ -315,32 +352,46 @@ public class ActivityController {
             @Parameter(description = "Número de página (comenzando desde 0)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Tamaño de la página") @RequestParam(defaultValue = "10") int size) {
 
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
-        org.springframework.data.domain.Page<ActivitySummary> summaries = activityJpaRepository
-                .findAllSummaries(pageable);
+        try {
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page,
+                    size);
+            org.springframework.data.domain.Page<ActivitySummary> summaries = activityJpaRepository
+                    .findAllSummaries(pageable);
 
-        List<Map<String, Object>> summaryList = summaries.getContent().stream()
-                .map(summary -> {
-                    Map<String, Object> item = new HashMap<>();
-                    item.put("id", summary.getId());
-                    item.put("date", summary.getDate());
-                    item.put("type", summary.getType());
-                    item.put("description", summary.getDescription());
-                    item.put("status", summary.getStatus());
-                    item.put("person", summary.getPerson());
-                    item.put("createdAt", summary.getCreatedAt());
-                    item.put("userId", summary.getUserId());
-                    return item;
-                })
-                .collect(Collectors.toList());
+            List<Map<String, Object>> summaryList = summaries.getContent().stream()
+                    .map(summary -> {
+                        Map<String, Object> item = new HashMap<>();
+                        item.put("id", summary.getId());
+                        item.put("date", summary.getDate());
+                        item.put("type", summary.getType());
+                        item.put("description", summary.getDescription());
+                        item.put("status", summary.getStatus());
+                        item.put("person", summary.getPerson());
+                        item.put("createdAt", summary.getCreatedAt());
+                        item.put("userId", summary.getUserId());
+                        return item;
+                    })
+                    .collect(Collectors.toList());
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("summaries", summaryList);
-        response.put("totalCount", summaries.getTotalElements());
-        response.put("totalPages", summaries.getTotalPages());
-        response.put("currentPage", summaries.getNumber());
+            Map<String, Object> response = new HashMap<>();
+            response.put("summaries", summaryList);
+            response.put("totalCount", summaries.getTotalElements());
+            response.put("totalPages", summaries.getTotalPages());
+            response.put("currentPage", summaries.getNumber());
 
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error al obtener resúmenes de actividades: {}", e.getMessage(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error al procesar resúmenes de actividades");
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("summaries", new ArrayList<>());
+            errorResponse.put("totalCount", 0);
+            errorResponse.put("totalPages", 0);
+            errorResponse.put("currentPage", page);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 
     /**

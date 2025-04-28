@@ -118,14 +118,18 @@ public class DeadlineReminderService {
         User user = userOpt.get();
 
         // Crear notificación de recordatorio
+        String activityDescription = activity.getDescription();
+        long dueDateMillis = activity.getDate().toInstant(ZoneOffset.UTC).toEpochMilli();
+        String reminderMessage = getMessageForReminderType(activityDescription, reminderType);
+
         DeadlineReminderNotification notification = DeadlineReminderNotification.builder()
                 .activityId(activity.getId())
-                .activityTitle(activity.getDescription())
-                .dueDate(activity.getDate().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .activityTitle(activityDescription)
+                .dueDate(dueDateMillis)
                 .hoursRemaining(hoursRemaining)
                 .reminderType(reminderType)
                 .title("Recordatorio de actividad")
-                .message(getMessageForReminderType(activity.getDescription(), reminderType))
+                .message(reminderMessage)
                 .build();
 
         // Enviar notificación

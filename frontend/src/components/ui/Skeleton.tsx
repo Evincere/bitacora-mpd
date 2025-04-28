@@ -1,3 +1,4 @@
+import React from 'react';
 import styled, { keyframes } from 'styled-components';
 
 // Animación de pulso
@@ -12,6 +13,40 @@ const pulse = keyframes`
     opacity: 0.6;
   }
 `;
+
+// Interfaz para el componente Skeleton principal
+interface SkeletonProps {
+  variant?: 'text' | 'circle' | 'rect';
+  width?: string;
+  height?: string;
+  margin?: string;
+  borderRadius?: string;
+  size?: string;
+  className?: string;
+}
+
+// Componente Skeleton principal que se exportará como default
+const Skeleton: React.FC<SkeletonProps> = ({
+  variant = 'text',
+  width,
+  height,
+  margin,
+  borderRadius,
+  size,
+  className
+}) => {
+  switch (variant) {
+    case 'circle':
+      return <CircleSkeleton size={size} margin={margin} className={className} />;
+    case 'rect':
+      return <RectSkeleton width={width} height={height} margin={margin} borderRadius={borderRadius} className={className} />;
+    case 'text':
+    default:
+      return <TextSkeleton width={width} height={height} margin={margin} className={className} />;
+  }
+};
+
+export default Skeleton;
 
 // Estilos base para todos los esqueletos
 const BaseSkeletonStyle = styled.div`
@@ -91,18 +126,18 @@ export const ActivitiesListSkeleton = ({ count = 5 }: { count?: number }) => (
 export const ActivityDetailSkeleton = () => (
   <div style={{ padding: '1.5rem' }}>
     <TextSkeleton width="70%" height="2rem" margin="0 0 2rem 0" />
-    
+
     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
       <TextSkeleton width="30%" height="1.2rem" />
       <TextSkeleton width="20%" height="1.2rem" />
     </div>
-    
+
     <TextSkeleton width="100%" height="1.2rem" margin="1rem 0" />
     <TextSkeleton width="100%" height="1.2rem" margin="1rem 0" />
     <TextSkeleton width="90%" height="1.2rem" margin="1rem 0" />
-    
+
     <RectSkeleton width="100%" height="150px" margin="2rem 0" />
-    
+
     <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
       <TextSkeleton width="120px" height="2rem" />
       <TextSkeleton width="120px" height="2rem" />
@@ -114,19 +149,19 @@ export const ActivityDetailSkeleton = () => (
 export const ActivityFormSkeleton = () => (
   <div style={{ padding: '1.5rem' }}>
     <TextSkeleton width="50%" height="2rem" margin="0 0 2rem 0" />
-    
+
     <TextSkeleton width="30%" height="1rem" margin="1rem 0 0.5rem 0" />
     <RectSkeleton width="100%" height="40px" margin="0 0 1.5rem 0" />
-    
+
     <TextSkeleton width="30%" height="1rem" margin="1rem 0 0.5rem 0" />
     <RectSkeleton width="100%" height="40px" margin="0 0 1.5rem 0" />
-    
+
     <TextSkeleton width="30%" height="1rem" margin="1rem 0 0.5rem 0" />
     <RectSkeleton width="100%" height="40px" margin="0 0 1.5rem 0" />
-    
+
     <TextSkeleton width="30%" height="1rem" margin="1rem 0 0.5rem 0" />
     <RectSkeleton width="100%" height="100px" margin="0 0 1.5rem 0" />
-    
+
     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
       <RectSkeleton width="120px" height="40px" />
       <RectSkeleton width="120px" height="40px" />
@@ -144,16 +179,16 @@ export const ProfileSkeleton = () => (
         <TextSkeleton width="150px" height="1rem" margin="0.5rem 0" />
       </div>
     </div>
-    
+
     <TextSkeleton width="30%" height="1rem" margin="1rem 0 0.5rem 0" />
     <RectSkeleton width="100%" height="40px" margin="0 0 1.5rem 0" />
-    
+
     <TextSkeleton width="30%" height="1rem" margin="1rem 0 0.5rem 0" />
     <RectSkeleton width="100%" height="40px" margin="0 0 1.5rem 0" />
-    
+
     <TextSkeleton width="30%" height="1rem" margin="1rem 0 0.5rem 0" />
     <RectSkeleton width="100%" height="40px" margin="0 0 1.5rem 0" />
-    
+
     <RectSkeleton width="150px" height="40px" margin="2rem 0 0 0" />
   </div>
 );

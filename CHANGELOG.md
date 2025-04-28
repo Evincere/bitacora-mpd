@@ -3,9 +3,237 @@
 ## [Unreleased]
 
 ### Agregado
+- Mejora de la interfaz de usuario
+  - Corrección de contraste en los campos de formulario para mejorar la accesibilidad
+  - Mejora visual de los selectores con iconos de flecha
+  - Adición de efectos visuales para estados de foco en campos de entrada
+  - Estandarización de estilos de entrada en toda la aplicación
+  - Mejora del control deslizante de progreso para mayor visibilidad
+  - Corrección del menú desplegable de plantillas para que se muestre correctamente dentro de la ventana
+- Implementación de controlador ActivityMetadataController para gestionar metadatos de actividades
+  - Endpoint para obtener categorías de actividades (/api/activities/categories)
+  - Endpoint para obtener prioridades de actividades (/api/activities/priorities)
+  - Creación de DTO ActivityPriorityDTO para representar prioridades
+- Corrección de errores en el frontend para usar las rutas correctas de la API
+  - Actualización de rutas en solicitudesService.ts para incluir el prefijo /api
+  - Ajuste del formato de datos enviados al endpoint de solicitudes para cumplir con el contrato de la API
+- Corrección de errores en la configuración de Zipkin
+  - Eliminación de configuraciones duplicadas en application.yml
+- Implementación de pruebas unitarias y de integración (Sprint 15, punto 8)
+  - Pruebas unitarias para la capa de dominio
+    - Creación de ActivityExtendedTest para probar los métodos de cambio de estado
+    - Implementación de ActivityStateTest para probar el patrón State y las transiciones entre estados
+    - Creación de ActivityStatusNewTest para probar la enumeración y sus métodos
+  - Pruebas unitarias para la capa de aplicación
+    - Implementación de ActivityWorkflowServiceTest para probar el servicio de flujo de trabajo
+    - Pruebas para verificar el comportamiento correcto de las transiciones de estado
+    - Pruebas para verificar el manejo de errores y excepciones
+  - Pruebas de integración
+    - Creación de ActivityWorkflowControllerTest para probar los endpoints REST
+    - Implementación de ActivityWorkflowIntegrationTest para probar el flujo completo
+    - Pruebas para verificar la autorización y permisos en los endpoints
+    - Pruebas para verificar la validación de datos de entrada
+    - Creación de ActivityWorkflowIntegrationTestNew con enfoque simplificado para pruebas
+    - Implementación de ActivityRepositoryMock para pruebas sin dependencia de base de datos
+  - Actualización de CHANGELOG.md para registrar las pruebas implementadas
+- Implementación de permisos específicos para el flujo de trabajo de actividades
+  - Creación de migración V14__Add_Workflow_Permissions.sql para agregar permisos específicos
+  - Actualización de pruebas de integración para usar los permisos correctos
+  - Mejora en la configuración de autenticación para pruebas
+  - Actualización de data.sql para incluir permisos de flujo de trabajo (REQUEST_ACTIVITIES, ASSIGN_ACTIVITIES, EXECUTE_ACTIVITIES, APPROVE_ACTIVITIES)
+
+### Corregido
+- Corrección de advertencias de Checkstyle relacionadas con números mágicos
+  - Corregido CacheConfig.java para extraer constantes para valores de configuración de caché
+  - Corregido WebConfig.java para extraer constante para el tiempo máximo de caché CORS
+  - Corregido WebSocketAuthenticationConfig.java para extraer constante para la longitud del prefijo Bearer
+  - Corregido JwtAuthenticationFilter.java para extraer constante para la longitud del prefijo Bearer
+  - Corregido GenerateEmployeePasswords.java para extraer constantes para los números de legajo inicial y final
+- Corrección de prueba unitaria ActivityExtendedTest para reflejar el comportamiento real del código
+  - Actualizado el test testAssign para esperar ActivityStatus.EN_PROGRESO en lugar de PENDIENTE
+- Corrección de advertencias de Checkstyle relacionadas con parámetros que deberían ser final en clases de dominio
+  - Corregido AbstractActivityState.java para hacer final los parámetros de métodos y constructor
+  - Corregido ActivityStateFactory.java para hacerla final y con constructor privado
+  - Corregido RequestedState.java para hacer final los parámetros de métodos
+  - Corregido AssignedState.java para hacer final los parámetros de métodos
+  - Corregido InProgressState.java para hacer final los parámetros de métodos
+  - Corregido CompletedState.java para hacer final los parámetros de métodos
+  - Corregido AbstractValueObject.java para hacer final los parámetros y añadir llaves a bloques if
+  - Corregido ValueObject.java para añadir documentación Javadoc completa
+  - Corregido UserSession.java para hacer final los parámetros de métodos
+  - Corregido ActivityHistory.java para hacer final los parámetros del método createStatusChange
+  - Corregido ActivityPriority.java para hacer final los parámetros de constructor y métodos
+  - Corregido ActivityStatus.java para hacer final los parámetros de constructor y método fromString
+  - Corregido ActivityStatusNew.java para hacer final los parámetros de constructor y método fromString
+  - Corregido ActivityType.java para hacer final los parámetros de constructor y método fromString
+  - Corregido operadores || en nuevas líneas en varias clases de enumeración
+- Corrección de error en ActivityStateFactory para manejar correctamente estados nulos
+  - Añadida validación explícita para lanzar IllegalArgumentException cuando se pasa un estado nulo
+- Corrección de implementación del patrón State en clases de estado de actividades
+  - Corregido PendingState para usar el constructor de AbstractActivityState correctamente
+  - Actualizado RequestedState para permitir la transición a InProgressState directamente
+  - Corregido ActivityWorkflowService para manejar correctamente los estados de actividades
+  - Añadida prueba unitaria para verificar la transición de RequestedState a InProgressState
+  - Mejorado el mapeo entre ActivityStatusNew y ActivityStatus en ActivityWorkflowService
+
+### Corregido
+- Corrección de advertencias de Checkstyle relacionadas con parámetros que deberían ser final
+  - Corregido ApiError.java para hacer final los parámetros de constructores y métodos
+  - Corregido ErrorCode.java para hacer final el parámetro del constructor
+  - Corregido InvalidTokenException.java para hacer final los parámetros de constructores
+  - Corregido ResourceNotFoundException.java para hacer final los parámetros de constructores
+  - Corregido NotificationAdapter.java para hacer final los parámetros de métodos
+  - Corregido WebSocketController.java para hacer final los parámetros de métodos
+  - Corregido UserSessionAdapter.java para hacer final los parámetros de métodos
+  - Corregido Password.java para hacer final los parámetros de métodos
+  - Corregido Permission.java para hacer final los parámetros de métodos
+  - Corregido PersonName.java para hacer final los parámetros de métodos y declarar la clase como final
+  - Corregido User.java para hacer final los parámetros de métodos
+  - Corregido UserRole.java para hacer final los parámetros de métodos
+- Corrección de advertencias de Checkstyle relacionadas con operadores en nuevas líneas
+  - Corregido User.java para colocar operadores || en nuevas líneas
+  - Corregido Permission.java para colocar operadores || en nuevas líneas
+  - Corregido PersonName.java para colocar operadores && en nuevas líneas
+  - Corregido UserRole.java para colocar operadores || en nuevas líneas
+- Corrección de advertencias de Checkstyle relacionadas con clases de utilidad con constructores públicos
+  - Corregido GenerateEmployeePasswords.java para hacerla final y con constructor privado
+  - Corregido GeneratePassword.java para hacerla final y con constructor privado
+  - Corregido PasswordHashGenerator.java para hacerla final y con constructor privado
+- Corrección de advertencias de Checkstyle relacionadas con importaciones con comodín
+  - Corregido ActuatorConfig.java para reemplazar import org.springframework.boot.actuate.endpoint.web.* con importaciones específicas
+  - Corregido UserMapper.java para reemplazar import com.bitacora.domain.model.user.* con importaciones específicas
+- Corrección de advertencias de Checkstyle relacionadas con longitud de línea excesiva
+  - Corregido ActuatorConfig.java para dividir expresiones condicionales largas en variables intermedias
+  - Corregido DeadlineReminderService.java para extraer variables intermedias en la creación de notificaciones
+  - Corregido OpenApiGenerator.java para dividir la creación de esquemas en variables intermedias
+- Corrección de advertencias de Checkstyle relacionadas con clases de valor que deberían ser finales
+  - Corregido Email.java para hacerla final y añadir modificadores final a los parámetros de métodos
+  - Corregido Password.java para hacerla final
+
+- Implementación de usuarios desde archivo CSV de empleados
+  - Creación de migración V8__Add_Employees_From_CSV.sql para agregar usuarios del archivo
+  - Configuración de DNI como nombre de usuario y número de legajo + "@Pass" como contraseña
+  - Asignación de roles específicos: SOLICITANTE, EJECUTOR, ASIGNADOR
+  - Asignación del rol ASIGNADOR únicamente a Adriana Sanchez
+  - Actualización del usuario admin para que sea Semper Evincere
+  - Asignación de permisos adecuados según el rol de cada usuario
+  - Corrección de la migración para eliminar primero las actividades asociadas a usuarios
+  - Creación de migración V9__Fix_User_Passwords.sql para corregir las contraseñas de los usuarios
+  - Creación de migración V10__Update_User_Passwords_Format.sql para actualizar el formato de contraseñas a legajo@Pass
+  - Creación de migración V11__Fix_User_Passwords_For_Testing.sql para asegurar que las contraseñas se actualicen correctamente
+  - Creación de migración V12__Fix_Employee_Passwords.sql para establecer contraseñas conocidas y funcionales
+  - Creación de migración V13__Fix_Employee_Passwords_With_System_Hash.sql para usar el hash generado por el sistema
+  - Corrección del método de logout en el frontend para enviar correctamente el token de autorización
+  - Actualización de la documentación para reflejar el nuevo formato de contraseñas
+  - Simplificación de contraseñas de usuarios a "Test@1234" para facilitar pruebas
+
+### Corregido
+- Solución para permitir que el usuario ADMIN acceda a todos los dashboards y vistas específicas de cada rol
+- Modificación del componente App.tsx para usar RoleBasedLayout en lugar de MainLayout
+- Corrección del manejo de roles de usuario en el frontend para asegurar que se respeten las restricciones de acceso basadas en roles
+- Actualización de la forma en que se almacena y recupera el rol del usuario en localStorage
+- Corrección de la respuesta de autenticación en el backend para enviar el rol como un campo único en lugar de una lista
+- Mejora del componente de depuración para mostrar información detallada sobre el rol del usuario
+- Corrección del mapeo de roles en el frontend para manejar correctamente la respuesta del backend
+- Corrección del menú lateral para mostrar solo las secciones correspondientes al rol del usuario
+- Implementación de condiciones en RoleBasedSidebar para mostrar elementos de menú según el rol del usuario
+- Adición de iconos faltantes en RoleBasedSidebar
+- Modificación del componente RoleBasedSidebar para mostrar todos los elementos del menú al usuario ADMIN
+- Adición de componente de depuración para verificar el rol del usuario
+- Implementación de protección de rutas basada en roles para permitir que el usuario ADMIN acceda a todos los dashboards y vistas específicas de cada rol
+- Creación de componente RoleProtectedRoute para manejar la lógica de acceso basado en roles
+- Actualización de las rutas para usar el componente de protección de rutas
+- Solución al problema de carga de rutas basadas en roles
+- Creación de componente PlaceholderDashboard para mostrar en rutas en desarrollo
+- Modificación de App.tsx para cargar directamente las rutas en lugar de usar lazy loading
+- Implementación de rutas directas para cada sección (solicitudes, asignación, tareas, etc.)
+- Activación de las interfaces específicas por rol (SOLICITANTE, ASIGNADOR, EJECUTOR)
+  - Reemplazo de componentes PlaceholderDashboard por los componentes reales
+  - Importación de todos los componentes necesarios para las interfaces específicas por rol
+  - Configuración de rutas para usar los componentes reales en lugar de placeholders
+- Corrección de problemas de componentes duplicados en el frontend
+  - Corregido error de identificadores duplicados en CategoriasList.tsx
+  - Corregido error de identificadores duplicados en PrioridadesList.tsx
+  - Implementado componente Card faltante
+  - Corregidas importaciones en index.ts
+  - Implementado componente Skeleton con exportación por defecto
+  - Corregido error de exportación en Skeleton.tsx
+- Implementación de protección de rutas basada en roles
+  - Mejorado componente ProtectedRoute para verificar autenticación de manera más robusta
+  - Integrado RoleProtectedRoute en App.tsx para proteger rutas específicas por rol
+  - Configurado acceso por roles: ADMIN (acceso irrestricto), SOLICITANTE, ASIGNADOR, EJECUTOR
+  - Implementadas redirecciones adecuadas para usuarios sin permisos
+  - Protegidas rutas de configuración y reportes para que solo sean accesibles por ADMIN
+  - Corregido error de importación de RoleProtectedRoute y UserRole en App.tsx
+
+### Corregido
+- Problema de autenticación con contraseñas incorrectas después de migrar a Flyway
+- Endpoints de estadísticas de actividades que devolvían errores 500
+  - Corregida la configuración del controlador de actividades para soportar rutas con prefijo /api
+  - Implementado controlador de diagnóstico para verificar rutas disponibles
+  - Actualizado el controlador para manejar correctamente ambos prefijos de ruta (/activities y /api/activities)
+- Manejo de errores mejorado en los endpoints de actividades
+- Limpieza de archivos temporales y código no utilizado
+- Error en componentes que usaban useToastContext sin estar dentro de un ToastProvider
+  - Reemplazado useToastContext por react-toastify en todos los componentes afectados
+  - Simplificado el sistema de notificaciones para usar directamente toast de react-toastify
+
+### Agregado
+- Implementación de interfaces específicas por rol (Sprint 15, punto 4)
+  - Dashboard para SOLICITANTE con:
+    - Resumen de solicitudes por estado
+    - Visualización de tiempos de respuesta
+    - Lista de solicitudes recientes
+    - Indicadores de progreso para seguimiento de solicitudes
+    - Sección de próximas fechas límite
+  - Formulario de solicitud mejorado:
+    - Conexión con el endpoint /api/activities/request
+    - Selección de categoría y prioridad desde datos reales
+    - Sistema de adjuntos para solicitudes con previsualización
+    - Validación de formularios con Zod
+    - Indicadores de estado de carga durante el envío
+  - Dashboard para ASIGNADOR con:
+    - Bandeja de entrada de solicitudes pendientes
+    - Visualización de tareas asignadas por ejecutor
+    - Gráficos de distribución de carga
+    - Filtros por categoría y prioridad
+  - Formulario de asignación de tareas:
+    - Interfaz para asignar tareas a ejecutores
+    - Selección de prioridad y fecha límite
+    - Sistema de notas para la asignación
+    - Conexión con el endpoint /api/activities/{id}/assign
+  - Dashboard para EJECUTOR con:
+    - Lista de tareas asignadas por prioridad
+    - Visualización de progreso de tareas actuales
+    - Calendario de vencimientos
+    - Estadísticas de rendimiento
+  - Formulario de actualización de progreso:
+    - Interfaz para actualizar el progreso de tareas con control deslizante
+    - Sistema de comentarios para registrar avances
+    - Funcionalidad para completar tareas
+    - Conexión con los endpoints /api/activities/{id}/progress y /api/activities/{id}/complete
+  - Actualización del menú lateral para incluir acceso a los dashboards
+  - Actualización de rutas para soportar los nuevos componentes
+- Script de migración para corregir datos de actividades (V7__Fix_Activity_Data.sql)
+- Documentación detallada sobre el mecanismo de login y rutas protegidas en README.md
+- Manejo de errores más robusto en el frontend para mostrar datos vacíos cuando hay errores
+- Controlador de diagnóstico para verificar el estado de la aplicación y las rutas disponibles
+- Implementación de endpoints para el flujo de trabajo de actividades
+  - Endpoint POST /api/activities/request para crear solicitudes (SOLICITANTE)
+  - Endpoint POST /api/activities/{id}/assign para asignar tareas (ASIGNADOR)
+  - Endpoint POST /api/activities/{id}/start para iniciar tareas (EJECUTOR)
+  - Endpoint POST /api/activities/{id}/complete para completar tareas (EJECUTOR)
+  - Endpoint POST /api/activities/{id}/approve para aprobar tareas (ASIGNADOR)
+  - Endpoint POST /api/activities/{id}/reject para rechazar tareas (ASIGNADOR)
+  - Endpoint POST /api/activities/{id}/cancel para cancelar tareas
+  - Endpoint POST /api/activities/{id}/comment para agregar comentarios
+  - DTOs específicos para cada operación del flujo de trabajo
+  - Implementación completa de la funcionalidad de comentarios en actividades
+
+### Agregado
 - Inicio del Sprint 15: Implementación del Sistema de Gestión de Tareas
   - Implementación del nuevo modelo de datos para el sistema de gestión de tareas
-    - Creación de enum UserRoleNew con roles ADMIN, ASIGNADOR, SOLICITANTE, EJECUTOR
+    - Unificación de enumeraciones de roles en UserRole con roles ADMIN, ASIGNADOR, SOLICITANTE, EJECUTOR, SUPERVISOR, USUARIO, CONSULTA
     - Creación de enum ActivityStatusNew con estados REQUESTED, ASSIGNED, IN_PROGRESS, COMPLETED, APPROVED, REJECTED, CANCELLED
     - Creación de enum ActivityPriority con niveles CRITICAL, HIGH, MEDIUM, LOW, TRIVIAL
     - Ampliación del modelo Activity con campos para flujo de trabajo, seguimiento y métricas
@@ -25,6 +253,35 @@
     - Implementación de reglas de transición entre estados
     - Desarrollo de validaciones para cada transición
     - Implementación de servicio para gestionar el flujo de trabajo de actividades
+  - Corrección de pruebas unitarias
+    - Configuración de datos de prueba para tests
+    - Actualización de la configuración de pruebas para cargar datos SQL
+    - Corrección de errores en la inicialización del contexto de Spring
+  - Implementación de interfaces específicas para roles
+    - Implementación de interfaz para SOLICITANTES con formulario de solicitudes y seguimiento
+    - Implementación de interfaz para ASIGNADORES con bandeja de entrada, distribución de carga y métricas
+    - Implementación de interfaz para EJECUTORES con vista de tareas asignadas, progreso y historial
+    - Implementación de sistema de navegación adaptativo con menú lateral dinámico según el rol del usuario
+  - Implementación de sistema de categorización y priorización de tareas
+    - Desarrollo de componentes para gestión de categorías con colores personalizables
+    - Implementación de sistema de prioridades con niveles configurables
+    - Creación de interfaz de administración para categorías y prioridades
+    - Integración con el flujo de trabajo para clasificar y priorizar tareas
+  - Implementación de sistema de notificaciones para el flujo de trabajo
+    - Desarrollo de centro de notificaciones con filtros por tipo
+    - Implementación de indicador de notificaciones no leídas
+    - Creación de panel de configuración de preferencias de notificaciones
+    - Integración de múltiples canales de notificación (app, email, push)
+  - Desarrollo de reportes y métricas para seguimiento de tareas
+    - Implementación de dashboard con resumen de tareas y distribución por estados
+    - Creación de gráficos de distribución por categorías
+    - Desarrollo de análisis de tendencias de tiempos de respuesta y completado
+    - Implementación de métricas de rendimiento por usuario
+  - Preparación para integración futura con Google Calendar y Drive
+    - Diseño e implementación de interfaces para Google Calendar API
+    - Diseño e implementación de interfaces para Google Drive API
+    - Creación de panel de configuración para integraciones
+    - Implementación de servicios mock para pruebas de integración
 
 ## [0.14.1] - 2025-04-25
 

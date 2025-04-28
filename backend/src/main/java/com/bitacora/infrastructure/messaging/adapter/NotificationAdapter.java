@@ -38,19 +38,19 @@ public class NotificationAdapter implements NotificationPort {
     private static final String DEPARTMENT_ANNOUNCEMENT_DESTINATION = "/topic/department/";
 
     @Override
-    public void sendGlobalNotification(RealTimeNotification notification) {
+    public void sendGlobalNotification(final RealTimeNotification notification) {
         log.debug("Enviando notificación global: {}", notification);
         messagingTemplate.convertAndSend(NOTIFICATION_DESTINATION, notification);
     }
 
     @Override
-    public void sendPrivateNotification(String username, RealTimeNotification notification) {
+    public void sendPrivateNotification(final String username, final RealTimeNotification notification) {
         log.debug("Enviando notificación privada a {}: {}", username, notification);
         messagingTemplate.convertAndSendToUser(username, USER_NOTIFICATION_DESTINATION, notification);
     }
 
     @Override
-    public void sendSuccessNotification(String username, String title, String message) {
+    public void sendSuccessNotification(final String username, final String title, final String message) {
         RealTimeNotification notification = RealTimeNotification.builder()
                 .type(NotificationType.SUCCESS)
                 .title(title)
@@ -60,7 +60,7 @@ public class NotificationAdapter implements NotificationPort {
     }
 
     @Override
-    public void sendErrorNotification(String username, String title, String message) {
+    public void sendErrorNotification(final String username, final String title, final String message) {
         RealTimeNotification notification = RealTimeNotification.builder()
                 .type(NotificationType.ERROR)
                 .title(title)
@@ -70,7 +70,7 @@ public class NotificationAdapter implements NotificationPort {
     }
 
     @Override
-    public void sendWarningNotification(String username, String title, String message) {
+    public void sendWarningNotification(final String username, final String title, final String message) {
         RealTimeNotification notification = RealTimeNotification.builder()
                 .type(NotificationType.WARNING)
                 .title(title)
@@ -80,7 +80,7 @@ public class NotificationAdapter implements NotificationPort {
     }
 
     @Override
-    public void sendInfoNotification(String username, String title, String message) {
+    public void sendInfoNotification(final String username, final String title, final String message) {
         RealTimeNotification notification = RealTimeNotification.builder()
                 .type(NotificationType.INFO)
                 .title(title)
@@ -90,46 +90,49 @@ public class NotificationAdapter implements NotificationPort {
     }
 
     @Override
-    public void broadcastUserStatus(UserStatusEvent statusEvent) {
+    public void broadcastUserStatus(final UserStatusEvent statusEvent) {
         log.debug("Enviando evento de estado de usuario: {}", statusEvent);
         messagingTemplate.convertAndSend(USER_STATUS_DESTINATION, statusEvent);
     }
 
     @Override
-    public void broadcastSessionActivity(SessionActivityEvent activityEvent) {
+    public void broadcastSessionActivity(final SessionActivityEvent activityEvent) {
         log.debug("Enviando evento de actividad de sesión: {}", activityEvent);
         messagingTemplate.convertAndSend(SESSION_ACTIVITY_DESTINATION, activityEvent);
     }
 
     @Override
-    public void broadcastSystemAlert(SystemAlertEvent alertEvent) {
+    public void broadcastSystemAlert(final SystemAlertEvent alertEvent) {
         log.debug("Enviando alerta del sistema: {}", alertEvent);
         messagingTemplate.convertAndSend(SYSTEM_ALERT_DESTINATION, alertEvent);
     }
 
     @Override
-    public void sendTaskAssignmentNotification(String username, TaskAssignmentNotification notification) {
+    public void sendTaskAssignmentNotification(final String username, final TaskAssignmentNotification notification) {
         log.debug("Enviando notificación de asignación de tarea a {}: {}", username, notification);
         notification.setType(NotificationType.TASK_ASSIGNMENT);
         messagingTemplate.convertAndSendToUser(username, USER_NOTIFICATION_DESTINATION, notification);
     }
 
     @Override
-    public void sendTaskStatusChangeNotification(String username, TaskStatusChangeNotification notification) {
+    public void sendTaskStatusChangeNotification(final String username,
+            final TaskStatusChangeNotification notification) {
         log.debug("Enviando notificación de cambio de estado de tarea a {}: {}", username, notification);
         notification.setType(NotificationType.TASK_STATUS_CHANGE);
         messagingTemplate.convertAndSendToUser(username, USER_NOTIFICATION_DESTINATION, notification);
     }
 
     @Override
-    public void sendDeadlineReminderNotification(String username, DeadlineReminderNotification notification) {
+    public void sendDeadlineReminderNotification(final String username,
+            final DeadlineReminderNotification notification) {
         log.debug("Enviando notificación de recordatorio de fecha límite a {}: {}", username, notification);
         notification.setType(NotificationType.DEADLINE_REMINDER);
         messagingTemplate.convertAndSendToUser(username, USER_NOTIFICATION_DESTINATION, notification);
     }
 
     @Override
-    public void broadcastAnnouncementNotification(AnnouncementNotification notification, String department) {
+    public void broadcastAnnouncementNotification(final AnnouncementNotification notification,
+            final String department) {
         log.debug("Enviando notificación de anuncio: {}", notification);
         notification.setType(NotificationType.ANNOUNCEMENT);
 
@@ -143,7 +146,8 @@ public class NotificationAdapter implements NotificationPort {
     }
 
     @Override
-    public void broadcastCollaborationNotification(CollaborationNotification notification, Long activityId) {
+    public void broadcastCollaborationNotification(final CollaborationNotification notification,
+            final Long activityId) {
         log.debug("Enviando notificación de colaboración para la actividad {}: {}", activityId, notification);
         notification.setType(NotificationType.COLLABORATION);
         messagingTemplate.convertAndSend(ACTIVITY_COLLABORATION_DESTINATION + activityId, notification);

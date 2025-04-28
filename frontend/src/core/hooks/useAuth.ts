@@ -123,6 +123,21 @@ export const useAuth = () => {
         roles: data.roles
       });
 
+      // Depuración de la respuesta del servidor
+      console.log('Respuesta completa del servidor:', data);
+      console.log('Rol recibido del servidor:', data.role);
+
+      // Determinar el rol correcto
+      let userRole = UserRole.USUARIO;
+      if (data.role === 'ADMIN') userRole = UserRole.ADMIN;
+      else if (data.role === 'ASIGNADOR') userRole = UserRole.ASIGNADOR;
+      else if (data.role === 'SOLICITANTE') userRole = UserRole.SOLICITANTE;
+      else if (data.role === 'EJECUTOR') userRole = UserRole.EJECUTOR;
+      else if (data.role === 'SUPERVISOR') userRole = UserRole.SUPERVISOR;
+      else if (data.role === 'CONSULTA') userRole = UserRole.CONSULTA;
+
+      console.log('Rol mapeado:', userRole);
+
       // Crear objeto de usuario a partir de los datos recibidos
       const user: User = {
         id: data.userId,
@@ -131,13 +146,11 @@ export const useAuth = () => {
         firstName: data.name ? data.name.split(' ')[0] : '',
         lastName: data.name ? data.name.split(' ').slice(1).join(' ') : '',
         fullName: data.name || data.username,
-        role: data.roles && data.roles.includes('ADMIN') ? UserRole.ADMIN :
-          data.roles && data.roles.includes('SUPERVISOR') ? UserRole.SUPERVISOR :
-            data.roles && data.roles.includes('CONSULTA') ? UserRole.CONSULTA : UserRole.USUARIO,
+        role: userRole,
         active: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        permissions: data.roles || [],
+        permissions: data.permissions || [],
         token: data.token,
         tokenType: data.tokenType
       };
@@ -198,7 +211,7 @@ export const useAuth = () => {
       const token = localStorage.getItem('bitacora_token');
       if (token) {
         try {
-          await api.post('auth/logout', {
+          await api.post('auth/logout', null, {
             headers: {
               Authorization: `Bearer ${token}`
             }

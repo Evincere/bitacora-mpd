@@ -69,6 +69,11 @@ public class AuthService {
                 // Registrar la sesión
                 sessionService.createSession(user.getId(), jwt, refreshToken, request);
 
+                // Obtener permisos del usuario
+                List<String> permissions = user.getPermissions().stream()
+                                .map(permission -> permission.name())
+                                .collect(java.util.stream.Collectors.toList());
+
                 // Construir respuesta
                 return JwtResponse.builder()
                                 .token(jwt)
@@ -77,7 +82,8 @@ public class AuthService {
                                 .userId(user.getId())
                                 .username(user.getUsername())
                                 .email(user.getEmail().getValue())
-                                .roles(java.util.Collections.singletonList(user.getRole().name()))
+                                .role(user.getRole().name())
+                                .permissions(permissions)
                                 .build();
         }
 
@@ -132,6 +138,11 @@ public class AuthService {
                 // Actualizar la sesión
                 sessionService.createSession(user.getId(), newToken, newRefreshToken, request);
 
+                // Obtener permisos del usuario
+                List<String> permissions = user.getPermissions().stream()
+                                .map(permission -> permission.name())
+                                .collect(java.util.stream.Collectors.toList());
+
                 // Construir respuesta
                 return JwtResponse.builder()
                                 .token(newToken)
@@ -140,7 +151,8 @@ public class AuthService {
                                 .userId(user.getId())
                                 .username(user.getUsername())
                                 .email(user.getEmail().getValue())
-                                .roles(java.util.Collections.singletonList(user.getRole().name()))
+                                .role(user.getRole().name())
+                                .permissions(permissions)
                                 .build();
         }
 }

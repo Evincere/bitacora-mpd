@@ -22,6 +22,11 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    /**
+     * Longitud del prefijo "Bearer " en el token JWT.
+     */
+    private static final int BEARER_PREFIX_LENGTH = 7;
+
     private final JwtTokenProvider tokenProvider;
     private final TokenBlacklistService tokenBlacklistService;
 
@@ -35,7 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @throws IOException      Si ocurre un error de E/S
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
+            final FilterChain filterChain)
             throws ServletException, IOException {
 
         // No aplicar el filtro a las rutas de autenticación
@@ -62,7 +68,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             log.error("No se pudo establecer la autenticación del usuario en el contexto de seguridad", ex);
         }
 
@@ -75,10 +81,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @param request La solicitud HTTP
      * @return El token JWT o null si no existe
      */
-    private String getJwtFromRequest(HttpServletRequest request) {
+    private String getJwtFromRequest(final HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+            return bearerToken.substring(BEARER_PREFIX_LENGTH);
         }
         return null;
     }

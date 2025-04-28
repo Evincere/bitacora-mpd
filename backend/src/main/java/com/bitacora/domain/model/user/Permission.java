@@ -14,7 +14,7 @@ public enum Permission {
 
     private final String displayName;
 
-    Permission(String displayName) {
+    Permission(final String displayName) {
         this.displayName = displayName;
     }
 
@@ -23,20 +23,21 @@ public enum Permission {
     }
 
     /**
-     * Convierte un string en un Permission, ignorando mayúsculas/minúsculas y acentos.
+     * Convierte un string en un Permission, ignorando mayúsculas/minúsculas y
+     * acentos.
      * Si no se encuentra una coincidencia, devuelve null.
      *
      * @param text El texto a convertir
      * @return El Permission correspondiente o null si no hay coincidencia
      */
-    public static Permission fromString(String text) {
+    public static Permission fromString(final String text) {
         if (text == null || text.trim().isEmpty()) {
             return null;
         }
 
-        for (Permission permission : Permission.values()) {
-            if (permission.name().equalsIgnoreCase(text) || 
-                permission.getDisplayName().equalsIgnoreCase(text)) {
+        for (final Permission permission : Permission.values()) {
+            if (permission.name().equalsIgnoreCase(text)
+                    || permission.getDisplayName().equalsIgnoreCase(text)) {
                 return permission;
             }
         }

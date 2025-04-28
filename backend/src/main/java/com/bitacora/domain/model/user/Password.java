@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 /**
  * Value Object que representa una contraseña segura.
  */
-public class Password extends AbstractValueObject {
+public final class Password extends AbstractValueObject {
 
     private static final long serialVersionUID = 1L;
 
@@ -26,7 +26,7 @@ public class Password extends AbstractValueObject {
      * @param password La contraseña
      * @param isHashed Indica si la contraseña ya está hasheada
      */
-    private Password(String password, boolean isHashed) {
+    private Password(final String password, final boolean isHashed) {
         this.value = password;
         this.isHashed = isHashed;
     }
@@ -40,7 +40,7 @@ public class Password extends AbstractValueObject {
      * @throws InvalidPasswordException Si la contraseña no cumple con los
      *                                  requisitos de seguridad
      */
-    public static Password createRaw(String password) {
+    public static Password createRaw(final String password) {
         if (password == null || password.trim().isEmpty()) {
             throw new InvalidPasswordException("La contraseña no puede estar vacía");
         }
@@ -61,7 +61,7 @@ public class Password extends AbstractValueObject {
      * @param hashedPassword La contraseña hasheada
      * @return Una nueva instancia de Password
      */
-    public static Password createHashed(String hashedPassword) {
+    public static Password createHashed(final String hashedPassword) {
         if (hashedPassword == null || hashedPassword.trim().isEmpty()) {
             throw new InvalidPasswordException("La contraseña hasheada no puede estar vacía");
         }
@@ -88,7 +88,7 @@ public class Password extends AbstractValueObject {
     }
 
     @Override
-    protected boolean doEquals(AbstractValueObject other) {
+    protected boolean doEquals(final AbstractValueObject other) {
         Password that = (Password) other;
         return Objects.equals(value, that.value) && isHashed == that.isHashed;
     }

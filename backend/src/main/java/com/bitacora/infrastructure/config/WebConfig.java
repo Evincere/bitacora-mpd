@@ -13,18 +13,23 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     /**
+     * Tiempo máximo de caché para la configuración CORS (en segundos).
+     */
+    private static final int CORS_MAX_AGE = 3600;
+
+    /**
      * Configura CORS para permitir solicitudes desde el frontend.
      *
      * @param registry El registro CORS
      */
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
+    public void addCorsMappings(final CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:3000", "http://localhost:8080")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .exposedHeaders("Authorization")
                 .allowCredentials(true)
-                .maxAge(3600);
+                .maxAge(CORS_MAX_AGE);
     }
 }

@@ -27,49 +27,49 @@ public class UserSessionAdapter implements UserSessionPort {
 
     private final UserSessionJpaRepository repository;
     private final UserSessionMapper mapper;
-    
+
     @Override
     @Transactional
-    public UserSession saveSession(UserSession session) {
+    public UserSession saveSession(final UserSession session) {
         UserSessionEntity entity = mapper.toEntity(session);
         UserSessionEntity savedEntity = repository.save(entity);
         return mapper.toDomain(savedEntity);
     }
-    
+
     @Override
-    public Optional<UserSession> findByToken(String token) {
+    public Optional<UserSession> findByToken(final String token) {
         return repository.findByToken(token)
                 .map(mapper::toDomain);
     }
-    
+
     @Override
-    public Optional<UserSession> findByRefreshToken(String refreshToken) {
+    public Optional<UserSession> findByRefreshToken(final String refreshToken) {
         return repository.findByRefreshToken(refreshToken)
                 .map(mapper::toDomain);
     }
-    
+
     @Override
-    public List<UserSession> findActiveSessionsByUserId(Long userId) {
+    public List<UserSession> findActiveSessionsByUserId(final Long userId) {
         return repository.findByUserIdAndStatus(userId, SessionStatus.ACTIVE)
                 .stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
-    public List<UserSession> findAllSessionsByUserId(Long userId) {
+    public List<UserSession> findAllSessionsByUserId(final Long userId) {
         return repository.findByUserId(userId)
                 .stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
-    public Optional<UserSession> findById(Long sessionId) {
+    public Optional<UserSession> findById(final Long sessionId) {
         return repository.findById(sessionId)
                 .map(mapper::toDomain);
     }
-    
+
     @Override
     public List<UserSession> findSuspiciousSessions() {
         return repository.findBySuspiciousTrue()
@@ -77,32 +77,32 @@ public class UserSessionAdapter implements UserSessionPort {
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
-    public List<UserSession> findExpiredSessions(Date now) {
+    public List<UserSession> findExpiredSessions(final Date now) {
         return repository.findByStatusAndExpiryTimeBefore(SessionStatus.ACTIVE, now)
                 .stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
-    public List<UserSession> findInactiveSessions(Date lastActivityBefore) {
+    public List<UserSession> findInactiveSessions(final Date lastActivityBefore) {
         return repository.findByStatusAndLastActivityTimeBefore(SessionStatus.ACTIVE, lastActivityBefore)
                 .stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     @Transactional
-    public int updateExpiredSessions(Date now) {
+    public int updateExpiredSessions(final Date now) {
         return repository.updateExpiredSessions(SessionStatus.EXPIRED, now);
     }
-    
+
     @Override
     @Transactional
-    public int closeOtherSessions(Long userId, Long currentSessionId) {
+    public int closeOtherSessions(final Long userId, final Long currentSessionId) {
         return repository.closeOtherSessions(
                 userId, currentSessionId, SessionStatus.CLOSED, new Date());
     }

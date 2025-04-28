@@ -384,11 +384,30 @@
 - [x] Asegurar que los skeleton loaders reflejen la estructura real de los componentes
 - [x] Implementar animaciones suaves para los skeleton loaders
 
-#### 2.2 Mejorar las transiciones entre páginas (1 día)
-- [x] Implementar animaciones de transición entre páginas
-- [x] Asegurar que las transiciones sean accesibles
-- [x] Optimizar el rendimiento de las transiciones
-- [x] Implementar transiciones contextuales basadas en la navegación
+#### 2.2 Implementación de Interfaz para Roles Específicos (3 días)
+- [x] Diseñar e implementar interfaz para SOLICITANTES
+  - [x] Crear vista específica para solicitar nuevas tareas
+  - [x] Implementar formulario adaptado para solicitudes con campos relevantes
+  - [x] Desarrollar panel de seguimiento de solicitudes enviadas
+  - [x] Implementar filtros específicos para solicitudes (por estado, fecha, etc.)
+  - [x] Añadir notificaciones específicas para cambios en solicitudes
+- [x] Diseñar e implementar interfaz para ASIGNADORES
+  - [x] Crear bandeja de entrada para nuevas solicitudes pendientes de asignación
+  - [x] Implementar vista de distribución de carga de trabajo del equipo
+  - [x] Desarrollar herramienta de asignación con arrastrar y soltar
+  - [x] Añadir panel de métricas de asignación y rendimiento
+  - [x] Implementar sistema de priorización visual de tareas
+- [x] Diseñar e implementar interfaz para EJECUTORES
+  - [x] Crear vista de tareas asignadas con filtros por prioridad y fecha límite
+  - [x] Implementar panel de progreso de tareas actuales
+  - [x] Desarrollar formulario para reportar avances y completar tareas
+  - [x] Añadir sistema de notificaciones para nuevas asignaciones y fechas límite
+  - [x] Implementar vista de historial de tareas completadas
+- [x] Implementar sistema de navegación adaptativo según rol
+  - [x] Crear menú lateral dinámico que muestre opciones según el rol del usuario
+  - [x] Implementar redirección inteligente al dashboard específico según rol
+  - [x] Desarrollar componente de cambio rápido entre roles para usuarios con múltiples roles
+  - [x] Añadir indicadores visuales del rol activo en la interfaz
 
 #### 2.3 Implementar notificaciones toast para acciones del usuario (1 día)
 - [x] Revisar y mejorar el sistema de notificaciones existente
@@ -399,20 +418,30 @@
 ### 3. Pruebas Automatizadas (3 días)
 
 #### 3.1 Implementar pruebas unitarias para los componentes principales (1 día)
-- [ ] Configurar Jest y React Testing Library
-- [ ] Implementar pruebas para componentes comunes
-- [ ] Implementar pruebas para hooks personalizados
-- [ ] Implementar pruebas para funciones de utilidad
-- [ ] Implementar pruebas unitarias para la capa de dominio
-- [ ] Implementar pruebas unitarias para la capa de aplicación
+- [x] Configurar Jest y React Testing Library
+- [x] Implementar pruebas para componentes comunes
+- [x] Implementar pruebas para hooks personalizados
+- [x] Implementar pruebas para funciones de utilidad
+- [x] Implementar pruebas unitarias para la capa de dominio
+  - [x] Creación de ActivityExtendedTest para probar los métodos de cambio de estado
+  - [x] Implementación de ActivityStateTest para probar el patrón State y las transiciones entre estados
+  - [x] Creación de ActivityStatusNewTest para probar la enumeración y sus métodos
+- [x] Implementar pruebas unitarias para la capa de aplicación
+  - [x] Implementación de ActivityWorkflowServiceTest para probar el servicio de flujo de trabajo
+  - [x] Pruebas para verificar el comportamiento correcto de las transiciones de estado
+  - [x] Pruebas para verificar el manejo de errores y excepciones
 
 #### 3.2 Implementar pruebas de integración para los flujos críticos (1 día)
-- [ ] Identificar los flujos críticos de la aplicación
-- [ ] Implementar pruebas para el flujo de autenticación
-- [ ] Implementar pruebas para el flujo de gestión de actividades
-- [ ] Implementar pruebas para el flujo de filtrado y búsqueda
-- [ ] Implementar pruebas de integración para los adaptadores
-- [ ] Implementar pruebas de integración para los controladores
+- [x] Identificar los flujos críticos de la aplicación
+- [x] Implementar pruebas para el flujo de autenticación
+- [x] Implementar pruebas para el flujo de gestión de actividades
+  - [x] Creación de ActivityWorkflowControllerTest para probar los endpoints REST
+  - [x] Implementación de ActivityWorkflowIntegrationTest para probar el flujo completo
+  - [x] Creación de ActivityWorkflowIntegrationTestNew con enfoque simplificado para pruebas
+  - [x] Implementación de ActivityRepositoryMock para pruebas sin dependencia de base de datos
+- [x] Implementar pruebas para el flujo de filtrado y búsqueda
+- [x] Implementar pruebas de integración para los adaptadores
+- [x] Implementar pruebas de integración para los controladores
 
 #### 3.3 Configurar CI/CD para ejecutar pruebas automáticamente (1 día)
 - [ ] Configurar GitHub Actions para ejecutar pruebas en cada push
@@ -432,12 +461,62 @@
 ### 5. Mejoras de Calidad de Código (2 días)
 
 #### 5.1 Corregir advertencias de Checkstyle (1 día)
-- [ ] Corregir parámetros que deberían ser declarados como `final`
-- [ ] Corregir problemas de formato de código (operadores en nuevas líneas)
-- [ ] Corregir clases de utilidad con constructores públicos
-- [ ] Corregir importaciones no utilizadas o con comodín
-- [ ] Corregir problemas de longitud de línea
-- [ ] Corregir problemas de documentación Javadoc
+- [x] Corregir parámetros que deberían ser declarados como `final`
+  - [x] Corregido en ApiError.java
+  - [x] Corregido en ErrorCode.java
+  - [x] Corregido en InvalidTokenException.java
+  - [x] Corregido en ResourceNotFoundException.java
+  - [x] Corregido en NotificationAdapter.java
+  - [x] Corregido en WebSocketController.java
+  - [x] Corregido en UserSessionAdapter.java
+  - [x] Corregido en Password.java
+  - [x] Corregido en Permission.java
+  - [x] Corregido en PersonName.java (también declarada como clase final)
+  - [x] Corregido en User.java
+  - [x] Corregido en UserRole.java
+  - [x] Corregido en ActivitySpecifications.java
+  - [x] Corregido en WebConfig.java
+  - [x] Corregido en WebSocketAuthenticationConfig.java
+  - [x] Corregido en JwtAuthenticationFilter.java
+  - [x] Corregido en AbstractActivityState.java
+  - [x] Corregido en ActivityStateFactory.java (también declarada como clase final)
+  - [x] Corregido en RequestedState.java
+  - [x] Corregido en AssignedState.java
+  - [x] Corregido en InProgressState.java
+  - [x] Corregido en CompletedState.java
+  - [x] Corregido en AbstractValueObject.java
+  - [x] Corregido en ValueObject.java (añadido Javadoc)
+  - [x] Corregido en UserSession.java
+  - [x] Corregido en ActivityHistory.java
+  - [x] Corregido en ActivityPriority.java
+  - [x] Corregido en ActivityStatus.java
+  - [x] Corregido en ActivityStatusNew.java
+  - [x] Corregido en ActivityType.java
+- [x] Corregir problemas de formato de código (operadores en nuevas líneas)
+  - [x] Corregido en User.java para colocar operadores || en nuevas líneas
+  - [x] Corregido en Permission.java para colocar operadores || en nuevas líneas
+  - [x] Corregido en PersonName.java para colocar operadores && en nuevas líneas
+  - [x] Corregido en UserRole.java para colocar operadores || en nuevas líneas
+- [x] Corregir clases de utilidad con constructores públicos
+  - [x] Corregido GenerateEmployeePasswords.java para hacerla final y con constructor privado
+  - [x] Corregido GeneratePassword.java para hacerla final y con constructor privado
+  - [x] Corregido PasswordHashGenerator.java para hacerla final y con constructor privado
+- [x] Corregir importaciones no utilizadas o con comodín
+  - [x] Corregido ActuatorConfig.java para reemplazar import org.springframework.boot.actuate.endpoint.web.* con importaciones específicas
+  - [x] Corregido UserMapper.java para reemplazar import com.bitacora.domain.model.user.* con importaciones específicas
+- [x] Corregir problemas de longitud de línea
+  - [x] Corregido ActuatorConfig.java para dividir expresiones condicionales largas en variables intermedias
+  - [x] Corregido DeadlineReminderService.java para extraer variables intermedias en la creación de notificaciones
+  - [x] Corregido OpenApiGenerator.java para dividir la creación de esquemas en variables intermedias
+- [x] Corregir problemas de documentación Javadoc
+  - [x] Corregido Email.java para hacerla final y añadir modificadores final a los parámetros de métodos
+  - [x] Corregido Password.java para hacerla final
+- [x] Corregir números mágicos
+  - [x] Corregido CacheConfig.java para extraer constantes para valores de configuración de caché
+  - [x] Corregido WebConfig.java para extraer constante para el tiempo máximo de caché CORS
+  - [x] Corregido WebSocketAuthenticationConfig.java para extraer constante para la longitud del prefijo Bearer
+  - [x] Corregido JwtAuthenticationFilter.java para extraer constante para la longitud del prefijo Bearer
+  - [x] Corregido GenerateEmployeePasswords.java para extraer constantes para los números de legajo inicial y final
 
 #### 5.2 Corregir problemas de generación de OpenAPI (1 día)
 - [x] Investigar y corregir el error en la generación de tipos TypeScript
@@ -935,6 +1014,7 @@ Este sprint se enfocará en mejorar el rendimiento de la aplicación, corregir e
 - Mejorar el rendimiento de la aplicación
 - Implementar pruebas automatizadas
 - Corregir errores de código y advertencias
+- Solucionar problemas de componentes duplicados
 
 ### Fase 1: Corrección de errores de autenticación (3 días)
 - [x] 1.1 Corregir problemas con el token de autenticación
@@ -969,6 +1049,12 @@ Este sprint se enfocará en mejorar el rendimiento de la aplicación, corregir e
   - [x] Integrar componentes de estadísticas en el dashboard
   - [x] Actualizar ActivityChart para usar datos reales en lugar de datos estáticos
   - [x] Actualizar StatCard para usar datos reales en lugar de datos estáticos
+- [x] 2.5 Corregir problemas con endpoints de estadísticas
+  - [x] Corregir rutas de API para estadísticas por tipo (/api/activities/stats/by-type)
+  - [x] Corregir rutas de API para estadísticas por estado (/api/activities/stats/by-status)
+  - [x] Corregir rutas de API para resúmenes de actividades (/api/activities/summaries)
+  - [x] Actualizar controlador para manejar correctamente ambos prefijos de ruta (/activities y /api/activities)
+  - [x] Implementar controlador de diagnóstico para verificar rutas disponibles
 
 ### Fase 3: Implementación de pruebas automatizadas (3 días)
 - [ ] 3.1 Configurar entorno de pruebas
@@ -985,18 +1071,61 @@ Este sprint se enfocará en mejorar el rendimiento de la aplicación, corregir e
   - [ ] Crear pruebas para la capa de persistencia
 
 ### Fase 4: Corrección de errores y advertencias (4 días)
-- [ ] 4.1 Corregir errores de código en el backend
+- [x] 4.0 Implementar usuarios desde archivo CSV de empleados
+  - [x] Crear migración V8__Add_Employees_From_CSV.sql para agregar usuarios del archivo
+  - [x] Configurar DNI como nombre de usuario y número de legajo + "@Pass" como contraseña
+  - [x] Asignar roles específicos: SOLICITANTE, EJECUTOR, ASIGNADOR
+  - [x] Asignar rol ASIGNADOR únicamente a Adriana Sanchez
+  - [x] Actualizar usuario admin para que sea Semper Evincere
+  - [x] Asignar permisos adecuados según el rol de cada usuario
+  - [x] Corregir migración para manejar restricciones de integridad referencial
+  - [x] Crear migración V9__Fix_User_Passwords.sql para corregir las contraseñas de los usuarios
+  - [x] Crear migración V10__Update_User_Passwords_Format.sql para actualizar el formato de contraseñas a legajo@Pass
+  - [x] Crear migración V11__Fix_User_Passwords_For_Testing.sql para asegurar que las contraseñas se actualicen correctamente
+  - [x] Crear migración V12__Fix_Employee_Passwords.sql para establecer contraseñas conocidas y funcionales
+  - [x] Crear migración V13__Fix_Employee_Passwords_With_System_Hash.sql para usar el hash generado por el sistema
+  - [x] Corregir método de logout en el frontend para enviar correctamente el token de autorización
+  - [x] Actualizar documentación para reflejar el nuevo formato de contraseñas
+  - [x] Simplificar contraseñas de usuarios a "Test@1234" para facilitar pruebas
+- [x] 4.1 Corregir errores de acceso basado en roles
+  - [x] Corregir el manejo de roles de usuario en el frontend
+  - [x] Actualizar la forma en que se almacena y recupera el rol del usuario en localStorage
+  - [x] Mejorar el componente de depuración para mostrar información detallada sobre el rol del usuario
+  - [x] Asegurar que se respeten las restricciones de acceso basadas en roles
+  - [x] Corregir la respuesta de autenticación en el backend para enviar el rol como un campo único
+  - [x] Añadir logs de depuración detallados para identificar problemas con los roles
+  - [x] Corregir el mapeo de roles en el frontend para manejar correctamente la respuesta del backend
+  - [x] Corregir el menú lateral para mostrar solo las secciones correspondientes al rol del usuario
+  - [x] Implementar condiciones en RoleBasedSidebar para mostrar elementos de menú según el rol del usuario
+- [ ] 4.2 Corregir errores de código en el backend
   - [ ] Corregir advertencias de Checkstyle
   - [ ] Resolver problemas de código no utilizado
   - [ ] Corregir posibles null pointer exceptions
-  - [x] Refactorizar inicialización de datos de prueba
-    - [x] Consolidar datos de prueba en migraciones Flyway
-    - [x] Crear migración V3__Consolidated_Test_Data.sql
-    - [x] Deshabilitar mecanismo data.sql
-    - [x] Modificar DataInitializer para que solo se active con el perfil "data-init"
-    - [x] Implementar prueba unitaria para verificar la inicialización de datos
-    - [x] Documentar nuevo enfoque en README-DATA-INITIALIZATION.md
-- [x] 4.2 Corregir errores de código en el frontend
+- [x] 4.2 Corregir problemas de componentes duplicados en el frontend
+  - [x] Corregir identificadores duplicados en CategoriasList.tsx
+  - [x] Corregir identificadores duplicados en PrioridadesList.tsx
+  - [x] Implementar componente Card faltante
+  - [x] Corregir importaciones en index.ts
+  - [x] Implementar componente Skeleton con exportación por defecto
+  - [x] Corregir error de exportación en Skeleton.tsx
+- [x] 4.3 Implementar protección de rutas basada en roles
+  - [x] Mejorar componente ProtectedRoute para verificar autenticación
+  - [x] Integrar RoleProtectedRoute en App.tsx para proteger rutas específicas
+  - [x] Configurar acceso por roles: ADMIN, SOLICITANTE, ASIGNADOR, EJECUTOR
+  - [x] Implementar redirecciones adecuadas para usuarios sin permisos
+  - [x] Corregir error de importación de RoleProtectedRoute y UserRole en App.tsx
+- [x] 4.4 Corregir errores en componentes del frontend
+  - [x] Corregir error "useToastContext must be used within a ToastProvider"
+  - [x] Reemplazar useToastContext por react-toastify en todos los componentes afectados
+  - [x] Simplificar el sistema de notificaciones para usar directamente toast de react-toastify
+- [x] 4.5 Refactorizar inicialización de datos de prueba
+  - [x] Consolidar datos de prueba en migraciones Flyway
+  - [x] Crear migración V3__Consolidated_Test_Data.sql
+  - [x] Deshabilitar mecanismo data.sql
+  - [x] Modificar DataInitializer para que solo se active con el perfil "data-init"
+  - [x] Implementar prueba unitaria para verificar la inicialización de datos
+  - [x] Documentar nuevo enfoque en README-DATA-INITIALIZATION.md
+- [x] 4.6 Corregir errores de código en el frontend
   - [x] Resolver advertencias de ESLint
   - [x] Corregir problemas de accesibilidad
   - [x] Eliminar código no utilizado y datos mockeados
@@ -1010,11 +1139,11 @@ Este sprint se enfocará en mejorar el rendimiento de la aplicación, corregir e
     - [x] Corregir URLs con doble slash en peticiones API
     - [x] Solucionar error de formateo de fechas inválidas
     - [x] Implementar función de utilidad para manejo seguro de fechas
-- [ ] 4.3 Mejorar la documentación del código
+- [ ] 4.7 Mejorar la documentación del código
   - [ ] Añadir comentarios JSDoc a componentes y funciones clave
   - [ ] Documentar APIs públicas
   - [ ] Actualizar README.md con la nueva estructura y convenciones
-- [x] 4.4 Implementar componentes para resúmenes de actividades
+- [x] 4.8 Implementar componentes para resúmenes de actividades
   - [x] Crear componente para mostrar resúmenes de actividades usando getActivitySummaries
   - [x] Integrar componente de resúmenes en el dashboard
   - [x] Actualizar RecentActivities para usar datos reales en lugar de datos estáticos
@@ -1033,7 +1162,7 @@ Este sprint se enfocará en mejorar el rendimiento de la aplicación, corregir e
 - Realizar code reviews frecuentes
 - Mantener dependencias actualizadas
 
-## Sprint 15: Implementación del Sistema de Gestión de Tareas (4 semanas)
+## Sprint 15: Implementación del Sistema de Gestión de Tareas (4 semanas) ✅
 
 ### Objetivos del Sprint
 - Implementar el nuevo modelo de datos para el sistema de gestión de tareas
@@ -1048,7 +1177,7 @@ Este sprint se enfocará en mejorar el rendimiento de la aplicación, corregir e
 
 #### 1.1 Implementación de Entidades Principales (3 días)
 - [x] Actualizar modelo de Usuario (User)
-  - [x] Agregar enum UserRole con roles ADMIN, ASIGNADOR, SOLICITANTE, EJECUTOR
+  - [x] Unificar enumeraciones de roles en UserRole con roles ADMIN, ASIGNADOR, SOLICITANTE, EJECUTOR, SUPERVISOR, USUARIO, CONSULTA
   - [x] Actualizar repositorio y servicios de usuario
   - [x] Implementar migración de base de datos para nuevos roles
 - [x] Ampliar modelo de Actividad (Activity)
@@ -1093,154 +1222,166 @@ Este sprint se enfocará en mejorar el rendimiento de la aplicación, corregir e
   - [x] Implementar servicio para aprobación/rechazo de actividades
 
 #### 2.2 Desarrollo de Endpoints de API (2 días)
-- [ ] Implementar endpoints para el flujo de trabajo
-  - [ ] POST /api/activities/request - Crear solicitud (SOLICITANTE)
-  - [ ] POST /api/activities/{id}/assign - Asignar tarea (ASIGNADOR)
-  - [ ] POST /api/activities/{id}/start - Iniciar tarea (EJECUTOR)
-  - [ ] POST /api/activities/{id}/complete - Completar tarea (EJECUTOR)
-  - [ ] POST /api/activities/{id}/approve - Aprobar tarea (ASIGNADOR)
-  - [ ] POST /api/activities/{id}/reject - Rechazar tarea (ASIGNADOR)
-- [ ] Implementar endpoints para comentarios y adjuntos
-  - [ ] Endpoints CRUD para comentarios en actividades
-  - [ ] Endpoints para gestión de archivos adjuntos
-  - [ ] Endpoints para consultar historial de actividades
+- [x] Implementar endpoints para el flujo de trabajo
+  - [x] POST /api/activities/request - Crear solicitud (SOLICITANTE)
+  - [x] POST /api/activities/{id}/assign - Asignar tarea (ASIGNADOR)
+  - [x] POST /api/activities/{id}/start - Iniciar tarea (EJECUTOR)
+  - [x] POST /api/activities/{id}/complete - Completar tarea (EJECUTOR)
+  - [x] POST /api/activities/{id}/approve - Aprobar tarea (ASIGNADOR)
+  - [x] POST /api/activities/{id}/reject - Rechazar tarea (ASIGNADOR)
+- [x] Implementar endpoints para comentarios y adjuntos
+  - [x] Endpoints CRUD para comentarios en actividades
+  - [x] Endpoints para gestión de archivos adjuntos
+  - [x] Endpoints para consultar historial de actividades
+- [x] Proteger adecuadamente los endpoints de actividades
+  - [x] Eliminar la configuración temporal que hace públicos los endpoints de actividades
+  - [x] Restaurar las anotaciones @PreAuthorize en los métodos GET de ActivityController
+  - [x] Verificar que todos los endpoints requieran los permisos adecuados
 
 ### 3. Sistema de Categorización y Priorización (1 semana)
 
 #### 3.1 Implementación de Categorías (3 días)
-- [ ] Desarrollar modelo de categorías
-  - [ ] Crear entidad ActivityCategory con campos name, description, color
-  - [ ] Implementar repositorio y servicios para categorías
-  - [ ] Desarrollar endpoints REST para gestión de categorías
-- [ ] Implementar sistema de categorías extensible
-  - [ ] Permitir a ASIGNADORES crear nuevas categorías
-  - [ ] Implementar categorías predefinidas por defecto
-  - [ ] Desarrollar interfaz para gestión de categorías
+- [x] Desarrollar modelo de categorías
+  - [x] Crear entidad ActivityCategory con campos name, description, color
+  - [x] Implementar repositorio y servicios para categorías
+  - [x] Desarrollar endpoints REST para gestión de categorías
+- [x] Implementar sistema de categorías extensible
+  - [x] Permitir a ASIGNADORES crear nuevas categorías
+  - [x] Implementar categorías predefinidas por defecto
+  - [x] Desarrollar interfaz para gestión de categorías
 
 #### 3.2 Implementación de Priorización (2 días)
-- [ ] Desarrollar sistema de prioridades
-  - [ ] Implementar enum ActivityPriority con niveles CRITICAL, HIGH, MEDIUM, LOW, TRIVIAL
-  - [ ] Crear servicios para gestión de prioridades
-  - [ ] Desarrollar visualización de prioridades en la interfaz
-- [ ] Implementar sistema de etiquetas (tags)
-  - [ ] Crear entidad ActivityTag con campos name y color
-  - [ ] Implementar repositorio y servicios para etiquetas
-  - [ ] Desarrollar endpoints REST para gestión de etiquetas
+- [x] Desarrollar sistema de prioridades
+  - [x] Implementar enum ActivityPriority con niveles CRITICAL, HIGH, MEDIUM, LOW, TRIVIAL
+  - [x] Crear servicios para gestión de prioridades
+  - [x] Desarrollar visualización de prioridades en la interfaz
+- [x] Implementar sistema de etiquetas (tags)
+  - [x] Crear entidad ActivityTag con campos name y color
+  - [x] Implementar repositorio y servicios para etiquetas
+  - [x] Desarrollar endpoints REST para gestión de etiquetas
 
 ### 4. Interfaces Específicas por Rol (1 semana)
-
+  Identificar las necesidades específicas de cada rol (SOLICITANTE, ASIGNADOR, EJECUTOR)
+  Revisar los componentes existentes que pueden ser reutilizados
+  Determinar qué endpoints del backend son necesarios para cada vista
 #### 4.1 Desarrollo de Vistas para SOLICITANTE (2 días)
-- [ ] Implementar dashboard para SOLICITANTE
-  - [ ] Crear componente de resumen de solicitudes por estado
-  - [ ] Implementar visualización de tiempos de respuesta
-  - [ ] Desarrollar lista de solicitudes recientes
-- [ ] Implementar formulario de solicitud
-  - [ ] Crear formulario para nuevas solicitudes
-  - [ ] Implementar selección de categoría y prioridad
-  - [ ] Desarrollar sistema de adjuntos para solicitudes
+- [x] Implementar dashboard para SOLICITANTE
+  - [x] Crear componente de resumen de solicitudes por estado
+  - [x] Implementar visualización de tiempos de respuesta
+  - [x] Desarrollar lista de solicitudes recientes
+- [x] Implementar formulario de solicitud
+  - [x] Crear formulario para nuevas solicitudes
+  - [x] Implementar selección de categoría y prioridad
+  - [x] Desarrollar sistema de adjuntos para solicitudes
 
 #### 4.2 Desarrollo de Vistas para ASIGNADOR (2 días)
-- [ ] Implementar dashboard para ASIGNADOR
-  - [ ] Crear bandeja de entrada de solicitudes pendientes
-  - [ ] Implementar visualización de tareas asignadas por ejecutor
-  - [ ] Desarrollar gráficos de distribución de carga
-- [ ] Implementar formulario de asignación
-  - [ ] Crear interfaz para asignar tareas a ejecutores
-  - [ ] Implementar selección de prioridad y fecha límite
-  - [ ] Desarrollar sistema de notas para la asignación
+- [x] Implementar dashboard para ASIGNADOR
+  - [x] Crear bandeja de entrada de solicitudes pendientes
+  - [x] Implementar visualización de tareas asignadas por ejecutor
+  - [x] Desarrollar gráficos de distribución de carga
+- [x] Implementar formulario de asignación
+  - [x] Crear interfaz para asignar tareas a ejecutores
+  - [x] Implementar selección de prioridad y fecha límite
+  - [x] Desarrollar sistema de notas para la asignación
 
 #### 4.3 Desarrollo de Vistas para EJECUTOR (2 días)
-- [ ] Implementar dashboard para EJECUTOR
-  - [ ] Crear lista de tareas asignadas por prioridad
-  - [ ] Implementar visualización de progreso de tareas actuales
-  - [ ] Desarrollar calendario de vencimientos
-- [ ] Implementar formulario de progreso
-  - [ ] Crear interfaz para actualizar el progreso de tareas
-  - [ ] Implementar sistema para registrar tiempo dedicado
-  - [ ] Desarrollar interfaz para completar tareas con resultados
+- [x] Implementar dashboard para EJECUTOR
+  - [x] Crear lista de tareas asignadas por prioridad
+  - [x] Implementar visualización de progreso de tareas actuales
+  - [x] Desarrollar calendario de vencimientos
+- [x] Implementar formulario de progreso
+  - [x] Crear interfaz para actualizar el progreso de tareas
+  - [x] Implementar sistema para registrar tiempo dedicado
+  - [x] Desarrollar interfaz para completar tareas con resultados
 
 ### 5. Sistema de Notificaciones para el Flujo de Trabajo (3 días)
 
 #### 5.1 Implementación de Notificaciones en Tiempo Real (2 días)
-- [ ] Desarrollar sistema de notificaciones para cambios de estado
-  - [ ] Implementar notificaciones para nuevas solicitudes (ASIGNADOR)
-  - [ ] Implementar notificaciones para tareas asignadas (EJECUTOR)
-  - [ ] Implementar notificaciones para tareas completadas (ASIGNADOR)
-  - [ ] Implementar notificaciones para tareas aprobadas/rechazadas (SOLICITANTE, EJECUTOR)
-- [ ] Implementar sistema de presencia para colaboración
-  - [ ] Crear sistema para detectar usuarios viendo/editando tareas
-  - [ ] Implementar indicadores visuales de presencia
-  - [ ] Desarrollar notificaciones de edición simultánea
+- [x] Desarrollar sistema de notificaciones para cambios de estado
+  - [x] Implementar notificaciones para nuevas solicitudes (ASIGNADOR)
+  - [x] Implementar notificaciones para tareas asignadas (EJECUTOR)
+  - [x] Implementar notificaciones para tareas completadas (ASIGNADOR)
+  - [x] Implementar notificaciones para tareas aprobadas/rechazadas (SOLICITANTE, EJECUTOR)
+- [x] Implementar sistema de presencia para colaboración
+  - [x] Crear sistema para detectar usuarios viendo/editando tareas
+  - [x] Implementar indicadores visuales de presencia
+  - [x] Desarrollar notificaciones de edición simultánea
 
 #### 5.2 Implementación de Centro de Notificaciones (1 día)
-- [ ] Desarrollar interfaz de centro de notificaciones
-  - [ ] Crear componente para mostrar notificaciones por categoría
-  - [ ] Implementar filtros y búsqueda de notificaciones
-  - [ ] Desarrollar sistema de marcado como leído/no leído
-- [ ] Implementar preferencias de notificaciones
-  - [ ] Crear panel de preferencias por tipo de notificación
-  - [ ] Implementar opciones de activación/desactivación
-  - [ ] Desarrollar configuración de métodos de entrega
+- [x] Desarrollar interfaz de centro de notificaciones
+  - [x] Crear componente para mostrar notificaciones por categoría
+  - [x] Implementar filtros y búsqueda de notificaciones
+  - [x] Desarrollar sistema de marcado como leído/no leído
+- [x] Implementar preferencias de notificaciones
+  - [x] Crear panel de preferencias por tipo de notificación
+  - [x] Implementar opciones de activación/desactivación
+  - [x] Desarrollar configuración de métodos de entrega
 
 ### 6. Reportes y Métricas (3 días)
 
 #### 6.1 Implementación de Reportes Básicos (2 días)
-- [ ] Desarrollar reportes por estado
-  - [ ] Crear endpoint para obtener actividades por estado
-  - [ ] Implementar visualización gráfica de distribución por estado
-  - [ ] Desarrollar filtros por período
-- [ ] Implementar reportes por usuario
-  - [ ] Crear endpoint para obtener actividades por usuario
-  - [ ] Implementar visualización de carga de trabajo por usuario
-  - [ ] Desarrollar métricas de rendimiento individual
-- [ ] Desarrollar reportes por categoría
-  - [ ] Crear endpoint para obtener actividades por categoría
-  - [ ] Implementar visualización de distribución por categoría
-  - [ ] Desarrollar análisis de tendencias por categoría
+- [x] Desarrollar reportes por estado
+  - [x] Crear endpoint para obtener actividades por estado
+  - [x] Implementar visualización gráfica de distribución por estado
+  - [x] Desarrollar filtros por período
+- [x] Implementar reportes por usuario
+  - [x] Crear endpoint para obtener actividades por usuario
+  - [x] Implementar visualización de carga de trabajo por usuario
+  - [x] Desarrollar métricas de rendimiento individual
+- [x] Desarrollar reportes por categoría
+  - [x] Crear endpoint para obtener actividades por categoría
+  - [x] Implementar visualización de distribución por categoría
+  - [x] Desarrollar análisis de tendencias por categoría
 
 #### 6.2 Implementación de Métricas Avanzadas (1 día)
-- [ ] Desarrollar métricas de tiempo de respuesta
-  - [ ] Implementar cálculo de tiempo entre solicitud y asignación
-  - [ ] Crear visualización de tiempos promedio por ASIGNADOR
-  - [ ] Desarrollar alertas para tiempos excesivos
-- [ ] Implementar métricas de tiempo de finalización
-  - [ ] Calcular tiempo entre asignación y completitud
-  - [ ] Crear visualización de tiempos promedio por EJECUTOR
-  - [ ] Desarrollar comparativa entre tiempo estimado y real
+- [x] Desarrollar métricas de tiempo de respuesta
+  - [x] Implementar cálculo de tiempo entre solicitud y asignación
+  - [x] Crear visualización de tiempos promedio por ASIGNADOR
+  - [x] Desarrollar alertas para tiempos excesivos
+- [x] Implementar métricas de tiempo de finalización
+  - [x] Calcular tiempo entre asignación y completitud
+  - [x] Crear visualización de tiempos promedio por EJECUTOR
+  - [x] Desarrollar comparativa entre tiempo estimado y real
 
 ### 7. Preparación para Integraciones Futuras (2 días)
 
 #### 7.1 Preparación para Google Calendar (1 día)
-- [ ] Diseñar interfaces para integración con Google Calendar
-  - [ ] Crear interfaz CalendarIntegrationService
-  - [ ] Definir métodos para crear, actualizar y eliminar eventos
-  - [ ] Diseñar estructura de datos para eventos de calendario
-- [ ] Implementar configuración para OAuth
-  - [ ] Crear estructura para almacenar credenciales de OAuth
-  - [ ] Diseñar flujo de autorización
-  - [ ] Preparar endpoints para callback de OAuth
+- [x] Diseñar interfaces para integración con Google Calendar
+  - [x] Crear interfaz CalendarIntegrationService
+  - [x] Definir métodos para crear, actualizar y eliminar eventos
+  - [x] Diseñar estructura de datos para eventos de calendario
+- [x] Implementar configuración para OAuth
+  - [x] Crear estructura para almacenar credenciales de OAuth
+  - [x] Diseñar flujo de autorización
+  - [x] Preparar endpoints para callback de OAuth
 
 #### 7.2 Preparación para Google Drive (1 día)
-- [ ] Diseñar interfaces para integración con Google Drive
-  - [ ] Crear interfaz DriveIntegrationService
-  - [ ] Definir métodos para subir, descargar y eliminar archivos
-  - [ ] Diseñar estructura de datos para archivos en Drive
-- [ ] Implementar estructura para almacenamiento de archivos
-  - [ ] Crear entidad para almacenar referencias a archivos externos
-  - [ ] Diseñar sistema de permisos para archivos
-  - [ ] Preparar interfaz para gestión de archivos
+- [x] Diseñar interfaces para integración con Google Drive
+  - [x] Crear interfaz DriveIntegrationService
+  - [x] Definir métodos para subir, descargar y eliminar archivos
+  - [x] Diseñar estructura de datos para archivos en Drive
+- [x] Implementar estructura para almacenamiento de archivos
+  - [x] Crear entidad para almacenar referencias a archivos externos
+  - [x] Diseñar sistema de permisos para archivos
+  - [x] Preparar interfaz para gestión de archivos
 
 ### 8. Pruebas y Documentación (1 semana)
 
 #### 8.1 Implementación de Pruebas (3 días)
-- [ ] Desarrollar pruebas unitarias
-  - [ ] Implementar pruebas para la capa de dominio
-  - [ ] Implementar pruebas para la capa de aplicación
-  - [ ] Desarrollar pruebas para servicios y utilidades
-- [ ] Implementar pruebas de integración
-  - [ ] Crear pruebas para el flujo de trabajo completo
-  - [ ] Implementar pruebas para la API REST
-  - [ ] Desarrollar pruebas para la capa de persistencia
+- [x] Desarrollar pruebas unitarias
+  - [x] Implementar pruebas para la capa de dominio
+    - [x] Crear pruebas para ActivityExtended y métodos de cambio de estado
+    - [x] Implementar pruebas para el patrón State y transiciones entre estados
+    - [x] Crear pruebas para enumeraciones y sus métodos
+  - [x] Implementar pruebas para la capa de aplicación
+    - [x] Crear pruebas para ActivityWorkflowService
+    - [x] Verificar comportamiento correcto de transiciones de estado
+    - [x] Probar manejo de errores y excepciones
+  - [x] Desarrollar pruebas para servicios y utilidades
+- [x] Implementar pruebas de integración
+  - [x] Crear pruebas para el flujo de trabajo completo
+  - [x] Implementar pruebas para la API REST
+  - [x] Desarrollar pruebas para la capa de persistencia
 - [ ] Implementar pruebas de interfaz de usuario
   - [ ] Crear pruebas para componentes principales
   - [ ] Implementar pruebas para flujos de usuario
@@ -1266,3 +1407,75 @@ Este sprint se enfocará en mejorar el rendimiento de la aplicación, corregir e
 - Preparación para integraciones futuras completada
 - Pruebas automatizadas implementadas
 - Documentación completa y actualizada
+
+## Sprint 15: Implementación de Pruebas Unitarias y de Integración (2 semanas)
+
+### Descripción del Sprint
+Este sprint se enfocará en implementar pruebas unitarias y de integración para mejorar la calidad y estabilidad del código, tanto en el frontend como en el backend.
+
+### Objetivos
+- Implementar pruebas unitarias para la capa de dominio
+- Implementar pruebas unitarias para la capa de aplicación
+- Implementar pruebas de integración para los controladores
+- Mejorar la cobertura de código
+- Documentar las pruebas implementadas
+
+### Fase 1: Pruebas unitarias para la capa de dominio (3 días)
+- [x] 1.1 Implementar pruebas para las entidades de dominio
+  - [x] Crear pruebas para Activity y sus métodos
+  - [x] Crear pruebas para User y sus métodos
+  - [x] Crear pruebas para los value objects
+- [x] 1.2 Implementar pruebas para los servicios de dominio
+  - [x] Crear pruebas para ActivityService
+  - [x] Crear pruebas para UserService
+  - [x] Crear pruebas para otros servicios de dominio
+- [x] 1.3 Implementar pruebas para las reglas de negocio
+  - [x] Crear pruebas para validaciones de dominio
+  - [x] Crear pruebas para reglas de transición de estado
+  - [x] Crear pruebas para permisos y roles
+
+### Fase 2: Pruebas unitarias para la capa de aplicación (3 días)
+- [x] 2.1 Implementar pruebas para los casos de uso
+  - [x] Crear pruebas para CreateActivityUseCase
+  - [x] Crear pruebas para UpdateActivityUseCase
+  - [x] Crear pruebas para otros casos de uso
+- [x] 2.2 Implementar pruebas para los servicios de aplicación
+  - [x] Crear pruebas para ActivityWorkflowService
+  - [x] Crear pruebas para AuthenticationService
+  - [x] Crear pruebas para otros servicios de aplicación
+- [x] 2.3 Implementar pruebas para los DTOs y mappers
+  - [x] Crear pruebas para ActivityDTO y su mapper
+  - [x] Crear pruebas para UserDTO y su mapper
+  - [x] Crear pruebas para otros DTOs y mappers
+
+### Fase 3: Pruebas de integración (4 días)
+- [x] 3.1 Implementar pruebas para los controladores REST
+  - [x] Crear pruebas para ActivityController
+  - [x] Crear pruebas para UserController
+  - [x] Crear pruebas para AuthController
+  - [x] Crear pruebas para ActivityWorkflowController
+- [x] 3.2 Implementar pruebas para los repositorios
+  - [x] Crear pruebas para ActivityRepository
+  - [x] Crear pruebas para UserRepository
+  - [x] Crear pruebas para otros repositorios
+- [x] 3.3 Implementar pruebas para la seguridad
+  - [x] Crear pruebas para autenticación
+  - [x] Crear pruebas para autorización
+  - [x] Crear pruebas para manejo de tokens
+
+### Fase 4: Mejora de cobertura y documentación (2 días)
+- [x] 4.1 Analizar la cobertura de código
+  - [x] Ejecutar informes de cobertura
+  - [x] Identificar áreas con baja cobertura
+  - [x] Implementar pruebas adicionales para mejorar la cobertura
+- [x] 4.2 Documentar las pruebas
+  - [x] Actualizar README.md con información sobre pruebas
+  - [x] Documentar patrones y convenciones de pruebas
+  - [x] Actualizar CHANGELOG.md con las pruebas implementadas
+
+### Criterios de aceptación
+- Las pruebas unitarias para la capa de dominio están implementadas y pasan
+- Las pruebas unitarias para la capa de aplicación están implementadas y pasan
+- Las pruebas de integración están implementadas y pasan
+- La cobertura de código ha mejorado
+- La documentación está actualizada

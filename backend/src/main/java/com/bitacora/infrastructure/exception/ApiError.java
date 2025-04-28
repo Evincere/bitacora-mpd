@@ -20,23 +20,23 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ApiError {
-    
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
-    
+
     private HttpStatus status;
-    
+
     private String message;
-    
+
     private String path;
-    
+
     private String error;
-    
+
     private String errorCode;
-    
+
     @Builder.Default
     private List<String> details = new ArrayList<>();
-    
+
     /**
      * Constructor para crear un error de API con detalles.
      *
@@ -47,7 +47,9 @@ public class ApiError {
      * @param errorCode El código de error
      * @param details   Los detalles del error
      */
-    public ApiError(HttpStatus status, String message, String path, String error, String errorCode, List<String> details) {
+    public ApiError(final HttpStatus status, final String message, final String path, final String error,
+            final String errorCode,
+            final List<String> details) {
         this.timestamp = LocalDateTime.now();
         this.status = status;
         this.message = message;
@@ -56,7 +58,7 @@ public class ApiError {
         this.errorCode = errorCode;
         this.details = details;
     }
-    
+
     /**
      * Constructor para crear un error de API sin detalles.
      *
@@ -66,16 +68,17 @@ public class ApiError {
      * @param error     El tipo de error
      * @param errorCode El código de error
      */
-    public ApiError(HttpStatus status, String message, String path, String error, String errorCode) {
+    public ApiError(final HttpStatus status, final String message, final String path, final String error,
+            final String errorCode) {
         this(status, message, path, error, errorCode, new ArrayList<>());
     }
-    
+
     /**
      * Añade un detalle al error.
      *
      * @param detail El detalle a añadir
      */
-    public void addDetail(String detail) {
+    public void addDetail(final String detail) {
         if (this.details == null) {
             this.details = new ArrayList<>();
         }

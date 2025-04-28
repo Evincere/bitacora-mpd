@@ -10,7 +10,7 @@ import { FiSearch, FiSettings, FiBell, FiUser, FiMenu, FiLogOut, FiMail, FiShiel
 import { toggleSidebar, toggleTheme } from '@/core/store/uiSlice';
 import { useAuth } from '@/core/hooks/useAuth';
 import { useToast } from '@/core/hooks/useToast';
-import RealTimeNotificationCenter from '@/features/notifications/components/RealTimeNotificationCenter';
+import NotificacionesButton from '@/features/notificaciones/components/NotificacionesButton';
 import { useAppSelector, useAppDispatch } from '@/core/store';
 
 const HeaderContainer = styled.header`
@@ -426,7 +426,7 @@ const Header: React.FC = () => {
         <IconButton>
           <FiSettings size={20} />
         </IconButton>
-        <RealTimeNotificationCenter />
+        <NotificacionesButton />
         <UserAvatar onClick={handleToggleMenu}>
           <FiUser size={20} />
         </UserAvatar>

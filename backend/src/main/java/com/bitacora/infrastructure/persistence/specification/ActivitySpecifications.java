@@ -6,10 +6,11 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDateTime;
 
 /**
- * Clase de utilidad que proporciona especificaciones JPA para consultas dinámicas
+ * Clase de utilidad que proporciona especificaciones JPA para consultas
+ * dinámicas
  * de actividades.
  */
-public class ActivitySpecifications {
+public final class ActivitySpecifications {
 
     private ActivitySpecifications() {
         // Clase de utilidad, no debe ser instanciada
@@ -21,7 +22,7 @@ public class ActivitySpecifications {
      * @param type El tipo de actividad
      * @return Una especificación JPA
      */
-    public static Specification<ActivityEntity> hasType(String type) {
+    public static Specification<ActivityEntity> hasType(final String type) {
         return (root, query, criteriaBuilder) -> {
             if (type == null || type.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -36,7 +37,7 @@ public class ActivitySpecifications {
      * @param status El estado de la actividad
      * @return Una especificación JPA
      */
-    public static Specification<ActivityEntity> hasStatus(String status) {
+    public static Specification<ActivityEntity> hasStatus(final String status) {
         return (root, query, criteriaBuilder) -> {
             if (status == null || status.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -51,7 +52,7 @@ public class ActivitySpecifications {
      * @param userId El ID del usuario
      * @return Una especificación JPA
      */
-    public static Specification<ActivityEntity> belongsToUser(Long userId) {
+    public static Specification<ActivityEntity> belongsToUser(final Long userId) {
         return (root, query, criteriaBuilder) -> {
             if (userId == null) {
                 return criteriaBuilder.conjunction();
@@ -67,7 +68,8 @@ public class ActivitySpecifications {
      * @param endDate   La fecha de fin
      * @return Una especificación JPA
      */
-    public static Specification<ActivityEntity> dateIsBetween(LocalDateTime startDate, LocalDateTime endDate) {
+    public static Specification<ActivityEntity> dateIsBetween(final LocalDateTime startDate,
+            final LocalDateTime endDate) {
         return (root, query, criteriaBuilder) -> {
             if (startDate == null && endDate == null) {
                 return criteriaBuilder.conjunction();
@@ -88,25 +90,24 @@ public class ActivitySpecifications {
      * @param query El texto a buscar
      * @return Una especificación JPA
      */
-    public static Specification<ActivityEntity> containsText(String query) {
+    public static Specification<ActivityEntity> containsText(final String query) {
         return (root, criteriaQuery, criteriaBuilder) -> {
             if (query == null || query.isEmpty()) {
                 return criteriaBuilder.conjunction();
             }
-            
+
             String likePattern = "%" + query.toLowerCase() + "%";
-            
+
             return criteriaBuilder.or(
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), likePattern),
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("situation")), likePattern),
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("result")), likePattern),
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("comments")), likePattern),
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("person")), likePattern),
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("dependency")), likePattern)
-            );
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), likePattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("situation")), likePattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("result")), likePattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("comments")), likePattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("person")), likePattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("dependency")), likePattern));
         };
     }
-    
+
     /**
      * Combina múltiples especificaciones con AND.
      *
@@ -116,7 +117,7 @@ public class ActivitySpecifications {
     @SafeVarargs
     public static Specification<ActivityEntity> where(Specification<ActivityEntity>... specs) {
         Specification<ActivityEntity> result = Specification.where(null);
-        for (Specification<ActivityEntity> spec : specs) {
+        for (final Specification<ActivityEntity> spec : specs) {
             result = result.and(spec);
         }
         return result;

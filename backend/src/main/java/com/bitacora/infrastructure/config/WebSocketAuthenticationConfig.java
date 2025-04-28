@@ -35,21 +35,27 @@ import java.util.List;
 @Slf4j
 public class WebSocketAuthenticationConfig implements WebSocketMessageBrokerConfigurer {
 
+    /**
+     * Longitud del prefijo "Bearer " en el token JWT.
+     */
+    private static final int BEARER_PREFIX_LENGTH = 7;
+
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
 
     /**
      * Configura el canal de cliente entrante para agregar un interceptor de
      * autenticación.
-     * 
+     *
      * @param registration El registro del canal
      */
     @Override
-    public void configureClientInboundChannel(@org.springframework.lang.NonNull ChannelRegistration registration) {
+    public void configureClientInboundChannel(
+            @org.springframework.lang.NonNull final ChannelRegistration registration) {
         registration.interceptors(new ChannelInterceptor() {
             @Override
-            public Message<?> preSend(@org.springframework.lang.NonNull Message<?> message,
-                    @org.springframework.lang.NonNull MessageChannel channel) {
+            public Message<?> preSend(@org.springframework.lang.NonNull final Message<?> message,
+                    @org.springframework.lang.NonNull final MessageChannel channel) {
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
                 if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
@@ -60,7 +66,7 @@ public class WebSocketAuthenticationConfig implements WebSocketMessageBrokerConf
                     if (authorization != null && !authorization.isEmpty()) {
                         String token = authorization.get(0);
                         if (token != null && token.startsWith("Bearer ")) {
-                            token = token.substring(7);
+                            token = token.substring(BEARER_PREFIX_LENGTH);
 
                             try {
                                 if (jwtTokenProvider.validateToken(token)) {
@@ -75,7 +81,7 @@ public class WebSocketAuthenticationConfig implements WebSocketMessageBrokerConf
 
                                     log.debug("WebSocket Connection authenticated for user: {}", username);
                                 }
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 log.error("WebSocket Authentication error: {}", e.getMessage());
                             }
                         }

@@ -55,7 +55,13 @@ export enum UserRole {
   /** Usuario estándar con acceso básico */
   USUARIO = 'USUARIO',
   /** Usuario con permisos de solo lectura */
-  CONSULTA = 'CONSULTA'
+  CONSULTA = 'CONSULTA',
+  /** Usuario que puede crear solicitudes y hacer seguimiento */
+  SOLICITANTE = 'SOLICITANTE',
+  /** Usuario que puede asignar tareas a ejecutores */
+  ASIGNADOR = 'ASIGNADOR',
+  /** Usuario que ejecuta las tareas asignadas */
+  EJECUTOR = 'EJECUTOR'
 }
 
 /**

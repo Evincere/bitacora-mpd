@@ -28,65 +28,65 @@ public class User {
     private boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    
+
     @Builder.Default
     private Set<Permission> permissions = new HashSet<>();
-    
+
     /**
      * Verifica si el usuario tiene un permiso específico.
-     * 
+     *
      * @param permission El permiso a verificar
      * @return true si el usuario tiene el permiso, false en caso contrario
      */
-    public boolean hasPermission(Permission permission) {
-        return permissions.contains(permission) || 
-               (role != null && role.getPermissions().contains(permission));
+    public boolean hasPermission(final Permission permission) {
+        return permissions.contains(permission)
+                || (role != null && role.getPermissions().contains(permission));
     }
-    
+
     /**
      * Agrega un permiso al usuario.
-     * 
+     *
      * @param permission El permiso a agregar
      */
-    public void addPermission(Permission permission) {
+    public void addPermission(final Permission permission) {
         permissions.add(permission);
     }
-    
+
     /**
      * Elimina un permiso del usuario.
-     * 
+     *
      * @param permission El permiso a eliminar
      */
-    public void removePermission(Permission permission) {
+    public void removePermission(final Permission permission) {
         permissions.remove(permission);
     }
-    
+
     /**
      * Activa el usuario.
      */
     public void activate() {
         this.active = true;
     }
-    
+
     /**
      * Desactiva el usuario.
      */
     public void deactivate() {
         this.active = false;
     }
-    
+
     /**
      * Verifica si el usuario está activo.
-     * 
+     *
      * @return true si el usuario está activo, false en caso contrario
      */
     public boolean isActive() {
         return active;
     }
-    
+
     /**
      * Obtiene el nombre completo del usuario.
-     * 
+     *
      * @return El nombre completo del usuario
      */
     public String getFullName() {

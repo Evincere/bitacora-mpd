@@ -18,7 +18,7 @@ spring:
 
   # Configuración de Flyway
   flyway:
-    enabled: false
+    enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
     out-of-order: true
@@ -134,12 +134,6 @@ management:
       probability: 0.0
     propagation:
       type: w3c
-  zipkin:
-    tracing:
-      enabled: false
-      endpoint: ""
-  # Deshabilitar completamente Zipkin para evitar advertencias
-  zipkin-enabled: false
 
 # Configuración de OpenAPI
 springdoc:

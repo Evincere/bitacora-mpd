@@ -14,7 +14,7 @@ public enum ActivityType {
 
     private final String displayName;
 
-    ActivityType(String displayName) {
+    ActivityType(final String displayName) {
         this.displayName = displayName;
     }
 
@@ -23,20 +23,21 @@ public enum ActivityType {
     }
 
     /**
-     * Convierte un string en un ActivityType, ignorando mayúsculas/minúsculas y acentos.
+     * Convierte un string en un ActivityType, ignorando mayúsculas/minúsculas y
+     * acentos.
      * Si no se encuentra una coincidencia, devuelve OTRO.
      *
      * @param text El texto a convertir
      * @return El ActivityType correspondiente o OTRO si no hay coincidencia
      */
-    public static ActivityType fromString(String text) {
+    public static ActivityType fromString(final String text) {
         if (text == null || text.trim().isEmpty()) {
             return OTRO;
         }
 
-        for (ActivityType type : ActivityType.values()) {
-            if (type.name().equalsIgnoreCase(text) || 
-                type.getDisplayName().equalsIgnoreCase(text)) {
+        for (final ActivityType type : ActivityType.values()) {
+            if (type.name().equalsIgnoreCase(text)
+                    || type.getDisplayName().equalsIgnoreCase(text)) {
                 return type;
             }
         }

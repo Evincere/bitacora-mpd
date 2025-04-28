@@ -19,19 +19,21 @@ const InputContainer = styled.div`
   width: 100%;
 `;
 
-const Input = styled.input<{ hasError?: boolean }>`
+const Input = styled.input<{ $hasError?: boolean }>`
   width: 100%;
   padding: 10px 12px;
   padding-right: 32px;
   border-radius: 4px;
-  border: 1px solid ${({ theme, hasError }) => hasError ? theme.error : theme.border};
-  background-color: ${({ theme }) => theme.inputBackground};
+  border: 1px solid ${({ theme, $hasError }) => $hasError ? theme.error : theme.border};
+  background-color: ${({ theme }) => theme.backgroundTertiary};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
+  transition: all 0.2s;
 
   &:focus {
     outline: none;
-    border-color: ${({ theme, hasError }) => hasError ? theme.error : theme.primary};
+    border-color: ${({ theme, $hasError }) => $hasError ? theme.error : theme.primary};
+    box-shadow: 0 0 0 2px ${({ theme, $hasError }) => $hasError ? `${theme.error}30` : `${theme.primary}30`};
   }
 
   &:disabled {
@@ -100,7 +102,7 @@ const NoSuggestions = styled.div`
   font-style: italic;
 `;
 
-const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
+const AutocompleteInput = React.forwardRef<HTMLInputElement, AutocompleteInputProps>(({
   id,
   value,
   onChange,
@@ -110,10 +112,10 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   error,
   onSuggestionSelected,
   disabled = false
-}) => {
+}, ref) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = ref || useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLUListElement>(null);
 
   // Filtrar sugerencias basadas en el valor actual
@@ -122,7 +124,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
       setFilteredSuggestions(suggestions.slice(0, 10)); // Mostrar las primeras 10 sugerencias
     } else {
       const filtered = suggestions
-        .filter(suggestion => 
+        .filter(suggestion =>
           suggestion.toLowerCase().includes(value.toLowerCase()))
         .slice(0, 10); // Limitar a 10 resultados
       setFilteredSuggestions(filtered);
@@ -133,9 +135,9 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        inputRef.current && 
+        inputRef.current &&
         !inputRef.current.contains(event.target as Node) &&
-        suggestionsRef.current && 
+        suggestionsRef.current &&
         !suggestionsRef.current.contains(event.target as Node)
       ) {
         setShowSuggestions(false);
@@ -153,7 +155,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     const event = {
       target: { value: suggestion }
     } as React.ChangeEvent<HTMLInputElement>;
-    
+
     onChange(event);
     onSuggestionSelected(suggestion);
     setShowSuggestions(false);
@@ -165,7 +167,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     const event = {
       target: { value: '' }
     } as React.ChangeEvent<HTMLInputElement>;
-    
+
     onChange(event);
     inputRef.current?.focus();
   };
@@ -186,18 +188,18 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
         onBlur={onBlur}
         onFocus={() => setShowSuggestions(true)}
         placeholder={placeholder}
-        hasError={!!error}
+        $hasError={!!error}
         disabled={disabled}
       />
-      
-      <IconButton 
-        type="button" 
+
+      <IconButton
+        type="button"
         onClick={value ? handleClear : handleToggleSuggestions}
         tabIndex={-1}
       >
         {value ? <FiX size={16} /> : <FiChevronDown size={16} />}
       </IconButton>
-      
+
       {showSuggestions && !disabled && (
         <SuggestionsList ref={suggestionsRef}>
           {filteredSuggestions.length > 0 ? (
@@ -214,10 +216,10 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
           )}
         </SuggestionsList>
       )}
-      
+
       {error && <ErrorMessage>{error}</ErrorMessage>}
     </InputContainer>
   );
-};
+});
 
 export default AutocompleteInput;

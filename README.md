@@ -16,6 +16,13 @@ Bitácora es una plataforma moderna para la gestión de actividades y tareas del
   - Validación en tiempo real con mensajes específicos
   - Sistema de plantillas para agilizar la creación de actividades recurrentes
 - **Dashboard personalizable**: Visualización de métricas y actividades relevantes
+  - Dashboard específico para SOLICITANTE con resumen de solicitudes y tiempos de respuesta
+  - Dashboard específico para ASIGNADOR con bandeja de entrada, distribución de carga y métricas
+  - Dashboard específico para EJECUTOR con tareas asignadas y progreso
+- **Flujo de trabajo optimizado**: Interfaces específicas para cada rol
+  - SOLICITANTE: Creación de solicitudes, seguimiento de estado y visualización de tiempos de respuesta
+  - ASIGNADOR: Bandeja de entrada de solicitudes, asignación a ejecutores y monitoreo de carga de trabajo
+  - EJECUTOR: Gestión de tareas asignadas, actualización de progreso y registro de resultados
 - **Estadísticas y resúmenes**: Visualización de datos por tipo y estado de actividades
 - **Colaboración entre equipos**: Espacios de trabajo compartidos con permisos granulares
   - Indicadores de presencia en tiempo real
@@ -305,6 +312,16 @@ En desarrollo:
 - **PUT /api/activities/{id}**: Actualizar una actividad existente
 - **DELETE /api/activities/{id}**: Eliminar una actividad
 
+#### Flujo de Trabajo de Actividades
+- **POST /api/activities/request**: Crear solicitud (SOLICITANTE)
+- **POST /api/activities/{id}/assign**: Asignar tarea (ASIGNADOR)
+- **POST /api/activities/{id}/start**: Iniciar tarea (EJECUTOR)
+- **POST /api/activities/{id}/complete**: Completar tarea (EJECUTOR)
+- **POST /api/activities/{id}/approve**: Aprobar tarea (ASIGNADOR)
+- **POST /api/activities/{id}/reject**: Rechazar tarea (ASIGNADOR)
+- **POST /api/activities/{id}/cancel**: Cancelar tarea
+- **POST /api/activities/{id}/comment**: Agregar comentario a una actividad
+
 #### Estadísticas y Resúmenes
 - **GET /api/activities/stats/by-type**: Obtener estadísticas por tipo de actividad
 - **GET /api/activities/stats/by-status**: Obtener estadísticas por estado de actividad
@@ -374,27 +391,29 @@ También se proporcionan endpoints equivalentes en la ruta `/auth` para compatib
 - **POST /auth/logout**: Cerrar sesión
 - **POST /auth/refresh**: Refrescar token JWT
 
-### Usuarios de prueba
+### Usuarios del Sistema
 
-La aplicación incluye tres usuarios predefinidos para pruebas:
+La aplicación incluye múltiples usuarios con diferentes roles:
 
 1. **Usuario Administrador**:
+   - **Nombre**: Semper Evincere
    - **Usuario**: admin
    - **Contraseña**: Admin@123
    - **Rol**: ADMIN
    - **Permisos**: Todos los permisos (lectura, escritura y eliminación de actividades y usuarios, generación de informes)
 
-2. **Usuario Común**:
-   - **Usuario**: usuario
-   - **Contraseña**: Usuario@123
-   - **Rol**: USUARIO
-   - **Permisos**: Lectura y escritura de actividades
+2. **Usuario Asignador**:
+   - **Nombre**: Adriana Sanchez
+   - **Usuario**: 32345678 (DNI)
+   - **Contraseña**: Test@1234
+   - **Rol**: ASIGNADOR
+   - **Permisos**: Lectura y escritura de actividades, lectura de usuarios, generación de informes
 
-3. **Usuario de Prueba**:
-   - **Usuario**: testuser
-   - **Contraseña**: test123
-   - **Rol**: ADMIN
-   - **Permisos**: Todos los permisos (lectura, escritura y eliminación de actividades y usuarios, generación de informes)
+3. **Usuarios Solicitantes y Ejecutores**:
+   - Múltiples usuarios con roles SOLICITANTE y EJECUTOR
+   - Utilizan su DNI como nombre de usuario y la contraseña "Test@1234"
+
+Para ver la lista completa de usuarios, roles y credenciales, consulte el archivo [README-USERS.md](README-USERS.md).
 
 ### Autenticación y Seguridad
 
@@ -421,6 +440,144 @@ La aplicación utiliza autenticación basada en JWT (JSON Web Tokens) con los si
 2. Si el usuario permanece inactivo durante 30 minutos, se muestra un diálogo de confirmación.
 3. Si el usuario no responde o elige cerrar sesión, el sistema cierra la sesión automáticamente.
 4. Si el usuario elige continuar, se reinicia el temporizador de inactividad.
+
+### Mecanismo de Login y Rutas Protegidas
+
+#### Mecanismo de Autenticación
+
+##### Backend (Spring Security)
+
+La aplicación utiliza **JWT (JSON Web Tokens)** para la autenticación, con las siguientes características:
+
+1. **Configuración de Seguridad**:
+   - Definida en `SecurityConfig.java`
+   - Utiliza autenticación stateless (sin sesión en el servidor)
+   - CSRF está deshabilitado
+   - CORS está configurado para permitir solicitudes desde `http://localhost:3000` y otros orígenes
+
+2. **Rutas Públicas** (no requieren autenticación):
+   - `/api/auth/**` y `/auth/**` - Endpoints de autenticación
+   - `/api/api-docs/**`, `/api/swagger-ui/**` - Documentación de la API
+   - `/api/actuator/**` - Endpoints de monitoreo
+   - `/api/h2-console/**` - Consola de la base de datos H2
+   - `/api/ws/**` - Endpoints de WebSocket
+   - `/api/activities/**` - Endpoints de actividades (temporalmente públicos para pruebas)
+
+3. **Filtro JWT**:
+   - Implementado en `JwtAuthenticationFilter.java`
+   - Extrae el token JWT de la cabecera de autorización
+   - Verifica si el token está en la lista negra
+   - Valida el token y establece la autenticación en el contexto de seguridad
+
+4. **Controladores de Autenticación**:
+   - `AuthController.java` - Maneja solicitudes a `/api/auth/**`
+   - `RootAuthController.java` - Maneja solicitudes a `/auth/**` (sin el prefijo `/api`)
+   - Ambos exponen endpoints para login, refresh token y logout
+
+##### Frontend (React)
+
+1. **Componentes de Autenticación**:
+   - `Login.tsx` - Formulario de inicio de sesión
+   - `authSlice.ts` - Estado de autenticación en Redux
+   - `authService.ts` - Servicios para comunicarse con la API de autenticación
+
+2. **Almacenamiento de Tokens**:
+   - Los tokens JWT se almacenan en `localStorage`:
+     - `bitacora_token` - Token JWT principal
+     - `bitacora_refresh_token` - Token de refresco
+     - `bitacora_user` - Información del usuario
+
+3. **Protección de Rutas**:
+   - Implementada en `ProtectedRoute` en `App.tsx`
+   - Verifica la existencia de tokens en localStorage
+   - Redirige a `/login` si no hay tokens
+
+#### Rutas Protegidas
+
+##### Backend
+
+1. **Rutas Protegidas por Configuración**:
+   - Todas las rutas excepto las mencionadas como públicas requieren autenticación
+
+2. **Rutas Protegidas por Anotaciones**:
+   - Utilizan `@PreAuthorize` para verificar permisos específicos
+
+3. **Controladores con Protección**:
+
+   a. **UserController**:
+   - `GET /api/users` - `@PreAuthorize("hasAuthority('READ_USERS')")`
+   - `GET /api/users/{id}` - `@PreAuthorize("hasAuthority('READ_USERS')")`
+   - Otros endpoints también protegidos con permisos específicos
+
+   b. **ActivityController**:
+   - `POST /activities` - `@PreAuthorize("hasAuthority('WRITE_ACTIVITIES')")`
+   - `PUT /activities/{id}` - `@PreAuthorize("hasAuthority('WRITE_ACTIVITIES')")`
+   - `DELETE /activities/{id}` - `@PreAuthorize("hasAuthority('DELETE_ACTIVITIES')")`
+   - Algunos endpoints como `GET /activities` están temporalmente sin protección para pruebas
+
+   c. **AnnouncementController**:
+   - `POST /department` - `@PreAuthorize("hasRole('ADMIN')")`
+   - Requiere rol de administrador
+
+##### Frontend
+
+1. **Rutas Públicas**:
+   - `/login` - Página de inicio de sesión
+
+2. **Rutas Protegidas**:
+   - Todas las rutas bajo `/app/*` están protegidas por el componente `ProtectedRoute`
+   - Incluyen:
+     - `/app` - Dashboard principal
+     - `/app/activities` - Lista de actividades
+     - `/app/activities/calendar` - Calendario de actividades
+     - `/app/activities/new` - Formulario para crear actividades
+     - `/app/activities/:id` - Detalles de una actividad
+     - `/app/activities/:id/edit` - Formulario para editar actividades
+     - `/app/profile` - Perfil de usuario
+
+#### Flujo de Autenticación
+
+1. **Inicio de Sesión**:
+   - Usuario ingresa credenciales en `/login`
+   - Frontend envía solicitud a `/api/auth/login` o `/auth/login`
+   - Backend verifica credenciales y genera tokens JWT
+   - Frontend almacena tokens en localStorage
+   - Usuario es redirigido a `/app`
+
+2. **Acceso a Rutas Protegidas**:
+   - Componente `ProtectedRoute` verifica tokens en localStorage
+   - Si hay tokens, permite acceso a la ruta
+   - Si no hay tokens, redirige a `/login`
+
+3. **Solicitudes a API Protegida**:
+   - Frontend incluye token JWT en cabecera de autorización
+   - Backend valida token con `JwtAuthenticationFilter`
+   - Si el token es válido, permite acceso al recurso
+   - Si el token no es válido o está en lista negra, rechaza la solicitud
+
+4. **Cierre de Sesión**:
+   - Usuario hace clic en "Cerrar sesión"
+   - Frontend envía solicitud a `/api/auth/logout`
+   - Backend añade token a lista negra
+   - Frontend elimina tokens de localStorage
+   - Usuario es redirigido a `/login`
+
+#### Permisos y Roles
+
+1. **Roles de Usuario**:
+   - `ADMIN` - Administrador del sistema
+   - `ASIGNADOR` - Asigna tareas a ejecutores
+   - `SOLICITANTE` - Solicita tareas
+   - `EJECUTOR` - Ejecuta tareas asignadas
+
+2. **Permisos**:
+   - `READ_ACTIVITIES` - Leer actividades
+   - `WRITE_ACTIVITIES` - Crear/editar actividades
+   - `DELETE_ACTIVITIES` - Eliminar actividades
+   - `READ_USERS` - Leer usuarios
+   - `WRITE_USERS` - Crear/editar usuarios
+   - `DELETE_USERS` - Eliminar usuarios
+   - `GENERATE_REPORTS` - Generar reportes
 
 ## Seguridad y Manejo de Credenciales
 
@@ -516,11 +673,35 @@ El proyecto utiliza `.gitignore` para evitar que archivos con información sensi
   - ✅ Implementación de reglas de transición entre estados
   - ✅ Desarrollo de validaciones para cada transición
   - ✅ Implementación de servicio para gestionar el flujo de trabajo
-- ⏳ Implementación de sistema de categorización y priorización de tareas
-- ⏳ Creación de interfaces específicas para cada rol
-- ⏳ Implementación de sistema de notificaciones para el flujo de trabajo
-- ⏳ Desarrollo de reportes y métricas para seguimiento de tareas
-- ⏳ Preparación para integración futura con Google Calendar y Drive
+- ✅ Corrección de pruebas unitarias
+  - ✅ Configuración de datos de prueba para tests
+  - ✅ Actualización de la configuración de pruebas para cargar datos SQL
+  - ✅ Corrección de errores en la inicialización del contexto de Spring
+- ✅ Implementación de sistema de categorización y priorización de tareas
+  - ✅ Gestión de categorías con colores personalizables
+  - ✅ Sistema de prioridades con niveles configurables
+  - ✅ Interfaz de administración para categorías y prioridades
+  - ✅ Integración con el flujo de trabajo para clasificar tareas
+- ✅ Creación de interfaces específicas para cada rol
+  - ✅ Interfaz para SOLICITANTES con formulario adaptado y seguimiento de solicitudes
+  - ✅ Interfaz para ASIGNADORES con bandeja de entrada y herramientas de distribución
+  - ✅ Interfaz para EJECUTORES con vista de tareas asignadas y reportes de progreso
+  - ✅ Sistema de navegación adaptativo según el rol del usuario
+- ✅ Implementación de sistema de notificaciones para el flujo de trabajo
+  - ✅ Centro de notificaciones con filtros por tipo
+  - ✅ Indicador de notificaciones no leídas
+  - ✅ Panel de configuración de preferencias de notificaciones
+  - ✅ Múltiples canales de notificación (app, email, push)
+- ✅ Desarrollo de reportes y métricas para seguimiento de tareas
+  - ✅ Dashboard con resumen de tareas y distribución por estados
+  - ✅ Gráficos de distribución por categorías
+  - ✅ Análisis de tendencias de tiempos de respuesta y completado
+  - ✅ Métricas de rendimiento por usuario
+- ✅ Preparación para integración futura con Google Calendar y Drive
+  - ✅ Interfaces para Google Calendar API
+  - ✅ Interfaces para Google Drive API
+  - ✅ Panel de configuración para integraciones
+  - ✅ Servicios mock para pruebas de integración
 
 - ✅ Documentación completa de arquitectura (diagramas, flujos, componentes)
 - ✅ Mejora de la documentación de API con OpenAPI/Swagger

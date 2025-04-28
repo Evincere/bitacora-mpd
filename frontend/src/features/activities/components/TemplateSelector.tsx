@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { FiFileText, FiChevronDown, FiEdit2, FiTrash2, FiClock } from 'react-icons/fi';
+import { FiFileText, FiChevronDown, FiEdit2, FiTrash2, FiClock, FiPlus, FiInfo, FiStar } from 'react-icons/fi';
 import useActivityTemplates, { ActivityTemplate } from '@/features/activities/hooks/useActivityTemplates';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -72,7 +72,8 @@ const SelectorButton = styled.button`
 
 const DropdownMenu = styled.div<{ isOpen: boolean }>`
   position: absolute;
-  top: calc(100% + 4px);
+  top: auto;
+  bottom: calc(100% + 4px); /* Mostrar el menú hacia arriba en lugar de hacia abajo */
   left: 0;
   width: 300px; /* Ancho fijo para mejor legibilidad */
   max-height: 350px;
@@ -81,14 +82,14 @@ const DropdownMenu = styled.div<{ isOpen: boolean }>`
   border-radius: 8px;
   border: 1px solid ${({ theme }) => theme.border};
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  z-index: 100; /* Valor alto para asegurar que esté por encima de otros elementos */
+  z-index: 1000; /* Valor muy alto para asegurar que esté por encima de otros elementos */
   display: ${({ isOpen }) => (isOpen ? 'block' : 'none')};
   min-width: 280px; /* Asegurar un ancho mínimo */
   animation: ${({ isOpen }) => isOpen ? 'dropdownFadeIn 0.2s ease-out' : 'none'};
-  transform-origin: top center;
+  transform-origin: bottom center;
 
   @keyframes dropdownFadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
+    from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
 `;
