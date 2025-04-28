@@ -17,7 +17,7 @@ else
     # Iniciar servicios de infraestructura con Docker Compose
     echo -e "${YELLOW}Iniciando servicios de infraestructura...${NC}"
     docker-compose up -d postgres
-    
+
     # Esperar a que PostgreSQL esté listo
     echo -e "${YELLOW}Esperando a que PostgreSQL esté listo...${NC}"
     sleep 10
