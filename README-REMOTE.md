@@ -12,7 +12,7 @@ Hemos detectado un conflicto de puertos entre Grafana y el frontend, ya que ambo
 
 1. **Hacer ejecutables los scripts**:
    ```bash
-   chmod +x make-scripts-executable.sh start-app-prod.sh
+   chmod +x make-scripts-executable.sh start-app-prod.sh start-app-prod-no-docker-frontend.sh
    ./make-scripts-executable.sh
    ```
 
@@ -21,12 +21,26 @@ Hemos detectado un conflicto de puertos entre Grafana y el frontend, ya que ambo
    sudo ./install-java17.sh
    ```
 
-3. **Iniciar la aplicación en modo producción**:
+3. **Instalar las dependencias faltantes**:
+   ```bash
+   cd frontend
+   npm install @hookform/resolvers react-hook-form zod
+   cd ..
+   ```
+
+4. **Iniciar la aplicación en modo producción**:
+
+   **Opción 1: Usando Docker para todo**
    ```bash
    ./start-app-prod.sh
    ```
 
-4. **Para detener la aplicación**:
+   **Opción 2: Usando Docker solo para el backend y la base de datos**
+   ```bash
+   ./start-app-prod-no-docker-frontend.sh
+   ```
+
+5. **Para detener la aplicación**:
    ```bash
    docker-compose down
    ```

@@ -2,11 +2,17 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copiar todo el código fuente
+# Copiar package.json y package-lock.json primero para aprovechar la caché de Docker
+COPY package*.json ./
+
+# Instalar dependencias
+RUN npm install
+
+# Copiar el resto del código fuente
 COPY . .
 
-# Instalar dependencias y construir la aplicación
-RUN npm install && npm run build
+# Construir la aplicación
+RUN npm run build
 
 # Etapa de producción
 FROM nginx:alpine
