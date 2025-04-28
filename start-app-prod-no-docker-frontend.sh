@@ -79,6 +79,13 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
+# Asegurarse de que las dependencias específicas estén instaladas
+echo -e "${YELLOW}Verificando dependencias específicas...${NC}"
+npm list @hookform/resolvers react-hook-form zod @tanstack/react-virtual || {
+    echo -e "${YELLOW}Instalando dependencias faltantes...${NC}"
+    npm install @hookform/resolvers react-hook-form zod @tanstack/react-virtual
+}
+
 # Iniciar el servidor de desarrollo
 echo -e "${GREEN}Iniciando servidor de desarrollo en el puerto 3000...${NC}"
 npm run dev &

@@ -6,6 +6,9 @@ chmod +x stop-dev-linux.sh
 chmod +x install-dependencies.sh
 chmod +x install-java17.sh
 chmod +x compile-backend.sh
+chmod +x start-app-prod.sh
+chmod +x start-app-prod-no-docker-frontend.sh
+chmod +x install-frontend-dependencies.sh
 chmod +x backend/run-dev.sh
 chmod +x frontend/run-dev.sh
 chmod +x backend/generate-openapi.sh

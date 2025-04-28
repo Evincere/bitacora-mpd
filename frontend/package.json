@@ -19,6 +19,7 @@
     "@reduxjs/toolkit": "^1.9.5",
     "@tanstack/react-query": "^5.0.0",
     "@tanstack/react-query-devtools": "^5.0.0",
+    "@tanstack/react-virtual": "^3.0.0",
     "axios": "^1.5.0",
     "bitacora-frontend": "file:",
     "chart.js": "^4.4.0",
