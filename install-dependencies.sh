@@ -20,8 +20,25 @@ fi
 echo -e "${YELLOW}Actualizando repositorios...${NC}"
 apt update
 
-# Instalar Java
-echo -e "${YELLOW}Instalando Java...${NC}"
+# Instalar Java 17
+echo -e "${YELLOW}Instalando Java 17...${NC}"
+
+# Agregar repositorio para Java 17 si es necesario
+if [ -f /etc/debian_version ]; then
+    # Debian/Ubuntu
+    apt update
+    apt install -y software-properties-common
+    add-apt-repository -y ppa:openjdk-r/ppa
+    apt update
+elif [ -f /etc/redhat-release ]; then
+    # CentOS/RHEL
+    yum install -y java-17-openjdk-devel
+else
+    # Intentar instalación genérica
+    apt install -y openjdk-17-jdk
+fi
+
+# Instalar Java 17
 apt install -y openjdk-17-jdk
 
 # Verificar instalación de Java
@@ -32,6 +49,15 @@ fi
 
 java_version=$(java -version 2>&1 | head -n 1)
 echo -e "${GREEN}Java instalado: $java_version${NC}"
+
+# Verificar versión de Java
+java_major_version=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2 | cut -d'.' -f1)
+if [ "$java_major_version" -lt 17 ]; then
+    echo -e "${RED}Error: La versión de Java es demasiado antigua (Java $java_major_version).${NC}"
+    echo -e "${YELLOW}El proyecto requiere Java 17 o superior.${NC}"
+    echo -e "${YELLOW}Por favor, instala Java 17 manualmente.${NC}"
+    exit 1
+fi
 
 # Instalar Maven
 echo -e "${YELLOW}Instalando Maven...${NC}"
@@ -69,17 +95,17 @@ if ! command -v docker &> /dev/null; then
     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
     apt update
     apt install -y docker-ce
-    
+
     # Iniciar y habilitar Docker
     systemctl start docker
     systemctl enable docker
-    
+
     # Verificar instalación de Docker
     if ! command -v docker &> /dev/null; then
         echo -e "${RED}Error: No se pudo instalar Docker.${NC}"
         exit 1
     fi
-    
+
     docker_version=$(docker --version)
     echo -e "${GREEN}Docker instalado: $docker_version${NC}"
 else
@@ -92,13 +118,13 @@ if ! command -v docker-compose &> /dev/null; then
     echo -e "${YELLOW}Instalando Docker Compose...${NC}"
     curl -L "https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
-    
+
     # Verificar instalación de Docker Compose
     if ! command -v docker-compose &> /dev/null; then
         echo -e "${RED}Error: No se pudo instalar Docker Compose.${NC}"
         exit 1
     fi
-    
+
     docker_compose_version=$(docker-compose --version)
     echo -e "${GREEN}Docker Compose instalado: $docker_compose_version${NC}"
 else
