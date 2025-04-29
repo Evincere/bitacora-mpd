@@ -28,6 +28,9 @@ INSERT INTO users (
     CURRENT_TIMESTAMP
 );
 
+-- Verificar usuarios existentes
+-- SELECT * FROM users;
+
 -- Insertar permisos para el administrador
 INSERT INTO user_permissions (user_id, permission) VALUES
 (1, 'READ_ACTIVITIES'),
