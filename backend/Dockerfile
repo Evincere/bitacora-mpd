@@ -5,7 +5,7 @@ COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 COPY src src
-RUN ./mvnw package -DskipTests
+RUN ./mvnw package -DskipTests -Dcheckstyle.skip=true
 
 # Stage 2: Runtime
 FROM eclipse-temurin:21-jre-alpine

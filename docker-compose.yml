@@ -30,10 +30,9 @@ services:
 
   # Backend - Spring Boot
   backend:
-    image: eclipse-temurin:21-jre-alpine
-    working_dir: /app
-    volumes:
-      - ./backend/target/bitacora-backend-0.0.1-SNAPSHOT.jar:/app/app.jar
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: bitacora-backend
     restart: unless-stopped
     depends_on:
