@@ -1,7 +1,13 @@
 spring:
-  # Perfiles de aplicación
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+    group:
+      dev:
+        - common
+        - dev-db
+      prod:
+        - common
+        - prod-db
 
   # Deshabilitar seguridad para pruebas
   security:
@@ -14,7 +20,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    show-sql: true
+    show-sql: false
 
   # Configuración de Flyway
   flyway:
@@ -93,7 +99,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
   servlet:
     context-path: /api
 
@@ -102,11 +108,11 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus,loggers,env,flyway,caches,mappings
+        include: health,info,metrics,prometheus
       base-path: /actuator
   endpoint:
     health:
-      show-details: always
+      show-details: when_authorized
       probes:
         enabled: true
     prometheus:
@@ -147,18 +153,18 @@ springdoc:
 
 logging:
   level:
-    org.springframework.web: INFO
-    org.hibernate: ERROR
-    com.bitacora: DEBUG
-    org.springframework.cache: DEBUG
+    root: ${LOG_LEVEL:INFO}
+    com.bitacora: ${APP_LOG_LEVEL:DEBUG}
+    org.springframework.web: ${SPRING_WEB_LOG_LEVEL:INFO}
+    org.hibernate: ${HIBERNATE_LOG_LEVEL:ERROR}
 
 jwt:
-  secret: bitacoraSecretKey2023SecureApplicationWithLongSecretKey
-  expiration: 86400000
+  secret: ${JWT_SECRET:bitacoraSecretKey2023SecureApplicationWithLongSecretKey}
+  expiration: ${JWT_EXPIRATION:86400000}
 
 # Configuración de CORS
 cors:
-  allowed-origins: http://localhost:3000,http://localhost:3001,http://localhost:8080
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3001}
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS
   allowed-headers: "*"
   exposed-headers: Authorization

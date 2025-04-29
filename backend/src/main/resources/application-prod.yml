@@ -3,18 +3,38 @@ spring:
   flyway:
     locations: classpath:db/migration,classpath:db/migration/prod
     ignore-migration-patterns: V*__*H2*
-    out-of-order: true
+    out-of-order: false
     baseline-on-migrate: true
 
   # Configuración de PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5432/bitacora
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:bitacora}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      idle-timeout: 300000
+      connection-timeout: 20000
 
   # Configuración de JPA para PostgreSQL
   jpa:
+    hibernate:
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  tomcat:
+    threads:
+      max: 200
+    max-connections: 8192
+    accept-count: 100
+    connection-timeout: 20000
+
+management:
+  endpoint:
+    health:
+      show-details: never

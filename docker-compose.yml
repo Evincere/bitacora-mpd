@@ -1,3 +1,4 @@
+version: '3.8'
 
 services:
   # Base de datos PostgreSQL
@@ -18,6 +19,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
   # Backend - Spring Boot
   backend:
@@ -41,6 +50,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-postgres}
       - JWT_SECRET=${JWT_SECRET:-bitacoraSecretKey2023SecureApplicationWithLongSecretKey}
       - JWT_EXPIRATION=${JWT_EXPIRATION:-86400000}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
     command: [
       "java",
       "-jar",
@@ -60,7 +70,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
+          cpus: '1.5'
           memory: 1.5G
         reservations:
           cpus: '0.5'

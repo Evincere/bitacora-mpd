@@ -1,23 +1,37 @@
-FROM eclipse-temurin:21-jre-alpine
+# Stage 1: Build
+FROM eclipse-temurin:21-jdk-alpine as builder
+WORKDIR /app
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+COPY src src
+RUN ./mvnw package -DskipTests
 
+# Stage 2: Runtime
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# Crear un usuario no root para ejecutar la aplicación
+# Instalar herramientas básicas
+RUN apk add --no-cache curl
+
+# Crear usuario no root
 RUN addgroup -S spring && adduser -S spring -G spring
-
-# Copiar el JAR construido
-COPY target/*.jar app.jar
-
-# Establecer permisos
-RUN chown -R spring:spring /app
 USER spring:spring
 
-# Variables de entorno
+# Copiar el jar desde el stage de build
+COPY --from=builder /app/target/*.jar app.jar
+
+# Variables de entorno por defecto
 ENV SPRING_PROFILES_ACTIVE=prod
-ENV JAVA_OPTS="-Xms512m -Xmx1024m"
+ENV SERVER_PORT=8080
 
-# Puerto de la aplicación
-EXPOSE 8080
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -f http://localhost:${SERVER_PORT}/api/actuator/health || exit 1
 
-# Comando para ejecutar la aplicación
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+EXPOSE ${SERVER_PORT}
+ENTRYPOINT ["java", \
+            "-XX:+UseContainerSupport", \
+            "-XX:MaxRAMPercentage=75.0", \
+            "-jar", \
+            "app.jar"]
