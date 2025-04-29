@@ -156,3 +156,4 @@ google-*.json
 **/*password*.json
 **/*private*.json
 **/*confidential*.json
+.env*
