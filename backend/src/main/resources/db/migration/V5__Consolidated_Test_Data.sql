@@ -9,17 +9,17 @@
 
 -- Verificar si el usuario admin ya existe
 INSERT INTO users (username, password, email, first_name, last_name, role, position, department, active, created_at, updated_at)
-SELECT 'admin', '$2a$10$bieh3BVExvsBBABMSR.oduEksKK2jQhTd.r0lJQ/.HEqjPsVhH4fe', 'admin@bitacora.com', 'Administrador', 'Sistema', 'ADMIN', 'Administrador de Sistema', 'Sistemas', true, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()
+SELECT 'admin', '$2a$10$bieh3BVExvsBBABMSR.oduEksKK2jQhTd.r0lJQ/.HEqjPsVhH4fe', 'admin@bitacora.com', 'Administrador', 'Sistema', 'ADMIN', 'Administrador de Sistema', 'Sistemas', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'admin');
 
 -- Verificar si el usuario común ya existe
 INSERT INTO users (username, password, email, first_name, last_name, role, position, department, active, created_at, updated_at)
-SELECT 'usuario', '$2a$10$pDx3WDEE4Lt7gM4QOIQNkeb9T082kw3MRo8WngXupNCdkUIITLTcu', 'usuario@bitacora.com', 'Usuario', 'Común', 'USUARIO', 'Operador', 'Operaciones', true, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()
+SELECT 'usuario', '$2a$10$pDx3WDEE4Lt7gM4QOIQNkeb9T082kw3MRo8WngXupNCdkUIITLTcu', 'usuario@bitacora.com', 'Usuario', 'Común', 'USUARIO', 'Operador', 'Operaciones', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'usuario');
 
 -- Verificar si el usuario de prueba ya existe
 INSERT INTO users (username, password, email, first_name, last_name, role, position, department, active, created_at, updated_at)
-SELECT 'testuser', '$2a$10$ITnemZSRcxdvrM1nRHEhU.tfqocBP1ELIIq3ZLpjGUZ8i6AGQEY3y', 'test@bitacora.com', 'Test', 'User', 'ADMIN', 'Tester', 'QA', true, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()
+SELECT 'testuser', '$2a$10$ITnemZSRcxdvrM1nRHEhU.tfqocBP1ELIIq3ZLpjGUZ8i6AGQEY3y', 'test@bitacora.com', 'Test', 'User', 'ADMIN', 'Tester', 'QA', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'testuser');
 
 -- Insertar permisos para el administrador (solo si no existen)
@@ -204,7 +204,7 @@ AND NOT EXISTS (
 
 -- Actividad 9 (de V2__Initial_Data.sql)
 INSERT INTO activities (date, type, description, person, role, dependency, situation, result, status, last_status_change_date, comments, agent, created_at, updated_at, user_id)
-SELECT DATEADD('DAY', -2, CURRENT_TIMESTAMP), 'REUNION', 'Reunión con el equipo de desarrollo', 'Juan Pérez', 'Coordinador', 'Dirección de Sistemas', 'Planificación del sprint', 'Se definieron las tareas para el próximo sprint', 'COMPLETADA', DATEADD('DAY', -1, CURRENT_TIMESTAMP), 'La reunión fue productiva', 'María López', DATEADD('DAY', -2, CURRENT_TIMESTAMP), DATEADD('DAY', -1, CURRENT_TIMESTAMP), u.id
+SELECT CURRENT_TIMESTAMP - INTERVAL '2 days', 'REUNION', 'Reunión con el equipo de desarrollo', 'Juan Pérez', 'Coordinador', 'Dirección de Sistemas', 'Planificación del sprint', 'Se definieron las tareas para el próximo sprint', 'COMPLETADA', CURRENT_TIMESTAMP - INTERVAL '1 day', 'La reunión fue productiva', 'María López', CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP - INTERVAL '1 day', u.id
 FROM users u
 WHERE u.username = 'admin'
 AND NOT EXISTS (
@@ -214,7 +214,7 @@ AND NOT EXISTS (
 
 -- Actividad 10 (de V2__Initial_Data.sql)
 INSERT INTO activities (date, type, description, person, role, dependency, situation, result, status, last_status_change_date, comments, agent, created_at, updated_at, user_id)
-SELECT DATEADD('DAY', -1, CURRENT_TIMESTAMP), 'AUDIENCIA', 'Audiencia de conciliación', 'Pedro Gómez', 'Defensor', 'Defensoría Civil', 'Conflicto vecinal', 'Se llegó a un acuerdo entre las partes', 'COMPLETADA', CURRENT_TIMESTAMP, 'Se firmó acta de acuerdo', 'Ana Rodríguez', DATEADD('DAY', -1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, u.id
+SELECT CURRENT_TIMESTAMP - INTERVAL '1 day', 'AUDIENCIA', 'Audiencia de conciliación', 'Pedro Gómez', 'Defensor', 'Defensoría Civil', 'Conflicto vecinal', 'Se llegó a un acuerdo entre las partes', 'COMPLETADA', CURRENT_TIMESTAMP, 'Se firmó acta de acuerdo', 'Ana Rodríguez', CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP, u.id
 FROM users u
 WHERE u.username = 'usuario'
 AND NOT EXISTS (
@@ -224,7 +224,7 @@ AND NOT EXISTS (
 
 -- Actividad 11 (de V2__Initial_Data.sql)
 INSERT INTO activities (date, type, description, person, role, dependency, situation, result, status, last_status_change_date, comments, agent, created_at, updated_at, user_id)
-SELECT DATEADD('DAY', 1, CURRENT_TIMESTAMP), 'ENTREVISTA', 'Entrevista con el cliente', 'Laura Martínez', 'Asistente Social', 'Defensoría Penal', 'Evaluación de situación socioeconómica', NULL, 'PENDIENTE', CURRENT_TIMESTAMP, 'Preparar documentación necesaria', 'Carlos Sánchez', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, u.id
+SELECT CURRENT_TIMESTAMP + INTERVAL '1 day', 'ENTREVISTA', 'Entrevista con el cliente', 'Laura Martínez', 'Asistente Social', 'Defensoría Penal', 'Evaluación de situación socioeconómica', NULL, 'PENDIENTE', CURRENT_TIMESTAMP, 'Preparar documentación necesaria', 'Carlos Sánchez', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, u.id
 FROM users u
 WHERE u.username = 'usuario'
 AND NOT EXISTS (
