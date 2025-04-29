@@ -270,9 +270,10 @@ const Login: React.FC = () => {
         <HelpText>
           <p>Usuarios de prueba:</p>
           <ul>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); setUsername('admin'); setPassword('Admin@123'); }}>admin / Admin@123</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); setUsername('usuario'); setPassword('Usuario@123'); }}>usuario / Usuario@123</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); setUsername('testuser'); setPassword('test123'); }}>testuser / test123</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); setUsername('admin'); setPassword('Admin@123'); }}>admin (usuario administrador) password Admin@123</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); setUsername('28456789'); setPassword('Test@1234'); }}>28456789 (usuario solicitante) password Test@1234</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); setUsername('25789012'); setPassword('Test@1234'); }}>25789012 (usuario ejecutor) password Test@1234</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); setUsername('32345678'); setPassword('Test@1234'); }}>32345678 (usuario asignador) password Test@1234</a></li>
           </ul>
         </HelpText>
       </Form>
