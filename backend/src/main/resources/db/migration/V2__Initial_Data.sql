@@ -163,3 +163,6 @@ INSERT INTO activities (
     'Carlos Sánchez',
     2
 );
+
+-- Ajustar la secuencia para que el próximo id sea el correcto
+SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT MAX(id) FROM users));
