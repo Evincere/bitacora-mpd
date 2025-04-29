@@ -1,5 +1,6 @@
 -- Insertar usuario administrador
 INSERT INTO users (
+    id,
     username,
     password,
     email,
@@ -12,6 +13,7 @@ INSERT INTO users (
     created_at,
     updated_at
 ) VALUES (
+    1,
     'admin',
     -- Contraseña: Admin@123 (hasheada con BCrypt)
     '$2a$10$rPiEAgQNIT1TCoKi3Eqq8eVaRaAhaDkVr2lR5DYtYEg3iJZ1L/Wn6',
@@ -38,6 +40,7 @@ INSERT INTO user_permissions (user_id, permission) VALUES
 
 -- Insertar usuario de prueba
 INSERT INTO users (
+    id,
     username,
     password,
     email,
@@ -50,6 +53,7 @@ INSERT INTO users (
     created_at,
     updated_at
 ) VALUES (
+    2,
     'usuario',
     -- Contraseña: Usuario@123 (hasheada con BCrypt)
     '$2a$10$rPiEAgQNIT1TCoKi3Eqq8eVaRaAhaDkVr2lR5DYtYEg3iJZ1L/Wn6',
