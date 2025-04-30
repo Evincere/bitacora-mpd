@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
@@ -151,7 +150,10 @@ class TaskRequestRepositoryAdapterTest {
         Pageable pageable = pageableCaptor.getValue();
         assertEquals(page, pageable.getPageNumber());
         assertEquals(size, pageable.getPageSize());
-        assertEquals(Sort.Direction.DESC, pageable.getSort().getOrderFor("requestDate").getDirection());
+        assertNotNull(pageable.getSort().getOrderFor("requestDate"));
+        Sort.Order order = pageable.getSort().getOrderFor("requestDate");
+        assertNotNull(order, "El ordenamiento por requestDate no debería ser nulo");
+        assertEquals(Sort.Direction.DESC, order.getDirection());
         
         verify(mapper, times(2)).toDomain(any(TaskRequestEntity.class));
     }
@@ -192,7 +194,9 @@ class TaskRequestRepositoryAdapterTest {
         Pageable pageable = pageableCaptor.getValue();
         assertEquals(page, pageable.getPageNumber());
         assertEquals(size, pageable.getPageSize());
-        assertEquals(Sort.Direction.DESC, pageable.getSort().getOrderFor("requestDate").getDirection());
+        Sort.Order order = pageable.getSort().getOrderFor("requestDate");
+        assertNotNull(order, "El ordenamiento por requestDate no debería ser nulo");
+        assertEquals(Sort.Direction.DESC, order.getDirection());
         
         verify(mapper, times(2)).toDomain(any(TaskRequestEntity.class));
     }
@@ -234,7 +238,9 @@ class TaskRequestRepositoryAdapterTest {
         Pageable pageable = pageableCaptor.getValue();
         assertEquals(page, pageable.getPageNumber());
         assertEquals(size, pageable.getPageSize());
-        assertEquals(Sort.Direction.DESC, pageable.getSort().getOrderFor("requestDate").getDirection());
+        Sort.Order order = pageable.getSort().getOrderFor("requestDate");
+        assertNotNull(order, "El ordenamiento por requestDate no debería ser nulo");
+        assertEquals(Sort.Direction.DESC, order.getDirection());
         
         verify(mapper, times(2)).toDomain(any(TaskRequestEntity.class));
     }

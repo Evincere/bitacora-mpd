@@ -2,12 +2,10 @@ package com.bitacora.infrastructure.persistence.mapper;
 
 import com.bitacora.domain.model.taskrequest.TaskRequest;
 import com.bitacora.domain.model.taskrequest.TaskRequestAttachment;
-import com.bitacora.domain.model.taskrequest.TaskRequestCategory;
 import com.bitacora.domain.model.taskrequest.TaskRequestComment;
 import com.bitacora.domain.model.taskrequest.TaskRequestPriority;
 import com.bitacora.domain.model.taskrequest.TaskRequestStatus;
 import com.bitacora.infrastructure.persistence.entity.TaskRequestAttachmentEntity;
-import com.bitacora.infrastructure.persistence.entity.TaskRequestCategoryEntity;
 import com.bitacora.infrastructure.persistence.entity.TaskRequestCommentEntity;
 import com.bitacora.infrastructure.persistence.entity.TaskRequestEntity;
 import com.bitacora.infrastructure.persistence.entity.TaskRequestPriorityEntity;

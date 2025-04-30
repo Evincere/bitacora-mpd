@@ -92,7 +92,7 @@ INSERT INTO activities (
     agent,
     user_id
 ) VALUES (
-    CURRENT_TIMESTAMP - INTERVAL '2 days',
+    DATEADD('DAY', -2, CURRENT_TIMESTAMP),
     'REUNION',
     'Reunión con el equipo de desarrollo',
     'Juan Pérez',
@@ -101,7 +101,7 @@ INSERT INTO activities (
     'Planificación del sprint',
     'Se definieron las tareas para el próximo sprint',
     'COMPLETADA',
-    CURRENT_TIMESTAMP - INTERVAL '1 day',
+    DATEADD('DAY', -1, CURRENT_TIMESTAMP),
     'La reunión fue productiva',
     'María López',
     1
@@ -122,7 +122,7 @@ INSERT INTO activities (
     agent,
     user_id
 ) VALUES (
-    CURRENT_TIMESTAMP - INTERVAL '1 day',
+    DATEADD('DAY', -1, CURRENT_TIMESTAMP),
     'AUDIENCIA',
     'Audiencia de conciliación',
     'Pedro Gómez',
@@ -152,7 +152,7 @@ INSERT INTO activities (
     agent,
     user_id
 ) VALUES (
-    CURRENT_TIMESTAMP + INTERVAL '1 day',
+    DATEADD('DAY', 1, CURRENT_TIMESTAMP),
     'ENTREVISTA',
     'Entrevista con el cliente',
     'Laura Martínez',
@@ -168,4 +168,5 @@ INSERT INTO activities (
 );
 
 -- Ajustar la secuencia para que el próximo id sea el correcto
-SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT MAX(id) FROM users));
+-- Esta línea es específica de PostgreSQL y se ha comentado para H2
+-- SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT MAX(id) FROM users));

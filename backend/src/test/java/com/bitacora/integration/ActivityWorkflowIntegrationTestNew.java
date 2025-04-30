@@ -2,7 +2,6 @@ package com.bitacora.integration;
 
 import com.bitacora.application.activity.ActivityWorkflowService;
 import com.bitacora.domain.model.activity.*;
-import com.bitacora.domain.port.repository.ActivityRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,9 +25,6 @@ class ActivityWorkflowIntegrationTestNew {
         @Autowired
         private ActivityWorkflowService activityWorkflowService;
 
-        @Autowired
-        private ActivityRepository activityRepository;
-
         @Test
         void testCompleteWorkflow() {
                 // 1. Solicitar actividad
@@ -48,23 +44,23 @@ class ActivityWorkflowIntegrationTestNew {
                 Long activityId = requestedActivity.getId();
 
                 // 2. Asignar actividad
-                ActivityExtended assignedActivity = activityWorkflowService.assignActivity(activityId, 2L, 1L,
+                activityWorkflowService.assignActivity(activityId, 2L, 1L,
                                 "Asignación de prueba");
-                assertEquals(ActivityStatus.EN_PROGRESO, assignedActivity.getStatus());
-                assertEquals(1L, assignedActivity.getExecutorId());
+                assertEquals(ActivityStatus.EN_PROGRESO, activityWorkflowService.findById(activityId).get().getStatus());
+                assertEquals(1L, activityWorkflowService.findById(activityId).get().getExecutorId());
 
                 // 3. Iniciar actividad
-                ActivityExtended startedActivity = activityWorkflowService.startActivity(activityId,
+                activityWorkflowService.startActivity(activityId,
                                 "Inicio de prueba");
-                assertEquals(ActivityStatus.EN_PROGRESO, startedActivity.getStatus());
-                assertNotNull(startedActivity.getStartDate());
+                assertEquals(ActivityStatus.EN_PROGRESO, activityWorkflowService.findById(activityId).get().getStatus());
+                assertNotNull(activityWorkflowService.findById(activityId).get().getStartDate());
 
                 // 4. Completar actividad
-                ActivityExtended completedActivity = activityWorkflowService.completeActivity(activityId,
+                activityWorkflowService.completeActivity(activityId,
                                 "Finalización de prueba", 4);
-                assertEquals(ActivityStatus.COMPLETADA, completedActivity.getStatus());
-                assertNotNull(completedActivity.getCompletionDate());
-                assertEquals(Integer.valueOf(4), completedActivity.getActualHours());
+                assertEquals(ActivityStatus.COMPLETADA, activityWorkflowService.findById(activityId).get().getStatus());
+                assertNotNull(activityWorkflowService.findById(activityId).get().getCompletionDate());
+                assertEquals(Integer.valueOf(4), activityWorkflowService.findById(activityId).get().getActualHours());
 
                 // 5. Aprobar actividad
                 ActivityExtended approvedActivity = activityWorkflowService.approveActivity(activityId,
@@ -91,15 +87,15 @@ class ActivityWorkflowIntegrationTestNew {
                 Long activityId = requestedActivity.getId();
 
                 // 2. Asignar actividad
-                ActivityExtended assignedActivity = activityWorkflowService.assignActivity(activityId, 2L, 1L,
+                activityWorkflowService.assignActivity(activityId, 2L, 1L,
                                 "Asignación de prueba");
 
                 // 3. Iniciar actividad
-                ActivityExtended startedActivity = activityWorkflowService.startActivity(activityId,
+                activityWorkflowService.startActivity(activityId,
                                 "Inicio de prueba");
 
                 // 4. Completar actividad
-                ActivityExtended completedActivity = activityWorkflowService.completeActivity(activityId,
+                activityWorkflowService.completeActivity(activityId,
                                 "Finalización de prueba", 4);
 
                 // 5. Rechazar actividad

@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Servicio que implementa el flujo de trabajo para las solicitudes de tareas.
@@ -271,5 +270,45 @@ public class TaskRequestWorkflowService {
             TaskRequestStatus.COMPLETED, taskRequestRepository.countByStatus(TaskRequestStatus.COMPLETED),
             TaskRequestStatus.CANCELLED, taskRequestRepository.countByStatus(TaskRequestStatus.CANCELLED)
         );
+    }
+
+    /**
+     * Cuenta el total de solicitudes.
+     */
+    @Transactional(readOnly = true)
+    public long count() {
+        return taskRequestRepository.count();
+    }
+
+    /**
+     * Cuenta las solicitudes por ID de solicitante.
+     */
+    @Transactional(readOnly = true)
+    public long countByRequesterId(Long requesterId) {
+        return taskRequestRepository.countByRequesterId(requesterId);
+    }
+
+    /**
+     * Cuenta las solicitudes por ID de asignador.
+     */
+    @Transactional(readOnly = true)
+    public long countByAssignerId(Long assignerId) {
+        return taskRequestRepository.countByAssignerId(assignerId);
+    }
+
+    /**
+     * Cuenta las solicitudes por estado.
+     */
+    @Transactional(readOnly = true)
+    public long countByStatus(TaskRequestStatus status) {
+        return taskRequestRepository.countByStatus(status);
+    }
+
+    /**
+     * Elimina una solicitud por su ID.
+     */
+    @Transactional
+    public void deleteById(Long id) {
+        taskRequestRepository.deleteById(id);
     }
 }

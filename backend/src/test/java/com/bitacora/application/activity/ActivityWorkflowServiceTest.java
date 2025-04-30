@@ -2,12 +2,14 @@ package com.bitacora.application.activity;
 
 import com.bitacora.domain.model.activity.*;
 import com.bitacora.domain.port.repository.ActivityRepository;
+import com.bitacora.infrastructure.persistence.mapper.ActivityExtendedMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -15,15 +17,20 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
 
 /**
  * Tests unitarios para el servicio ActivityWorkflowService.
  */
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 class ActivityWorkflowServiceTest {
 
     @Mock
     private ActivityRepository activityRepository;
+
+    @Mock
+    private ActivityExtendedMapper activityExtendedMapper;
 
     @InjectMocks
     private ActivityWorkflowService activityWorkflowService;
@@ -43,6 +50,13 @@ class ActivityWorkflowServiceTest {
                 .situation("Planning meeting")
                 .status(ActivityStatus.PENDIENTE)
                 .build();
+
+        // Configurar el comportamiento del mapper para que devuelva la misma actividad
+        // Usar lenient() para evitar el error de UnnecessaryStubbingException
+        lenient().when(activityExtendedMapper.fromActivity(any(Activity.class))).thenAnswer(invocation -> {
+            Activity activity = invocation.getArgument(0);
+            return activity instanceof ActivityExtended ? (ActivityExtended) activity : testActivity;
+        });
     }
 
     @Test

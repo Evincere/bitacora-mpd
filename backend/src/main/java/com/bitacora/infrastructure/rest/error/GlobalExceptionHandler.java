@@ -23,6 +23,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -168,7 +169,9 @@ public class GlobalExceptionHandler {
         String message = String.format(
                 "El parámetro '%s' debería ser de tipo '%s'",
                 ex.getName(),
-                ex.getRequiredType().getSimpleName());
+                Optional.ofNullable(ex.getRequiredType())
+                    .map(Class::getSimpleName)
+                    .orElse("desconocido"));
 
         ApiError apiError = ApiError.of(
                 HttpStatus.BAD_REQUEST,

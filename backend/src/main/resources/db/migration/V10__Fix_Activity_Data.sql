@@ -1,4 +1,4 @@
--- V7__Fix_Activity_Data.sql
+-- V10__Fix_Activity_Data.sql
 -- Migración para corregir datos en la tabla de actividades
 
 -- Asegurarse de que todos los tipos de actividad sean válidos

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
@@ -135,4 +134,9 @@ public class CreateTaskRequestDto {
             return new CreateTaskRequestDto(this);
         }
     }
+
+    public void setTitle(String title) { this.title = title; }
+    public void setDescription(String description) { this.description = description; }
+    public void setPriority(String priority) { this.priority = priority; }
+    public void setSubmitImmediately(boolean submitImmediately) { this.submitImmediately = submitImmediately; }
 }

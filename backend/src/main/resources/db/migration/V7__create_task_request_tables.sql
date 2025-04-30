@@ -66,7 +66,7 @@ CREATE INDEX idx_task_request_attachments_request ON task_request_attachments(ta
 
 -- Insertar categorías por defecto
 INSERT INTO task_request_categories (name, description, color, is_default, created_at)
-VALUES 
+VALUES
 ('General', 'Categoría general para solicitudes de tareas', '#808080', TRUE, CURRENT_TIMESTAMP),
 ('Urgente', 'Solicitudes que requieren atención inmediata', '#FF0000', FALSE, CURRENT_TIMESTAMP),
 ('Mantenimiento', 'Solicitudes relacionadas con tareas de mantenimiento', '#FFA500', FALSE, CURRENT_TIMESTAMP),
@@ -74,37 +74,38 @@ VALUES
 ('Administrativo', 'Solicitudes relacionadas con tareas administrativas', '#008000', FALSE, CURRENT_TIMESTAMP);
 
 -- Insertar datos de ejemplo para solicitudes de tareas
+-- Usamos IDs fijos para los usuarios en lugar de buscarlos por nombre de usuario
+-- Sabemos que el usuario admin tiene ID 1 según la migración V2__Initial_Data.sql
 INSERT INTO task_requests (title, description, category_id, priority, due_date, status, requester_id, assigner_id, request_date, assignment_date, notes, created_at)
-VALUES 
-('Actualización de software', 'Se requiere actualizar el software de gestión a la última versión', 
- (SELECT id FROM task_request_categories WHERE name = 'Mantenimiento'), 
- 'MEDIUM', DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 7 DAY), 'SUBMITTED', 
- (SELECT id FROM users WHERE username = '12345678'), NULL, 
+VALUES
+('Actualización de software', 'Se requiere actualizar el software de gestión a la última versión',
+ (SELECT id FROM task_request_categories WHERE name = 'Mantenimiento'),
+ 'MEDIUM', DATEADD('DAY', 7, CURRENT_TIMESTAMP), 'SUBMITTED',
+ 1, NULL, -- Usamos el ID 1 (admin) como requester
  CURRENT_TIMESTAMP, NULL, 'Coordinar con el equipo de TI', CURRENT_TIMESTAMP),
- 
-('Revisión de documentación', 'Revisar la documentación del proyecto antes de la reunión con el cliente', 
- (SELECT id FROM task_request_categories WHERE name = 'Administrativo'), 
- 'HIGH', DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 3 DAY), 'DRAFT', 
- (SELECT id FROM users WHERE username = '23456789'), NULL, 
+
+('Revisión de documentación', 'Revisar la documentación del proyecto antes de la reunión con el cliente',
+ (SELECT id FROM task_request_categories WHERE name = 'Administrativo'),
+ 'HIGH', DATEADD('DAY', 3, CURRENT_TIMESTAMP), 'DRAFT',
+ 1, NULL, -- Usamos el ID 1 (admin) como requester
  CURRENT_TIMESTAMP, NULL, 'Enfocarse en la sección de requisitos', CURRENT_TIMESTAMP),
- 
-('Implementación de nueva funcionalidad', 'Desarrollar la funcionalidad de exportación a PDF', 
- (SELECT id FROM task_request_categories WHERE name = 'Desarrollo'), 
- 'CRITICAL', DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 5 DAY), 'ASSIGNED', 
- (SELECT id FROM users WHERE username = '12345678'), 
- (SELECT id FROM users WHERE username = 'admin'), 
- DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP, 
+
+('Implementación de nueva funcionalidad', 'Desarrollar la funcionalidad de exportación a PDF',
+ (SELECT id FROM task_request_categories WHERE name = 'Desarrollo'),
+ 'CRITICAL', DATEADD('DAY', 5, CURRENT_TIMESTAMP), 'ASSIGNED',
+ 1, 1, -- Usamos el ID 1 (admin) como requester y assigner
+ DATEADD('DAY', -2, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP,
  'Utilizar la biblioteca PDFBox', CURRENT_TIMESTAMP);
 
 -- Insertar comentarios de ejemplo
 INSERT INTO task_request_comments (task_request_id, user_id, content, created_at)
-VALUES 
-((SELECT id FROM task_requests WHERE title = 'Implementación de nueva funcionalidad'), 
- (SELECT id FROM users WHERE username = '12345678'), 
- 'Por favor, asegúrese de que la funcionalidad sea compatible con todos los navegadores', 
- DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)),
- 
-((SELECT id FROM task_requests WHERE title = 'Implementación de nueva funcionalidad'), 
- (SELECT id FROM users WHERE username = 'admin'), 
- 'Asignado al equipo de desarrollo. Comenzaremos a trabajar en ello inmediatamente', 
+VALUES
+((SELECT id FROM task_requests WHERE title = 'Implementación de nueva funcionalidad'),
+ 1, -- Usamos el ID 1 (admin) como usuario
+ 'Por favor, asegúrese de que la funcionalidad sea compatible con todos los navegadores',
+ DATEADD('DAY', -1, CURRENT_TIMESTAMP)),
+
+((SELECT id FROM task_requests WHERE title = 'Implementación de nueva funcionalidad'),
+ 1, -- Usamos el ID 1 (admin) como usuario
+ 'Asignado al equipo de desarrollo. Comenzaremos a trabajar en ello inmediatamente',
  CURRENT_TIMESTAMP);

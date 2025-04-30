@@ -252,4 +252,9 @@ public class ActivityWorkflowService {
                 Activity savedActivity = activityRepository.save(activityExtended);
                 return activityExtendedMapper.fromActivity(savedActivity);
         }
+
+        @Transactional(readOnly = true)
+        public java.util.Optional<ActivityExtended> findById(Long id) {
+                return activityRepository.findById(id).map(activityExtendedMapper::fromActivity);
+        }
 }
