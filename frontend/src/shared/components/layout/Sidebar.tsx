@@ -9,10 +9,14 @@ import {
   FiGrid,
   FiUser,
   FiChevronLeft,
-  FiChevronRight
+  FiChevronRight,
+  FiClipboard,
+  FiPieChart,
+  FiTag
 } from 'react-icons/fi';
 import { toggleSidebar } from '@/core/store/uiSlice';
 import { useAppSelector, useAppDispatch } from '@/core/store';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarProps {
   $isOpen: boolean;
@@ -184,6 +188,7 @@ const NavItem = styled(NavLink)<NavItemProps>`
 const Sidebar: React.FC = () => {
   const dispatch = useAppDispatch();
   const { sidebarOpen } = useAppSelector((state) => state.ui);
+  const { currentUser } = useAuth();
 
   const handleToggleSidebar = () => {
     dispatch(toggleSidebar());
@@ -211,17 +216,55 @@ const Sidebar: React.FC = () => {
           <div className="icon"><FiHome size={20} /></div>
           <span>Dashboard</span>
         </NavItem>
+
+        {/* Menú de Actividades */}
         <NavItem to="/app/activities" $isOpen={sidebarOpen}>
           <div className="icon"><FiList size={20} /></div>
           <span>Actividades</span>
         </NavItem>
-        <NavItem to="/app/messages" $isOpen={sidebarOpen}>
-          <div className="icon"><FiMessageSquare size={20} /></div>
-          <span>Mensajes</span>
-        </NavItem>
         <NavItem to="/app/activities/calendar" $isOpen={sidebarOpen}>
           <div className="icon"><FiCalendar size={20} /></div>
           <span>Calendario</span>
+        </NavItem>
+
+        {/* Menú de Solicitudes de Tareas */}
+        {(currentUser?.roles.includes('ROLE_SOLICITANTE') || currentUser?.roles.includes('ROLE_ADMIN')) && (
+          <NavItem to="/app/task-requests/my-requests" $isOpen={sidebarOpen}>
+            <div className="icon"><FiClipboard size={20} /></div>
+            <span>Mis Solicitudes</span>
+          </NavItem>
+        )}
+
+        {(currentUser?.roles.includes('ROLE_ASIGNADOR') || currentUser?.roles.includes('ROLE_ADMIN')) && (
+          <NavItem to="/app/task-requests/assigned" $isOpen={sidebarOpen}>
+            <div className="icon"><FiClipboard size={20} /></div>
+            <span>Solicitudes Asignadas</span>
+          </NavItem>
+        )}
+
+        {(currentUser?.roles.includes('ROLE_ASIGNADOR') || currentUser?.roles.includes('ROLE_ADMIN')) && (
+          <NavItem to="/app/task-requests/stats" $isOpen={sidebarOpen}>
+            <div className="icon"><FiPieChart size={20} /></div>
+            <span>Estadísticas</span>
+          </NavItem>
+        )}
+
+        <NavItem to="/app/task-requests/categories" $isOpen={sidebarOpen}>
+          <div className="icon"><FiTag size={20} /></div>
+          <span>Categorías</span>
+        </NavItem>
+
+        {currentUser?.roles.includes('ROLE_ADMIN') && (
+          <NavItem to="/app/task-requests/all" $isOpen={sidebarOpen}>
+            <div className="icon"><FiList size={20} /></div>
+            <span>Todas las Solicitudes</span>
+          </NavItem>
+        )}
+
+        {/* Otros menús */}
+        <NavItem to="/app/messages" $isOpen={sidebarOpen}>
+          <div className="icon"><FiMessageSquare size={20} /></div>
+          <span>Mensajes</span>
         </NavItem>
         <NavItem to="/app/documents" $isOpen={sidebarOpen}>
           <div className="icon"><FiFile size={20} /></div>

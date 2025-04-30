@@ -24,8 +24,22 @@
     - Creación de controladores REST `TaskRequestController` y `TaskRequestCategoryController`
     - Implementación de seguridad para endpoints con anotaciones `@PreAuthorize`
     - Creación de script de migración para las nuevas tablas con datos iniciales
+  - Implementación de la interfaz de usuario para la entidad `TaskRequest`
+    - Creación de tipos TypeScript para las solicitudes de tareas
+    - Implementación de servicios de frontend para interactuar con la API
+    - Creación de componentes React para listar, ver, crear y editar solicitudes
+    - Implementación de componentes para gestionar categorías y ver estadísticas
+    - Creación de páginas y rutas para las diferentes funcionalidades
+    - Actualización del menú de navegación con las nuevas opciones
+    - Implementación de control de acceso basado en roles en el frontend
+  - Implementación de pruebas y documentación
+    - Creación de pruebas unitarias para entidades de dominio y casos de uso
+    - Implementación de pruebas para servicios de aplicación
+    - Creación de pruebas de integración para controladores REST
+    - Implementación de pruebas para adaptadores de repositorio
+    - Creación de documentación de usuario con guías detalladas
+    - Implementación de documentación técnica para desarrolladores
   - Documentación del modelo de dominio con diagrama UML y reglas de negocio
-  - Diseño de la interfaz de usuario para la nueva entidad
 
 - Corrección de problemas con las rutas de API en el frontend y backend
   - Eliminación del prefijo duplicado `/api` en las URLs del servicio de solicitudes

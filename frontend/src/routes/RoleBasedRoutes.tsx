@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import RoleBasedLayout from '@/shared/components/layout/RoleBasedLayout';
 import RoleProtectedRoute from './RoleProtectedRoute';
 import { UserRole } from '@/core/types/models';
+import TaskRequestRoutes from './TaskRequestRoutes';
 
 // Componentes para SOLICITANTE
 import DashboardSolicitante from '@/features/solicitudes/pages/DashboardSolicitante';
@@ -81,6 +82,9 @@ const RoleBasedRoutes: React.FC = () => {
         <Route element={<RoleProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.ASIGNADOR]} />}>
           <Route path="app/reportes" element={<DashboardReportes />} />
         </Route>
+
+        {/* Rutas de solicitudes de tareas */}
+        <TaskRequestRoutes />
 
         {/* Rutas comunes */}
         <Route path="app/activities" element={<ActivityList />} />
