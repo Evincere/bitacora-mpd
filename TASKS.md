@@ -1155,6 +1155,197 @@ Este sprint se enfocará en mejorar el rendimiento de la aplicación, corregir e
 - No hay errores o advertencias de código
 - La documentación está actualizada y es clara
 
+## Sprint 16: Implementación de Entidad Solicitud (Request) (3 semanas)
+
+### Descripción del Sprint
+Este sprint se enfocará en crear una nueva entidad `Request` (Solicitud) separada de la entidad `Activity` (Actividad) para diferenciar claramente estos dos conceptos de negocio. Esto permitirá una mejor organización del código y una experiencia de usuario más clara.
+
+### Objetivos
+- Crear una nueva entidad `Request` en el dominio
+- Implementar la infraestructura necesaria para la nueva entidad
+- Desarrollar endpoints REST para gestionar solicitudes
+- Actualizar la interfaz de usuario para trabajar con la nueva entidad
+- Migrar datos existentes a la nueva estructura
+
+### Fase 1: Diseño e Implementación del Dominio (1 semana)
+
+#### 1.1 Diseño del Modelo de Dominio (2 días)
+- [x] Diseñar la entidad `TaskRequest` y sus relaciones
+  - [x] Definir atributos: id, title, description, category, priority, dueDate, status, etc.
+  - [x] Definir relaciones con otras entidades (User, Activity, etc.)
+  - [x] Diseñar enumeraciones para estados de solicitud (TaskRequestStatus)
+- [x] Diseñar el flujo de trabajo para solicitudes
+  - [x] Definir estados posibles: DRAFT, SUBMITTED, ASSIGNED, COMPLETED, CANCELLED, etc.
+  - [x] Definir transiciones válidas entre estados
+  - [x] Diseñar reglas de negocio para cada transición
+- [x] Documentar el modelo de dominio
+  - [x] Crear diagramas UML para la entidad y sus relaciones
+  - [x] Documentar reglas de negocio y flujo de trabajo
+
+#### 1.2 Implementación de la Capa de Dominio (3 días)
+- [x] Implementar la entidad `TaskRequest`
+  - [x] Crear clase TaskRequest en el paquete domain.model.taskrequest
+  - [x] Implementar atributos y métodos básicos
+  - [x] Implementar validaciones de dominio
+- [x] Implementar enumeraciones y value objects
+  - [x] Crear enum TaskRequestStatus
+  - [x] Crear enum TaskRequestPriority
+  - [x] Implementar clases TaskRequestCategory, TaskRequestComment y TaskRequestAttachment
+- [x] Implementar interfaces de repositorio
+  - [x] Crear interfaz TaskRequestRepository en domain.port.repository
+  - [x] Crear interfaz TaskRequestCategoryRepository en domain.port.repository
+  - [x] Definir métodos para operaciones CRUD
+  - [x] Definir métodos para consultas específicas
+- [x] Implementar servicios de dominio
+  - [x] Crear interfaz TaskRequestService en domain.port.service
+  - [x] Crear interfaz TaskRequestCategoryService en domain.port.service
+  - [x] Definir métodos para operaciones de negocio
+  - [x] Implementar reglas de negocio específicas
+
+### Fase 2: Implementación de la Capa de Aplicación (3 días)
+
+#### 2.1 Implementación de Casos de Uso (2 días)
+- [x] Implementar casos de uso para solicitudes
+  - [x] Crear CreateTaskRequestUseCase
+  - [x] Crear UpdateTaskRequestUseCase
+  - [x] Integrar funcionalidad de SubmitTaskRequest en TaskRequestWorkflowService
+  - [x] Integrar funcionalidad de CancelTaskRequest en TaskRequestWorkflowService
+  - [x] Crear otros casos de uso necesarios
+- [x] Implementar servicios de aplicación
+  - [x] Crear TaskRequestWorkflowService
+  - [x] Implementar lógica para transiciones de estado
+  - [x] Implementar validaciones de aplicación
+
+#### 2.2 Implementación de DTOs y Mappers (1 día)
+- [x] Crear DTOs para solicitudes
+  - [x] Implementar TaskRequestDto
+  - [x] Implementar CreateTaskRequestDto
+  - [x] Implementar UpdateTaskRequestDto
+  - [x] Implementar TaskRequestCategoryDto
+  - [x] Implementar TaskRequestCommentDto
+  - [x] Implementar TaskRequestAttachmentDto
+  - [x] Implementar TaskRequestPageDto
+- [x] Implementar mappers
+  - [x] Crear TaskRequestMapper para convertir entre entidad y DTOs
+  - [x] Crear TaskRequestCategoryMapper para convertir entre entidad y DTOs
+  - [x] Implementar mapeo bidireccional
+  - [x] Manejar relaciones con otras entidades
+
+### Fase 3: Implementación de la Capa de Infraestructura (1 semana)
+
+#### 3.1 Implementación de Persistencia (3 días)
+- [x] Crear entidades JPA para solicitudes
+  - [x] Implementar TaskRequestEntity en infrastructure.persistence.entity
+  - [x] Implementar TaskRequestCategoryEntity, TaskRequestCommentEntity y TaskRequestAttachmentEntity
+  - [x] Implementar enumeraciones TaskRequestStatusEntity y TaskRequestPriorityEntity
+  - [x] Definir mapeo ORM con anotaciones JPA
+  - [x] Configurar relaciones con otras entidades
+- [x] Implementar repositorios JPA
+  - [x] Crear TaskRequestJpaRepository
+  - [x] Crear TaskRequestCategoryJpaRepository
+  - [x] Implementar consultas personalizadas con métodos derivados
+  - [x] Configurar paginación y ordenamiento
+- [x] Implementar adaptadores de repositorio
+  - [x] Crear TaskRequestRepositoryAdapter que implemente TaskRequestRepository
+  - [x] Crear TaskRequestCategoryRepositoryAdapter que implemente TaskRequestCategoryRepository
+  - [x] Implementar métodos definidos en las interfaces
+  - [x] Implementar mapeo entre entidades JPA y entidades de dominio
+
+#### 3.2 Implementación de API REST (2 días)
+- [x] Crear controladores REST para solicitudes
+  - [x] Implementar TaskRequestController
+  - [x] Implementar TaskRequestCategoryController
+  - [x] Definir endpoints para operaciones CRUD
+  - [x] Definir endpoints para operaciones de flujo de trabajo
+- [x] Implementar seguridad para endpoints
+  - [x] Configurar permisos basados en roles con anotaciones @PreAuthorize
+  - [x] Implementar validación de autorización
+  - [x] Configurar acceso según roles (SOLICITANTE, ASIGNADOR, EJECUTOR, ADMIN)
+- [x] Documentar API con OpenAPI/Swagger
+  - [x] Añadir anotaciones para documentación
+  - [x] Configurar etiquetas y descripciones
+  - [x] Verificar que la documentación sea clara y completa
+
+#### 3.3 Implementación de Migraciones (2 días)
+- [x] Crear script de migración para las nuevas tablas
+  - [x] Implementar migración Flyway para crear tablas de solicitudes y relacionadas
+  - [x] Definir restricciones y claves foráneas
+  - [x] Configurar índices para optimizar consultas
+  - [x] Insertar datos iniciales de categorías y ejemplos de solicitudes
+- [ ] Implementar migración de datos
+  - [ ] Crear script para migrar datos de actividades a solicitudes
+  - [ ] Implementar lógica para preservar relaciones
+  - [ ] Verificar integridad de datos después de la migración
+
+### Fase 4: Implementación de la Interfaz de Usuario (1 semana)
+
+#### 4.1 Diseño de Componentes (2 días)
+- [ ] Diseñar interfaces para gestión de solicitudes
+  - [ ] Diseñar lista de solicitudes
+  - [ ] Diseñar formulario de creación/edición
+  - [ ] Diseñar vista de detalles
+  - [ ] Diseñar componentes para acciones de flujo de trabajo
+- [ ] Diseñar interfaces específicas por rol
+  - [ ] Diseñar vista para SOLICITANTES
+  - [ ] Diseñar vista para ASIGNADORES
+  - [ ] Diseñar vista para EJECUTORES
+  - [ ] Diseñar vista para ADMIN
+
+#### 4.2 Implementación de Componentes (3 días)
+- [ ] Implementar servicios de frontend
+  - [ ] Crear requestService.ts para comunicación con API
+  - [ ] Implementar métodos para operaciones CRUD
+  - [ ] Implementar métodos para operaciones de flujo de trabajo
+- [ ] Implementar componentes de React
+  - [ ] Crear RequestList.tsx
+  - [ ] Crear RequestForm.tsx
+  - [ ] Crear RequestDetail.tsx
+  - [ ] Crear componentes para acciones específicas
+- [ ] Implementar gestión de estado
+  - [ ] Crear hooks personalizados (useRequests.ts)
+  - [ ] Configurar React Query para solicitudes
+  - [ ] Implementar caché y revalidación
+
+#### 4.3 Implementación de Rutas y Navegación (2 días)
+- [ ] Configurar rutas para solicitudes
+  - [ ] Añadir rutas en App.tsx
+  - [ ] Configurar protección de rutas por rol
+  - [ ] Implementar redirecciones adecuadas
+- [ ] Actualizar menú de navegación
+  - [ ] Añadir enlaces para gestión de solicitudes
+  - [ ] Configurar visibilidad según rol
+  - [ ] Implementar indicadores de notificación
+
+### Fase 5: Pruebas y Documentación (3 días)
+
+#### 5.1 Implementación de Pruebas (2 días)
+- [ ] Implementar pruebas unitarias
+  - [ ] Crear pruebas para entidades de dominio
+  - [ ] Crear pruebas para servicios de aplicación
+  - [ ] Crear pruebas para mappers y DTOs
+- [ ] Implementar pruebas de integración
+  - [ ] Crear pruebas para repositorios
+  - [ ] Crear pruebas para controladores REST
+  - [ ] Crear pruebas para flujo de trabajo completo
+
+#### 5.2 Documentación (1 día)
+- [ ] Actualizar documentación técnica
+  - [ ] Documentar el nuevo modelo de dominio
+  - [ ] Actualizar diagramas de arquitectura
+  - [ ] Documentar API REST
+- [ ] Actualizar documentación de usuario
+  - [ ] Crear guías para gestión de solicitudes
+  - [ ] Actualizar manuales por rol
+  - [ ] Crear tutoriales para nuevas funcionalidades
+
+### Criterios de Aceptación
+- La entidad `Request` está implementada y funciona correctamente
+- El flujo de trabajo para solicitudes funciona según lo esperado
+- La API REST para solicitudes está documentada y funciona correctamente
+- La interfaz de usuario permite gestionar solicitudes de forma intuitiva
+- Las pruebas automatizadas cubren la nueva funcionalidad
+- La documentación está actualizada y es clara
+
 ## Notas y Consideraciones
 - Mantener compatibilidad hacia atrás durante la migración
 - Seguir principios SOLID y Clean Architecture

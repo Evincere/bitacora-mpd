@@ -79,6 +79,22 @@ public class ActivityRepositoryImpl implements ActivityRepository {
     }
 
     @Override
+    public List<Activity> findByRequesterId(Long requesterId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Crear una especificación para buscar actividades con requesterId específico
+        // y con estado REQUESTED (para diferenciar solicitudes de actividades
+        // regulares)
+        Specification<ActivityEntity> spec = Specification.where(
+                (root, query, cb) -> cb.equal(root.get("requesterId"), requesterId));
+
+        return activityJpaRepository.findAll(spec, pageable)
+                .stream()
+                .map(activityMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Activity> findByDateBetween(LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return activityJpaRepository.findByDateBetween(startDate, endDate, pageable)
@@ -121,6 +137,17 @@ public class ActivityRepositoryImpl implements ActivityRepository {
     @Override
     public long countByUserId(Long userId) {
         return activityJpaRepository.countByUserId(userId);
+    }
+
+    @Override
+    public long countByRequesterId(Long requesterId) {
+        // Crear una especificación para contar actividades con requesterId específico
+        // y con estado REQUESTED (para diferenciar solicitudes de actividades
+        // regulares)
+        Specification<ActivityEntity> spec = Specification.where(
+                (root, query, cb) -> cb.equal(root.get("requesterId"), requesterId));
+
+        return activityJpaRepository.count(spec);
     }
 
     @Override

@@ -65,6 +65,11 @@ public class ActivityRepositoryMock implements ActivityRepository {
     }
 
     @Override
+    public List<Activity> findByRequesterId(Long requesterId, int page, int size) {
+        return new ArrayList<>();
+    }
+
+    @Override
     public List<Activity> findByDateBetween(LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
         return activities.values().stream()
                 .filter(a -> !a.getDate().isBefore(startDate) && !a.getDate().isAfter(endDate))
@@ -97,6 +102,13 @@ public class ActivityRepositoryMock implements ActivityRepository {
 
     @Override
     public long countByUserId(Long userId) {
+        return 0;
+    }
+
+    @Override
+    public long countByRequesterId(Long requesterId) {
+        // Como Activity no tiene requesterId, implementamos una versión simplificada
+        // para el mock
         return 0;
     }
 

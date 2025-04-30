@@ -49,6 +49,15 @@ public interface ActivityJpaRepository
         Page<ActivityEntity> findByUserId(Long userId, Pageable pageable);
 
         /**
+         * Busca actividades por solicitante con paginación.
+         *
+         * @param requesterId El ID del solicitante
+         * @param pageable    La información de paginación
+         * @return Una página de actividades
+         */
+        Page<ActivityEntity> findByRequesterId(Long requesterId, Pageable pageable);
+
+        /**
          * Busca actividades por rango de fechas con paginación.
          *
          * @param startDate La fecha de inicio
@@ -99,6 +108,14 @@ public interface ActivityJpaRepository
          * @return El número de actividades
          */
         long countByUserId(Long userId);
+
+        /**
+         * Cuenta el número de actividades por solicitante.
+         *
+         * @param requesterId El ID del solicitante
+         * @return El número de actividades
+         */
+        long countByRequesterId(Long requesterId);
 
         /**
          * Cuenta el número de actividades por tipo.

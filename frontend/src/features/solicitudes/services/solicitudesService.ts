@@ -1,5 +1,6 @@
 import { api } from '@/core/api/api';
 import { Activity, ActivityCategory, ActivityPriority } from '@/types/models';
+import { formatDateForBackend } from '@/utils/dateUtils';
 
 export interface SolicitudRequest {
   titulo: string;
@@ -26,6 +27,30 @@ export interface SolicitudResponse {
  */
 const solicitudesService = {
   /**
+   * Obtiene las solicitudes del usuario actual
+   * @param page Número de página
+   * @param size Tamaño de página
+   * @returns Lista de solicitudes del usuario
+   */
+  async getMySolicitudes(page = 0, size = 10): Promise<{
+    activities: Activity[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+  }> {
+    try {
+      console.log('Solicitando mis solicitudes a la API...');
+      // Usar la URL correcta sin duplicar el prefijo /api
+      const response = await api.get(`activities/user/my-requests?page=${page}&size=${size}`).json();
+      console.log('Respuesta de mis solicitudes:', response);
+      return response;
+    } catch (error) {
+      console.error('Error al obtener mis solicitudes:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Crea una nueva solicitud
    * @param solicitud Datos de la solicitud
    * @returns La solicitud creada
@@ -37,12 +62,20 @@ const solicitudesService = {
         type: solicitud.categoria,
         description: solicitud.descripcion,
         priority: solicitud.prioridad,
-        date: new Date().toISOString(),
+        date: formatDateForBackend(new Date()),
         notes: `Solicitud: ${solicitud.titulo}`,
-        dueDate: solicitud.fechaLimite,
+        dueDate: formatDateForBackend(solicitud.fechaLimite),
       };
 
-      const response = await api.post('api/activities/request', { json: requestData }).json();
+      // Añadir encabezados específicos para esta solicitud
+      console.log('Enviando solicitud de creación a la API:', requestData);
+      const response = await api.post('activities/request', {
+        json: requestData,
+        headers: {
+          'X-User-Permissions': 'REQUEST_ACTIVITIES'
+        }
+      }).json();
+      console.log('Respuesta de creación de solicitud:', response);
       return {
         id: response.id,
         titulo: response.title || response.titulo,
@@ -66,7 +99,9 @@ const solicitudesService = {
    */
   async getCategories(): Promise<ActivityCategory[]> {
     try {
-      const response = await api.get('api/activities/categories').json<ActivityCategory[]>();
+      console.log('Solicitando categorías a la API...');
+      const response = await api.get('activities/categories').json<ActivityCategory[]>();
+      console.log('Respuesta de categorías:', response);
       return response;
     } catch (error) {
       console.error('Error al obtener categorías:', error);
@@ -88,7 +123,9 @@ const solicitudesService = {
    */
   async getPriorities(): Promise<ActivityPriority[]> {
     try {
-      const response = await api.get('api/activities/priorities').json<ActivityPriority[]>();
+      console.log('Solicitando prioridades a la API...');
+      const response = await api.get('activities/priorities').json<ActivityPriority[]>();
+      console.log('Respuesta de prioridades:', response);
       return response;
     } catch (error) {
       console.error('Error al obtener prioridades:', error);
@@ -116,9 +153,11 @@ const solicitudesService = {
         formData.append('files', file);
       });
 
-      const response = await api.post(`api/activities/${activityId}/attachments`, {
+      console.log(`Subiendo archivos adjuntos para la actividad ${activityId}...`);
+      const response = await api.post(`activities/${activityId}/attachments`, {
         body: formData,
       }).json();
+      console.log('Respuesta de subida de archivos:', response);
 
       return response;
     } catch (error) {

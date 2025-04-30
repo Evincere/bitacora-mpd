@@ -24,23 +24,23 @@ public class ActivityAttachmentService {
      * Crea un nuevo adjunto.
      *
      * @param activityId ID de la actividad
-     * @param userId ID del usuario que sube el archivo
-     * @param userName Nombre del usuario que sube el archivo
-     * @param fileName Nombre del archivo
-     * @param fileType Tipo MIME del archivo
-     * @param fileUrl URL o ruta del archivo
-     * @param fileSize Tamaño del archivo en bytes
+     * @param userId     ID del usuario que sube el archivo
+     * @param userName   Nombre del usuario que sube el archivo
+     * @param fileName   Nombre del archivo
+     * @param fileType   Tipo MIME del archivo
+     * @param fileUrl    URL o ruta del archivo
+     * @param fileSize   Tamaño del archivo en bytes
      * @return El adjunto creado
      */
     @Transactional
     public ActivityAttachment createAttachment(
-            Long activityId,
-            Long userId,
-            String userName,
-            String fileName,
-            String fileType,
-            String fileUrl,
-            Long fileSize) {
+            final Long activityId,
+            final Long userId,
+            final String userName,
+            final String fileName,
+            final String fileType,
+            final String fileUrl,
+            final Long fileSize) {
 
         log.debug("Creando adjunto para actividad con ID: {}", activityId);
 
@@ -57,7 +57,7 @@ public class ActivityAttachmentService {
      * @return El adjunto
      */
     @Transactional(readOnly = true)
-    public ActivityAttachment getAttachmentById(Long id) {
+    public ActivityAttachment getAttachmentById(final Long id) {
         log.debug("Obteniendo adjunto con ID: {}", id);
         return activityAttachmentRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Adjunto no encontrado con ID: " + id));
@@ -70,7 +70,7 @@ public class ActivityAttachmentService {
      * @return Lista de adjuntos
      */
     @Transactional(readOnly = true)
-    public List<ActivityAttachment> getAttachmentsByActivityId(Long activityId) {
+    public List<ActivityAttachment> getAttachmentsByActivityId(final Long activityId) {
         log.debug("Obteniendo adjuntos para actividad con ID: {}", activityId);
         return activityAttachmentRepository.findByActivityId(activityId);
     }
@@ -79,12 +79,12 @@ public class ActivityAttachmentService {
      * Obtiene los adjuntos de una actividad con paginación.
      *
      * @param activityId ID de la actividad
-     * @param page Número de página (0-based)
-     * @param size Tamaño de página
+     * @param page       Número de página (0-based)
+     * @param size       Tamaño de página
      * @return Lista de adjuntos
      */
     @Transactional(readOnly = true)
-    public List<ActivityAttachment> getAttachmentsByActivityId(Long activityId, int page, int size) {
+    public List<ActivityAttachment> getAttachmentsByActivityId(final Long activityId, final int page, final int size) {
         log.debug("Obteniendo adjuntos paginados para actividad con ID: {}", activityId);
         return activityAttachmentRepository.findByActivityId(activityId, page, size);
     }
@@ -93,12 +93,12 @@ public class ActivityAttachmentService {
      * Obtiene los adjuntos subidos por un usuario.
      *
      * @param userId ID del usuario
-     * @param page Número de página (0-based)
-     * @param size Tamaño de página
+     * @param page   Número de página (0-based)
+     * @param size   Tamaño de página
      * @return Lista de adjuntos
      */
     @Transactional(readOnly = true)
-    public List<ActivityAttachment> getAttachmentsByUserId(Long userId, int page, int size) {
+    public List<ActivityAttachment> getAttachmentsByUserId(final Long userId, final int page, final int size) {
         log.debug("Obteniendo adjuntos para usuario con ID: {}", userId);
         return activityAttachmentRepository.findByUserId(userId, page, size);
     }
@@ -107,12 +107,12 @@ public class ActivityAttachmentService {
      * Obtiene los adjuntos por tipo de archivo.
      *
      * @param fileType Tipo de archivo
-     * @param page Número de página (0-based)
-     * @param size Tamaño de página
+     * @param page     Número de página (0-based)
+     * @param size     Tamaño de página
      * @return Lista de adjuntos
      */
     @Transactional(readOnly = true)
-    public List<ActivityAttachment> getAttachmentsByFileType(String fileType, int page, int size) {
+    public List<ActivityAttachment> getAttachmentsByFileType(final String fileType, final int page, final int size) {
         log.debug("Obteniendo adjuntos por tipo de archivo: {}", fileType);
         return activityAttachmentRepository.findByFileType(fileType, page, size);
     }
@@ -124,7 +124,7 @@ public class ActivityAttachmentService {
      * @return Número de adjuntos
      */
     @Transactional(readOnly = true)
-    public long countAttachmentsByActivityId(Long activityId) {
+    public long countAttachmentsByActivityId(final Long activityId) {
         log.debug("Contando adjuntos para actividad con ID: {}", activityId);
         return activityAttachmentRepository.countByActivityId(activityId);
     }
@@ -132,11 +132,11 @@ public class ActivityAttachmentService {
     /**
      * Elimina un adjunto.
      *
-     * @param id ID del adjunto
+     * @param id     ID del adjunto
      * @param userId ID del usuario que elimina
      */
     @Transactional
-    public void deleteAttachment(Long id, Long userId) {
+    public void deleteAttachment(final Long id, final Long userId) {
         log.debug("Eliminando adjunto con ID: {}", id);
 
         // Verificar que el adjunto existe y pertenece al usuario

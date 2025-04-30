@@ -9,7 +9,14 @@ public enum ActivityStatus {
     EN_PROGRESO("En Progreso"),
     COMPLETADA("Completada"),
     CANCELADA("Cancelada"),
-    ARCHIVADA("Archivada");
+    ARCHIVADA("Archivada"),
+    // Estados nuevos para el flujo de trabajo
+    REQUESTED("Solicitada"),
+    ASSIGNED("Asignada"),
+    IN_PROGRESS("En Ejecución"),
+    COMPLETED("Finalizada"),
+    APPROVED("Aprobada"),
+    REJECTED("Rechazada");
 
     private final String displayName;
 

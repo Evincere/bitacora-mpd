@@ -72,6 +72,16 @@ public interface ActivityRepository {
     List<Activity> findByUserId(Long userId, int page, int size);
 
     /**
+     * Busca actividades por solicitante con paginación.
+     *
+     * @param requesterId El ID del solicitante
+     * @param page        El número de página (comenzando desde 0)
+     * @param size        El tamaño de la página
+     * @return Una lista con las actividades del solicitante especificado
+     */
+    List<Activity> findByRequesterId(Long requesterId, int page, int size);
+
+    /**
      * Busca actividades por rango de fechas con paginación.
      *
      * @param startDate La fecha de inicio
@@ -125,6 +135,14 @@ public interface ActivityRepository {
      * @return El número de actividades del usuario especificado
      */
     long countByUserId(Long userId);
+
+    /**
+     * Cuenta el número de actividades por solicitante.
+     *
+     * @param requesterId El ID del solicitante
+     * @return El número de actividades del solicitante especificado
+     */
+    long countByRequesterId(Long requesterId);
 
     /**
      * Cuenta el número de actividades por tipo.

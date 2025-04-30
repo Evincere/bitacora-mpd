@@ -1,20 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { 
-  FiPlus, 
-  FiFilter, 
-  FiSearch, 
-  FiClock, 
-  FiCheckCircle, 
-  FiXCircle, 
+import {
+  FiPlus,
+  FiFilter,
+  FiSearch,
+  FiClock,
+  FiCheckCircle,
+  FiXCircle,
   FiAlertCircle,
   FiChevronDown,
   FiChevronUp,
-  FiEye
+  FiEye,
+  FiLoader
 } from 'react-icons/fi';
+import useSolicitudes from '../hooks/useSolicitudes';
+import { Activity } from '@/types/models';
 
-// Datos de ejemplo para mostrar en la interfaz
+// Datos de respaldo para mostrar en la interfaz si no hay datos reales
 const MOCK_SOLICITUDES = [
   {
     id: 1,
@@ -162,15 +165,18 @@ const SearchInput = styled.div`
     width: 100%;
     padding: 10px 12px 10px 36px;
     border-radius: 4px;
-    border: 1px solid ${({ theme }) => theme.border};
-    background-color: ${({ theme }) => theme.backgroundInput};
+    border: 2px solid ${({ theme }) => theme.border};
+    background-color: ${({ theme }) => theme.backgroundPaper};
     color: ${({ theme }) => theme.text};
     font-size: 14px;
-    transition: border-color 0.2s;
+    font-weight: 500;
+    transition: all 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
     &:focus {
       border-color: ${({ theme }) => theme.primary};
       outline: none;
+      box-shadow: 0 0 0 2px ${({ theme }) => `${theme.primary}30`};
     }
   }
 
@@ -179,23 +185,26 @@ const SearchInput = styled.div`
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: ${({ theme }) => theme.textSecondary};
+    color: ${({ theme }) => theme.primary};
   }
 `;
 
 const FilterSelect = styled.select`
   padding: 10px 12px;
   border-radius: 4px;
-  border: 1px solid ${({ theme }) => theme.border};
-  background-color: ${({ theme }) => theme.backgroundInput};
+  border: 2px solid ${({ theme }) => theme.border};
+  background-color: ${({ theme }) => theme.backgroundPaper};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
-  transition: border-color 0.2s;
+  font-weight: 500;
+  transition: all 0.2s;
   min-width: 150px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
   &:focus {
     border-color: ${({ theme }) => theme.primary};
     outline: none;
+    box-shadow: 0 0 0 2px ${({ theme }) => `${theme.primary}30`};
   }
 `;
 
@@ -206,14 +215,17 @@ const SolicitudesList = styled.div`
 `;
 
 const SolicitudCard = styled.div`
-  background-color: ${({ theme }) => theme.backgroundSecondary};
+  background-color: ${({ theme }) => theme.backgroundPaper};
   border-radius: 8px;
-  box-shadow: ${({ theme }) => theme.shadow};
+  border: 1px solid ${({ theme }) => theme.border};
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   transition: all 0.3s ease;
+  margin-bottom: 16px;
 
   &:hover {
-    box-shadow: ${({ theme }) => theme.shadowHover};
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
   }
 `;
 
@@ -222,17 +234,28 @@ const SolicitudHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 16px;
+  background-color: ${({ theme }) => theme.backgroundSecondary};
   border-bottom: 1px solid ${({ theme }) => theme.border};
   cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.backgroundHover};
+  }
 `;
 
 const SolicitudTitle = styled.h3`
   margin: 0;
   font-size: 16px;
+  font-weight: 600;
   color: ${({ theme }) => theme.text};
   display: flex;
   align-items: center;
   gap: 8px;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const SolicitudMeta = styled.div`
@@ -256,44 +279,52 @@ const StatusBadge = styled.span<{ $status: string }>`
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 
   ${({ $status, theme }) => {
     switch ($status) {
       case 'REQUESTED':
         return `
-          background-color: ${theme.infoLight};
-          color: ${theme.info};
+          background-color: #E6F2FF;
+          color: #0066CC;
+          border: 1px solid #99CCFF;
         `;
       case 'ASSIGNED':
         return `
-          background-color: ${theme.warningLight};
-          color: ${theme.warning};
+          background-color: #FFF8E6;
+          color: #CC7700;
+          border: 1px solid #FFCC66;
         `;
       case 'IN_PROGRESS':
         return `
-          background-color: ${theme.primaryLight};
-          color: ${theme.primary};
+          background-color: #F0E6FF;
+          color: #6600CC;
+          border: 1px solid #CC99FF;
         `;
       case 'COMPLETED':
         return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
+          background-color: #E6FFE6;
+          color: #007700;
+          border: 1px solid #99DD99;
         `;
       case 'APPROVED':
         return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
+          background-color: #E6FFE6;
+          color: #007700;
+          border: 1px solid #99DD99;
         `;
       case 'REJECTED':
         return `
-          background-color: ${theme.errorLight};
-          color: ${theme.error};
+          background-color: #FFE6E6;
+          color: #CC0000;
+          border: 1px solid #FF9999;
         `;
       default:
         return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
+          background-color: #F0F0F5;
+          color: #666666;
+          border: 1px solid #CCCCCC;
         `;
     }
   }}
@@ -306,39 +337,46 @@ const PriorityBadge = styled.span<{ $priority: string }>`
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 
   ${({ $priority, theme }) => {
     switch ($priority) {
       case 'CRITICAL':
         return `
-          background-color: ${theme.errorLight};
-          color: ${theme.error};
+          background-color: #FFE6E6;
+          color: #CC0000;
+          border: 1px solid #FF9999;
         `;
       case 'HIGH':
         return `
-          background-color: ${theme.warningLight};
-          color: ${theme.warning};
+          background-color: #FFF0E6;
+          color: #CC4400;
+          border: 1px solid #FFAA77;
         `;
       case 'MEDIUM':
         return `
-          background-color: ${theme.infoLight};
-          color: ${theme.info};
+          background-color: #E6F2FF;
+          color: #0066CC;
+          border: 1px solid #99CCFF;
         `;
       case 'LOW':
         return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
+          background-color: #E6FFE6;
+          color: #007700;
+          border: 1px solid #99DD99;
         `;
       case 'TRIVIAL':
         return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
+          background-color: #F0F0F5;
+          color: #666666;
+          border: 1px solid #CCCCCC;
         `;
       default:
         return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
+          background-color: #F0F0F5;
+          color: #666666;
+          border: 1px solid #CCCCCC;
         `;
     }
   }}
@@ -350,12 +388,14 @@ const SolicitudDetails = styled.div<{ $isOpen: boolean }>`
   overflow: hidden;
   transition: all 0.3s ease;
   border-top: ${({ $isOpen, theme }) => ($isOpen ? `1px solid ${theme.border}` : 'none')};
+  background-color: ${({ theme }) => theme.backgroundPaper};
+  box-shadow: ${({ $isOpen }) => ($isOpen ? 'inset 0 2px 4px rgba(0, 0, 0, 0.05)' : 'none')};
 `;
 
 const DetailRow = styled.div`
   display: flex;
   margin-bottom: 12px;
-  
+
   &:last-child {
     margin-bottom: 0;
   }
@@ -363,8 +403,8 @@ const DetailRow = styled.div`
 
 const DetailLabel = styled.div`
   width: 150px;
-  font-weight: 500;
-  color: ${({ theme }) => theme.textSecondary};
+  font-weight: 600;
+  color: ${({ theme }) => theme.text};
   font-size: 14px;
 `;
 
@@ -375,21 +415,24 @@ const DetailValue = styled.div`
 `;
 
 const ActionButton = styled.button`
-  padding: 6px 12px;
+  padding: 8px 16px;
   border-radius: 4px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 13px;
   display: flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  background-color: ${({ theme }) => `${theme.primary}10`};
-  color: ${({ theme }) => theme.primary};
+  background-color: ${({ theme }) => theme.primary};
+  color: white;
   border: none;
   transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   &:hover {
-    background-color: ${({ theme }) => `${theme.primary}20`};
+    background-color: ${({ theme }) => theme.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   }
 `;
 
@@ -399,23 +442,28 @@ const EmptyState = styled.div`
   align-items: center;
   justify-content: center;
   padding: 40px;
-  background-color: ${({ theme }) => theme.backgroundSecondary};
+  background-color: ${({ theme }) => theme.backgroundPaper};
+  border: 1px solid ${({ theme }) => theme.border};
   border-radius: 8px;
   text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
   svg {
-    color: ${({ theme }) => theme.textSecondary};
+    color: ${({ theme }) => theme.primary};
     margin-bottom: 16px;
+    opacity: 0.8;
   }
 
   h3 {
     margin: 0 0 8px;
     color: ${({ theme }) => theme.text};
+    font-weight: 600;
   }
 
   p {
     margin: 0 0 20px;
-    color: ${({ theme }) => theme.textSecondary};
+    color: ${({ theme }) => theme.text};
+    opacity: 0.8;
   }
 `;
 
@@ -513,16 +561,60 @@ const MisSolicitudes: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setpriorityFilter] = useState('');
+  const [solicitudes, setSolicitudes] = useState<any[]>([]);
+
+  // Obtener solicitudes del usuario actual
+  const {
+    mySolicitudes,
+    isLoadingMySolicitudes,
+    mySolicitudesError,
+    refetchMySolicitudes
+  } = useSolicitudes();
+
+  // Actualizar el estado local cuando se reciben los datos
+  useEffect(() => {
+    console.log('MisSolicitudes: Datos recibidos:', mySolicitudes);
+
+    if (mySolicitudes && mySolicitudes.activities) {
+      console.log('MisSolicitudes: Actividades encontradas:', mySolicitudes.activities.length);
+
+      // Mapear las actividades al formato esperado por el componente
+      const mappedSolicitudes = mySolicitudes.activities.map((activity: Activity) => {
+        console.log('MisSolicitudes: Procesando actividad:', activity);
+
+        return {
+          id: activity.id,
+          titulo: activity.description,
+          descripcion: activity.description,
+          categoria: activity.type,
+          prioridad: activity.priority || 'MEDIUM',
+          fechaCreacion: activity.requestDate || activity.createdAt,
+          fechaLimite: activity.dueDate,
+          estado: activity.status,
+          asignador: null,
+          ejecutor: null
+        };
+      });
+
+      console.log('MisSolicitudes: Solicitudes mapeadas:', mappedSolicitudes);
+      setSolicitudes(mappedSolicitudes);
+    } else {
+      console.warn('MisSolicitudes: No se encontraron actividades en la respuesta');
+    }
+  }, [mySolicitudes]);
+
+  // Usar solo datos reales, no usar datos de respaldo
+  const solicitudesData = solicitudes;
 
   // Filtrar solicitudes según los criterios
-  const filteredSolicitudes = MOCK_SOLICITUDES.filter(solicitud => {
-    const matchesSearch = searchTerm === '' || 
+  const filteredSolicitudes = solicitudesData.filter(solicitud => {
+    const matchesSearch = searchTerm === '' ||
       solicitud.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       solicitud.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = statusFilter === '' || solicitud.estado === statusFilter;
     const matchesPriority = priorityFilter === '' || solicitud.prioridad === priorityFilter;
-    
+
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
@@ -535,6 +627,10 @@ const MisSolicitudes: React.FC = () => {
       <PageHeader>
         <PageTitle>Mis Solicitudes</PageTitle>
         <ButtonGroup>
+          <Button onClick={() => refetchMySolicitudes()}>
+            <FiLoader size={16} />
+            Recargar
+          </Button>
           <Button $primary onClick={() => navigate('/app/solicitudes/nueva')}>
             <FiPlus size={16} />
             Nueva Solicitud
@@ -581,7 +677,13 @@ const MisSolicitudes: React.FC = () => {
         </Button>
       </FiltersContainer>
 
-      {filteredSolicitudes.length > 0 ? (
+      {isLoadingMySolicitudes ? (
+        <EmptyState>
+          <FiLoader size={48} />
+          <h3>Cargando solicitudes...</h3>
+          <p>Por favor espere mientras obtenemos sus solicitudes.</p>
+        </EmptyState>
+      ) : filteredSolicitudes.length > 0 ? (
         <SolicitudesList>
           {filteredSolicitudes.map((solicitud) => (
             <SolicitudCard key={solicitud.id}>
@@ -617,10 +719,12 @@ const MisSolicitudes: React.FC = () => {
                   <DetailLabel>Fecha de creación:</DetailLabel>
                   <DetailValue>{formatDate(solicitud.fechaCreacion)}</DetailValue>
                 </DetailRow>
-                <DetailRow>
-                  <DetailLabel>Fecha límite:</DetailLabel>
-                  <DetailValue>{formatDate(solicitud.fechaLimite)}</DetailValue>
-                </DetailRow>
+                {solicitud.fechaLimite && (
+                  <DetailRow>
+                    <DetailLabel>Fecha límite:</DetailLabel>
+                    <DetailValue>{formatDate(solicitud.fechaLimite)}</DetailValue>
+                  </DetailRow>
+                )}
                 {solicitud.asignador && (
                   <DetailRow>
                     <DetailLabel>Asignador:</DetailLabel>
@@ -649,6 +753,15 @@ const MisSolicitudes: React.FC = () => {
             </SolicitudCard>
           ))}
         </SolicitudesList>
+      ) : mySolicitudesError ? (
+        <EmptyState>
+          <FiAlertCircle size={48} />
+          <h3>Error al cargar solicitudes</h3>
+          <p>Ocurrió un error al intentar cargar sus solicitudes. Por favor intente nuevamente.</p>
+          <Button $primary onClick={() => refetchMySolicitudes()}>
+            Reintentar
+          </Button>
+        </EmptyState>
       ) : (
         <EmptyState>
           <FiAlertCircle size={48} />

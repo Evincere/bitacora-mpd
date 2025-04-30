@@ -7,6 +7,7 @@ import { setUser } from './features/auth/store/authSlice';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastProvider } from './components/ui/Toast';
+import PermissionsDebugger from './components/debug/PermissionsDebugger';
 import AnimatedRoutes from './shared/components/ui/AnimatedRoutes';
 import { RealTimeNotificationProvider } from './features/notifications/contexts/RealTimeNotificationContext';
 import { lightTheme, darkTheme } from '@/shared/styles';
@@ -32,6 +33,7 @@ import DashboardSolicitante from '@/features/solicitudes/pages/DashboardSolicita
 import SolicitudForm from '@/features/solicitudes/pages/SolicitudForm';
 import MisSolicitudes from '@/features/solicitudes/pages/MisSolicitudes';
 import SeguimientoSolicitud from '@/features/solicitudes/pages/SeguimientoSolicitud';
+import SolicitudesRoute from './routes/SolicitudesRoute';
 
 // Componentes para ASIGNADOR
 import DashboardAsignador from '@/features/asignacion/pages/DashboardAsignador';
@@ -240,6 +242,7 @@ function App() {
   return (
     <ThemeProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
       <GlobalStyle />
+      <PermissionsDebugger />
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -288,10 +291,13 @@ function App() {
           }>
             {/* Rutas para SOLICITANTE */}
             <Route path="/app/solicitudes/*" element={<RoleProtectedRoute allowedRoles={[UserRole.SOLICITANTE, UserRole.ADMIN]} redirectTo="/app" />}>
-              <Route path="dashboard" element={<DashboardSolicitante />} />
-              <Route path="nueva" element={<SolicitudForm />} />
-              <Route path="" element={<MisSolicitudes />} />
-              <Route path="seguimiento/:id" element={<SeguimientoSolicitud />} />
+              {/* Usar SolicitudesRoute para recargar datos cuando se navega a la página de solicitudes */}
+              <Route element={<SolicitudesRoute />}>
+                <Route path="dashboard" element={<DashboardSolicitante />} />
+                <Route path="nueva" element={<SolicitudForm />} />
+                <Route path="" element={<MisSolicitudes />} />
+                <Route path="seguimiento/:id" element={<SeguimientoSolicitud />} />
+              </Route>
             </Route>
 
             {/* Rutas para ASIGNADOR */}

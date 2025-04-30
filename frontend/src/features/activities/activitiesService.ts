@@ -7,6 +7,7 @@ import {
 } from '@/types/api';
 import { Activity } from '@/types/models';
 import { apiRequest } from '@/utils/api-ky';
+import { formatDateForBackend } from '@/utils/dateUtils';
 
 // Asegurarse de que la URL no incluya el prefijo /app
 const API_URL = 'activities';
@@ -197,9 +198,16 @@ const getActivityById = async (id: number): Promise<Activity> => {
  */
 const createActivity = async (activityData: ActivityCreateRequest): Promise<Activity> => {
   try {
+    // Formatear fechas para eliminar la 'Z' al final (formato esperado por el backend)
+    const formattedData = {
+      ...activityData,
+      date: formatDateForBackend(activityData.date),
+      lastStatusChangeDate: formatDateForBackend(activityData.lastStatusChangeDate)
+    };
+
     return await apiRequest<Activity>(API_URL, {
       method: 'POST',
-      json: activityData
+      json: formattedData
     });
   } catch (error) {
     console.error('Error al crear actividad:', error);
@@ -232,9 +240,16 @@ const createActivity = async (activityData: ActivityCreateRequest): Promise<Acti
  */
 const updateActivity = async (id: number, activityData: ActivityUpdateRequest): Promise<Activity> => {
   try {
+    // Formatear fechas para eliminar la 'Z' al final (formato esperado por el backend)
+    const formattedData = {
+      ...activityData,
+      date: formatDateForBackend(activityData.date),
+      lastStatusChangeDate: formatDateForBackend(activityData.lastStatusChangeDate)
+    };
+
     return await apiRequest<Activity>(`${API_URL}/${id}`, {
       method: 'PUT',
-      json: activityData
+      json: formattedData
     });
   } catch (error) {
     console.error(`Error al actualizar actividad con ID ${id}:`, error);

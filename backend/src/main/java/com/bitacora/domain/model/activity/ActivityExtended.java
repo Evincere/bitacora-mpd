@@ -9,7 +9,8 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDateTime;
 
 /**
- * Entidad de dominio extendida que representa una actividad en el sistema de gestión de tareas.
+ * Entidad de dominio extendida que representa una actividad en el sistema de
+ * gestión de tareas.
  * Extiende la entidad Activity con campos adicionales para el flujo de trabajo.
  */
 @Data
@@ -19,38 +20,44 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class ActivityExtended extends Activity {
     // Campos para el flujo de trabajo
-    private Long requesterId;        // ID del SOLICITANTE
-    private Long assignerId;         // ID del ASIGNADOR
-    private Long executorId;         // ID del EJECUTOR
-    private LocalDateTime requestDate;        // Fecha de solicitud
-    private LocalDateTime assignmentDate;     // Fecha de asignación
-    private LocalDateTime startDate;          // Fecha de inicio
-    private LocalDateTime completionDate;     // Fecha de finalización
-    private LocalDateTime approvalDate;       // Fecha de aprobación
+    private Long requesterId; // ID del SOLICITANTE
+    private Long assignerId; // ID del ASIGNADOR
+    private Long executorId; // ID del EJECUTOR
+    private LocalDateTime requestDate; // Fecha de solicitud
+    private LocalDateTime assignmentDate; // Fecha de asignación
+    private LocalDateTime startDate; // Fecha de inicio
+    private LocalDateTime completionDate; // Fecha de finalización
+    private LocalDateTime approvalDate; // Fecha de aprobación
 
     // Campos para seguimiento
-    private String requestNotes;     // Notas del SOLICITANTE
-    private String assignmentNotes;  // Notas del ASIGNADOR al asignar
-    private String executionNotes;   // Notas del EJECUTOR durante la ejecución
-    private String completionNotes;  // Notas del EJECUTOR al completar
-    private String approvalNotes;    // Notas del ASIGNADOR al aprobar
+    private String requestNotes; // Notas del SOLICITANTE
+    private String assignmentNotes; // Notas del ASIGNADOR al asignar
+    private String executionNotes; // Notas del EJECUTOR durante la ejecución
+    private String completionNotes; // Notas del EJECUTOR al completar
+    private String approvalNotes; // Notas del ASIGNADOR al aprobar
 
     // Campos para métricas
-    private Integer estimatedHours;  // Horas estimadas
-    private Integer actualHours;     // Horas reales
-    private ActivityPriority priority;        // Prioridad
-    private ActivityCategory category;        // Categoría de la tarea
+    private Integer estimatedHours; // Horas estimadas
+    private Integer actualHours; // Horas reales
+    private ActivityPriority priority; // Prioridad
+    private ActivityCategory category; // Categoría de la tarea
 
     /**
      * Cambia el estado de la actividad a REQUESTED (Solicitada).
      *
      * @param requesterId ID del usuario solicitante
-     * @param notes Notas de la solicitud
+     * @param notes       Notas de la solicitud
      */
     public void request(Long requesterId, String notes) {
         this.requesterId = requesterId;
         this.requestNotes = notes;
         this.requestDate = LocalDateTime.now();
+
+        // Si el userId no está establecido, usar el requesterId
+        if (this.getUserId() == null) {
+            this.setUserId(requesterId);
+        }
+
         changeStatus(ActivityStatusNew.REQUESTED);
     }
 
@@ -59,7 +66,7 @@ public class ActivityExtended extends Activity {
      *
      * @param assignerId ID del usuario asignador
      * @param executorId ID del usuario ejecutor
-     * @param notes Notas de la asignación
+     * @param notes      Notas de la asignación
      */
     public void assign(Long assignerId, Long executorId, String notes) {
         this.assignerId = assignerId;
@@ -83,7 +90,7 @@ public class ActivityExtended extends Activity {
     /**
      * Cambia el estado de la actividad a COMPLETED (Completada).
      *
-     * @param notes Notas de finalización
+     * @param notes       Notas de finalización
      * @param actualHours Horas reales dedicadas
      */
     public void complete(String notes, Integer actualHours) {
@@ -126,7 +133,8 @@ public class ActivityExtended extends Activity {
     }
 
     /**
-     * Cambia el estado de la actividad y actualiza la fecha del último cambio de estado.
+     * Cambia el estado de la actividad y actualiza la fecha del último cambio de
+     * estado.
      *
      * @param newStatus El nuevo estado de la actividad
      */
@@ -138,7 +146,8 @@ public class ActivityExtended extends Activity {
     }
 
     /**
-     * Mapea un estado nuevo (ActivityStatusNew) a un estado antiguo (ActivityStatus).
+     * Mapea un estado nuevo (ActivityStatusNew) a un estado antiguo
+     * (ActivityStatus).
      * Método temporal para la migración.
      *
      * @param newStatus El nuevo estado
@@ -147,7 +156,9 @@ public class ActivityExtended extends Activity {
     private ActivityStatus mapNewStatusToOld(ActivityStatusNew newStatus) {
         switch (newStatus) {
             case REQUESTED:
-                return ActivityStatus.PENDIENTE;
+                // Mantener el estado REQUESTED para diferenciar solicitudes de actividades
+                // regulares
+                return ActivityStatus.valueOf("REQUESTED");
             case ASSIGNED:
             case IN_PROGRESS:
                 return ActivityStatus.EN_PROGRESO;
