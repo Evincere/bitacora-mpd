@@ -32,7 +32,8 @@ public class ActivityCategoryService {
      * @return La categoría creada
      */
     @Transactional
-    public ActivityCategory createCategory(String name, String description, String color, Long creatorId) {
+    public ActivityCategory createCategory(final String name, final String description, final String color,
+            final Long creatorId) {
         log.info("Creando nueva categoría: {}", name);
         ActivityCategory category = ActivityCategory.createCustom(name, description, color, creatorId);
         return activityCategoryRepository.save(category);
@@ -48,7 +49,8 @@ public class ActivityCategoryService {
      * @return La categoría actualizada
      */
     @Transactional
-    public ActivityCategory updateCategory(Long id, String name, String description, String color) {
+    public ActivityCategory updateCategory(final Long id, final String name, final String description,
+            final String color) {
         log.info("Actualizando categoría con ID: {}", id);
         ActivityCategory category = getCategoryById(id);
 
@@ -68,7 +70,7 @@ public class ActivityCategoryService {
      * @throws IllegalArgumentException si no se encuentra la categoría
      */
     @Transactional(readOnly = true)
-    public ActivityCategory getCategoryById(Long id) {
+    public ActivityCategory getCategoryById(final Long id) {
         log.info("Buscando categoría con ID: {}", id);
         return activityCategoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada con ID: " + id));
@@ -105,7 +107,7 @@ public class ActivityCategoryService {
      * @return Lista de categorías del usuario
      */
     @Transactional(readOnly = true)
-    public List<ActivityCategory> getCategoriesByCreator(Long creatorId, int page, int size) {
+    public List<ActivityCategory> getCategoriesByCreator(final Long creatorId, final int page, final int size) {
         log.info("Obteniendo categorías creadas por el usuario con ID: {}", creatorId);
         return activityCategoryRepository.findByCreatorId(creatorId, page, size);
     }
@@ -117,7 +119,7 @@ public class ActivityCategoryService {
      * @return Lista de categorías que coinciden con el nombre
      */
     @Transactional(readOnly = true)
-    public List<ActivityCategory> searchCategoriesByName(String name) {
+    public List<ActivityCategory> searchCategoriesByName(final String name) {
         log.info("Buscando categorías por nombre: {}", name);
         return activityCategoryRepository.findByNameContaining(name);
     }
@@ -131,7 +133,7 @@ public class ActivityCategoryService {
      * @return Lista de categorías que coinciden con la búsqueda
      */
     @Transactional(readOnly = true)
-    public List<ActivityCategory> searchCategories(String query, int page, int size) {
+    public List<ActivityCategory> searchCategories(final String query, final int page, final int size) {
         log.info("Buscando categorías con texto: {}", query);
         return activityCategoryRepository.search(query, page, size);
     }
@@ -142,7 +144,7 @@ public class ActivityCategoryService {
      * @param id ID de la categoría a eliminar
      */
     @Transactional
-    public void deleteCategory(Long id) {
+    public void deleteCategory(final Long id) {
         log.info("Eliminando categoría con ID: {}", id);
         ActivityCategory category = getCategoryById(id);
 

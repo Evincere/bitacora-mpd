@@ -48,13 +48,21 @@ const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
       }
 
       // Guardar datos del usuario
+      let permissions = response.permissions || [];
+
+      // Asegurarse de que el usuario tenga los permisos necesarios según su rol
+      if (response.role === 'SOLICITANTE' && !permissions.includes('REQUEST_ACTIVITIES')) {
+        console.log('Añadiendo permiso REQUEST_ACTIVITIES al usuario SOLICITANTE');
+        permissions = [...permissions, 'REQUEST_ACTIVITIES'];
+      }
+
       const userData = {
         id: response.userId,
         username: response.username,
         name: response.fullName,
         email: response.email,
         role: response.role, // Guardar el rol como un valor único
-        permissions: response.permissions || [] // Guardar los permisos
+        permissions: permissions // Guardar los permisos actualizados
       };
 
       // Depuración

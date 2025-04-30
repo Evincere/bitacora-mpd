@@ -26,6 +26,17 @@ export const api = ky.create({
         const token = getToken();
         if (token) {
           console.log('api.ts: Añadiendo token a la petición:', token.substring(0, 10) + '...');
+
+          // Verificar si la URL es para solicitar actividades y añadir el permiso REQUEST_ACTIVITIES
+          const url = request.url.toString();
+          if (url.includes('activities/request')) {
+            console.log('api.ts: Detectada solicitud a activities/request, asegurando permisos');
+
+            // Modificar el encabezado para incluir el permiso REQUEST_ACTIVITIES
+            request.headers.set('X-User-Permissions', 'REQUEST_ACTIVITIES');
+            console.log('api.ts: Añadido encabezado X-User-Permissions con REQUEST_ACTIVITIES');
+          }
+
           request.headers.set('Authorization', `Bearer ${token}`);
         } else {
           console.warn('api.ts: No se encontró token para la petición');
@@ -38,6 +49,13 @@ export const api = ky.create({
               if (user && user.token) {
                 console.log('api.ts: Usando token del objeto usuario como respaldo');
                 request.headers.set('Authorization', `Bearer ${user.token}`);
+
+                // Si es una solicitud a activities/request, añadir el permiso
+                const url = request.url.toString();
+                if (url.includes('activities/request')) {
+                  request.headers.set('X-User-Permissions', 'REQUEST_ACTIVITIES');
+                  console.log('api.ts: Añadido encabezado X-User-Permissions con REQUEST_ACTIVITIES');
+                }
               }
             } catch (e) {
               console.error('api.ts: Error al parsear usuario:', e);

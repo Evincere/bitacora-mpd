@@ -11,6 +11,15 @@ import { User, UserRole } from '@/types/models';
  * @returns Objeto de usuario compatible con el estado de la aplicación
  */
 const mapAuthResponseToUser = (authResponse: AuthResponse): User => {
+  // Asegurarse de que el usuario tenga los permisos necesarios según su rol
+  let permissions = authResponse.permissions || [];
+
+  // Asegurarse de que el usuario tenga los permisos necesarios según su rol
+  if (authResponse.role === 'SOLICITANTE' && !permissions.includes('REQUEST_ACTIVITIES')) {
+    console.log('authSlice: Añadiendo permiso REQUEST_ACTIVITIES al usuario SOLICITANTE');
+    permissions = [...permissions, 'REQUEST_ACTIVITIES'];
+  }
+
   return {
     id: authResponse.userId,
     username: authResponse.username,
@@ -22,7 +31,7 @@ const mapAuthResponseToUser = (authResponse: AuthResponse): User => {
     active: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    permissions: authResponse.permissions || [],
+    permissions: permissions,
     token: authResponse.token,
     tokenType: authResponse.tokenType
   };

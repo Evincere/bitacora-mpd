@@ -1,0 +1,68 @@
+package com.bitacora.infrastructure.persistence.repository;
+
+import com.bitacora.infrastructure.persistence.entity.TaskRequestEntity;
+import com.bitacora.infrastructure.persistence.entity.TaskRequestStatusEntity;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
+
+/**
+ * Repositorio JPA para la entidad TaskRequestEntity.
+ */
+@Repository
+public interface TaskRequestJpaRepository extends JpaRepository<TaskRequestEntity, Long>, JpaSpecificationExecutor<TaskRequestEntity> {
+
+    /**
+     * Busca solicitudes por el ID del solicitante.
+     *
+     * @param requesterId ID del solicitante
+     * @param pageable Información de paginación
+     * @return Página de solicitudes
+     */
+    Page<TaskRequestEntity> findByRequesterId(Long requesterId, Pageable pageable);
+
+    /**
+     * Cuenta el número de solicitudes de un solicitante.
+     *
+     * @param requesterId ID del solicitante
+     * @return El número de solicitudes
+     */
+    long countByRequesterId(Long requesterId);
+
+    /**
+     * Busca solicitudes por el ID del asignador.
+     *
+     * @param assignerId ID del asignador
+     * @param pageable Información de paginación
+     * @return Página de solicitudes
+     */
+    Page<TaskRequestEntity> findByAssignerId(Long assignerId, Pageable pageable);
+
+    /**
+     * Cuenta el número de solicitudes asignadas por un asignador.
+     *
+     * @param assignerId ID del asignador
+     * @return El número de solicitudes
+     */
+    long countByAssignerId(Long assignerId);
+
+    /**
+     * Busca solicitudes por estado.
+     *
+     * @param status Estado de las solicitudes
+     * @param pageable Información de paginación
+     * @return Página de solicitudes
+     */
+    Page<TaskRequestEntity> findByStatus(TaskRequestStatusEntity status, Pageable pageable);
+
+    /**
+     * Cuenta el número de solicitudes con un estado específico.
+     *
+     * @param status Estado de las solicitudes
+     * @return El número de solicitudes
+     */
+    long countByStatus(TaskRequestStatusEntity status);
+}

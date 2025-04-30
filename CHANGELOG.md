@@ -3,6 +3,43 @@
 ## [Unreleased]
 
 ### Agregado
+- Implementación del Sprint 16: Entidad TaskRequest (Solicitud de Tarea)
+  - Diseño detallado de la nueva entidad `TaskRequest` separada de `Activity`
+  - Implementación de la capa de dominio para la entidad `TaskRequest`
+    - Creación de la clase `TaskRequest` con atributos y métodos de negocio
+    - Implementación de enumeraciones `TaskRequestStatus` y `TaskRequestPriority`
+    - Creación de clases `TaskRequestCategory`, `TaskRequestComment` y `TaskRequestAttachment`
+    - Implementación de interfaces de repositorio `TaskRequestRepository` y `TaskRequestCategoryRepository`
+    - Implementación de interfaces de servicio `TaskRequestService` y `TaskRequestCategoryService`
+  - Implementación de la capa de aplicación para la entidad `TaskRequest`
+    - Creación de casos de uso `CreateTaskRequestUseCase` y `UpdateTaskRequestUseCase`
+    - Implementación del servicio `TaskRequestWorkflowService` para gestionar el flujo de trabajo
+    - Implementación del servicio `TaskRequestCategoryService` para gestionar categorías
+    - Creación de DTOs para la comunicación con la capa de infraestructura
+    - Implementación de mappers para convertir entre entidades de dominio y DTOs
+  - Implementación de la capa de infraestructura para la entidad `TaskRequest`
+    - Creación de entidades JPA `TaskRequestEntity`, `TaskRequestCategoryEntity`, etc.
+    - Implementación de repositorios JPA `TaskRequestJpaRepository` y `TaskRequestCategoryJpaRepository`
+    - Implementación de adaptadores de repositorio `TaskRequestRepositoryAdapter` y `TaskRequestCategoryRepositoryAdapter`
+    - Creación de controladores REST `TaskRequestController` y `TaskRequestCategoryController`
+    - Implementación de seguridad para endpoints con anotaciones `@PreAuthorize`
+    - Creación de script de migración para las nuevas tablas con datos iniciales
+  - Documentación del modelo de dominio con diagrama UML y reglas de negocio
+  - Diseño de la interfaz de usuario para la nueva entidad
+
+- Corrección de problemas con las rutas de API en el frontend y backend
+  - Eliminación del prefijo duplicado `/api` en las URLs del servicio de solicitudes
+  - Actualización del controlador ActivityUserController para manejar rutas con y sin el prefijo `/api`
+  - Mejora de logs para depuración de solicitudes HTTP
+- Corrección de problemas con las solicitudes de usuario
+  - Actualización del DTO ActivityDto para incluir el campo requesterId
+  - Mejora del mapeo entre Activity y ActivityExtended para preservar el requesterId
+  - Corrección del controlador ActivityUserController para mostrar correctamente las solicitudes del usuario
+  - Manejo de errores mejorado para casos donde el usuario no está autenticado correctamente
+  - Actualización del método mapToDto en ActivityWorkflowController para incluir el requesterId en la respuesta
+  - Diferenciación clara entre solicitudes y actividades mediante estados específicos
+  - Actualización del enum ActivityStatus para incluir estados del flujo de trabajo
+  - Mejora de los métodos findByRequesterId y countByRequesterId para filtrar correctamente
 - Mejora de la interfaz de usuario
   - Corrección de contraste en los campos de formulario para mejorar la accesibilidad
   - Mejora visual de los selectores con iconos de flecha
@@ -15,8 +52,23 @@
   - Endpoint para obtener prioridades de actividades (/api/activities/priorities)
   - Creación de DTO ActivityPriorityDTO para representar prioridades
 - Corrección de errores en el frontend para usar las rutas correctas de la API
-  - Actualización de rutas en solicitudesService.ts para incluir el prefijo /api
+  - Eliminación del prefijo duplicado /api en solicitudesService.ts
+  - Ajuste del formato de fechas para cumplir con el formato esperado por el backend (formato yyyy-MM-dd'T'HH:mm:ss sin milisegundos)
   - Ajuste del formato de datos enviados al endpoint de solicitudes para cumplir con el contrato de la API
+  - Corrección de permisos para usuarios con rol SOLICITANTE, asegurando que tengan el permiso REQUEST_ACTIVITIES
+  - Implementación de encabezados personalizados para solicitudes a endpoints protegidos, añadiendo X-User-Permissions
+- Implementación de filtro de seguridad personalizado en el backend
+  - Creación de CustomPermissionsFilter para procesar encabezados X-User-Permissions
+  - Integración del filtro en la cadena de filtros de seguridad
+  - Soporte para añadir permisos temporales a la autenticación actual
+- Corrección de error en la creación de actividades
+  - Asegurar que el campo userId se establezca correctamente al crear una actividad
+  - Modificación del método request en ActivityExtended para establecer userId si es nulo
+  - Establecer explícitamente el userId en el controlador ActivityWorkflowController
+  - Implementación de ActivityExtendedMapper para manejar correctamente la conversión entre Activity y ActivityExtended
+  - Actualización de ActivityWorkflowService para usar el nuevo mapper y evitar errores de casting
+  - Creación de endpoint para obtener las solicitudes del usuario actual
+  - Mejora del contraste visual en la vista de "Mis Solicitudes" para mejor legibilidad
 - Corrección de errores en la configuración de Zipkin
   - Eliminación de configuraciones duplicadas en application.yml
 - Implementación de pruebas unitarias y de integración (Sprint 15, punto 8)

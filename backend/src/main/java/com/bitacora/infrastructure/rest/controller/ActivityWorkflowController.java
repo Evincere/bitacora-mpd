@@ -61,6 +61,7 @@ public class ActivityWorkflowController {
                                 .dependency(requestActivityDto.getDependency())
                                 .situation(requestActivityDto.getSituation())
                                 .estimatedHours(requestActivityDto.getEstimatedHours())
+                                .userId(userPrincipal.getId()) // Establecer el userId con el ID del usuario autenticado
                                 .build();
 
                 // Solicitar la actividad
@@ -288,6 +289,7 @@ public class ActivityWorkflowController {
                                 .createdAt(activity.getCreatedAt())
                                 .updatedAt(activity.getUpdatedAt())
                                 .userId(activity.getUserId())
+                                .requesterId(activity.getRequesterId())
                                 .build();
         }
 }

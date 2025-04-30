@@ -1,5 +1,6 @@
 package com.bitacora.application.activity;
 
+import com.bitacora.domain.model.activity.Activity;
 import com.bitacora.domain.model.activity.ActivityExtended;
 import com.bitacora.domain.model.activity.ActivityStatus;
 import com.bitacora.domain.model.activity.ActivityStatusNew;
@@ -7,6 +8,7 @@ import com.bitacora.domain.model.activity.state.ActivityState;
 import com.bitacora.domain.model.activity.state.ActivityStateFactory;
 
 import com.bitacora.domain.port.repository.ActivityRepository;
+import com.bitacora.infrastructure.persistence.mapper.ActivityExtendedMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ActivityWorkflowService {
 
         private final ActivityRepository activityRepository;
+        private final ActivityExtendedMapper activityExtendedMapper;
 
         /**
          * Solicita una nueva actividad.
@@ -38,7 +41,8 @@ public class ActivityWorkflowService {
                 activity.request(requesterId, notes);
 
                 // Guardar la actividad
-                return (ActivityExtended) activityRepository.save(activity);
+                Activity savedActivity = activityRepository.save(activity);
+                return activityExtendedMapper.fromActivity(savedActivity);
         }
 
         /**
@@ -55,19 +59,21 @@ public class ActivityWorkflowService {
                 log.debug("Asignando actividad con ID: {} al ejecutor con ID: {}", activityId, executorId);
 
                 // Obtener la actividad
-                ActivityExtended activity = (ActivityExtended) activityRepository.findById(activityId)
+                Activity activity = activityRepository.findById(activityId)
                                 .orElseThrow(() -> new IllegalArgumentException(
                                                 "No se encontró la actividad con ID: " + activityId));
+                ActivityExtended activityExtended = activityExtendedMapper.fromActivity(activity);
 
                 // Crear el estado actual
                 ActivityState state = ActivityStateFactory
-                                .createState(ActivityStatusNew.fromString(activity.getStatus().name()));
+                                .createState(ActivityStatusNew.fromString(activityExtended.getStatus().name()));
 
                 // Aplicar la transición
-                state = state.assign(activity, assignerId, executorId, notes);
+                state = state.assign(activityExtended, assignerId, executorId, notes);
 
                 // Guardar la actividad
-                return (ActivityExtended) activityRepository.save(activity);
+                Activity savedActivity = activityRepository.save(activityExtended);
+                return activityExtendedMapper.fromActivity(savedActivity);
         }
 
         /**
@@ -82,24 +88,26 @@ public class ActivityWorkflowService {
                 log.debug("Iniciando actividad con ID: {}", activityId);
 
                 // Obtener la actividad
-                ActivityExtended activity = (ActivityExtended) activityRepository.findById(activityId)
+                Activity activity = activityRepository.findById(activityId)
                                 .orElseThrow(() -> new IllegalArgumentException(
                                                 "No se encontró la actividad con ID: " + activityId));
+                ActivityExtended activityExtended = activityExtendedMapper.fromActivity(activity);
 
                 // Crear el estado actual
                 ActivityState state;
-                if (activity.getStatus() == ActivityStatus.PENDIENTE) {
-                        state = ActivityStateFactory.createStateFromActivityStatus(activity.getStatus());
+                if (activityExtended.getStatus() == ActivityStatus.PENDIENTE) {
+                        state = ActivityStateFactory.createStateFromActivityStatus(activityExtended.getStatus());
                 } else {
                         state = ActivityStateFactory
-                                        .createState(ActivityStatusNew.fromString(activity.getStatus().name()));
+                                        .createState(ActivityStatusNew.fromString(activityExtended.getStatus().name()));
                 }
 
                 // Aplicar la transición
-                state = state.start(activity, notes);
+                state = state.start(activityExtended, notes);
 
                 // Guardar la actividad
-                return (ActivityExtended) activityRepository.save(activity);
+                Activity savedActivity = activityRepository.save(activityExtended);
+                return activityExtendedMapper.fromActivity(savedActivity);
         }
 
         /**
@@ -115,24 +123,26 @@ public class ActivityWorkflowService {
                 log.debug("Completando actividad con ID: {}", activityId);
 
                 // Obtener la actividad
-                ActivityExtended activity = (ActivityExtended) activityRepository.findById(activityId)
+                Activity activity = activityRepository.findById(activityId)
                                 .orElseThrow(() -> new IllegalArgumentException(
                                                 "No se encontró la actividad con ID: " + activityId));
+                ActivityExtended activityExtended = activityExtendedMapper.fromActivity(activity);
 
                 // Crear el estado actual
                 ActivityState state;
-                if (activity.getStatus() == ActivityStatus.EN_PROGRESO) {
+                if (activityExtended.getStatus() == ActivityStatus.EN_PROGRESO) {
                         state = ActivityStateFactory.createState(ActivityStatusNew.IN_PROGRESS);
                 } else {
                         state = ActivityStateFactory
-                                        .createState(ActivityStatusNew.fromString(activity.getStatus().name()));
+                                        .createState(ActivityStatusNew.fromString(activityExtended.getStatus().name()));
                 }
 
                 // Aplicar la transición
-                state = state.complete(activity, notes, actualHours);
+                state = state.complete(activityExtended, notes, actualHours);
 
                 // Guardar la actividad
-                return (ActivityExtended) activityRepository.save(activity);
+                Activity savedActivity = activityRepository.save(activityExtended);
+                return activityExtendedMapper.fromActivity(savedActivity);
         }
 
         /**
@@ -147,24 +157,26 @@ public class ActivityWorkflowService {
                 log.debug("Aprobando actividad con ID: {}", activityId);
 
                 // Obtener la actividad
-                ActivityExtended activity = (ActivityExtended) activityRepository.findById(activityId)
+                Activity activity = activityRepository.findById(activityId)
                                 .orElseThrow(() -> new IllegalArgumentException(
                                                 "No se encontró la actividad con ID: " + activityId));
+                ActivityExtended activityExtended = activityExtendedMapper.fromActivity(activity);
 
                 // Crear el estado actual
                 ActivityState state;
-                if (activity.getStatus() == ActivityStatus.COMPLETADA) {
+                if (activityExtended.getStatus() == ActivityStatus.COMPLETADA) {
                         state = ActivityStateFactory.createState(ActivityStatusNew.COMPLETED);
                 } else {
                         state = ActivityStateFactory
-                                        .createState(ActivityStatusNew.fromString(activity.getStatus().name()));
+                                        .createState(ActivityStatusNew.fromString(activityExtended.getStatus().name()));
                 }
 
                 // Aplicar la transición
-                state = state.approve(activity, notes);
+                state = state.approve(activityExtended, notes);
 
                 // Guardar la actividad
-                return (ActivityExtended) activityRepository.save(activity);
+                Activity savedActivity = activityRepository.save(activityExtended);
+                return activityExtendedMapper.fromActivity(savedActivity);
         }
 
         /**
@@ -179,24 +191,26 @@ public class ActivityWorkflowService {
                 log.debug("Rechazando actividad con ID: {}", activityId);
 
                 // Obtener la actividad
-                ActivityExtended activity = (ActivityExtended) activityRepository.findById(activityId)
+                Activity activity = activityRepository.findById(activityId)
                                 .orElseThrow(() -> new IllegalArgumentException(
                                                 "No se encontró la actividad con ID: " + activityId));
+                ActivityExtended activityExtended = activityExtendedMapper.fromActivity(activity);
 
                 // Crear el estado actual
                 ActivityState state;
-                if (activity.getStatus() == ActivityStatus.COMPLETADA) {
+                if (activityExtended.getStatus() == ActivityStatus.COMPLETADA) {
                         state = ActivityStateFactory.createState(ActivityStatusNew.COMPLETED);
                 } else {
                         state = ActivityStateFactory
-                                        .createState(ActivityStatusNew.fromString(activity.getStatus().name()));
+                                        .createState(ActivityStatusNew.fromString(activityExtended.getStatus().name()));
                 }
 
                 // Aplicar la transición
-                state = state.reject(activity, notes);
+                state = state.reject(activityExtended, notes);
 
                 // Guardar la actividad
-                return (ActivityExtended) activityRepository.save(activity);
+                Activity savedActivity = activityRepository.save(activityExtended);
+                return activityExtendedMapper.fromActivity(savedActivity);
         }
 
         /**
@@ -211,29 +225,31 @@ public class ActivityWorkflowService {
                 log.debug("Cancelando actividad con ID: {}", activityId);
 
                 // Obtener la actividad
-                ActivityExtended activity = (ActivityExtended) activityRepository.findById(activityId)
+                Activity activity = activityRepository.findById(activityId)
                                 .orElseThrow(() -> new IllegalArgumentException(
                                                 "No se encontró la actividad con ID: " + activityId));
+                ActivityExtended activityExtended = activityExtendedMapper.fromActivity(activity);
 
                 // Crear el estado actual
                 ActivityState state;
 
                 // Si la actividad está en estado COMPLETADA, lanzar una excepción
-                if (activity.getStatus() == ActivityStatus.COMPLETADA) {
+                if (activityExtended.getStatus() == ActivityStatus.COMPLETADA) {
                         throw new IllegalStateException("No se puede cancelar una actividad en estado COMPLETADA");
                 }
 
-                if (activity.getStatus() == ActivityStatus.PENDIENTE) {
-                        state = ActivityStateFactory.createStateFromActivityStatus(activity.getStatus());
+                if (activityExtended.getStatus() == ActivityStatus.PENDIENTE) {
+                        state = ActivityStateFactory.createStateFromActivityStatus(activityExtended.getStatus());
                 } else {
                         state = ActivityStateFactory
-                                        .createState(ActivityStatusNew.fromString(activity.getStatus().name()));
+                                        .createState(ActivityStatusNew.fromString(activityExtended.getStatus().name()));
                 }
 
                 // Aplicar la transición
-                state = state.cancel(activity, notes);
+                state = state.cancel(activityExtended, notes);
 
                 // Guardar la actividad
-                return (ActivityExtended) activityRepository.save(activity);
+                Activity savedActivity = activityRepository.save(activityExtended);
+                return activityExtendedMapper.fromActivity(savedActivity);
         }
 }

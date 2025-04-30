@@ -31,6 +31,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomPermissionsFilter customPermissionsFilter;
 
     /**
      * Configura la cadena de filtros de seguridad.
@@ -57,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/activities/**", "/activities/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(customPermissionsFilter, JwtAuthenticationFilter.class)
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .build();
     }

@@ -10,6 +10,20 @@ export const useSolicitudes = () => {
   const queryClient = useQueryClient();
   const [isUploading, setIsUploading] = useState(false);
 
+  // Obtener mis solicitudes
+  const {
+    data: mySolicitudes,
+    isLoading: isLoadingMySolicitudes,
+    error: mySolicitudesError,
+    refetch: refetchMySolicitudes
+  } = useQuery({
+    queryKey: ['mySolicitudes'],
+    queryFn: () => solicitudesService.getMySolicitudes(),
+    staleTime: 0, // Siempre considerar los datos como obsoletos para forzar la recarga
+    refetchOnMount: true, // Recargar al montar el componente
+    refetchOnWindowFocus: true, // Recargar cuando la ventana recupera el foco
+  });
+
   // Obtener categorías
   const {
     data: categories,
@@ -37,7 +51,7 @@ export const useSolicitudes = () => {
     mutationFn: async ({ solicitud, files }: { solicitud: SolicitudRequest, files: File[] }) => {
       // Paso 1: Crear la solicitud
       const createdSolicitud = await solicitudesService.createSolicitud(solicitud);
-      
+
       // Paso 2: Si hay archivos, subirlos
       if (files.length > 0) {
         setIsUploading(true);
@@ -47,12 +61,18 @@ export const useSolicitudes = () => {
           setIsUploading(false);
         }
       }
-      
+
       return createdSolicitud;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Solicitud creada exitosamente:', data);
       // Invalidar consultas para actualizar la lista de solicitudes
-      queryClient.invalidateQueries({ queryKey: ['solicitudes'] });
+      queryClient.invalidateQueries({ queryKey: ['mySolicitudes'] });
+      // Forzar una recarga inmediata de los datos
+      setTimeout(() => {
+        console.log('Recargando datos de solicitudes...');
+        refetchMySolicitudes();
+      }, 500);
       toast.success('Solicitud creada correctamente');
     },
     onError: (error: any) => {
@@ -63,22 +83,26 @@ export const useSolicitudes = () => {
 
   return {
     // Datos
+    mySolicitudes,
     categories,
     priorities,
-    
+
     // Estados de carga
+    isLoadingMySolicitudes,
     isLoadingCategories,
     isLoadingPriorities,
     isCreatingSolicitud: createSolicitudMutation.isPending,
     isUploading,
-    
+
     // Errores
+    mySolicitudesError,
     categoriesError,
     prioritiesError,
     createSolicitudError: createSolicitudMutation.error,
-    
+
     // Métodos
-    createSolicitud: createSolicitudMutation.mutate
+    createSolicitud: createSolicitudMutation.mutate,
+    refetchMySolicitudes
   };
 };
 

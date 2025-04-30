@@ -302,6 +302,8 @@ const SolicitudForm: React.FC = () => {
 
   const onSubmit = async (data: SolicitudFormData) => {
     try {
+      console.log('SolicitudForm: Enviando datos del formulario:', data);
+
       // Crear la solicitud y subir los archivos adjuntos
       createSolicitud({
         solicitud: {
@@ -313,8 +315,14 @@ const SolicitudForm: React.FC = () => {
         },
         files
       }, {
-        onSuccess: () => {
-          navigate('/app/solicitudes');
+        onSuccess: (result) => {
+          console.log('SolicitudForm: Solicitud creada exitosamente:', result);
+          toast.success('Solicitud creada correctamente. Redirigiendo a la lista de solicitudes...');
+
+          // Esperar un momento antes de redirigir para que se complete la invalidación de la caché
+          setTimeout(() => {
+            navigate('/app/solicitudes');
+          }, 1000);
         }
       });
     } catch (error) {
