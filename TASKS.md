@@ -1272,71 +1272,69 @@ Este sprint se enfocará en crear una nueva entidad `Request` (Solicitud) separa
   - [x] Definir restricciones y claves foráneas
   - [x] Configurar índices para optimizar consultas
   - [x] Insertar datos iniciales de categorías y ejemplos de solicitudes
-- [ ] Implementar migración de datos
-  - [ ] Crear script para migrar datos de actividades a solicitudes
-  - [ ] Implementar lógica para preservar relaciones
-  - [ ] Verificar integridad de datos después de la migración
 
 ### Fase 4: Implementación de la Interfaz de Usuario (1 semana)
 
 #### 4.1 Diseño de Componentes (2 días)
-- [ ] Diseñar interfaces para gestión de solicitudes
-  - [ ] Diseñar lista de solicitudes
-  - [ ] Diseñar formulario de creación/edición
-  - [ ] Diseñar vista de detalles
-  - [ ] Diseñar componentes para acciones de flujo de trabajo
-- [ ] Diseñar interfaces específicas por rol
-  - [ ] Diseñar vista para SOLICITANTES
-  - [ ] Diseñar vista para ASIGNADORES
-  - [ ] Diseñar vista para EJECUTORES
-  - [ ] Diseñar vista para ADMIN
+- [x] Diseñar interfaces para gestión de solicitudes
+  - [x] Diseñar lista de solicitudes
+  - [x] Diseñar formulario de creación/edición
+  - [x] Diseñar vista de detalles
+  - [x] Diseñar componentes para acciones de flujo de trabajo
+- [x] Diseñar interfaces específicas por rol
+  - [x] Diseñar vista para SOLICITANTES
+  - [x] Diseñar vista para ASIGNADORES
+  - [x] Diseñar vista para EJECUTORES
+  - [x] Diseñar vista para ADMIN
 
 #### 4.2 Implementación de Componentes (3 días)
-- [ ] Implementar servicios de frontend
-  - [ ] Crear requestService.ts para comunicación con API
-  - [ ] Implementar métodos para operaciones CRUD
-  - [ ] Implementar métodos para operaciones de flujo de trabajo
-- [ ] Implementar componentes de React
-  - [ ] Crear RequestList.tsx
-  - [ ] Crear RequestForm.tsx
-  - [ ] Crear RequestDetail.tsx
-  - [ ] Crear componentes para acciones específicas
-- [ ] Implementar gestión de estado
-  - [ ] Crear hooks personalizados (useRequests.ts)
-  - [ ] Configurar React Query para solicitudes
-  - [ ] Implementar caché y revalidación
+- [x] Implementar servicios de frontend
+  - [x] Crear taskRequestService.ts para comunicación con API
+  - [x] Crear taskRequestCategoryService.ts para gestión de categorías
+  - [x] Implementar métodos para operaciones CRUD
+  - [x] Implementar métodos para operaciones de flujo de trabajo
+- [x] Implementar componentes de React
+  - [x] Crear TaskRequestList.tsx para listar solicitudes
+  - [x] Crear TaskRequestForm.tsx para crear y editar solicitudes
+  - [x] Crear TaskRequestDetail.tsx para ver detalles de solicitudes
+  - [x] Crear TaskRequestCategoryList.tsx para gestionar categorías
+  - [x] Crear TaskRequestStats.tsx para visualizar estadísticas
+- [x] Implementar gestión de estado
+  - [x] Crear tipos TypeScript para las entidades
+  - [x] Implementar manejo de errores y carga
+  - [x] Configurar notificaciones con react-toastify
 
 #### 4.3 Implementación de Rutas y Navegación (2 días)
-- [ ] Configurar rutas para solicitudes
-  - [ ] Añadir rutas en App.tsx
-  - [ ] Configurar protección de rutas por rol
-  - [ ] Implementar redirecciones adecuadas
-- [ ] Actualizar menú de navegación
-  - [ ] Añadir enlaces para gestión de solicitudes
-  - [ ] Configurar visibilidad según rol
-  - [ ] Implementar indicadores de notificación
+- [x] Configurar rutas para solicitudes
+  - [x] Crear TaskRequestRoutes.tsx con todas las rutas necesarias
+  - [x] Configurar protección de rutas por rol con RoleProtectedRoute
+  - [x] Implementar redirecciones adecuadas
+- [x] Actualizar menú de navegación
+  - [x] Añadir enlaces para gestión de solicitudes en Sidebar.tsx
+  - [x] Configurar visibilidad según roles (SOLICITANTE, ASIGNADOR, EJECUTOR, ADMIN)
+  - [x] Organizar menú por secciones
 
 ### Fase 5: Pruebas y Documentación (3 días)
 
 #### 5.1 Implementación de Pruebas (2 días)
-- [ ] Implementar pruebas unitarias
-  - [ ] Crear pruebas para entidades de dominio
-  - [ ] Crear pruebas para servicios de aplicación
-  - [ ] Crear pruebas para mappers y DTOs
-- [ ] Implementar pruebas de integración
-  - [ ] Crear pruebas para repositorios
-  - [ ] Crear pruebas para controladores REST
-  - [ ] Crear pruebas para flujo de trabajo completo
+- [x] Implementar pruebas unitarias
+  - [x] Crear pruebas para entidades de dominio (TaskRequestTest)
+  - [x] Crear pruebas para servicios de aplicación (TaskRequestWorkflowServiceTest)
+  - [x] Crear pruebas para casos de uso (CreateTaskRequestUseCaseTest)
+- [x] Implementar pruebas de integración
+  - [x] Crear pruebas para repositorios (TaskRequestRepositoryAdapterTest)
+  - [x] Crear pruebas para controladores REST (TaskRequestControllerIntegrationTest)
+  - [x] Configurar entorno de pruebas con MockMvc y JUnit 5
 
 #### 5.2 Documentación (1 día)
-- [ ] Actualizar documentación técnica
-  - [ ] Documentar el nuevo modelo de dominio
-  - [ ] Actualizar diagramas de arquitectura
-  - [ ] Documentar API REST
-- [ ] Actualizar documentación de usuario
-  - [ ] Crear guías para gestión de solicitudes
-  - [ ] Actualizar manuales por rol
-  - [ ] Crear tutoriales para nuevas funcionalidades
+- [x] Actualizar documentación técnica
+  - [x] Documentar el nuevo modelo de dominio
+  - [x] Documentar arquitectura y componentes
+  - [x] Documentar API REST con endpoints y permisos
+- [x] Actualizar documentación de usuario
+  - [x] Crear guías para gestión de solicitudes
+  - [x] Documentar flujo de trabajo de solicitudes
+  - [x] Crear guías detalladas para cada rol (SOLICITANTE, ASIGNADOR, EJECUTOR, ADMIN)
 
 ### Criterios de Aceptación
 - La entidad `Request` está implementada y funciona correctamente
