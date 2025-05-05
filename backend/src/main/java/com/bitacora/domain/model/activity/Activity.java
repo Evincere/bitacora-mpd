@@ -31,9 +31,12 @@ public class Activity {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long userId;
+    // Añadimos el campo executorId para poder filtrar por él
+    private Long executorId;
 
     /**
-     * Cambia el estado de la actividad y actualiza la fecha del último cambio de estado.
+     * Cambia el estado de la actividad y actualiza la fecha del último cambio de
+     * estado.
      *
      * @param newStatus El nuevo estado de la actividad
      */

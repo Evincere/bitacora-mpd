@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { API_BASE_URL } from '../config';
+import { config } from '../config';
 import { TaskRequestCategory } from '../types/TaskRequest';
 
-const API_URL = `${API_BASE_URL}/task-request-categories`;
+const API_URL = `${config.apiUrl}/task-request-categories`;
 
 /**
  * Servicio para interactuar con la API de categorías de solicitudes de tareas

@@ -103,4 +103,13 @@ public interface UserRepository {
      * @param id El ID del usuario a eliminar
      */
     void deleteById(Long id);
+
+    /**
+     * Busca usuarios por nombre o nombre de usuario.
+     *
+     * @param query Texto para buscar en nombre o nombre de usuario
+     * @param limit Límite de resultados a devolver
+     * @return Lista de usuarios que coinciden con la búsqueda
+     */
+    List<User> findByNameOrUsername(String query, int limit);
 }

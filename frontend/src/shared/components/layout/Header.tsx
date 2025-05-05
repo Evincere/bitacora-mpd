@@ -292,11 +292,17 @@ const MobileMenuButton = styled(IconButton)`
  * @property {string} [username] - Nombre de usuario
  * @property {string} [role] - Rol del usuario
  * @property {string} [email] - Correo electrónico del usuario
+ * @property {string} [firstName] - Nombre del usuario
+ * @property {string} [lastName] - Apellido del usuario
+ * @property {string} [fullName] - Nombre completo del usuario
  */
 interface User {
   username?: string;
   role?: string;
   email?: string;
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
 }
 
 /**
@@ -435,10 +441,12 @@ const Header: React.FC = () => {
           {user && (
             <UserInfo>
               <div className="user-avatar">
-                {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
+                {user.firstName ? user.firstName.charAt(0).toUpperCase() :
+                 user.fullName ? user.fullName.charAt(0).toUpperCase() :
+                 user.username ? user.username.charAt(0).toUpperCase() : 'U'}
               </div>
               <div className="user-details">
-                <h3>{user.username || 'Usuario'}</h3>
+                <h3>{user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username || 'Usuario'}</h3>
                 <div className="role">
                   <FiShield className="icon" />
                   {user.role || 'Usuario'}

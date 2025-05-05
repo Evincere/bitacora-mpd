@@ -1,17 +1,21 @@
 package com.bitacora.infrastructure.rest.controller;
 
 import com.bitacora.application.taskrequest.CreateTaskRequestUseCase;
+import com.bitacora.application.taskrequest.TaskRequestHistoryService;
 import com.bitacora.application.taskrequest.TaskRequestWorkflowService;
 import com.bitacora.application.taskrequest.UpdateTaskRequestUseCase;
 import com.bitacora.application.taskrequest.dto.CreateTaskRequestDto;
 import com.bitacora.application.taskrequest.dto.TaskRequestCommentCreateDto;
+import com.bitacora.application.taskrequest.dto.TaskRequestCommentWithReadStatusDto;
 import com.bitacora.application.taskrequest.dto.TaskRequestDto;
+import com.bitacora.application.taskrequest.dto.TaskRequestHistoryDto;
 import com.bitacora.application.taskrequest.dto.TaskRequestPageDto;
 import com.bitacora.application.taskrequest.dto.UpdateTaskRequestDto;
 import com.bitacora.application.taskrequest.mapper.TaskRequestMapper;
 import com.bitacora.domain.model.taskrequest.TaskRequest;
 import com.bitacora.domain.model.taskrequest.TaskRequestComment;
 import com.bitacora.domain.model.taskrequest.TaskRequestStatus;
+import com.bitacora.infrastructure.rest.dto.workflow.StartTaskRequestDto;
 import com.bitacora.infrastructure.security.CurrentUser;
 import com.bitacora.infrastructure.security.UserPrincipal;
 
@@ -53,30 +57,41 @@ public class TaskRequestController {
     private final CreateTaskRequestUseCase createTaskRequestUseCase;
     private final UpdateTaskRequestUseCase updateTaskRequestUseCase;
     private final TaskRequestWorkflowService taskRequestWorkflowService;
+    private final TaskRequestHistoryService taskRequestHistoryService;
     private final TaskRequestMapper taskRequestMapper;
+    private final com.bitacora.application.taskrequest.mapper.TaskRequestHistoryMapper historyMapper;
 
     /**
      * Constructor.
      *
-     * @param createTaskRequestUseCase Caso de uso para crear solicitudes
-     * @param updateTaskRequestUseCase Caso de uso para actualizar solicitudes
+     * @param createTaskRequestUseCase   Caso de uso para crear solicitudes
+     * @param updateTaskRequestUseCase   Caso de uso para actualizar solicitudes
      * @param taskRequestWorkflowService Servicio de flujo de trabajo de solicitudes
-     * @param taskRequestMapper Mapper para convertir entre entidades y DTOs
+     * @param taskRequestHistoryService  Servicio de historial de solicitudes
+     * @param taskRequestMapper          Mapper para convertir entre entidades y
+     *                                   DTOs
+     * @param historyMapper              Mapper para convertir entre entidades y
+     *                                   DTOs de historial
      */
-    public TaskRequestController(CreateTaskRequestUseCase createTaskRequestUseCase,
-                                UpdateTaskRequestUseCase updateTaskRequestUseCase,
-                                TaskRequestWorkflowService taskRequestWorkflowService,
-                                TaskRequestMapper taskRequestMapper) {
+    public TaskRequestController(
+            final CreateTaskRequestUseCase createTaskRequestUseCase,
+            final UpdateTaskRequestUseCase updateTaskRequestUseCase,
+            final TaskRequestWorkflowService taskRequestWorkflowService,
+            final TaskRequestHistoryService taskRequestHistoryService,
+            final TaskRequestMapper taskRequestMapper,
+            final com.bitacora.application.taskrequest.mapper.TaskRequestHistoryMapper historyMapper) {
         this.createTaskRequestUseCase = createTaskRequestUseCase;
         this.updateTaskRequestUseCase = updateTaskRequestUseCase;
         this.taskRequestWorkflowService = taskRequestWorkflowService;
+        this.taskRequestHistoryService = taskRequestHistoryService;
         this.taskRequestMapper = taskRequestMapper;
+        this.historyMapper = historyMapper;
     }
 
     /**
      * Crea una nueva solicitud de tarea.
      *
-     * @param createDto DTO con los datos de la solicitud
+     * @param createDto   DTO con los datos de la solicitud
      * @param currentUser Usuario actual
      * @return La solicitud creada
      */
@@ -86,9 +101,9 @@ public class TaskRequestController {
     public ResponseEntity<TaskRequestDto> createTaskRequest(
             @Valid @RequestBody CreateTaskRequestDto createDto,
             @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
-        
+
         logger.info("Creando solicitud de tarea para el usuario: {}", currentUser.getId());
-        
+
         TaskRequest taskRequest;
         if (createDto.isSubmitImmediately()) {
             taskRequest = createTaskRequestUseCase.createAndSubmit(
@@ -98,8 +113,7 @@ public class TaskRequestController {
                     taskRequestMapper.toPriorityEnum(createDto.getPriority()),
                     createDto.getDueDate(),
                     createDto.getNotes(),
-                    currentUser.getId()
-            );
+                    currentUser.getId());
         } else {
             taskRequest = createTaskRequestUseCase.createDraft(
                     createDto.getTitle(),
@@ -108,18 +122,17 @@ public class TaskRequestController {
                     taskRequestMapper.toPriorityEnum(createDto.getPriority()),
                     createDto.getDueDate(),
                     createDto.getNotes(),
-                    currentUser.getId()
-            );
+                    currentUser.getId());
         }
-        
+
         return ResponseEntity.status(HttpStatus.CREATED).body(taskRequestMapper.toDto(taskRequest));
     }
 
     /**
      * Actualiza una solicitud de tarea existente.
      *
-     * @param id ID de la solicitud a actualizar
-     * @param updateDto DTO con los datos actualizados
+     * @param id          ID de la solicitud a actualizar
+     * @param updateDto   DTO con los datos actualizados
      * @param currentUser Usuario actual
      * @return La solicitud actualizada
      */
@@ -130,9 +143,9 @@ public class TaskRequestController {
             @PathVariable Long id,
             @Valid @RequestBody UpdateTaskRequestDto updateDto,
             @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
-        
+
         logger.info("Actualizando solicitud de tarea con ID: {} para el usuario: {}", id, currentUser.getId());
-        
+
         TaskRequest taskRequest = updateTaskRequestUseCase.update(
                 id,
                 updateDto.getTitle(),
@@ -141,13 +154,12 @@ public class TaskRequestController {
                 taskRequestMapper.toPriorityEnum(updateDto.getPriority()),
                 updateDto.getDueDate(),
                 updateDto.getNotes(),
-                currentUser.getId()
-        );
-        
+                currentUser.getId());
+
         if (updateDto.isSubmit()) {
             taskRequest = taskRequestWorkflowService.submit(id, currentUser.getId());
         }
-        
+
         return ResponseEntity.ok(taskRequestMapper.toDto(taskRequest));
     }
 
@@ -162,11 +174,15 @@ public class TaskRequestController {
     @Operation(summary = "Obtiene una solicitud de tarea", description = "Obtiene una solicitud de tarea por su ID")
     public ResponseEntity<TaskRequestDto> getTaskRequest(@PathVariable Long id) {
         logger.info("Obteniendo solicitud de tarea con ID: {}", id);
-        
-        return taskRequestWorkflowService.findById(id)
-                .map(taskRequestMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+
+        try {
+            TaskRequest taskRequest = taskRequestWorkflowService.findById(id);
+            TaskRequestDto taskRequestDto = taskRequestMapper.toDto(taskRequest);
+            return ResponseEntity.ok(taskRequestDto);
+        } catch (Exception e) {
+            logger.error("Error al obtener la solicitud de tarea con ID: {}", id, e);
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**
@@ -182,23 +198,23 @@ public class TaskRequestController {
     public ResponseEntity<TaskRequestPageDto> getAllTaskRequests(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        
+
         logger.info("Obteniendo todas las solicitudes de tarea, página: {}, tamaño: {}", page, size);
-        
+
         List<TaskRequest> taskRequests = taskRequestWorkflowService.findAll(page, size);
         long totalItems = taskRequestWorkflowService.count();
         int totalPages = (int) Math.ceil((double) totalItems / size);
-        
+
         TaskRequestPageDto pageDto = taskRequestMapper.toPageDto(taskRequests, totalItems, totalPages, page);
-        
+
         return ResponseEntity.ok(pageDto);
     }
 
     /**
      * Obtiene las solicitudes de tarea del usuario actual.
      *
-     * @param page Número de página (0-indexed)
-     * @param size Tamaño de la página
+     * @param page        Número de página (0-indexed)
+     * @param size        Tamaño de la página
      * @param currentUser Usuario actual
      * @return Lista paginada de solicitudes
      */
@@ -209,42 +225,73 @@ public class TaskRequestController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
-        
-        logger.info("Obteniendo solicitudes de tarea para el usuario: {}, página: {}, tamaño: {}", currentUser.getId(), page, size);
-        
+
+        logger.info("Obteniendo solicitudes de tarea para el usuario: {}, página: {}, tamaño: {}", currentUser.getId(),
+                page, size);
+
         List<TaskRequest> taskRequests = taskRequestWorkflowService.findByRequesterId(currentUser.getId(), page, size);
         long totalItems = taskRequestWorkflowService.countByRequesterId(currentUser.getId());
         int totalPages = (int) Math.ceil((double) totalItems / size);
-        
+
         TaskRequestPageDto pageDto = taskRequestMapper.toPageDto(taskRequests, totalItems, totalPages, page);
-        
+
         return ResponseEntity.ok(pageDto);
     }
 
     /**
      * Obtiene las solicitudes de tarea asignadas al usuario actual.
      *
-     * @param page Número de página (0-indexed)
-     * @param size Tamaño de la página
+     * @param page        Número de página (0-indexed)
+     * @param size        Tamaño de la página
      * @param currentUser Usuario actual
      * @return Lista paginada de solicitudes
      */
     @GetMapping("/assigned-to-me")
     @PreAuthorize("hasAnyRole('ASIGNADOR', 'ADMIN')")
-    @Operation(summary = "Obtiene las solicitudes de tarea asignadas al usuario actual", description = "Obtiene las solicitudes de tarea asignadas por el usuario actual con paginación")
+    @Operation(summary = "Obtiene las solicitudes de tarea asignadas por el usuario actual", description = "Obtiene las solicitudes de tarea asignadas por el usuario actual con paginación")
     public ResponseEntity<TaskRequestPageDto> getAssignedTaskRequests(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
-        
-        logger.info("Obteniendo solicitudes de tarea asignadas por el usuario: {}, página: {}, tamaño: {}", currentUser.getId(), page, size);
-        
+
+        logger.info("Obteniendo solicitudes de tarea asignadas por el usuario: {}, página: {}, tamaño: {}",
+                currentUser.getId(), page, size);
+
         List<TaskRequest> taskRequests = taskRequestWorkflowService.findByAssignerId(currentUser.getId(), page, size);
         long totalItems = taskRequestWorkflowService.countByAssignerId(currentUser.getId());
         int totalPages = (int) Math.ceil((double) totalItems / size);
-        
+
         TaskRequestPageDto pageDto = taskRequestMapper.toPageDto(taskRequests, totalItems, totalPages, page);
-        
+
+        return ResponseEntity.ok(pageDto);
+    }
+
+    /**
+     * Obtiene las solicitudes de tarea donde el usuario actual es el ejecutor.
+     *
+     * @param page        Número de página (0-indexed)
+     * @param size        Tamaño de la página
+     * @param currentUser Usuario actual
+     * @return Lista paginada de solicitudes
+     */
+    @GetMapping("/assigned-to-executor")
+    @PreAuthorize("hasAnyRole('EJECUTOR', 'ADMIN')")
+    @Operation(summary = "Obtiene las solicitudes de tarea asignadas al ejecutor actual", description = "Obtiene las solicitudes de tarea donde el usuario actual es el ejecutor con paginación")
+    public ResponseEntity<TaskRequestPageDto> getTasksAssignedToExecutor(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
+
+        logger.info("Obteniendo solicitudes de tarea asignadas al ejecutor: {}, página: {}, tamaño: {}",
+                currentUser.getId(), page, size);
+
+        // Implementar la búsqueda por executorId
+        List<TaskRequest> taskRequests = taskRequestWorkflowService.findByExecutorId(currentUser.getId(), page, size);
+        long totalItems = taskRequestWorkflowService.countByExecutorId(currentUser.getId());
+        int totalPages = (int) Math.ceil((double) totalItems / size);
+
+        TaskRequestPageDto pageDto = taskRequestMapper.toPageDto(taskRequests, totalItems, totalPages, page);
+
         return ResponseEntity.ok(pageDto);
     }
 
@@ -252,8 +299,8 @@ public class TaskRequestController {
      * Obtiene las solicitudes de tarea por estado.
      *
      * @param status Estado de las solicitudes
-     * @param page Número de página (0-indexed)
-     * @param size Tamaño de la página
+     * @param page   Número de página (0-indexed)
+     * @param size   Tamaño de la página
      * @return Lista paginada de solicitudes
      */
     @GetMapping("/by-status/{status}")
@@ -263,23 +310,23 @@ public class TaskRequestController {
             @PathVariable String status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        
+
         logger.info("Obteniendo solicitudes de tarea con estado: {}, página: {}, tamaño: {}", status, page, size);
-        
+
         TaskRequestStatus taskRequestStatus = taskRequestMapper.toStatusEnum(status);
         List<TaskRequest> taskRequests = taskRequestWorkflowService.findByStatus(taskRequestStatus, page, size);
         long totalItems = taskRequestWorkflowService.countByStatus(taskRequestStatus);
         int totalPages = (int) Math.ceil((double) totalItems / size);
-        
+
         TaskRequestPageDto pageDto = taskRequestMapper.toPageDto(taskRequests, totalItems, totalPages, page);
-        
+
         return ResponseEntity.ok(pageDto);
     }
 
     /**
      * Envía una solicitud de tarea.
      *
-     * @param id ID de la solicitud
+     * @param id          ID de la solicitud
      * @param currentUser Usuario actual
      * @return La solicitud actualizada
      */
@@ -289,18 +336,18 @@ public class TaskRequestController {
     public ResponseEntity<TaskRequestDto> submitTaskRequest(
             @PathVariable Long id,
             @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
-        
+
         logger.info("Enviando solicitud de tarea con ID: {} para el usuario: {}", id, currentUser.getId());
-        
+
         TaskRequest taskRequest = taskRequestWorkflowService.submit(id, currentUser.getId());
-        
+
         return ResponseEntity.ok(taskRequestMapper.toDto(taskRequest));
     }
 
     /**
      * Asigna una solicitud de tarea.
      *
-     * @param id ID de la solicitud
+     * @param id          ID de la solicitud
      * @param currentUser Usuario actual
      * @return La solicitud actualizada
      */
@@ -310,35 +357,89 @@ public class TaskRequestController {
     public ResponseEntity<TaskRequestDto> assignTaskRequest(
             @PathVariable Long id,
             @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
-        
+
         logger.info("Asignando solicitud de tarea con ID: {} para el usuario: {}", id, currentUser.getId());
-        
+
         TaskRequest taskRequest = taskRequestWorkflowService.assign(id, currentUser.getId());
-        
+
+        return ResponseEntity.ok(taskRequestMapper.toDto(taskRequest));
+    }
+
+    /**
+     * Asigna un ejecutor a una solicitud de tarea.
+     *
+     * @param id                ID de la solicitud
+     * @param assignExecutorDto DTO con los datos del ejecutor
+     * @param currentUser       Usuario actual
+     * @return La solicitud actualizada
+     */
+    @PostMapping("/{id}/assign-executor")
+    @PreAuthorize("hasAnyRole('ASIGNADOR', 'ADMIN')")
+    @Operation(summary = "Asigna un ejecutor a una solicitud de tarea", description = "Asigna un ejecutor a una solicitud de tarea en estado ASSIGNED")
+    public ResponseEntity<TaskRequestDto> assignExecutorToTaskRequest(
+            @PathVariable Long id,
+            @Valid @RequestBody com.bitacora.infrastructure.rest.dto.workflow.AssignExecutorDto assignExecutorDto,
+            @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
+
+        logger.info("Asignando ejecutor a solicitud de tarea con ID: {} por el usuario: {}", id, currentUser.getId());
+
+        TaskRequest taskRequest = taskRequestWorkflowService.assignExecutor(
+                id,
+                assignExecutorDto.getExecutorId(),
+                assignExecutorDto.getNotes());
+
+        return ResponseEntity.ok(taskRequestMapper.toDto(taskRequest));
+    }
+
+    /**
+     * Inicia una solicitud de tarea.
+     *
+     * @param id          ID de la solicitud
+     * @param currentUser Usuario actual
+     * @return La solicitud actualizada
+     */
+    @PostMapping("/{id}/start")
+    @PreAuthorize("hasAnyRole('EJECUTOR', 'ADMIN')")
+    @Operation(summary = "Inicia una solicitud de tarea", description = "Cambia el estado de una solicitud de tarea de ASSIGNED a IN_PROGRESS")
+    public ResponseEntity<TaskRequestDto> startTaskRequest(
+            @PathVariable Long id,
+            @Valid @RequestBody(required = false) StartTaskRequestDto startTaskRequestDto,
+            @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
+        logger.info("Iniciando solicitud de tarea con ID: {} por el usuario: {}", id, currentUser.getId());
+
+        // Obtener las notas si se proporcionan
+        String notes = (startTaskRequestDto != null) ? startTaskRequestDto.getNotes() : null;
+
+        // Iniciar la tarea con las notas (si se proporcionan)
+        TaskRequest taskRequest = taskRequestWorkflowService.start(id, currentUser.getId(), notes);
+
         return ResponseEntity.ok(taskRequestMapper.toDto(taskRequest));
     }
 
     /**
      * Completa una solicitud de tarea.
      *
-     * @param id ID de la solicitud
+     * @param id          ID de la solicitud
+     * @param currentUser Usuario actual
      * @return La solicitud actualizada
      */
     @PostMapping("/{id}/complete")
     @PreAuthorize("hasAnyRole('EJECUTOR', 'ADMIN')")
-    @Operation(summary = "Completa una solicitud de tarea", description = "Cambia el estado de una solicitud de tarea de ASSIGNED a COMPLETED")
-    public ResponseEntity<TaskRequestDto> completeTaskRequest(@PathVariable Long id) {
-        logger.info("Completando solicitud de tarea con ID: {}", id);
-        
-        TaskRequest taskRequest = taskRequestWorkflowService.complete(id);
-        
+    @Operation(summary = "Completa una solicitud de tarea", description = "Cambia el estado de una solicitud de tarea de ASSIGNED o IN_PROGRESS a COMPLETED")
+    public ResponseEntity<TaskRequestDto> completeTaskRequest(
+            @PathVariable Long id,
+            @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
+        logger.info("Completando solicitud de tarea con ID: {} por el usuario: {}", id, currentUser.getId());
+
+        TaskRequest taskRequest = taskRequestWorkflowService.complete(id, currentUser.getId());
+
         return ResponseEntity.ok(taskRequestMapper.toDto(taskRequest));
     }
 
     /**
      * Cancela una solicitud de tarea.
      *
-     * @param id ID de la solicitud
+     * @param id          ID de la solicitud
      * @param currentUser Usuario actual
      * @return La solicitud actualizada
      */
@@ -348,18 +449,18 @@ public class TaskRequestController {
     public ResponseEntity<TaskRequestDto> cancelTaskRequest(
             @PathVariable Long id,
             @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
-        
+
         logger.info("Cancelando solicitud de tarea con ID: {} para el usuario: {}", id, currentUser.getId());
-        
+
         TaskRequest taskRequest = taskRequestWorkflowService.cancel(id, currentUser.getId());
-        
+
         return ResponseEntity.ok(taskRequestMapper.toDto(taskRequest));
     }
 
     /**
      * Añade un comentario a una solicitud de tarea.
      *
-     * @param commentDto DTO con los datos del comentario
+     * @param commentDto  DTO con los datos del comentario
      * @param currentUser Usuario actual
      * @return La solicitud actualizada
      */
@@ -369,24 +470,24 @@ public class TaskRequestController {
     public ResponseEntity<TaskRequestDto> addComment(
             @Valid @RequestBody TaskRequestCommentCreateDto commentDto,
             @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
-        
-        logger.info("Añadiendo comentario a la solicitud de tarea con ID: {} para el usuario: {}", commentDto.getTaskRequestId(), currentUser.getId());
-        
+
+        logger.info("Añadiendo comentario a la solicitud de tarea con ID: {} para el usuario: {}",
+                commentDto.getTaskRequestId(), currentUser.getId());
+
         TaskRequestComment comment = taskRequestMapper.toCommentEntity(
                 commentDto.getTaskRequestId(),
                 currentUser.getId(),
-                commentDto.getContent()
-        );
-        
+                commentDto.getContent());
+
         TaskRequest taskRequest = taskRequestWorkflowService.addComment(commentDto.getTaskRequestId(), comment);
-        
+
         return ResponseEntity.ok(taskRequestMapper.toDto(taskRequest));
     }
 
     /**
      * Elimina una solicitud de tarea.
      *
-     * @param id ID de la solicitud
+     * @param id          ID de la solicitud
      * @param currentUser Usuario actual
      * @return Respuesta vacía
      */
@@ -396,11 +497,11 @@ public class TaskRequestController {
     public ResponseEntity<Void> deleteTaskRequest(
             @PathVariable Long id,
             @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
-        
+
         logger.info("Eliminando solicitud de tarea con ID: {} por el usuario: {}", id, currentUser.getId());
-        
+
         taskRequestWorkflowService.deleteById(id);
-        
+
         return ResponseEntity.noContent().build();
     }
 
@@ -414,15 +515,80 @@ public class TaskRequestController {
     @Operation(summary = "Obtiene estadísticas de solicitudes por estado", description = "Obtiene el número de solicitudes para cada estado")
     public ResponseEntity<Map<String, Long>> getStatsByStatus() {
         logger.info("Obteniendo estadísticas de solicitudes por estado");
-        
+
         Map<TaskRequestStatus, Long> stats = taskRequestWorkflowService.getStatsByStatus();
-        
+
         Map<String, Long> result = stats.entrySet().stream()
                 .collect(Collectors.toMap(
                         entry -> entry.getKey().name(),
-                        Map.Entry::getValue
-                ));
-        
+                        Map.Entry::getValue));
+
         return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Obtiene los comentarios de una solicitud de tarea con información de lectura.
+     *
+     * @param taskRequestId ID de la solicitud
+     * @param currentUser   Usuario actual
+     * @return Lista de comentarios con información de lectura
+     */
+    @GetMapping("/{taskRequestId}/comments-with-read-status")
+    @PreAuthorize("hasAnyRole('SOLICITANTE', 'ASIGNADOR', 'EJECUTOR', 'ADMIN')")
+    @Operation(summary = "Obtiene los comentarios de una solicitud con estado de lectura", description = "Obtiene los comentarios de una solicitud de tarea con información de quién los ha leído")
+    public ResponseEntity<List<TaskRequestCommentWithReadStatusDto>> getCommentsWithReadStatus(
+            @PathVariable Long taskRequestId,
+            @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
+
+        logger.info("Obteniendo comentarios con estado de lectura para la solicitud: {} y usuario: {}",
+                taskRequestId, currentUser.getId());
+
+        List<TaskRequestComment> comments = taskRequestWorkflowService.getCommentsByTaskRequestId(taskRequestId);
+        List<TaskRequestCommentWithReadStatusDto> commentDtos = taskRequestMapper
+                .toCommentWithReadStatusDtoList(comments, currentUser.getId());
+
+        return ResponseEntity.ok(commentDtos);
+    }
+
+    /**
+     * Marca un comentario como leído por el usuario actual.
+     *
+     * @param commentId   ID del comentario
+     * @param currentUser Usuario actual
+     * @return El comentario actualizado
+     */
+    @PostMapping("/comments/{commentId}/mark-as-read")
+    @PreAuthorize("hasAnyRole('SOLICITANTE', 'ASIGNADOR', 'EJECUTOR', 'ADMIN')")
+    @Operation(summary = "Marca un comentario como leído", description = "Marca un comentario como leído por el usuario actual")
+    public ResponseEntity<TaskRequestCommentWithReadStatusDto> markCommentAsRead(
+            @PathVariable Long commentId,
+            @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
+
+        logger.info("Marcando comentario con ID: {} como leído por el usuario: {}",
+                commentId, currentUser.getId());
+
+        TaskRequestComment comment = taskRequestWorkflowService.markCommentAsRead(commentId, currentUser.getId());
+        TaskRequestCommentWithReadStatusDto commentDto = taskRequestMapper.toDtoWithReadStatus(comment,
+                currentUser.getId());
+
+        return ResponseEntity.ok(commentDto);
+    }
+
+    /**
+     * Obtiene el historial de cambios de estado de una solicitud de tarea.
+     *
+     * @param taskRequestId ID de la solicitud
+     * @return Lista de registros de historial
+     */
+    @GetMapping("/{taskRequestId}/history")
+    @PreAuthorize("hasAnyRole('SOLICITANTE', 'ASIGNADOR', 'EJECUTOR', 'ADMIN')")
+    @Operation(summary = "Obtiene el historial de una solicitud", description = "Obtiene el historial de cambios de estado de una solicitud de tarea")
+    public ResponseEntity<List<TaskRequestHistoryDto>> getTaskRequestHistory(@PathVariable Long taskRequestId) {
+        logger.info("Obteniendo historial para la solicitud de tarea con ID: {}", taskRequestId);
+
+        List<TaskRequestHistoryDto> historyDtos = historyMapper.toDtoList(
+                taskRequestHistoryService.getHistoryByTaskRequestId(taskRequestId));
+
+        return ResponseEntity.ok(historyDtos);
     }
 }

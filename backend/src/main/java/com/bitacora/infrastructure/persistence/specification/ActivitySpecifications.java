@@ -109,6 +109,21 @@ public final class ActivitySpecifications {
     }
 
     /**
+     * Crea una especificación para filtrar actividades por ejecutor.
+     *
+     * @param executorId El ID del ejecutor
+     * @return Una especificación JPA
+     */
+    public static Specification<ActivityEntity> hasExecutor(final Long executorId) {
+        return (root, query, criteriaBuilder) -> {
+            if (executorId == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("executorId"), executorId);
+        };
+    }
+
+    /**
      * Combina múltiples especificaciones con AND.
      *
      * @param specs Las especificaciones a combinar

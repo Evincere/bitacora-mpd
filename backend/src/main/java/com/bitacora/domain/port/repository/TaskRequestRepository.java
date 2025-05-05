@@ -7,9 +7,12 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Interfaz que define las operaciones de repositorio para la entidad TaskRequest.
- * Siguiendo el patrón de puertos y adaptadores, esta interfaz actúa como un puerto
- * en la capa de dominio que será implementado por un adaptador en la capa de infraestructura.
+ * Interfaz que define las operaciones de repositorio para la entidad
+ * TaskRequest.
+ * Siguiendo el patrón de puertos y adaptadores, esta interfaz actúa como un
+ * puerto
+ * en la capa de dominio que será implementado por un adaptador en la capa de
+ * infraestructura.
  */
 public interface TaskRequestRepository {
 
@@ -49,8 +52,8 @@ public interface TaskRequestRepository {
      * Busca solicitudes por el ID del solicitante.
      *
      * @param requesterId ID del solicitante
-     * @param page Número de página (0-indexed)
-     * @param size Tamaño de la página
+     * @param page        Número de página (0-indexed)
+     * @param size        Tamaño de la página
      * @return Lista de solicitudes del solicitante
      */
     List<TaskRequest> findByRequesterId(Long requesterId, int page, int size);
@@ -67,8 +70,8 @@ public interface TaskRequestRepository {
      * Busca solicitudes por el ID del asignador.
      *
      * @param assignerId ID del asignador
-     * @param page Número de página (0-indexed)
-     * @param size Tamaño de la página
+     * @param page       Número de página (0-indexed)
+     * @param size       Tamaño de la página
      * @return Lista de solicitudes asignadas por el asignador
      */
     List<TaskRequest> findByAssignerId(Long assignerId, int page, int size);
@@ -85,8 +88,8 @@ public interface TaskRequestRepository {
      * Busca solicitudes por estado.
      *
      * @param status Estado de las solicitudes
-     * @param page Número de página (0-indexed)
-     * @param size Tamaño de la página
+     * @param page   Número de página (0-indexed)
+     * @param size   Tamaño de la página
      * @return Lista de solicitudes con el estado especificado
      */
     List<TaskRequest> findByStatus(TaskRequestStatus status, int page, int size);
@@ -105,4 +108,30 @@ public interface TaskRequestRepository {
      * @param id ID de la solicitud a eliminar
      */
     void deleteById(Long id);
+
+    /**
+     * Busca una solicitud que contenga un comentario con el ID especificado.
+     *
+     * @param commentId ID del comentario
+     * @return Un Optional que contiene la solicitud si existe, o vacío si no
+     */
+    Optional<TaskRequest> findByCommentId(Long commentId);
+
+    /**
+     * Busca solicitudes por el ID del ejecutor.
+     *
+     * @param executorId ID del ejecutor
+     * @param page       Número de página (0-indexed)
+     * @param size       Tamaño de la página
+     * @return Lista de solicitudes asignadas al ejecutor
+     */
+    List<TaskRequest> findByExecutorId(Long executorId, int page, int size);
+
+    /**
+     * Cuenta el número de solicitudes asignadas a un ejecutor.
+     *
+     * @param executorId ID del ejecutor
+     * @return El número de solicitudes asignadas al ejecutor
+     */
+    long countByExecutorId(Long executorId);
 }

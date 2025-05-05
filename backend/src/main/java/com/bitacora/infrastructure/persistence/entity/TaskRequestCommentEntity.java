@@ -1,6 +1,8 @@
 package com.bitacora.infrastructure.persistence.entity;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -13,10 +15,13 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
- * Entidad JPA para representar un comentario de solicitud de tarea en la base de datos.
+ * Entidad JPA para representar un comentario de solicitud de tarea en la base
+ * de datos.
  */
 @Entity
 @Table(name = "task_request_comments")
@@ -40,6 +45,16 @@ public class TaskRequestCommentEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
 
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "task_request_comment_read_by", joinColumns = @JoinColumn(name = "comment_id"))
+    @Column(name = "user_id")
+    private Set<Long> readBy = new HashSet<>();
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "task_request_comment_mentions", joinColumns = @JoinColumn(name = "comment_id"))
+    @Column(name = "user_id")
+    private Set<Long> mentions = new HashSet<>();
+
     /**
      * Constructor por defecto requerido por JPA.
      */
@@ -55,6 +70,12 @@ public class TaskRequestCommentEntity {
         this.userId = builder.userId;
         this.content = builder.content;
         this.createdAt = builder.createdAt != null ? builder.createdAt : LocalDateTime.now();
+        if (builder.readBy != null) {
+            this.readBy = builder.readBy;
+        }
+        if (builder.mentions != null) {
+            this.mentions = builder.mentions;
+        }
     }
 
     // Getters y setters
@@ -99,10 +120,60 @@ public class TaskRequestCommentEntity {
         this.createdAt = createdAt;
     }
 
+    public Set<Long> getReadBy() {
+        return readBy;
+    }
+
+    public void setReadBy(Set<Long> readBy) {
+        this.readBy = readBy;
+    }
+
+    public Set<Long> getMentions() {
+        return mentions;
+    }
+
+    public void setMentions(Set<Long> mentions) {
+        this.mentions = mentions;
+    }
+
+    /**
+     * Añade una mención a un usuario en el comentario.
+     *
+     * @param userId ID del usuario mencionado
+     * @return true si el usuario se añadió a la lista de menciones, false si ya
+     *         estaba en la lista
+     */
+    public boolean addMention(Long userId) {
+        return this.mentions.add(userId);
+    }
+
+    /**
+     * Marca el comentario como leído por un usuario.
+     *
+     * @param userId ID del usuario que ha leído el comentario
+     * @return true si el usuario se añadió a la lista de lectores, false si ya
+     *         estaba en la lista
+     */
+    public boolean markAsReadBy(Long userId) {
+        return this.readBy.add(userId);
+    }
+
+    /**
+     * Verifica si un usuario ha leído el comentario.
+     *
+     * @param userId ID del usuario
+     * @return true si el usuario ha leído el comentario, false en caso contrario
+     */
+    public boolean isReadBy(Long userId) {
+        return this.readBy.contains(userId);
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         TaskRequestCommentEntity that = (TaskRequestCommentEntity) o;
         return Objects.equals(id, that.id);
     }
@@ -131,6 +202,8 @@ public class TaskRequestCommentEntity {
         private Long userId;
         private String content;
         private LocalDateTime createdAt;
+        private Set<Long> readBy;
+        private Set<Long> mentions;
 
         private Builder() {
         }
@@ -161,6 +234,16 @@ public class TaskRequestCommentEntity {
 
         public Builder createdAt(LocalDateTime createdAt) {
             this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder readBy(Set<Long> readBy) {
+            this.readBy = readBy;
+            return this;
+        }
+
+        public Builder mentions(Set<Long> mentions) {
+            this.mentions = mentions;
             return this;
         }
 

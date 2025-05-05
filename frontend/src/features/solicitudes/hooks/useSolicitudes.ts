@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import solicitudesService, { SolicitudRequest } from '../services/solicitudesService';
+import solicitudesService, { SolicitudRequest, TaskRequestPageDto } from '../services/solicitudesService';
 
 /**
  * Hook personalizado para gestionar solicitudes
@@ -16,7 +16,7 @@ export const useSolicitudes = () => {
     isLoading: isLoadingMySolicitudes,
     error: mySolicitudesError,
     refetch: refetchMySolicitudes
-  } = useQuery({
+  } = useQuery<TaskRequestPageDto>({
     queryKey: ['mySolicitudes'],
     queryFn: () => solicitudesService.getMySolicitudes(),
     staleTime: 0, // Siempre considerar los datos como obsoletos para forzar la recarga
@@ -48,9 +48,17 @@ export const useSolicitudes = () => {
 
   // Crear solicitud
   const createSolicitudMutation = useMutation({
-    mutationFn: async ({ solicitud, files }: { solicitud: SolicitudRequest, files: File[] }) => {
-      // Paso 1: Crear la solicitud
-      const createdSolicitud = await solicitudesService.createSolicitud(solicitud);
+    mutationFn: async ({
+      solicitud,
+      files,
+      submitImmediately = true
+    }: {
+      solicitud: SolicitudRequest,
+      files: File[],
+      submitImmediately?: boolean
+    }) => {
+      // Paso 1: Crear la solicitud (como borrador o enviada)
+      const createdSolicitud = await solicitudesService.createSolicitud(solicitud, submitImmediately);
 
       // Paso 2: Si hay archivos, subirlos
       if (files.length > 0) {

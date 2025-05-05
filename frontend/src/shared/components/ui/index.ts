@@ -1,6 +1,10 @@
 export { default as StatusBadge } from './StatusBadge';
 export { default as TypeBadge } from './TypeBadge';
+export { default as CategoryBadge } from './CategoryBadge';
+export { default as PriorityBadge } from './PriorityBadge';
 export { default as PageTransition } from './PageTransition';
 export { default as AnimatedRoutes } from './AnimatedRoutes';
 export { default as NotFound } from './NotFound';
+export { default as ErrorMessage } from './ErrorMessage';
 export { ToastProvider, useToastContext } from './Toast';
+export { default as Tooltip } from './Tooltip';

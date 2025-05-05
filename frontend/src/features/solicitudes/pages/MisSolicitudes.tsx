@@ -164,19 +164,24 @@ const SearchInput = styled.div`
   input {
     width: 100%;
     padding: 10px 12px 10px 36px;
-    border-radius: 4px;
+    border-radius: 6px;
     border: 2px solid ${({ theme }) => theme.border};
-    background-color: ${({ theme }) => theme.backgroundPaper};
+    background-color: ${({ theme }) => theme.backgroundSecondary};
     color: ${({ theme }) => theme.text};
     font-size: 14px;
     font-weight: 500;
     transition: all 0.2s;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
     &:focus {
       border-color: ${({ theme }) => theme.primary};
       outline: none;
-      box-shadow: 0 0 0 2px ${({ theme }) => `${theme.primary}30`};
+      box-shadow: 0 0 0 2px ${({ theme }) => `${theme.primary}40`};
+    }
+
+    &::placeholder {
+      color: ${({ theme }) => theme.textSecondary};
+      opacity: 0.9;
     }
   }
 
@@ -186,25 +191,32 @@ const SearchInput = styled.div`
     top: 50%;
     transform: translateY(-50%);
     color: ${({ theme }) => theme.primary};
+    opacity: 0.9;
   }
 `;
 
 const FilterSelect = styled.select`
   padding: 10px 12px;
-  border-radius: 4px;
+  border-radius: 6px;
   border: 2px solid ${({ theme }) => theme.border};
-  background-color: ${({ theme }) => theme.backgroundPaper};
+  background-color: ${({ theme }) => theme.backgroundSecondary};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
   font-weight: 500;
   transition: all 0.2s;
   min-width: 150px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 30px;
 
   &:focus {
     border-color: ${({ theme }) => theme.primary};
     outline: none;
-    box-shadow: 0 0 0 2px ${({ theme }) => `${theme.primary}30`};
+    box-shadow: 0 0 0 2px ${({ theme }) => `${theme.primary}40`};
   }
 `;
 
@@ -575,22 +587,22 @@ const MisSolicitudes: React.FC = () => {
   useEffect(() => {
     console.log('MisSolicitudes: Datos recibidos:', mySolicitudes);
 
-    if (mySolicitudes && mySolicitudes.activities) {
-      console.log('MisSolicitudes: Actividades encontradas:', mySolicitudes.activities.length);
+    if (mySolicitudes && mySolicitudes.taskRequests) {
+      console.log('MisSolicitudes: Solicitudes encontradas:', mySolicitudes.taskRequests.length);
 
-      // Mapear las actividades al formato esperado por el componente
-      const mappedSolicitudes = mySolicitudes.activities.map((activity: Activity) => {
-        console.log('MisSolicitudes: Procesando actividad:', activity);
+      // Mapear las solicitudes al formato esperado por el componente
+      const mappedSolicitudes = mySolicitudes.taskRequests.map((taskRequest) => {
+        console.log('MisSolicitudes: Procesando solicitud:', taskRequest);
 
         return {
-          id: activity.id,
-          titulo: activity.description,
-          descripcion: activity.description,
-          categoria: activity.type,
-          prioridad: activity.priority || 'MEDIUM',
-          fechaCreacion: activity.requestDate || activity.createdAt,
-          fechaLimite: activity.dueDate,
-          estado: activity.status,
+          id: taskRequest.id,
+          titulo: taskRequest.title,
+          descripcion: taskRequest.description,
+          categoria: taskRequest.category?.name || '',
+          prioridad: taskRequest.priority || 'MEDIUM',
+          fechaCreacion: taskRequest.requestDate,
+          fechaLimite: taskRequest.dueDate,
+          estado: taskRequest.status,
           asignador: null,
           ejecutor: null
         };
@@ -599,7 +611,7 @@ const MisSolicitudes: React.FC = () => {
       console.log('MisSolicitudes: Solicitudes mapeadas:', mappedSolicitudes);
       setSolicitudes(mappedSolicitudes);
     } else {
-      console.warn('MisSolicitudes: No se encontraron actividades en la respuesta');
+      console.warn('MisSolicitudes: No se encontraron solicitudes en la respuesta');
     }
   }, [mySolicitudes]);
 

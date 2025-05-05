@@ -1,7 +1,9 @@
 package com.bitacora.infrastructure.rest.error;
 
+import com.bitacora.domain.exception.CommentException;
 import com.bitacora.domain.exception.DomainException;
 import com.bitacora.domain.exception.EntityNotFoundException;
+import com.bitacora.domain.exception.TaskRequestException;
 import com.bitacora.infrastructure.exception.InvalidTokenException;
 import com.bitacora.infrastructure.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -53,6 +55,76 @@ public class GlobalExceptionHandler {
                 status,
                 ex.getMessage(),
                 request.getRequestURI());
+
+        return new ResponseEntity<>(apiError, status);
+    }
+
+    /**
+     * Maneja excepciones de tipo CommentException.
+     *
+     * @param ex      La excepción
+     * @param request La solicitud HTTP
+     * @return Una respuesta de error
+     */
+    @ExceptionHandler(CommentException.class)
+    public ResponseEntity<ApiError> handleCommentException(CommentException ex, HttpServletRequest request) {
+        log.error("Error en operación de comentario: {}", ex.getMessage(), ex);
+
+        HttpStatus status;
+        switch (ex.getErrorCode()) {
+            case COMMENT_NOT_FOUND:
+                status = HttpStatus.NOT_FOUND;
+                break;
+            case PERMISSION_DENIED:
+                status = HttpStatus.FORBIDDEN;
+                break;
+            case INVALID_CONTENT:
+                status = HttpStatus.BAD_REQUEST;
+                break;
+            default:
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        ApiError apiError = ApiError.of(
+                status,
+                ex.getMessage(),
+                request.getRequestURI());
+        apiError.addDetail("Error code: " + ex.getErrorCode().toString());
+
+        return new ResponseEntity<>(apiError, status);
+    }
+
+    /**
+     * Maneja excepciones de tipo TaskRequestException.
+     *
+     * @param ex      La excepción
+     * @param request La solicitud HTTP
+     * @return Una respuesta de error
+     */
+    @ExceptionHandler(TaskRequestException.class)
+    public ResponseEntity<ApiError> handleTaskRequestException(TaskRequestException ex, HttpServletRequest request) {
+        log.error("Error en operación de solicitud de tarea: {}", ex.getMessage(), ex);
+
+        HttpStatus status;
+        switch (ex.getErrorCode()) {
+            case TASK_REQUEST_NOT_FOUND:
+                status = HttpStatus.NOT_FOUND;
+                break;
+            case PERMISSION_DENIED:
+                status = HttpStatus.FORBIDDEN;
+                break;
+            case INVALID_STATE_TRANSITION:
+                status = HttpStatus.BAD_REQUEST;
+                break;
+            default:
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        ApiError apiError = ApiError.of(
+                status,
+                ex.getMessage(),
+                request.getRequestURI());
+        apiError.addDetail("Error code: " + ex.getErrorCode().toString());
 
         return new ResponseEntity<>(apiError, status);
     }
@@ -170,8 +242,8 @@ public class GlobalExceptionHandler {
                 "El parámetro '%s' debería ser de tipo '%s'",
                 ex.getName(),
                 Optional.ofNullable(ex.getRequiredType())
-                    .map(Class::getSimpleName)
-                    .orElse("desconocido"));
+                        .map(Class::getSimpleName)
+                        .orElse("desconocido"));
 
         ApiError apiError = ApiError.of(
                 HttpStatus.BAD_REQUEST,

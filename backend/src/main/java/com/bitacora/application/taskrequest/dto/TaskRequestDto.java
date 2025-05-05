@@ -16,22 +16,24 @@ public class TaskRequestDto {
     private String description;
     private TaskRequestCategoryDto category;
     private String priority;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dueDate;
-    
+
     private String status;
     private Long requesterId;
     private String requesterName;
     private Long assignerId;
     private String assignerName;
-    
+    private Long executorId;
+    private String executorName;
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime requestDate;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime assignmentDate;
-    
+
     private String notes;
     private List<TaskRequestAttachmentDto> attachments;
     private List<TaskRequestCommentDto> comments;
@@ -53,6 +55,8 @@ public class TaskRequestDto {
         this.requesterName = builder.requesterName;
         this.assignerId = builder.assignerId;
         this.assignerName = builder.assignerName;
+        this.executorId = builder.executorId;
+        this.executorName = builder.executorName;
         this.requestDate = builder.requestDate;
         this.assignmentDate = builder.assignmentDate;
         this.notes = builder.notes;
@@ -105,6 +109,14 @@ public class TaskRequestDto {
         return assignerName;
     }
 
+    public Long getExecutorId() {
+        return executorId;
+    }
+
+    public String getExecutorName() {
+        return executorName;
+    }
+
     public LocalDateTime getRequestDate() {
         return requestDate;
     }
@@ -142,6 +154,8 @@ public class TaskRequestDto {
         private String requesterName;
         private Long assignerId;
         private String assignerName;
+        private Long executorId;
+        private String executorName;
         private LocalDateTime requestDate;
         private LocalDateTime assignmentDate;
         private String notes;
@@ -203,6 +217,16 @@ public class TaskRequestDto {
 
         public Builder assignerName(String assignerName) {
             this.assignerName = assignerName;
+            return this;
+        }
+
+        public Builder executorId(Long executorId) {
+            this.executorId = executorId;
+            return this;
+        }
+
+        public Builder executorName(String executorName) {
+            this.executorName = executorName;
             return this;
         }
 

@@ -333,6 +333,33 @@
 
 ## Sprint 9: Mejoras de Rendimiento y Experiencia de Usuario
 
+### 0. Mejoras en el Sistema de Comentarios (3 días)
+- [x] Implementar menciones a usuarios con @ en comentarios
+  - [x] Crear endpoint para buscar usuarios por nombre o username
+  - [x] Modificar el modelo de comentarios para incluir menciones
+  - [x] Implementar detección y procesamiento de menciones en el backend
+  - [x] Crear componente UserMentionSuggestions para mostrar sugerencias al escribir @
+  - [x] Implementar servicio userSearchService para buscar usuarios
+  - [x] Mejorar el componente de entrada de comentarios para detectar y procesar menciones
+  - [x] Implementar visualización de menciones con resaltado en los comentarios
+  - [x] Añadir botón específico para mencionar usuarios
+  - [x] Crear tabla task_request_comment_mentions para almacenar menciones en comentarios
+- [x] Implementar notificaciones para usuarios mencionados
+  - [x] Crear modelo de notificación para menciones
+  - [x] Implementar servicio de notificaciones para menciones
+  - [x] Enviar notificaciones en tiempo real a usuarios mencionados
+- [x] Mejorar la visualización de menciones
+  - [x] Implementar avatares de usuario en las menciones
+  - [x] Mejorar el estilo visual de las menciones
+  - [x] Añadir tooltips con información del usuario
+- [x] Implementar mención a todos los usuarios con @all
+  - [x] Añadir opción @all en las sugerencias
+  - [x] Implementar lógica para notificar a todos los participantes
+- [x] Implementar sistema de permisos para menciones
+  - [x] Crear servicio de permisos para controlar quién puede mencionar a quién
+  - [x] Filtrar resultados de búsqueda según permisos
+  - [x] Implementar reglas basadas en roles para menciones
+
 ### 1. Optimización de Rendimiento (3 días)
 
 #### 1.1 Implementar virtualización para listas grandes (1 día)
@@ -397,6 +424,9 @@
   - [x] Desarrollar herramienta de asignación con arrastrar y soltar
   - [x] Añadir panel de métricas de asignación y rendimiento
   - [x] Implementar sistema de priorización visual de tareas
+  - [x] Mejorar la interfaz de asignación con scroll vertical para listas largas de ejecutores
+  - [x] Mejorar la consistencia visual con fondos oscuros para elementos informativos
+  - [x] Optimizar el contraste en los selectores de ejecutores
 - [x] Diseñar e implementar interfaz para EJECUTORES
   - [x] Crear vista de tareas asignadas con filtros por prioridad y fecha límite
   - [x] Implementar panel de progreso de tareas actuales
@@ -785,18 +815,23 @@ Solución implementada:
 ### 3. Nuevas Funcionalidades (1 semana)
 
 #### 3.1 Sistema de Comentarios en Actividades (2 días)
-- [ ] Implementar modelo de datos para comentarios
-  - [ ] Crear entidad Comment y relaciones necesarias
-  - [ ] Implementar repositorio y servicios para comentarios
-  - [ ] Desarrollar endpoints REST para gestión de comentarios
-- [ ] Desarrollar interfaz de usuario para comentarios
-  - [ ] Crear componente de lista de comentarios
-  - [ ] Implementar formulario para añadir comentarios
-  - [ ] Añadir funcionalidad de edición y eliminación
-- [ ] Implementar menciones a usuarios
-  - [ ] Desarrollar selector de usuarios con @
-  - [ ] Implementar resaltado de menciones
-  - [ ] Configurar notificaciones para usuarios mencionados
+- [x] Implementar modelo de datos para comentarios
+  - [x] Crear entidad Comment y relaciones necesarias
+  - [x] Implementar repositorio y servicios para comentarios
+  - [x] Desarrollar endpoints REST para gestión de comentarios
+- [x] Desarrollar interfaz de usuario para comentarios
+  - [x] Crear componente de lista de comentarios
+  - [x] Implementar formulario para añadir comentarios
+  - [x] Añadir funcionalidad de edición y eliminación
+- [x] Implementar menciones a usuarios
+  - [x] Desarrollar selector de usuarios con @
+  - [x] Implementar resaltado de menciones
+  - [x] Configurar notificaciones para usuarios mencionados
+- [x] Implementar sistema de comentarios para asignadores
+  - [x] Crear componente CommentSection reutilizable
+  - [x] Implementar servicio commentService para interactuar con la API
+  - [x] Crear hook useComments para gestionar el estado de los comentarios
+  - [x] Implementar página DetalleTarea para asignadores
 
 #### 3.2 Sistema de Etiquetas y Categorización (2 días)
 - [ ] Implementar modelo de datos para etiquetas
@@ -906,6 +941,148 @@ Este sprint se enfocará en refactorizar la arquitectura del frontend para resol
 - La aplicación funciona sin errores
 - La documentación está actualizada
 
+## Sprint 14: Mejoras de Robustez y Experiencia de Usuario (2 semanas)
+
+### Descripción del Sprint
+Este sprint se enfocará en mejorar la robustez del sistema, optimizar el manejo de errores, mejorar el rendimiento y la experiencia de usuario, basado en el análisis detallado del sistema actual.
+
+### Objetivos
+- Implementar un manejo de errores más robusto
+- Optimizar el rendimiento del sistema
+- Mejorar la seguridad
+- Mejorar la experiencia de usuario
+- Implementar pruebas automatizadas
+- Mejorar la arquitectura y mantenibilidad
+
+### 0. Correcciones de Funcionalidad (1 día)
+- [x] Implementar endpoint para que los ejecutores puedan ver sus tareas asignadas
+  - [x] Crear endpoint `/api/task-requests/assigned-to-executor` en el backend
+  - [x] Implementar métodos en el servicio y repositorio para buscar por executorId
+  - [x] Actualizar el frontend para mostrar las tareas asignadas a un ejecutor
+  - [x] Integrar con el sistema de tareas existente
+
+### 1. Manejo de Errores y Resiliencia (3 días)
+
+#### 1.1 Implementar manejo de excepciones robusto en el backend (1 día)
+- [ ] Crear clases de excepción específicas para diferentes tipos de errores
+- [ ] Implementar un manejador global de excepciones con mensajes detallados
+- [ ] Añadir logging estructurado para facilitar el diagnóstico de problemas
+- [ ] Implementar respuestas de error estandarizadas con códigos y mensajes claros
+
+#### 1.2 Mejorar el manejo de errores en el frontend (1 día)
+- [ ] Implementar interceptores para manejar diferentes tipos de errores HTTP
+- [ ] Crear componentes de error específicos para diferentes situaciones
+- [ ] Mejorar los mensajes de error para que sean más informativos y útiles
+- [ ] Implementar fallbacks para componentes que fallan
+
+#### 1.3 Implementar política de reintentos para peticiones críticas (1 día)
+- [ ] Crear un sistema de reintentos con backoff exponencial
+- [ ] Implementar almacenamiento temporal de operaciones fallidas
+- [ ] Añadir sincronización cuando se recupera la conexión
+- [ ] Implementar notificaciones para operaciones en segundo plano
+
+### 2. Rendimiento y Optimización (3 días)
+
+#### 2.1 Implementar caché en el frontend (1 día)
+- [ ] Configurar React Query para optimizar la caché de datos
+- [ ] Implementar estrategias de staleTime y cacheTime específicas por recurso
+- [ ] Añadir prefetching para mejorar la experiencia de navegación
+- [ ] Implementar caché en localStorage para datos que cambian con poca frecuencia
+
+#### 2.2 Optimizar consultas en el backend (1 día)
+- [ ] Revisar y optimizar consultas SQL con explicación de planes
+- [ ] Implementar proyecciones específicas para cada caso de uso
+- [ ] Añadir índices para mejorar el rendimiento de consultas frecuentes
+- [ ] Implementar caché de segundo nivel en Hibernate
+
+#### 2.3 Implementar paginación consistente (1 día)
+- [ ] Estandarizar la paginación en todos los endpoints
+- [ ] Implementar paginación con cursor para grandes conjuntos de datos
+- [ ] Optimizar la carga de datos relacionados con estrategias de fetch
+- [ ] Añadir soporte para ordenamiento dinámico
+
+### 3. Seguridad (2 días)
+
+#### 3.1 Revisar y consolidar el sistema de permisos (1 día)
+- [ ] Auditar los permisos actuales y su asignación
+- [ ] Crear script para asegurar que todos los usuarios tengan los permisos correctos
+- [ ] Implementar validación de permisos en el cliente para mejorar UX
+- [ ] Documentar la matriz de permisos y roles
+
+#### 3.2 Mejorar la seguridad general (1 día)
+- [ ] Implementar sanitización de logs para datos sensibles
+- [ ] Mejorar la validación de datos de entrada en todos los endpoints
+- [ ] Implementar protección contra ataques comunes (XSS, CSRF)
+- [ ] Revisar y actualizar las dependencias con vulnerabilidades
+
+### 4. Experiencia de Usuario (3 días)
+
+#### 4.1 Mejorar los mensajes de error (1 día)
+- [ ] Crear un sistema centralizado de mensajes de error amigables
+- [ ] Implementar diferentes niveles de detalle según el contexto
+- [ ] Añadir sugerencias de solución para errores comunes
+- [ ] Mejorar la accesibilidad de los mensajes de error
+
+#### 4.2 Implementar indicadores de carga más detallados (1 día)
+- [ ] Crear componentes de carga específicos para diferentes operaciones
+- [ ] Implementar indicadores de progreso para operaciones largas
+- [ ] Añadir animaciones suaves para mejorar la percepción de velocidad
+- [ ] Implementar carga optimista para operaciones comunes
+
+#### 4.3 Estandarizar la presentación de datos (1 día)
+- [ ] Crear componentes reutilizables para mostrar estados, prioridades, etc.
+- [ ] Implementar un sistema de iconos consistente
+- [ ] Estandarizar los formatos de fecha y hora en toda la aplicación
+- [ ] Mejorar el contraste y legibilidad de las etiquetas (pills)
+
+### 5. Pruebas Automatizadas (3 días)
+
+#### 5.1 Implementar pruebas unitarias (1 día)
+- [ ] Configurar Jest y React Testing Library
+- [ ] Crear pruebas para componentes críticos
+- [ ] Implementar pruebas para hooks personalizados
+- [ ] Añadir pruebas para funciones de utilidad
+
+#### 5.2 Implementar pruebas de integración (1 día)
+- [ ] Identificar flujos críticos para probar
+- [ ] Crear pruebas para el flujo de autenticación
+- [ ] Implementar pruebas para el flujo de gestión de actividades
+- [ ] Añadir pruebas para el flujo de filtrado y búsqueda
+
+#### 5.3 Configurar CI/CD para pruebas (1 día)
+- [ ] Configurar GitHub Actions para ejecutar pruebas automáticamente
+- [ ] Implementar informes de cobertura
+- [ ] Añadir pruebas de accesibilidad
+- [ ] Configurar análisis estático de código
+
+### 6. Arquitectura y Mantenibilidad (2 días)
+
+#### 6.1 Extraer lógica común a servicios compartidos (1 día)
+- [ ] Identificar código duplicado en controladores y servicios
+- [ ] Crear servicios base para operaciones comunes
+- [ ] Implementar patrones de diseño para mejorar la estructura
+- [ ] Refactorizar para seguir principios SOLID
+
+#### 6.2 Estandarizar el manejo de enumeraciones (0.5 días)
+- [ ] Crear convertidores para todas las enumeraciones
+- [ ] Implementar serialización/deserialización consistente
+- [ ] Añadir validación para valores de enumeración
+- [ ] Documentar el uso correcto de enumeraciones
+
+#### 6.3 Mejorar la documentación (0.5 días)
+- [ ] Actualizar la documentación de la API con OpenAPI
+- [ ] Añadir comentarios JavaDoc/JSDoc a clases y métodos importantes
+- [ ] Crear guías de desarrollo para patrones comunes
+- [ ] Documentar decisiones de arquitectura (ADRs)
+
+### Criterios de Aceptación
+- Todos los errores son manejados adecuadamente y muestran mensajes útiles
+- El sistema responde rápidamente incluso con grandes volúmenes de datos
+- Todos los usuarios tienen los permisos correctos según su rol
+- La interfaz de usuario es consistente y proporciona feedback claro
+- Las pruebas automatizadas cubren los flujos críticos
+- El código sigue principios SOLID y patrones de diseño adecuados
+
 ## Backlog Futuro
 
 ### Nuevas Características
@@ -923,7 +1100,76 @@ Este sprint se enfocará en refactorizar la arquitectura del frontend para resol
 - [ ] Mejoras en UX/UI
 - [ ] Optimizaciones de rendimiento adicionales
 
-## Sprint 13: Unificación de Estilos y Corrección de Errores TypeScript (2 semanas)
+## Sprint 13: Mejoras en el Sistema de Comentarios y Seguimiento de Solicitudes (2 semanas)
+
+### Descripción del Sprint
+Este sprint se enfocará en mejorar el sistema de comentarios para las solicitudes, implementar la persistencia de comentarios y mejorar la experiencia de usuario en el seguimiento de solicitudes.
+
+### Objetivos
+- Implementar persistencia de comentarios en solicitudes
+- Mejorar la interfaz de usuario para comentarios
+- Implementar carga de historial real desde el backend
+- Mejorar la gestión de errores en comentarios
+
+### Fase 1: Persistencia de Comentarios (3 días)
+- [x] 1.1 Implementar endpoints en el backend para comentarios
+  - [x] Crear endpoint para agregar comentarios a una solicitud
+  - [x] Crear endpoint para obtener comentarios de una solicitud
+- [x] 1.2 Actualizar el servicio de solicitudes en el frontend
+  - [x] Implementar método para agregar comentarios
+  - [x] Implementar método para obtener comentarios
+- [x] 1.3 Actualizar el componente SeguimientoSolicitud
+  - [x] Implementar carga de comentarios reales
+  - [x] Implementar envío de comentarios al backend
+  - [x] Mostrar indicadores de carga para comentarios
+
+### Fase 2: Mejoras en la Interfaz de Usuario (2 días)
+- [x] 2.1 Mejorar la visualización de comentarios
+  - [x] Implementar agrupación de comentarios por fecha
+  - [x] Mejorar el diseño de los avatares de usuario
+  - [x] Implementar indicadores de lectura para comentarios
+- [x] 2.2 Implementar funcionalidades adicionales
+  - [x] Agregar opción para editar comentarios propios
+  - [x] Agregar opción para eliminar comentarios propios
+  - [x] Implementar menciones a usuarios con @
+
+### Fase 3: Implementación de Historial Real (3 días) ✅
+- [x] 3.1 Implementar endpoints en el backend para historial
+  - [x] Crear endpoint para obtener historial de una solicitud
+  - [x] Implementar registro automático de cambios de estado
+- [x] 3.2 Actualizar el servicio de solicitudes en el frontend
+  - [x] Implementar método para obtener historial
+- [x] 3.3 Actualizar el componente SeguimientoSolicitud
+  - [x] Implementar carga de historial real
+  - [x] Mostrar indicadores de carga para historial
+
+### Fase 4: Mejoras en la Gestión de Errores (2 días) ✅
+- [x] 4.1 Implementar manejo de errores específicos
+  - [x] Crear tipos de error específicos para comentarios
+  - [x] Implementar mensajes de error personalizados
+- [x] 4.2 Implementar reintentos automáticos
+  - [x] Implementar reintentos para envío de comentarios
+  - [x] Implementar almacenamiento temporal de comentarios no enviados
+- [x] 4.3 Mejorar la experiencia de usuario en caso de errores
+  - [x] Mostrar mensajes de error amigables
+  - [x] Implementar opciones para reintentar acciones fallidas
+
+### Fase 5: Pruebas y Documentación (2 días)
+- [ ] 5.1 Implementar pruebas para el sistema de comentarios
+  - [ ] Crear pruebas unitarias para el servicio de comentarios
+  - [ ] Crear pruebas de integración para los endpoints
+- [ ] 5.2 Actualizar la documentación
+  - [ ] Documentar el sistema de comentarios en el README
+  - [ ] Actualizar el CHANGELOG con las mejoras implementadas
+
+### Criterios de aceptación
+- Los comentarios se persisten correctamente en la base de datos
+- Los usuarios pueden ver y agregar comentarios en tiempo real
+- El historial de la solicitud se carga desde el backend
+- Los errores se manejan de forma adecuada y amigable para el usuario
+- La documentación está actualizada
+
+## Sprint 14: Unificación de Estilos y Corrección de Errores TypeScript (2 semanas)
 
 ### Descripción del Sprint
 Este sprint se enfocará en unificar los archivos de estilos duplicados, corregir errores de TypeScript y mejorar la estructura general del proyecto para facilitar el mantenimiento y desarrollo futuro.

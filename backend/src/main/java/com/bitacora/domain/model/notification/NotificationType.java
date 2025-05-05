@@ -47,5 +47,10 @@ public enum NotificationType {
     /**
      * Notificación de colaboración en tiempo real.
      */
-    COLLABORATION
+    COLLABORATION,
+
+    /**
+     * Notificación de mención en comentario.
+     */
+    MENTION
 }

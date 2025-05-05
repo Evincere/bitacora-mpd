@@ -77,12 +77,32 @@ const tareasService = {
   /**
    * Inicia una tarea asignada
    * @param id ID de la tarea
+   * @param notes Notas opcionales para el inicio de la tarea
    * @returns Tarea actualizada
    */
-  async startTask(id: number): Promise<Activity> {
+  async startTask(id: number, notes?: string): Promise<Activity> {
     try {
-      const response = await api.post(`activities/${id}/start`).json<Activity>();
-      return response;
+      // Crear un objeto con las notas (si existen)
+      const requestData = notes ? { notes } : { notes: "" };
+
+      // Primero intentamos iniciar la tarea como una actividad
+      try {
+        const response = await api.post(`activities/${id}/start`, { json: requestData }).json<Activity>();
+        console.log('Tarea iniciada como actividad:', response);
+        return response;
+      } catch (activityError) {
+        console.warn('Error al iniciar tarea como actividad, intentando como solicitud:', activityError);
+
+        // Si falla, intentamos iniciar la tarea como una solicitud
+        try {
+          const response = await api.post(`task-requests/${id}/start`, { json: requestData }).json<Activity>();
+          console.log('Tarea iniciada como solicitud:', response);
+          return response;
+        } catch (taskRequestError) {
+          console.error('Error al iniciar tarea como solicitud:', taskRequestError);
+          throw taskRequestError;
+        }
+      }
     } catch (error) {
       console.error('Error al iniciar la tarea:', error);
       throw error;

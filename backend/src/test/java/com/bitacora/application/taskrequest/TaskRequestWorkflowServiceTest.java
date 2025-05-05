@@ -1,10 +1,12 @@
 package com.bitacora.application.taskrequest;
 
+import com.bitacora.application.notification.MentionNotificationService;
 import com.bitacora.domain.model.taskrequest.TaskRequest;
 import com.bitacora.domain.model.taskrequest.TaskRequestCategory;
 import com.bitacora.domain.model.taskrequest.TaskRequestComment;
 import com.bitacora.domain.model.taskrequest.TaskRequestPriority;
 import com.bitacora.domain.model.taskrequest.TaskRequestStatus;
+import com.bitacora.domain.port.UserRepository;
 import com.bitacora.domain.port.repository.TaskRequestRepository;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -35,11 +37,24 @@ class TaskRequestWorkflowServiceTest {
     @Mock
     private TaskRequestRepository taskRequestRepository;
 
+    @Mock
+    private TaskRequestHistoryService historyService;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private MentionNotificationService mentionNotificationService;
+
     private TaskRequestWorkflowService taskRequestWorkflowService;
 
     @BeforeEach
     void setUp() {
-        taskRequestWorkflowService = new TaskRequestWorkflowService(taskRequestRepository);
+        taskRequestWorkflowService = new TaskRequestWorkflowService(
+                taskRequestRepository,
+                historyService,
+                userRepository,
+                mentionNotificationService);
     }
 
     @Test
@@ -48,25 +63,25 @@ class TaskRequestWorkflowServiceTest {
         // Arrange
         Long taskRequestId = 1L;
         Long requesterId = 1L;
-        
+
         TaskRequest draftTaskRequest = createDraftTaskRequest(taskRequestId, requesterId);
         TaskRequest submittedTaskRequest = createSubmittedTaskRequest(taskRequestId, requesterId);
-        
+
         when(taskRequestRepository.findById(taskRequestId)).thenReturn(Optional.of(draftTaskRequest));
         when(taskRequestRepository.save(any(TaskRequest.class))).thenReturn(submittedTaskRequest);
-        
+
         // Act
         TaskRequest result = taskRequestWorkflowService.submit(taskRequestId, requesterId);
-        
+
         // Assert
         assertNotNull(result);
         assertEquals(TaskRequestStatus.SUBMITTED, result.getStatus());
-        
+
         verify(taskRequestRepository).findById(taskRequestId);
-        
+
         ArgumentCaptor<TaskRequest> taskRequestCaptor = ArgumentCaptor.forClass(TaskRequest.class);
         verify(taskRequestRepository).save(taskRequestCaptor.capture());
-        
+
         TaskRequest capturedTaskRequest = taskRequestCaptor.getValue();
         assertEquals(TaskRequestStatus.SUBMITTED, capturedTaskRequest.getStatus());
     }
@@ -78,18 +93,18 @@ class TaskRequestWorkflowServiceTest {
         Long taskRequestId = 1L;
         Long requesterId = 1L;
         Long wrongRequesterId = 2L;
-        
+
         TaskRequest draftTaskRequest = createDraftTaskRequest(taskRequestId, requesterId);
-        
+
         when(taskRequestRepository.findById(taskRequestId)).thenReturn(Optional.of(draftTaskRequest));
-        
+
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             taskRequestWorkflowService.submit(taskRequestId, wrongRequesterId);
         });
-        
+
         assertEquals("El solicitante no coincide con el de la solicitud", exception.getMessage());
-        
+
         verify(taskRequestRepository).findById(taskRequestId);
         verify(taskRequestRepository, never()).save(any(TaskRequest.class));
     }
@@ -100,18 +115,18 @@ class TaskRequestWorkflowServiceTest {
         // Arrange
         Long taskRequestId = 1L;
         Long requesterId = 1L;
-        
+
         TaskRequest submittedTaskRequest = createSubmittedTaskRequest(taskRequestId, requesterId);
-        
+
         when(taskRequestRepository.findById(taskRequestId)).thenReturn(Optional.of(submittedTaskRequest));
-        
+
         // Act & Assert
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
             taskRequestWorkflowService.submit(taskRequestId, requesterId);
         });
-        
+
         assertEquals("Solo se pueden enviar solicitudes en estado DRAFT", exception.getMessage());
-        
+
         verify(taskRequestRepository).findById(taskRequestId);
         verify(taskRequestRepository, never()).save(any(TaskRequest.class));
     }
@@ -122,22 +137,22 @@ class TaskRequestWorkflowServiceTest {
         // Arrange
         Long taskRequestId = 1L;
         Long assignerId = 2L;
-        
+
         TaskRequest submittedTaskRequest = createSubmittedTaskRequest(taskRequestId, 1L);
         TaskRequest assignedTaskRequest = createAssignedTaskRequest(taskRequestId, 1L, assignerId);
-        
+
         when(taskRequestRepository.findById(taskRequestId)).thenReturn(Optional.of(submittedTaskRequest));
         when(taskRequestRepository.save(any(TaskRequest.class))).thenReturn(assignedTaskRequest);
-        
+
         // Act
         TaskRequest result = taskRequestWorkflowService.assign(taskRequestId, assignerId);
-        
+
         // Assert
         assertNotNull(result);
         assertEquals(TaskRequestStatus.ASSIGNED, result.getStatus());
         assertEquals(assignerId, result.getAssignerId());
         assertNotNull(result.getAssignmentDate());
-        
+
         verify(taskRequestRepository).findById(taskRequestId);
         verify(taskRequestRepository).save(any(TaskRequest.class));
     }
@@ -147,20 +162,21 @@ class TaskRequestWorkflowServiceTest {
     void shouldCompleteTaskRequest() {
         // Arrange
         Long taskRequestId = 1L;
-        
+        Long executorId = 3L; // ID del ejecutor que completa la solicitud
+
         TaskRequest assignedTaskRequest = createAssignedTaskRequest(taskRequestId, 1L, 2L);
         TaskRequest completedTaskRequest = createCompletedTaskRequest(taskRequestId, 1L, 2L);
-        
+
         when(taskRequestRepository.findById(taskRequestId)).thenReturn(Optional.of(assignedTaskRequest));
         when(taskRequestRepository.save(any(TaskRequest.class))).thenReturn(completedTaskRequest);
-        
+
         // Act
-        TaskRequest result = taskRequestWorkflowService.complete(taskRequestId);
-        
+        TaskRequest result = taskRequestWorkflowService.complete(taskRequestId, executorId);
+
         // Assert
         assertNotNull(result);
         assertEquals(TaskRequestStatus.COMPLETED, result.getStatus());
-        
+
         verify(taskRequestRepository).findById(taskRequestId);
         verify(taskRequestRepository).save(any(TaskRequest.class));
     }
@@ -171,20 +187,20 @@ class TaskRequestWorkflowServiceTest {
         // Arrange
         Long taskRequestId = 1L;
         Long requesterId = 1L;
-        
+
         TaskRequest submittedTaskRequest = createSubmittedTaskRequest(taskRequestId, requesterId);
         TaskRequest cancelledTaskRequest = createCancelledTaskRequest(taskRequestId, requesterId);
-        
+
         when(taskRequestRepository.findById(taskRequestId)).thenReturn(Optional.of(submittedTaskRequest));
         when(taskRequestRepository.save(any(TaskRequest.class))).thenReturn(cancelledTaskRequest);
-        
+
         // Act
         TaskRequest result = taskRequestWorkflowService.cancel(taskRequestId, requesterId);
-        
+
         // Assert
         assertNotNull(result);
         assertEquals(TaskRequestStatus.CANCELLED, result.getStatus());
-        
+
         verify(taskRequestRepository).findById(taskRequestId);
         verify(taskRequestRepository).save(any(TaskRequest.class));
     }
@@ -194,7 +210,7 @@ class TaskRequestWorkflowServiceTest {
     void shouldAddComment() {
         // Arrange
         Long taskRequestId = 1L;
-        
+
         TaskRequest taskRequest = createDraftTaskRequest(taskRequestId, 1L);
         TaskRequestComment comment = TaskRequestComment.builder()
                 .id(1L)
@@ -203,7 +219,7 @@ class TaskRequestWorkflowServiceTest {
                 .content("Comentario de prueba")
                 .createdAt(LocalDateTime.now())
                 .build();
-        
+
         TaskRequest updatedTaskRequest = TaskRequest.builder()
                 .id(taskRequestId)
                 .title(taskRequest.getTitle())
@@ -215,19 +231,19 @@ class TaskRequestWorkflowServiceTest {
                 .requestDate(taskRequest.getRequestDate())
                 .comments(Arrays.asList(comment))
                 .build();
-        
+
         when(taskRequestRepository.findById(taskRequestId)).thenReturn(Optional.of(taskRequest));
         when(taskRequestRepository.save(any(TaskRequest.class))).thenReturn(updatedTaskRequest);
-        
+
         // Act
         TaskRequest result = taskRequestWorkflowService.addComment(taskRequestId, comment);
-        
+
         // Assert
         assertNotNull(result);
         assertNotNull(result.getComments());
         assertEquals(1, result.getComments().size());
         assertEquals(comment, result.getComments().get(0));
-        
+
         verify(taskRequestRepository).findById(taskRequestId);
         verify(taskRequestRepository).save(any(TaskRequest.class));
     }
@@ -239,21 +255,20 @@ class TaskRequestWorkflowServiceTest {
         Long requesterId = 1L;
         int page = 0;
         int size = 10;
-        
+
         List<TaskRequest> taskRequests = Arrays.asList(
                 createDraftTaskRequest(1L, requesterId),
-                createSubmittedTaskRequest(2L, requesterId)
-        );
-        
+                createSubmittedTaskRequest(2L, requesterId));
+
         when(taskRequestRepository.findByRequesterId(eq(requesterId), eq(page), eq(size))).thenReturn(taskRequests);
-        
+
         // Act
         List<TaskRequest> result = taskRequestWorkflowService.findByRequesterId(requesterId, page, size);
-        
+
         // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
-        
+
         verify(taskRequestRepository).findByRequesterId(requesterId, page, size);
     }
 
@@ -266,10 +281,10 @@ class TaskRequestWorkflowServiceTest {
         when(taskRequestRepository.countByStatus(TaskRequestStatus.ASSIGNED)).thenReturn(2L);
         when(taskRequestRepository.countByStatus(TaskRequestStatus.COMPLETED)).thenReturn(10L);
         when(taskRequestRepository.countByStatus(TaskRequestStatus.CANCELLED)).thenReturn(1L);
-        
+
         // Act
         Map<TaskRequestStatus, Long> result = taskRequestWorkflowService.getStatsByStatus();
-        
+
         // Assert
         assertNotNull(result);
         assertEquals(5, result.size());
@@ -278,7 +293,7 @@ class TaskRequestWorkflowServiceTest {
         assertEquals(2L, result.get(TaskRequestStatus.ASSIGNED));
         assertEquals(10L, result.get(TaskRequestStatus.COMPLETED));
         assertEquals(1L, result.get(TaskRequestStatus.CANCELLED));
-        
+
         verify(taskRequestRepository).countByStatus(TaskRequestStatus.DRAFT);
         verify(taskRequestRepository).countByStatus(TaskRequestStatus.SUBMITTED);
         verify(taskRequestRepository).countByStatus(TaskRequestStatus.ASSIGNED);

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_BASE_URL } from '../config';
+import { config } from '../config';
 import {
   TaskRequest,
   TaskRequestPage,
@@ -9,7 +9,7 @@ import {
   TaskRequestStats
 } from '../types/TaskRequest';
 
-const API_URL = `${API_BASE_URL}/task-requests`;
+const API_URL = `${config.apiUrl}/task-requests`;
 
 /**
  * Servicio para interactuar con la API de solicitudes de tareas
@@ -156,5 +156,83 @@ export const taskRequestService = {
   getStatsByStatus: async (): Promise<TaskRequestStats> => {
     const response = await axios.get(`${API_URL}/stats/by-status`);
     return response.data;
+  },
+
+  /**
+   * Obtiene las solicitudes de tareas donde el usuario actual es el ejecutor
+   * @param page Número de página (0-indexed)
+   * @param size Tamaño de la página
+   * @returns Página de solicitudes de tareas
+   */
+  getTasksAssignedToExecutor: async (page = 0, size = 10): Promise<TaskRequestPage> => {
+    try {
+      // Convertir los parámetros a números para asegurar que se envíen correctamente
+      const pageNum = Number(page);
+      const sizeNum = Number(size);
+
+      // Usar URLSearchParams para construir la URL correctamente
+      const params = new URLSearchParams();
+      params.append('page', pageNum.toString());
+      params.append('size', sizeNum.toString());
+
+      const url = `${API_URL}/assigned-to-executor?${params.toString()}`;
+
+      // Obtener el token de autenticación
+      const token = localStorage.getItem('bitacora_token');
+
+      // Configurar los headers con el token
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+
+      const response = await axios.get(url, config);
+
+      // Verificar la estructura de la respuesta
+      if (response.data && Array.isArray(response.data.taskRequests)) {
+        return response.data;
+      } else if (response.data && typeof response.data === 'object') {
+        // Intentar adaptar la respuesta si es posible
+        let adaptedResponse: TaskRequestPage = {
+          taskRequests: [],
+          totalItems: 0,
+          totalPages: 0,
+          currentPage: 0
+        };
+
+        // Si la respuesta es un array, asumimos que son las tareas
+        if (Array.isArray(response.data)) {
+          adaptedResponse.taskRequests = response.data;
+          adaptedResponse.totalItems = response.data.length;
+          adaptedResponse.totalPages = 1;
+        }
+        // Si la respuesta tiene una propiedad content que es un array, asumimos que es una página
+        else if (response.data.content && Array.isArray(response.data.content)) {
+          adaptedResponse.taskRequests = response.data.content;
+          adaptedResponse.totalItems = response.data.totalElements || response.data.content.length;
+          adaptedResponse.totalPages = response.data.totalPages || 1;
+          adaptedResponse.currentPage = response.data.number || 0;
+        }
+
+        return adaptedResponse;
+      } else {
+        // Devolver un objeto vacío con la estructura esperada
+        return {
+          taskRequests: [],
+          totalItems: 0,
+          totalPages: 0,
+          currentPage: 0
+        };
+      }
+    } catch (error) {
+      // Devolver un objeto vacío con la estructura esperada para evitar errores
+      return {
+        taskRequests: [],
+        totalItems: 0,
+        totalPages: 0,
+        currentPage: 0
+      };
+    }
   }
 };

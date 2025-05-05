@@ -25,7 +25,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = TaskStatusChangeNotification.class, name = "TaskStatusChange"),
         @JsonSubTypes.Type(value = DeadlineReminderNotification.class, name = "DeadlineReminder"),
         @JsonSubTypes.Type(value = AnnouncementNotification.class, name = "Announcement"),
-        @JsonSubTypes.Type(value = CollaborationNotification.class, name = "Collaboration")
+        @JsonSubTypes.Type(value = CollaborationNotification.class, name = "Collaboration"),
+        @JsonSubTypes.Type(value = MentionNotification.class, name = "Mention")
 })
 public class RealTimeNotification {
     /**

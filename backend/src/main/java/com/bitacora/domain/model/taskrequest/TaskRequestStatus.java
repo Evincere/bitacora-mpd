@@ -8,22 +8,29 @@ public enum TaskRequestStatus {
      * Borrador: La solicitud está siendo creada y aún no ha sido enviada.
      */
     DRAFT("Borrador"),
-    
+
     /**
-     * Enviada: La solicitud ha sido enviada al asignador pero aún no ha sido procesada.
+     * Enviada: La solicitud ha sido enviada al asignador pero aún no ha sido
+     * procesada.
      */
     SUBMITTED("Enviada"),
-    
+
     /**
-     * Asignada: La solicitud ha sido procesada por el asignador y asignada a un ejecutor.
+     * Asignada: La solicitud ha sido procesada por el asignador y asignada a un
+     * ejecutor.
      */
     ASSIGNED("Asignada"),
-    
+
+    /**
+     * En Progreso: La tarea ha sido iniciada por el ejecutor y está en proceso.
+     */
+    IN_PROGRESS("En Progreso"),
+
     /**
      * Completada: La tarea solicitada ha sido completada.
      */
     COMPLETED("Completada"),
-    
+
     /**
      * Cancelada: La solicitud ha sido cancelada y no será procesada.
      */
@@ -49,11 +56,12 @@ public enum TaskRequestStatus {
      *
      * @param status La cadena a convertir
      * @return El valor de la enumeración correspondiente
-     * @throws IllegalArgumentException Si la cadena no corresponde a ningún valor de la enumeración
+     * @throws IllegalArgumentException Si la cadena no corresponde a ningún valor
+     *                                  de la enumeración
      */
     public static TaskRequestStatus fromString(final String status) {
         for (TaskRequestStatus s : TaskRequestStatus.values()) {
-            if (s.name().equalsIgnoreCase(status) 
+            if (s.name().equalsIgnoreCase(status)
                     || s.getDisplayName().equalsIgnoreCase(status)) {
                 return s;
             }

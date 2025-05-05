@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,67 +14,14 @@ import {
   FiPause,
   FiCheck,
   FiCalendar,
-  FiUser
+  FiUser,
+  FiRefreshCw,
+  FiEye
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
-// Datos de ejemplo para mostrar en la interfaz
-const MOCK_TAREAS = [
-  {
-    id: 1,
-    titulo: 'Revisión de contrato',
-    descripcion: 'Revisar el contrato del caso #12345 para identificar posibles cláusulas abusivas.',
-    categoria: 'LEGAL',
-    prioridad: 'HIGH',
-    fechaAsignacion: '2025-05-01T10:30:00',
-    fechaLimite: '2025-05-10',
-    estado: 'ASSIGNED',
-    solicitante: 'Juan Pérez',
-    asignador: 'Carlos Rodríguez',
-    notas: 'Prestar especial atención a las cláusulas de penalización y rescisión.'
-  },
-  {
-    id: 2,
-    titulo: 'Preparación de informe legal',
-    descripcion: 'Elaborar un informe legal sobre las implicaciones del caso #54321.',
-    categoria: 'LEGAL',
-    prioridad: 'MEDIUM',
-    fechaAsignacion: '2025-04-28T14:15:00',
-    fechaLimite: '2025-05-15',
-    estado: 'ASSIGNED',
-    solicitante: 'María López',
-    asignador: 'Carlos Rodríguez',
-    notas: 'Incluir referencias a jurisprudencia reciente.'
-  },
-  {
-    id: 3,
-    titulo: 'Análisis de caso',
-    descripcion: 'Realizar un análisis detallado del caso #67890 para identificar fortalezas y debilidades.',
-    categoria: 'LEGAL',
-    prioridad: 'CRITICAL',
-    fechaAsignacion: '2025-04-25T09:45:00',
-    fechaLimite: '2025-05-05',
-    estado: 'IN_PROGRESS',
-    solicitante: 'Pedro Gómez',
-    asignador: 'Carlos Rodríguez',
-    notas: 'Este caso es prioritario debido a la proximidad de la audiencia.',
-    progreso: 65
-  },
-  {
-    id: 4,
-    titulo: 'Análisis financiero',
-    descripcion: 'Realizar un análisis financiero de la documentación del caso #24680.',
-    categoria: 'FINANCIERA',
-    prioridad: 'MEDIUM',
-    fechaAsignacion: '2025-04-20T11:00:00',
-    fechaLimite: '2025-05-12',
-    estado: 'IN_PROGRESS',
-    solicitante: 'Ana Martínez',
-    asignador: 'Carlos Rodríguez',
-    notas: 'Verificar especialmente los movimientos bancarios de los últimos 6 meses.',
-    progreso: 30
-  }
-];
+// Hooks y servicios
+import useTareas from '../hooks/useTareas';
 
 const PageContainer = styled.div`
   padding: 0;
@@ -107,56 +54,112 @@ const SearchInput = styled.div`
 
   input {
     width: 100%;
-    padding: 10px 12px 10px 36px;
-    border-radius: 4px;
-    border: 1px solid ${({ theme }) => theme.border};
+    padding: 12px 14px 12px 40px;
+    border-radius: 6px;
+    border: 2px solid ${({ theme }) => theme.border};
     background-color: ${({ theme }) => theme.backgroundTertiary};
     color: ${({ theme }) => theme.text};
     font-size: 14px;
     transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
     &:focus {
       border-color: ${({ theme }) => theme.primary};
       outline: none;
-      box-shadow: 0 0 0 2px ${({ theme }) => `${theme.primary}30`};
+      box-shadow: 0 0 0 3px ${({ theme }) => `${theme.primary}30`};
+    }
+
+    &::placeholder {
+      color: ${({ theme }) => theme.textSecondary};
+      opacity: 0.8;
     }
   }
 
   svg {
     position: absolute;
-    left: 12px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
     color: ${({ theme }) => theme.textSecondary};
+    font-size: 16px;
   }
 `;
 
 const FilterSelect = styled.select`
-  padding: 10px 12px;
-  border-radius: 4px;
-  border: 1px solid ${({ theme }) => theme.border};
+  padding: 12px 14px;
+  border-radius: 6px;
+  border: 2px solid ${({ theme }) => theme.border};
   background-color: ${({ theme }) => theme.backgroundInput};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
-  transition: border-color 0.2s;
-  min-width: 150px;
+  transition: all 0.2s;
+  min-width: 180px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
 
   &:focus {
     border-color: ${({ theme }) => theme.primary};
     outline: none;
+    box-shadow: 0 0 0 3px ${({ theme }) => `${theme.primary}30`};
+  }
+
+  option {
+    padding: 8px;
+  }
+`;
+
+const StyledSelect = styled.select`
+  padding: 12px 14px;
+  border-radius: 6px;
+  border: 2px solid #d0d5dd;
+  background-color: #ffffff;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 180px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+  height: 44px;
+
+  &:focus {
+    border-color: #7f56d9;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(127, 86, 217, 0.2);
+  }
+
+  &:hover {
+    border-color: #b2a3d8;
+  }
+
+  option {
+    padding: 8px;
+    font-weight: 500;
   }
 `;
 
 const Button = styled.button<{ $primary?: boolean }>`
-  padding: 10px 16px;
-  border-radius: 4px;
-  font-weight: 500;
+  padding: 12px 18px;
+  border-radius: 6px;
+  font-weight: 600;
   font-size: 14px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  letter-spacing: 0.3px;
 
   ${({ $primary, theme }) =>
     $primary
@@ -167,15 +170,31 @@ const Button = styled.button<{ $primary?: boolean }>`
 
     &:hover {
       background-color: ${theme.primaryDark};
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
   `
       : `
-    background-color: transparent;
+    background-color: white;
     color: ${theme.textSecondary};
-    border: 1px solid ${theme.border};
+    border: 2px solid ${theme.border};
 
     &:hover {
       background-color: ${theme.backgroundHover};
+      border-color: ${theme.borderHover || theme.border};
+      color: ${theme.text};
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
   `}
 `;
@@ -234,47 +253,57 @@ const StatusBadge = styled.span<{ $status: string }>`
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
+  padding: 5px 10px;
   border-radius: 4px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
 
   ${({ $status, theme }) => {
     switch ($status) {
       case 'REQUESTED':
         return `
-          background-color: ${theme.infoLight};
-          color: ${theme.info};
+          background-color: #E3F2FD;
+          color: #0D47A1;
+          border: 1px solid #2196F3;
         `;
       case 'ASSIGNED':
         return `
-          background-color: ${theme.warningLight};
-          color: ${theme.warning};
+          background-color: #FFF8E1;
+          color: #E65100;
+          border: 1px solid #FFC107;
         `;
       case 'IN_PROGRESS':
         return `
-          background-color: ${theme.primaryLight};
-          color: ${theme.primary};
+          background-color: #EDE7F6;
+          color: #4527A0;
+          border: 1px solid #673AB7;
         `;
       case 'COMPLETED':
         return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
+          background-color: #E8F5E9;
+          color: #1B5E20;
+          border: 1px solid #4CAF50;
         `;
       case 'APPROVED':
         return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
+          background-color: #E8F5E9;
+          color: #1B5E20;
+          border: 1px solid #4CAF50;
         `;
       case 'REJECTED':
         return `
-          background-color: ${theme.errorLight};
-          color: ${theme.error};
+          background-color: #FFEBEE;
+          color: #B71C1C;
+          border: 1px solid #F44336;
         `;
       default:
         return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
+          background-color: #ECEFF1;
+          color: #263238;
+          border: 1px solid #607D8B;
         `;
     }
   }}
@@ -284,42 +313,51 @@ const PriorityBadge = styled.span<{ $priority: string }>`
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
+  padding: 5px 10px;
   border-radius: 4px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
 
   ${({ $priority, theme }) => {
     switch ($priority) {
       case 'CRITICAL':
         return `
-          background-color: ${theme.errorLight};
-          color: ${theme.error};
+          background-color: #FFEBEE;
+          color: #B71C1C;
+          border: 1px solid #F44336;
         `;
       case 'HIGH':
         return `
-          background-color: ${theme.warningLight};
-          color: ${theme.warning};
+          background-color: #FFF3E0;
+          color: #E65100;
+          border: 1px solid #FF9800;
         `;
       case 'MEDIUM':
         return `
-          background-color: ${theme.infoLight};
-          color: ${theme.info};
+          background-color: #E3F2FD;
+          color: #0D47A1;
+          border: 1px solid #2196F3;
         `;
       case 'LOW':
         return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
+          background-color: #E8F5E9;
+          color: #1B5E20;
+          border: 1px solid #4CAF50;
         `;
       case 'TRIVIAL':
         return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
+          background-color: #ECEFF1;
+          color: #263238;
+          border: 1px solid #607D8B;
         `;
       default:
         return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
+          background-color: #ECEFF1;
+          color: #263238;
+          border: 1px solid #607D8B;
         `;
     }
   }}
@@ -362,17 +400,20 @@ const ActionButtons = styled.div`
   margin-top: 20px;
 `;
 
-const ActionButton = styled.button<{ $variant?: 'primary' | 'success' | 'warning' | 'danger' }>`
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-weight: 500;
+const ActionButton = styled.button<{ $variant?: 'primary' | 'success' | 'warning' | 'danger'; disabled?: boolean }>`
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 600;
   font-size: 13px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  cursor: pointer;
+  gap: 8px;
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   transition: all 0.2s;
   border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.3px;
+  opacity: ${props => props.disabled ? 0.6 : 1};
 
   ${({ $variant, theme }) => {
     switch ($variant) {
@@ -382,6 +423,12 @@ const ActionButton = styled.button<{ $variant?: 'primary' | 'success' | 'warning
           color: white;
           &:hover {
             background-color: ${theme.primaryDark};
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+          }
+          &:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
         `;
       case 'success':
@@ -390,6 +437,12 @@ const ActionButton = styled.button<{ $variant?: 'primary' | 'success' | 'warning
           color: white;
           &:hover {
             background-color: ${theme.successDark};
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+          }
+          &:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
         `;
       case 'warning':
@@ -398,6 +451,12 @@ const ActionButton = styled.button<{ $variant?: 'primary' | 'success' | 'warning
           color: white;
           &:hover {
             background-color: ${theme.warningDark};
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+          }
+          &:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
         `;
       case 'danger':
@@ -406,15 +465,28 @@ const ActionButton = styled.button<{ $variant?: 'primary' | 'success' | 'warning
           color: white;
           &:hover {
             background-color: ${theme.errorDark};
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+          }
+          &:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
         `;
       default:
         return `
           background-color: ${theme.backgroundAlt};
           color: ${theme.textSecondary};
+          border: 1px solid ${theme.border};
           &:hover {
             background-color: ${theme.backgroundHover};
             color: ${theme.text};
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+          }
+          &:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
           }
         `;
     }
@@ -580,8 +652,76 @@ const MisTareas: React.FC = () => {
   const [priorityFilter, setPriorityFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
 
+  // Usar el hook personalizado para tareas
+  const {
+    assignedTasks = [],
+    inProgressTasks = [],
+    tasksAssignedToExecutor = { taskRequests: [] },
+    isLoadingAssignedTasks,
+    isLoadingInProgressTasks,
+    isLoadingTasksAssignedToExecutor,
+    tasksAssignedToExecutorError,
+    refreshAllData,
+    startTask,
+    completeTask
+  } = useTareas();
+
+  // Combinar tareas asignadas y en progreso
+  const allTasks = [...(assignedTasks || []), ...(inProgressTasks || [])];
+
+  // Convertir las tareas asignadas desde el endpoint de task-requests
+  const taskRequestTasks = (tasksAssignedToExecutor?.taskRequests || []).map(task => ({
+    id: task.id,
+    title: task.title,
+    description: task.description,
+    category: task.category?.name || '',
+    priority: task.priority,
+    status: 'ASSIGNED', // Las tareas de task-requests asignadas a un ejecutor siempre están en estado ASSIGNED
+    dueDate: task.dueDate,
+    requestDate: task.requestDate,
+    requesterName: task.requesterName || '',
+    assignerName: task.assignerName || '',
+    comments: task.notes || ''
+  }));
+
+  // Convertir las tareas al formato esperado por el componente
+  const tareas = [
+    // Tareas de actividades (assignedTasks e inProgressTasks)
+    ...allTasks.map(task => ({
+      id: task.id,
+      titulo: task.title || '',
+      descripcion: task.description || '',
+      categoria: task.category || '',
+      prioridad: task.priority || 'MEDIUM',
+      fechaAsignacion: task.requestDate || '',
+      fechaLimite: task.dueDate || '',
+      estado: task.status,
+      solicitante: task.requesterName || '',
+      asignador: task.assignerName || '',
+      notas: task.comments || '',
+      progreso: task.progress,
+      source: 'activity'
+    })),
+    // Tareas de task-requests
+    ...taskRequestTasks.map(task => ({
+      id: task.id,
+      titulo: task.title || '',
+      descripcion: task.description || '',
+      categoria: task.category || '',
+      prioridad: task.priority || 'MEDIUM',
+      fechaAsignacion: task.requestDate || '',
+      fechaLimite: task.dueDate || '',
+      estado: task.status,
+      solicitante: task.requesterName || '',
+      asignador: task.assignerName || '',
+      notas: task.comments || '',
+      progreso: 0,
+      source: 'taskRequest'
+    }))
+  ];
+
   // Filtrar tareas según los criterios
-  const filteredTareas = MOCK_TAREAS.filter(tarea => {
+  const filteredTareas = tareas.filter(tarea => {
     const matchesSearch = searchTerm === '' ||
       tarea.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tarea.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
@@ -593,31 +733,40 @@ const MisTareas: React.FC = () => {
     return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
   });
 
+  // Cargar datos al montar el componente
+  useEffect(() => {
+    console.log('MisTareas: Cargando datos...');
+    refreshAllData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Este efecto se ha eliminado ya que la depuración no es necesaria
+
   const toggleExpand = (id: number) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  const handleIniciarTarea = (id: number) => {
-    // Aquí iría la lógica para iniciar la tarea
-    toast.success('Tarea iniciada correctamente');
+  const handleRefresh = () => {
+    refreshAllData();
+    toast.info('Actualizando datos...');
+  };
 
-    // Cerrar el panel expandido
+  const handleIniciarTarea = (id: number) => {
+    startTask(id);
     setExpandedId(null);
   };
 
   const handlePausarTarea = (id: number) => {
     // Aquí iría la lógica para pausar la tarea
     toast.info('Tarea pausada');
-
-    // Cerrar el panel expandido
     setExpandedId(null);
   };
 
   const handleCompletarTarea = (id: number) => {
-    // Aquí iría la lógica para completar la tarea
-    toast.success('Tarea completada correctamente');
-
-    // Cerrar el panel expandido
+    completeTask({
+      activityId: id,
+      result: 'Completada satisfactoriamente'
+    });
     setExpandedId(null);
   };
 
@@ -625,6 +774,10 @@ const MisTareas: React.FC = () => {
     <PageContainer>
       <PageHeader>
         <PageTitle>Mis Tareas</PageTitle>
+        <Button onClick={handleRefresh}>
+          <FiRefreshCw size={16} />
+          Actualizar
+        </Button>
       </PageHeader>
 
       <FiltersContainer>
@@ -637,18 +790,20 @@ const MisTareas: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </SearchInput>
-        <FilterSelect
+        <StyledSelect
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
+          className="custom-select"
         >
           <option value="">Todos los estados</option>
           <option value="ASSIGNED">Asignada</option>
           <option value="IN_PROGRESS">En Progreso</option>
           <option value="COMPLETED">Completada</option>
-        </FilterSelect>
-        <FilterSelect
+        </StyledSelect>
+        <StyledSelect
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value)}
+          className="custom-select"
         >
           <option value="">Todas las prioridades</option>
           <option value="CRITICAL">Crítica</option>
@@ -656,10 +811,11 @@ const MisTareas: React.FC = () => {
           <option value="MEDIUM">Media</option>
           <option value="LOW">Baja</option>
           <option value="TRIVIAL">Trivial</option>
-        </FilterSelect>
-        <FilterSelect
+        </StyledSelect>
+        <StyledSelect
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
+          className="custom-select"
         >
           <option value="">Todas las categorías</option>
           <option value="ADMINISTRATIVA">Administrativa</option>
@@ -668,14 +824,41 @@ const MisTareas: React.FC = () => {
           <option value="FINANCIERA">Financiera</option>
           <option value="RECURSOS_HUMANOS">Recursos Humanos</option>
           <option value="OTRA">Otra</option>
-        </FilterSelect>
+        </StyledSelect>
         <Button>
           <FiFilter size={16} />
           Más filtros
         </Button>
       </FiltersContainer>
 
-      {filteredTareas.length > 0 ? (
+      {isLoadingAssignedTasks || isLoadingInProgressTasks || isLoadingTasksAssignedToExecutor ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '50px 0' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ marginBottom: '20px' }}>
+              <FiClock size={48} style={{ color: '#7f56d9', opacity: 0.7 }} />
+            </div>
+            <h3 style={{ marginBottom: '10px', color: '#344054' }}>Cargando tareas...</h3>
+            <p style={{ color: '#667085' }}>Estamos obteniendo tus tareas asignadas</p>
+          </div>
+        </div>
+      ) : tasksAssignedToExecutorError ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '50px 0' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ marginBottom: '20px' }}>
+              <FiAlertCircle size={48} style={{ color: '#f44336', opacity: 0.7 }} />
+            </div>
+            <h3 style={{ marginBottom: '10px', color: '#344054' }}>Error al cargar tareas</h3>
+            <p style={{ color: '#667085' }}>Hubo un problema al obtener tus tareas asignadas</p>
+            <pre style={{ textAlign: 'left', background: '#f5f5f5', padding: '10px', borderRadius: '4px', marginTop: '10px', fontSize: '12px', maxHeight: '200px', overflow: 'auto' }}>
+              {JSON.stringify(tasksAssignedToExecutorError, null, 2)}
+            </pre>
+            <Button onClick={handleRefresh} style={{ marginTop: '20px' }}>
+              <FiRefreshCw size={16} />
+              Intentar nuevamente
+            </Button>
+          </div>
+        </div>
+      ) : filteredTareas.length > 0 ? (
         <TareasList>
           {filteredTareas.map((tarea) => (
             <TareaCard key={tarea.id}>
@@ -744,10 +927,24 @@ const MisTareas: React.FC = () => {
 
                 <ActionButtons>
                   {tarea.estado === 'ASSIGNED' && (
-                    <ActionButton $variant="primary" onClick={() => handleIniciarTarea(tarea.id)}>
-                      <FiPlay size={14} />
-                      Iniciar tarea
-                    </ActionButton>
+                    <>
+                      <ActionButton
+                        $variant="primary"
+                        onClick={() => handleIniciarTarea(tarea.id)}
+                        title="Iniciar tarea"
+                      >
+                        <FiPlay size={14} />
+                        Iniciar tarea
+                      </ActionButton>
+                      <ActionButton
+                        $variant="secondary"
+                        onClick={() => navigate(`/app/tareas/detalle/${tarea.id}`)}
+                        title="Ver detalles"
+                      >
+                        <FiEye size={14} />
+                        Ver detalles
+                      </ActionButton>
+                    </>
                   )}
                   {tarea.estado === 'IN_PROGRESS' && (
                     <>
@@ -773,7 +970,11 @@ const MisTareas: React.FC = () => {
         <EmptyState>
           <FiAlertCircle size={48} />
           <h3>No se encontraron tareas</h3>
-          <p>No hay tareas que coincidan con los criterios de búsqueda o filtros aplicados.</p>
+          <p>No hay tareas asignadas a tu usuario en este momento. Utiliza el botón "Actualizar" para refrescar los datos.</p>
+          <Button onClick={handleRefresh} style={{ marginTop: '20px' }}>
+            <FiRefreshCw size={16} />
+            Actualizar datos
+          </Button>
         </EmptyState>
       )}
     </PageContainer>

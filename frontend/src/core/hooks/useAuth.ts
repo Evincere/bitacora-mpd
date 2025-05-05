@@ -35,7 +35,10 @@ interface LoginCredentials {
  * @property {string} tokenType - Tipo de token (ej: 'Bearer')
  * @property {number} userId - ID del usuario autenticado
  * @property {string} username - Nombre de usuario
- * @property {string} name - Nombre completo del usuario
+ * @property {string} name - Nombre completo del usuario (campo legacy)
+ * @property {string} firstName - Nombre del usuario
+ * @property {string} lastName - Apellido del usuario
+ * @property {string} fullName - Nombre completo del usuario
  * @property {string} email - Correo electrónico del usuario
  * @property {string[]} roles - Roles del usuario
  */
@@ -45,9 +48,14 @@ interface LoginResponse {
   tokenType: string;
   userId: number;
   username: string;
-  name: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
   email: string;
-  roles: string[];
+  roles?: string[];
+  role?: string;
+  permissions?: string[];
 }
 
 /**
@@ -143,9 +151,9 @@ export const useAuth = () => {
         id: data.userId,
         username: data.username,
         email: data.email,
-        firstName: data.name ? data.name.split(' ')[0] : '',
-        lastName: data.name ? data.name.split(' ').slice(1).join(' ') : '',
-        fullName: data.name || data.username,
+        firstName: data.firstName || (data.name ? data.name.split(' ')[0] : ''),
+        lastName: data.lastName || (data.name ? data.name.split(' ').slice(1).join(' ') : ''),
+        fullName: data.fullName || data.name || `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.username,
         role: userRole,
         active: true,
         createdAt: new Date().toISOString(),

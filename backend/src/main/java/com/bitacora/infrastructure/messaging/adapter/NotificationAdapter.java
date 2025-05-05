@@ -10,6 +10,7 @@ import com.bitacora.domain.model.notification.TaskStatusChangeNotification;
 import com.bitacora.domain.model.notification.DeadlineReminderNotification;
 import com.bitacora.domain.model.notification.AnnouncementNotification;
 import com.bitacora.domain.model.notification.CollaborationNotification;
+import com.bitacora.domain.model.notification.MentionNotification;
 import com.bitacora.domain.port.notification.NotificationPort;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -151,5 +152,12 @@ public class NotificationAdapter implements NotificationPort {
         log.debug("Enviando notificación de colaboración para la actividad {}: {}", activityId, notification);
         notification.setType(NotificationType.COLLABORATION);
         messagingTemplate.convertAndSend(ACTIVITY_COLLABORATION_DESTINATION + activityId, notification);
+    }
+
+    @Override
+    public void sendMentionNotification(final String username, final MentionNotification notification) {
+        log.debug("Enviando notificación de mención a {}: {}", username, notification);
+        notification.setType(NotificationType.MENTION);
+        messagingTemplate.convertAndSendToUser(username, USER_NOTIFICATION_DESTINATION, notification);
     }
 }

@@ -82,6 +82,9 @@ public class AuthService {
                                 .userId(user.getId())
                                 .username(user.getUsername())
                                 .email(user.getEmail().getValue())
+                                .firstName(user.getPersonName().getFirstName())
+                                .lastName(user.getPersonName().getLastName())
+                                .fullName(user.getPersonName().getFullName())
                                 .role(user.getRole().name())
                                 .permissions(permissions)
                                 .build();
@@ -151,6 +154,9 @@ public class AuthService {
                                 .userId(user.getId())
                                 .username(user.getUsername())
                                 .email(user.getEmail().getValue())
+                                .firstName(user.getPersonName().getFirstName())
+                                .lastName(user.getPersonName().getLastName())
+                                .fullName(user.getPersonName().getFullName())
                                 .role(user.getRole().name())
                                 .permissions(permissions)
                                 .build();

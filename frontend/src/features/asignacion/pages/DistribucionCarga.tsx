@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { 
-  FiUsers, 
-  FiFilter, 
-  FiSearch, 
-  FiBarChart2, 
-  FiCheckCircle, 
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import asignacionService, { EjecutorConTareas } from '../services/asignacionService';
+import { Loader } from '@/shared/components/common';
+import {
+  FiUsers,
+  FiFilter,
+  FiSearch,
+  FiBarChart2,
+  FiCheckCircle,
   FiClock,
   FiAlertCircle,
   FiUser,
@@ -13,61 +17,7 @@ import {
   FiList
 } from 'react-icons/fi';
 
-// Datos de ejemplo para los ejecutores
-const MOCK_EJECUTORES = [
-  { 
-    id: 1, 
-    nombre: 'Ana Martínez', 
-    cargaActual: 3, 
-    especialidad: 'LEGAL',
-    tareas: [
-      { id: 101, titulo: 'Revisión de contrato', prioridad: 'HIGH', fechaLimite: '2025-05-10', estado: 'IN_PROGRESS' },
-      { id: 102, titulo: 'Preparación de informe legal', prioridad: 'MEDIUM', fechaLimite: '2025-05-15', estado: 'ASSIGNED' },
-      { id: 103, titulo: 'Análisis de caso', prioridad: 'CRITICAL', fechaLimite: '2025-05-05', estado: 'IN_PROGRESS' }
-    ]
-  },
-  { 
-    id: 2, 
-    nombre: 'Luis Sánchez', 
-    cargaActual: 2, 
-    especialidad: 'LEGAL',
-    tareas: [
-      { id: 201, titulo: 'Preparación de presentación', prioridad: 'HIGH', fechaLimite: '2025-05-08', estado: 'IN_PROGRESS' },
-      { id: 202, titulo: 'Revisión de expediente', prioridad: 'MEDIUM', fechaLimite: '2025-05-20', estado: 'ASSIGNED' }
-    ]
-  },
-  { 
-    id: 3, 
-    nombre: 'María López', 
-    cargaActual: 1, 
-    especialidad: 'FINANCIERA',
-    tareas: [
-      { id: 301, titulo: 'Análisis financiero', prioridad: 'MEDIUM', fechaLimite: '2025-05-12', estado: 'IN_PROGRESS' }
-    ]
-  },
-  { 
-    id: 4, 
-    nombre: 'Pedro Gómez', 
-    cargaActual: 4, 
-    especialidad: 'TECNICA',
-    tareas: [
-      { id: 401, titulo: 'Informe técnico', prioridad: 'CRITICAL', fechaLimite: '2025-05-03', estado: 'IN_PROGRESS' },
-      { id: 402, titulo: 'Evaluación de evidencias', prioridad: 'HIGH', fechaLimite: '2025-05-07', estado: 'IN_PROGRESS' },
-      { id: 403, titulo: 'Dictamen pericial', prioridad: 'MEDIUM', fechaLimite: '2025-05-18', estado: 'ASSIGNED' },
-      { id: 404, titulo: 'Análisis de documentación', prioridad: 'LOW', fechaLimite: '2025-05-25', estado: 'ASSIGNED' }
-    ]
-  },
-  { 
-    id: 5, 
-    nombre: 'Sofía Rodríguez', 
-    cargaActual: 2, 
-    especialidad: 'ADMINISTRATIVA',
-    tareas: [
-      { id: 501, titulo: 'Revisión de expediente administrativo', prioridad: 'HIGH', fechaLimite: '2025-05-09', estado: 'IN_PROGRESS' },
-      { id: 502, titulo: 'Organización de documentación', prioridad: 'LOW', fechaLimite: '2025-05-22', estado: 'ASSIGNED' }
-    ]
-  }
-];
+// Componente para mostrar la distribución de carga de trabajo entre ejecutores
 
 const PageContainer = styled.div`
   padding: 0;
@@ -106,7 +56,7 @@ const SearchInput = styled.div`
     padding: 10px 12px 10px 36px;
     border-radius: 4px;
     border: 1px solid ${({ theme }) => theme.border};
-    background-color: ${({ theme }) => theme.backgroundInput};
+    background-color: ${({ theme }) => theme.background};
     color: ${({ theme }) => theme.text};
     font-size: 14px;
     transition: border-color 0.2s;
@@ -130,7 +80,7 @@ const FilterSelect = styled.select`
   padding: 10px 12px;
   border-radius: 4px;
   border: 1px solid ${({ theme }) => theme.border};
-  background-color: ${({ theme }) => theme.backgroundInput};
+  background-color: ${({ theme }) => theme.background};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
   transition: border-color 0.2s;
@@ -254,25 +204,31 @@ const CargaIndicator = styled.div<{ $carga: number }>`
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 4px;
   font-size: 12px;
-  
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
   ${({ $carga, theme }) => {
     if ($carga <= 2) {
       return `
-        background-color: ${theme.successLight};
-        color: ${theme.success};
+        background-color: #E8F5E9;
+        color: #1B5E20;
+        border: 1px solid #4CAF50;
       `;
     } else if ($carga <= 4) {
       return `
-        background-color: ${theme.warningLight};
-        color: ${theme.warning};
+        background-color: #FFF3E0;
+        color: #E65100;
+        border: 1px solid #FF9800;
       `;
     } else {
       return `
-        background-color: ${theme.errorLight};
-        color: ${theme.error};
+        background-color: #FFEBEE;
+        color: #B71C1C;
+        border: 1px solid #F44336;
       `;
     }
   }}
@@ -293,7 +249,7 @@ const TareaItem = styled.div`
   border-radius: 4px;
   background-color: ${({ theme }) => theme.backgroundAlt};
   border-left: 3px solid ${({ theme }) => theme.border};
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.backgroundHover};
   }
@@ -330,42 +286,51 @@ const PriorityBadge = styled.span<{ $priority: string }>`
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 4px;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
 
   ${({ $priority, theme }) => {
     switch ($priority) {
       case 'CRITICAL':
         return `
-          background-color: ${theme.errorLight};
-          color: ${theme.error};
+          background-color: #FFEBEE;
+          color: #B71C1C;
+          border: 1px solid #F44336;
         `;
       case 'HIGH':
         return `
-          background-color: ${theme.warningLight};
-          color: ${theme.warning};
+          background-color: #FFF3E0;
+          color: #E65100;
+          border: 1px solid #FF9800;
         `;
       case 'MEDIUM':
         return `
-          background-color: ${theme.infoLight};
-          color: ${theme.info};
+          background-color: #E3F2FD;
+          color: #0D47A1;
+          border: 1px solid #2196F3;
         `;
       case 'LOW':
         return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
+          background-color: #E8F5E9;
+          color: #1B5E20;
+          border: 1px solid #4CAF50;
         `;
       case 'TRIVIAL':
         return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
+          background-color: #ECEFF1;
+          color: #263238;
+          border: 1px solid #607D8B;
         `;
       default:
         return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
+          background-color: #ECEFF1;
+          color: #263238;
+          border: 1px solid #607D8B;
         `;
     }
   }}
@@ -375,47 +340,57 @@ const StatusBadge = styled.span<{ $status: string }>`
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 4px;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
 
   ${({ $status, theme }) => {
     switch ($status) {
       case 'REQUESTED':
         return `
-          background-color: ${theme.infoLight};
-          color: ${theme.info};
+          background-color: #E3F2FD;
+          color: #0D47A1;
+          border: 1px solid #2196F3;
         `;
       case 'ASSIGNED':
         return `
-          background-color: ${theme.warningLight};
-          color: ${theme.warning};
+          background-color: #FFF8E1;
+          color: #E65100;
+          border: 1px solid #FFC107;
         `;
       case 'IN_PROGRESS':
         return `
-          background-color: ${theme.primaryLight};
-          color: ${theme.primary};
+          background-color: #EDE7F6;
+          color: #4527A0;
+          border: 1px solid #673AB7;
         `;
       case 'COMPLETED':
         return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
+          background-color: #E8F5E9;
+          color: #1B5E20;
+          border: 1px solid #4CAF50;
         `;
       case 'APPROVED':
         return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
+          background-color: #E8F5E9;
+          color: #1B5E20;
+          border: 1px solid #4CAF50;
         `;
       case 'REJECTED':
         return `
-          background-color: ${theme.errorLight};
-          color: ${theme.error};
+          background-color: #FFEBEE;
+          color: #B71C1C;
+          border: 1px solid #F44336;
         `;
       default:
         return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
+          background-color: #ECEFF1;
+          color: #263238;
+          border: 1px solid #607D8B;
         `;
     }
   }}
@@ -519,29 +494,52 @@ const getProgressColor = (carga: number) => {
 };
 
 const DistribucionCarga: React.FC = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [especialidadFilter, setEspecialidadFilter] = useState('');
 
+  const handleVerDetalleTarea = (id: number) => {
+    console.log(`Navegando a detalle de tarea con ID: ${id}`);
+    navigate(`/app/asignacion/detalle/${id}`);
+  };
+
+  // Usar React Query para obtener los datos
+  const {
+    data: ejecutores = [],
+    isLoading,
+    error: queryError,
+    refetch
+  } = useQuery({
+    queryKey: ['assignedTasksByExecutor'],
+    queryFn: asignacionService.getAssignedTasksByExecutor,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  });
+
+  // Convertir el error a un mensaje legible
+  const errorMessage = queryError
+    ? (queryError instanceof Error ? queryError.message : 'Error al cargar los datos')
+    : null;
+
   // Calcular estadísticas
-  const totalEjecutores = MOCK_EJECUTORES.length;
-  const totalTareas = MOCK_EJECUTORES.reduce((acc, ejecutor) => acc + ejecutor.tareas.length, 0);
-  const tareasEnProgreso = MOCK_EJECUTORES.reduce(
-    (acc, ejecutor) => acc + ejecutor.tareas.filter(t => t.estado === 'IN_PROGRESS').length, 
+  const totalEjecutores = ejecutores.length;
+  const totalTareas = ejecutores.reduce((acc, ejecutor) => acc + ejecutor.tareas.length, 0);
+  const tareasEnProgreso = ejecutores.reduce(
+    (acc, ejecutor) => acc + ejecutor.tareas.filter(t => t.estado === 'IN_PROGRESS').length,
     0
   );
-  const tareasAsignadas = MOCK_EJECUTORES.reduce(
-    (acc, ejecutor) => acc + ejecutor.tareas.filter(t => t.estado === 'ASSIGNED').length, 
+  const tareasAsignadas = ejecutores.reduce(
+    (acc, ejecutor) => acc + ejecutor.tareas.filter(t => t.estado === 'ASSIGNED').length,
     0
   );
-  const cargaPromedio = totalTareas / totalEjecutores;
+  const cargaPromedio = totalEjecutores > 0 ? totalTareas / totalEjecutores : 0;
 
   // Filtrar ejecutores según los criterios
-  const filteredEjecutores = MOCK_EJECUTORES.filter(ejecutor => {
-    const matchesSearch = searchTerm === '' || 
+  const filteredEjecutores = ejecutores.filter(ejecutor => {
+    const matchesSearch = searchTerm === '' ||
       ejecutor.nombre.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesEspecialidad = especialidadFilter === '' || ejecutor.especialidad === especialidadFilter;
-    
+
     return matchesSearch && matchesEspecialidad;
   });
 
@@ -554,119 +552,177 @@ const DistribucionCarga: React.FC = () => {
         </PageTitle>
       </PageHeader>
 
-      <StatsContainer>
-        <StatCard>
-          <StatTitle>Total de Ejecutores</StatTitle>
-          <StatValue>{totalEjecutores}</StatValue>
-        </StatCard>
-        <StatCard>
-          <StatTitle>Total de Tareas</StatTitle>
-          <StatValue>{totalTareas}</StatValue>
-          <StatFooter>
-            {tareasEnProgreso} en progreso, {tareasAsignadas} asignadas
-          </StatFooter>
-        </StatCard>
-        <StatCard>
-          <StatTitle>Carga Promedio</StatTitle>
-          <StatValue>{cargaPromedio.toFixed(1)}</StatValue>
-          <StatFooter>tareas por ejecutor</StatFooter>
-        </StatCard>
-      </StatsContainer>
+      {isLoading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '50px 0' }}>
+          <Loader size="large" />
+        </div>
+      ) : queryError ? (
+        <div style={{
+          padding: '20px',
+          textAlign: 'center',
+          color: '#ef4444',
+          backgroundColor: '#fee2e2',
+          borderRadius: '8px',
+          margin: '20px 0'
+        }}>
+          <FiAlertCircle size={24} style={{ marginBottom: '10px' }} />
+          <p>{errorMessage}</p>
+          <button
+            onClick={() => refetch()}
+            style={{
+              marginTop: '10px',
+              padding: '8px 16px',
+              backgroundColor: '#ef4444',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Reintentar
+          </button>
+        </div>
+      ) : (
+        <>
+          <StatsContainer>
+            <StatCard>
+              <StatTitle>Total de Ejecutores</StatTitle>
+              <StatValue>{totalEjecutores}</StatValue>
+            </StatCard>
+            <StatCard>
+              <StatTitle>Total de Tareas</StatTitle>
+              <StatValue>{totalTareas}</StatValue>
+              <StatFooter>
+                {tareasEnProgreso} en progreso, {tareasAsignadas} asignadas
+              </StatFooter>
+            </StatCard>
+            <StatCard>
+              <StatTitle>Carga Promedio</StatTitle>
+              <StatValue>{cargaPromedio.toFixed(1)}</StatValue>
+              <StatFooter>tareas por ejecutor</StatFooter>
+            </StatCard>
+          </StatsContainer>
 
-      <FiltersContainer>
-        <SearchInput>
-          <FiSearch size={16} />
-          <input
-            type="text"
-            placeholder="Buscar ejecutores..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </SearchInput>
-        <FilterSelect
-          value={especialidadFilter}
-          onChange={(e) => setEspecialidadFilter(e.target.value)}
-        >
-          <option value="">Todas las especialidades</option>
-          <option value="ADMINISTRATIVA">Administrativa</option>
-          <option value="LEGAL">Legal</option>
-          <option value="TECNICA">Técnica</option>
-          <option value="FINANCIERA">Financiera</option>
-          <option value="RECURSOS_HUMANOS">Recursos Humanos</option>
-        </FilterSelect>
-        <Button>
-          <FiFilter size={16} />
-          Más filtros
-        </Button>
-      </FiltersContainer>
+          <FiltersContainer>
+            <SearchInput>
+              <FiSearch size={16} />
+              <input
+                type="text"
+                placeholder="Buscar ejecutores..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </SearchInput>
+            <FilterSelect
+              value={especialidadFilter}
+              onChange={(e) => setEspecialidadFilter(e.target.value)}
+            >
+              <option value="">Todas las especialidades</option>
+              <option value="ADMINISTRATIVA">Administrativa</option>
+              <option value="LEGAL">Legal</option>
+              <option value="TECNICA">Técnica</option>
+              <option value="FINANCIERA">Financiera</option>
+              <option value="RECURSOS_HUMANOS">Recursos Humanos</option>
+              <option value="GENERAL">General</option>
+            </FilterSelect>
+            <Button>
+              <FiFilter size={16} />
+              Más filtros
+            </Button>
+          </FiltersContainer>
 
-      <DistribucionGrid>
-        {filteredEjecutores.map((ejecutor) => (
-          <EjecutorCard key={ejecutor.id}>
-            <EjecutorHeader>
-              <EjecutorAvatar>
-                <FiUser size={20} />
-              </EjecutorAvatar>
-              <EjecutorInfo>
-                <EjecutorName>{ejecutor.nombre}</EjecutorName>
-                <EjecutorMeta>
-                  <span>Especialidad: {ejecutor.especialidad}</span>
-                  <CargaIndicator $carga={ejecutor.cargaActual}>
-                    {ejecutor.cargaActual} tareas
-                  </CargaIndicator>
-                </EjecutorMeta>
-              </EjecutorInfo>
-            </EjecutorHeader>
-            <EjecutorContent>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                  <FiList size={14} style={{ marginRight: '6px' }} />
-                  Tareas asignadas
-                </div>
-                <div style={{ fontSize: '12px', color: '#666' }}>
-                  {ejecutor.tareas.length} tareas
-                </div>
-              </div>
-              
-              <ProgressBar>
-                <ProgressFill 
-                  $percentage={(ejecutor.cargaActual / 5) * 100} 
-                  $color={getProgressColor(ejecutor.cargaActual)} 
-                />
-              </ProgressBar>
-              
-              {ejecutor.tareas.length > 0 ? (
-                <TareasList>
-                  {ejecutor.tareas.map((tarea) => (
-                    <TareaItem key={tarea.id}>
-                      <TareaHeader>
-                        <TareaTitulo>{tarea.titulo}</TareaTitulo>
-                        <PriorityBadge $priority={tarea.prioridad}>
-                          {getPriorityText(tarea.prioridad)}
-                        </PriorityBadge>
-                      </TareaHeader>
-                      <TareaMeta>
-                        <TareaFecha>
-                          <FiCalendar size={12} />
-                          {formatDate(tarea.fechaLimite)}
-                        </TareaFecha>
-                        <StatusBadge $status={tarea.estado}>
-                          {getStatusIcon(tarea.estado)}
-                          {getStatusText(tarea.estado)}
-                        </StatusBadge>
-                      </TareaMeta>
-                    </TareaItem>
-                  ))}
-                </TareasList>
-              ) : (
-                <EmptyTareas>
-                  No hay tareas asignadas
-                </EmptyTareas>
-              )}
-            </EjecutorContent>
-          </EjecutorCard>
-        ))}
-      </DistribucionGrid>
+          {filteredEjecutores.length === 0 ? (
+            <div style={{
+              padding: '30px',
+              textAlign: 'center',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '8px',
+              margin: '20px 0',
+              color: '#6c757d'
+            }}>
+              <FiUsers size={40} style={{ marginBottom: '15px', opacity: 0.5 }} />
+              <h3 style={{ marginBottom: '10px' }}>No se encontraron ejecutores</h3>
+              <p>
+                {searchTerm || especialidadFilter ?
+                  'Intente con otros criterios de búsqueda' :
+                  'No hay ejecutores con tareas asignadas en este momento'}
+              </p>
+            </div>
+          ) : (
+            <DistribucionGrid>
+              {filteredEjecutores.map((ejecutor) => (
+                <EjecutorCard key={ejecutor.id}>
+                  <EjecutorHeader>
+                    <EjecutorAvatar>
+                      <FiUser size={20} />
+                    </EjecutorAvatar>
+                    <EjecutorInfo>
+                      <EjecutorName>{ejecutor.nombre}</EjecutorName>
+                      <EjecutorMeta>
+                        <span>Especialidad: {ejecutor.especialidad}</span>
+                        <CargaIndicator $carga={ejecutor.cargaActual}>
+                          {ejecutor.cargaActual} tareas
+                        </CargaIndicator>
+                      </EjecutorMeta>
+                    </EjecutorInfo>
+                  </EjecutorHeader>
+                  <EjecutorContent>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                        <FiList size={14} style={{ marginRight: '6px' }} />
+                        Tareas asignadas
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#666' }}>
+                        {ejecutor.tareas.length} tareas
+                      </div>
+                    </div>
+
+                    <ProgressBar>
+                      <ProgressFill
+                        $percentage={(ejecutor.cargaActual / 5) * 100}
+                        $color={getProgressColor(ejecutor.cargaActual)}
+                      />
+                    </ProgressBar>
+
+                    {ejecutor.tareas.length > 0 ? (
+                      <TareasList>
+                        {ejecutor.tareas.map((tarea) => (
+                          <TareaItem
+                            key={tarea.id}
+                            onClick={() => handleVerDetalleTarea(tarea.id)}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            <TareaHeader>
+                              <TareaTitulo>{tarea.titulo}</TareaTitulo>
+                              <PriorityBadge $priority={tarea.prioridad}>
+                                {getPriorityText(tarea.prioridad)}
+                              </PriorityBadge>
+                            </TareaHeader>
+                            <TareaMeta>
+                              <TareaFecha>
+                                <FiCalendar size={12} />
+                                {tarea.fechaLimite ? formatDate(tarea.fechaLimite) : 'Sin fecha límite'}
+                              </TareaFecha>
+                              <StatusBadge $status={tarea.estado}>
+                                {getStatusIcon(tarea.estado)}
+                                {getStatusText(tarea.estado)}
+                              </StatusBadge>
+                            </TareaMeta>
+                          </TareaItem>
+                        ))}
+                      </TareasList>
+                    ) : (
+                      <EmptyTareas>
+                        No hay tareas asignadas
+                      </EmptyTareas>
+                    )}
+                  </EjecutorContent>
+                </EjecutorCard>
+              ))}
+            </DistribucionGrid>
+          )}
+        </>
+      )}
     </PageContainer>
   );
 };

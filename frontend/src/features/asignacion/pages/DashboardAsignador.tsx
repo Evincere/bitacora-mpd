@@ -318,7 +318,7 @@ const FilterSelect = styled.select`
   padding: 8px 12px;
   border-radius: 4px;
   border: 1px solid ${({ theme }) => theme.border};
-  background-color: ${({ theme }) => theme.backgroundInput};
+  background-color: ${({ theme }) => theme.background};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
 `;
@@ -373,7 +373,7 @@ const getStatusIcon = (status: string) => {
 
 const DashboardAsignador: React.FC = () => {
   const navigate = useNavigate();
-  
+
   // Usar el hook personalizado para asignaciones
   const {
     pendingRequests,
@@ -390,12 +390,12 @@ const DashboardAsignador: React.FC = () => {
   const [priorityFilter, setPriorityFilter] = useState<string>('');
 
   // Usar datos reales o de ejemplo
-  const solicitudes = pendingRequests || MOCK_SOLICITUDES;
+  const solicitudes = pendingRequests?.taskRequests || MOCK_SOLICITUDES;
   const distribucionCarga = workloadDistribution || MOCK_DISTRIBUCION_CARGA;
 
   // Filtrar solicitudes
   const filteredSolicitudes = solicitudes.filter(solicitud => {
-    if (categoryFilter && solicitud.category !== categoryFilter) return false;
+    if (categoryFilter && solicitud.category?.name !== categoryFilter) return false;
     if (priorityFilter && solicitud.priority !== priorityFilter) return false;
     return true;
   });
@@ -409,10 +409,10 @@ const DashboardAsignador: React.FC = () => {
   }).length;
 
   // Obtener categorías únicas para el filtro
-  const uniqueCategories = Array.from(new Set(solicitudes.map(s => s.category)));
-  
+  const uniqueCategories = Array.from(new Set(solicitudes.map(s => s.category?.name).filter(Boolean)));
+
   // Obtener prioridades únicas para el filtro
-  const uniquePriorities = Array.from(new Set(solicitudes.map(s => s.priority)));
+  const uniquePriorities = Array.from(new Set(solicitudes.map(s => s.priority).filter(Boolean)));
 
   const handleRefresh = () => {
     refreshAllData();
@@ -420,6 +420,10 @@ const DashboardAsignador: React.FC = () => {
 
   const handleAsignarSolicitud = (id: number) => {
     navigate(`/app/asignacion/asignar/${id}`);
+  };
+
+  const handleVerDetalleTarea = (id: number) => {
+    navigate(`/app/asignacion/detalle/${id}`);
   };
 
   const handleVerDistribucion = () => {
@@ -489,10 +493,10 @@ const DashboardAsignador: React.FC = () => {
             <FiInbox size={18} />
             Bandeja de Entrada
           </SectionTitle>
-          
+
           <FilterContainer>
-            <FilterSelect 
-              value={categoryFilter} 
+            <FilterSelect
+              value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
             >
               <option value="">Todas las categorías</option>
@@ -502,9 +506,9 @@ const DashboardAsignador: React.FC = () => {
                 </option>
               ))}
             </FilterSelect>
-            
-            <FilterSelect 
-              value={priorityFilter} 
+
+            <FilterSelect
+              value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
             >
               <option value="">Todas las prioridades</option>
@@ -515,7 +519,7 @@ const DashboardAsignador: React.FC = () => {
               ))}
             </FilterSelect>
           </FilterContainer>
-          
+
           {filteredSolicitudes.length > 0 ? (
             <SolicitudesList>
               {filteredSolicitudes.map((solicitud) => (
@@ -543,7 +547,7 @@ const DashboardAsignador: React.FC = () => {
                   </SolicitudFooter>
                 </SolicitudItem>
               ))}
-              
+
               <div style={{ textAlign: 'center', marginTop: '16px' }}>
                 <Button onClick={() => navigate('/app/asignacion/bandeja')}>
                   Ver todas las solicitudes
@@ -564,7 +568,7 @@ const DashboardAsignador: React.FC = () => {
             <FiUsers size={18} />
             Distribución de Carga
           </SectionTitle>
-          
+
           <WorkloadTable>
             <thead>
               <tr>
@@ -580,9 +584,9 @@ const DashboardAsignador: React.FC = () => {
                 let color = '#4CAF50'; // Verde para carga baja
                 if (cargaPorcentaje > 75) color = '#F44336'; // Rojo para carga alta
                 else if (cargaPorcentaje > 50) color = '#FF9800'; // Naranja para carga media
-                
+
                 return (
-                  <TableRow key={index}>
+                  <TableRow key={index} style={{ cursor: 'pointer' }} onClick={() => handleVerDistribucion()}>
                     <TableCell>{ejecutor.executorName}</TableCell>
                     <TableCell>{ejecutor.assignedTasks}</TableCell>
                     <TableCell>{ejecutor.pendingTasks}</TableCell>
@@ -596,18 +600,18 @@ const DashboardAsignador: React.FC = () => {
               })}
             </tbody>
           </WorkloadTable>
-          
+
           <div style={{ textAlign: 'center', marginTop: '16px' }}>
             <Button onClick={handleVerDistribucion}>
               Ver distribución detallada
             </Button>
           </div>
-          
+
           <SectionTitle style={{ marginTop: '24px' }}>
             <FiPieChart size={18} />
             Métricas de Asignación
           </SectionTitle>
-          
+
           <div style={{ textAlign: 'center', marginTop: '16px' }}>
             <Button onClick={handleVerMetricas}>
               Ver métricas detalladas

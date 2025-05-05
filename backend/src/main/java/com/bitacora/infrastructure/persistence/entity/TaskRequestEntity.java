@@ -60,6 +60,9 @@ public class TaskRequestEntity {
     @Column(name = "assigner_id")
     private Long assignerId;
 
+    @Column(name = "executor_id")
+    private Long executorId;
+
     @Column(name = "request_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime requestDate;
@@ -104,6 +107,7 @@ public class TaskRequestEntity {
         this.status = builder.status;
         this.requesterId = builder.requesterId;
         this.assignerId = builder.assignerId;
+        this.executorId = builder.executorId;
         this.requestDate = builder.requestDate;
         this.assignmentDate = builder.assignmentDate;
         this.notes = builder.notes;
@@ -185,6 +189,14 @@ public class TaskRequestEntity {
 
     public void setAssignerId(Long assignerId) {
         this.assignerId = assignerId;
+    }
+
+    public Long getExecutorId() {
+        return executorId;
+    }
+
+    public void setExecutorId(Long executorId) {
+        this.executorId = executorId;
     }
 
     public LocalDateTime getRequestDate() {
@@ -291,8 +303,10 @@ public class TaskRequestEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         TaskRequestEntity that = (TaskRequestEntity) o;
         return Objects.equals(id, that.id);
     }
@@ -326,6 +340,7 @@ public class TaskRequestEntity {
         private TaskRequestStatusEntity status;
         private Long requesterId;
         private Long assignerId;
+        private Long executorId;
         private LocalDateTime requestDate;
         private LocalDateTime assignmentDate;
         private String notes;
@@ -383,6 +398,11 @@ public class TaskRequestEntity {
 
         public Builder assignerId(Long assignerId) {
             this.assignerId = assignerId;
+            return this;
+        }
+
+        public Builder executorId(Long executorId) {
+            this.executorId = executorId;
             return this;
         }
 

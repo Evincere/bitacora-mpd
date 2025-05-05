@@ -5,6 +5,7 @@ import { useRealTimeNotifications } from '../contexts/RealTimeNotificationContex
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
+import EnhancedNotificationList from './EnhancedNotificationList';
 
 const NotificationIconContainer = styled.div`
   position: relative;
@@ -16,7 +17,7 @@ const NotificationIconContainer = styled.div`
   height: 40px;
   border-radius: 50%;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.backgroundHover};
   }
@@ -102,11 +103,11 @@ const NotificationItem = styled.div<{ read: boolean }>`
   background-color: ${({ read, theme }) => read ? 'transparent' : theme.backgroundTertiary};
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.backgroundHover};
   }
-  
+
   &:last-child {
     border-bottom: none;
   }
@@ -159,7 +160,7 @@ const NotificationItemAction = styled.button`
   cursor: pointer;
   padding: 2px 4px;
   border-radius: 4px;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.backgroundTertiary};
   }
@@ -183,11 +184,11 @@ const MarkAllReadButton = styled.button`
   cursor: pointer;
   padding: 6px 12px;
   border-radius: 4px;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.backgroundTertiary};
   }
-  
+
   &:disabled {
     color: ${({ theme }) => theme.textTertiary};
     cursor: not-allowed;
@@ -200,9 +201,9 @@ const ConnectionStatus = styled.div<{ connected: boolean }>`
   gap: 6px;
   font-size: 12px;
   padding: 8px 16px;
-  background-color: ${({ connected, theme }) => 
+  background-color: ${({ connected, theme }) =>
     connected ? theme.successLight || '#e6f7e6' : theme.errorLight || '#ffe6e6'};
-  color: ${({ connected, theme }) => 
+  color: ${({ connected, theme }) =>
     connected ? theme.success : theme.error};
 `;
 
@@ -225,7 +226,7 @@ const RealTimeNotificationCenter: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { notifications, unreadCount, markAsRead, markAllAsRead, connected } = useRealTimeNotifications();
   const panelRef = useRef<HTMLDivElement>(null);
-  
+
   // Cerrar el panel al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -233,31 +234,31 @@ const RealTimeNotificationCenter: React.FC = () => {
         setIsOpen(false);
       }
     };
-    
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen]);
-  
+
   // Manejar clic en el icono de notificaciones
   const handleTogglePanel = () => {
     setIsOpen(!isOpen);
   };
-  
+
   // Manejar clic en una notificación
   const handleNotificationClick = (id: string, link?: string) => {
     markAsRead(id);
-    
+
     if (link) {
       // Navegar al enlace
       window.location.href = link;
     }
   };
-  
+
   return (
     <div style={{ position: 'relative' }}>
       <NotificationIconContainer onClick={handleTogglePanel}>
@@ -268,7 +269,7 @@ const RealTimeNotificationCenter: React.FC = () => {
           </NotificationBadge>
         )}
       </NotificationIconContainer>
-      
+
       <AnimatePresence>
         {isOpen && (
           <NotificationPanel
@@ -284,7 +285,7 @@ const RealTimeNotificationCenter: React.FC = () => {
                 <FiX size={18} />
               </NotificationItemAction>
             </NotificationHeader>
-            
+
             <ConnectionStatus connected={connected}>
               {connected ? (
                 <>
@@ -298,52 +299,14 @@ const RealTimeNotificationCenter: React.FC = () => {
                 </>
               )}
             </ConnectionStatus>
-            
+
             <NotificationList>
-              {notifications.length === 0 ? (
-                <EmptyState>
-                  <EmptyStateIcon>
-                    <FiBell />
-                  </EmptyStateIcon>
-                  <EmptyStateText>No tienes notificaciones</EmptyStateText>
-                </EmptyState>
-              ) : (
-                notifications.map(notification => (
-                  <NotificationItem
-                    key={notification.id}
-                    read={notification.read}
-                    onClick={() => handleNotificationClick(notification.id, notification.link)}
-                  >
-                    <NotificationItemHeader>
-                      <NotificationItemTitle>{notification.title}</NotificationItemTitle>
-                      <NotificationItemTime>
-                        {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: es })}
-                      </NotificationItemTime>
-                    </NotificationItemHeader>
-                    <NotificationItemContent>
-                      {notification.message}
-                    </NotificationItemContent>
-                    <NotificationItemFooter>
-                      <NotificationItemType>
-                        {getNotificationIcon(notification.type)}
-                        <span style={{ marginLeft: '4px' }}>{notification.type}</span>
-                      </NotificationItemType>
-                      {!notification.read && (
-                        <NotificationItemAction
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            markAsRead(notification.id);
-                          }}
-                        >
-                          Marcar como leída
-                        </NotificationItemAction>
-                      )}
-                    </NotificationItemFooter>
-                  </NotificationItem>
-                ))
-              )}
+              <EnhancedNotificationList
+                notifications={notifications}
+                onNotificationClick={handleNotificationClick}
+              />
             </NotificationList>
-            
+
             {notifications.length > 0 && (
               <NotificationFooter>
                 <MarkAllReadButton

@@ -29,7 +29,7 @@ public class TaskRequestRepositoryAdapter implements TaskRequestRepository {
      * Constructor.
      *
      * @param jpaRepository Repositorio JPA
-     * @param mapper Mapper para convertir entre entidades
+     * @param mapper        Mapper para convertir entre entidades
      */
     public TaskRequestRepositoryAdapter(TaskRequestJpaRepository jpaRepository, TaskRequestEntityMapper mapper) {
         this.jpaRepository = jpaRepository;
@@ -90,8 +90,8 @@ public class TaskRequestRepositoryAdapter implements TaskRequestRepository {
      * Busca solicitudes por el ID del solicitante.
      *
      * @param requesterId ID del solicitante
-     * @param page Número de página (0-indexed)
-     * @param size Tamaño de la página
+     * @param page        Número de página (0-indexed)
+     * @param size        Tamaño de la página
      * @return Lista de solicitudes del solicitante
      */
     @Override
@@ -117,8 +117,8 @@ public class TaskRequestRepositoryAdapter implements TaskRequestRepository {
      * Busca solicitudes por el ID del asignador.
      *
      * @param assignerId ID del asignador
-     * @param page Número de página (0-indexed)
-     * @param size Tamaño de la página
+     * @param page       Número de página (0-indexed)
+     * @param size       Tamaño de la página
      * @return Lista de solicitudes asignadas por el asignador
      */
     @Override
@@ -144,8 +144,8 @@ public class TaskRequestRepositoryAdapter implements TaskRequestRepository {
      * Busca solicitudes por estado.
      *
      * @param status Estado de las solicitudes
-     * @param page Número de página (0-indexed)
-     * @param size Tamaño de la página
+     * @param page   Número de página (0-indexed)
+     * @param size   Tamaño de la página
      * @return Lista de solicitudes con el estado especificado
      */
     @Override
@@ -180,7 +180,47 @@ public class TaskRequestRepositoryAdapter implements TaskRequestRepository {
     }
 
     /**
-     * Convierte un enum de dominio TaskRequestStatus a un enum de entidad TaskRequestStatusEntity.
+     * Busca una solicitud que contenga un comentario con el ID especificado.
+     *
+     * @param commentId ID del comentario
+     * @return Un Optional que contiene la solicitud si existe, o vacío si no
+     */
+    @Override
+    public Optional<TaskRequest> findByCommentId(Long commentId) {
+        var entity = jpaRepository.findByCommentId(commentId);
+        return Optional.ofNullable(entity).map(mapper::toDomain);
+    }
+
+    /**
+     * Busca solicitudes por el ID del ejecutor.
+     *
+     * @param executorId ID del ejecutor
+     * @param page       Número de página (0-indexed)
+     * @param size       Tamaño de la página
+     * @return Lista de solicitudes asignadas al ejecutor
+     */
+    @Override
+    public List<TaskRequest> findByExecutorId(Long executorId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "assignmentDate"));
+        Page<TaskRequest> taskRequestPage = jpaRepository.findByExecutorId(executorId, pageable)
+                .map(mapper::toDomain);
+        return taskRequestPage.getContent();
+    }
+
+    /**
+     * Cuenta el número de solicitudes asignadas a un ejecutor.
+     *
+     * @param executorId ID del ejecutor
+     * @return El número de solicitudes asignadas al ejecutor
+     */
+    @Override
+    public long countByExecutorId(Long executorId) {
+        return jpaRepository.countByExecutorId(executorId);
+    }
+
+    /**
+     * Convierte un enum de dominio TaskRequestStatus a un enum de entidad
+     * TaskRequestStatusEntity.
      *
      * @param status El enum de dominio a convertir
      * @return El enum de entidad resultante

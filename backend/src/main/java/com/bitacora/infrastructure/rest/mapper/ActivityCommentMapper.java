@@ -1,30 +1,31 @@
 package com.bitacora.infrastructure.rest.mapper;
 
 import com.bitacora.domain.model.activity.ActivityComment;
-import com.bitacora.infrastructure.rest.dto.ActivityCommentDTO;
+import com.bitacora.infrastructure.rest.dto.ActivityCommentDto;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 /**
- * Mapper para convertir entre ActivityComment y ActivityCommentDTO.
+ * Mapper para convertir entre ActivityComment y ActivityCommentDto.
  */
 @Component("activityCommentDtoMapper")
 public class ActivityCommentMapper {
 
     /**
-     * Convierte un modelo de dominio ActivityComment a un DTO ActivityCommentDTO.
+     * Convierte un modelo de dominio ActivityComment a un DTO ActivityCommentDto.
      *
      * @param comment El modelo de dominio ActivityComment
-     * @return El DTO ActivityCommentDTO
+     * @return El DTO ActivityCommentDto
      */
-    public ActivityCommentDTO toDto(ActivityComment comment) {
+    public ActivityCommentDto toDto(ActivityComment comment) {
         if (comment == null) {
             return null;
         }
 
-        return ActivityCommentDTO.builder()
+        return ActivityCommentDto.builder()
                 .id(comment.getId())
                 .activityId(comment.getActivityId())
                 .userId(comment.getUserId())
@@ -32,16 +33,20 @@ public class ActivityCommentMapper {
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())
+                .readBy(new ArrayList<>()) // Por defecto, nadie lo ha leído
+                .readByCurrentUser(false) // Por defecto, no leído por el usuario actual
+                .mentions(new ArrayList<>()) // Por defecto, sin menciones
                 .build();
     }
 
     /**
-     * Convierte una lista de modelos de dominio ActivityComment a una lista de DTOs ActivityCommentDTO.
+     * Convierte una lista de modelos de dominio ActivityComment a una lista de DTOs
+     * ActivityCommentDto.
      *
      * @param comments Lista de modelos de dominio ActivityComment
-     * @return Lista de DTOs ActivityCommentDTO
+     * @return Lista de DTOs ActivityCommentDto
      */
-    public List<ActivityCommentDTO> toDtoList(List<ActivityComment> comments) {
+    public List<ActivityCommentDto> toDtoList(List<ActivityComment> comments) {
         if (comments == null) {
             return null;
         }

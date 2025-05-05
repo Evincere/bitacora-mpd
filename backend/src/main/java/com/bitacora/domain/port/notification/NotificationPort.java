@@ -9,6 +9,7 @@ import com.bitacora.domain.model.notification.TaskStatusChangeNotification;
 import com.bitacora.domain.model.notification.DeadlineReminderNotification;
 import com.bitacora.domain.model.notification.AnnouncementNotification;
 import com.bitacora.domain.model.notification.CollaborationNotification;
+import com.bitacora.domain.model.notification.MentionNotification;
 
 /**
  * Puerto para el envío de notificaciones en tiempo real.
@@ -132,4 +133,12 @@ public interface NotificationPort {
      * @param activityId   El ID de la actividad
      */
     void broadcastCollaborationNotification(CollaborationNotification notification, Long activityId);
+
+    /**
+     * Envía una notificación de mención en comentario a un usuario.
+     *
+     * @param username     El nombre de usuario del destinatario
+     * @param notification La notificación de mención
+     */
+    void sendMentionNotification(String username, MentionNotification notification);
 }

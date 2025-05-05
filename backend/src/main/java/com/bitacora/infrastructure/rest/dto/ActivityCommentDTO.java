@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * DTO para transferir información de comentarios en actividades.
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActivityCommentDTO {
+public class ActivityCommentDto {
     private Long id;
     private Long activityId;
     private Long userId;
@@ -22,4 +23,7 @@ public class ActivityCommentDTO {
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<Long> readBy;
+    private Boolean readByCurrentUser;
+    private List<Long> mentions;
 }

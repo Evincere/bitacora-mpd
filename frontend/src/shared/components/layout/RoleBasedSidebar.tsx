@@ -222,6 +222,9 @@ interface RoleBasedSidebarProps {
     username?: string;
     role?: string;
     email?: string;
+    firstName?: string;
+    lastName?: string;
+    fullName?: string;
   };
 }
 
@@ -248,7 +251,7 @@ const RoleBasedSidebar: React.FC<RoleBasedSidebarProps> = ({ user }) => {
           <FiUser size={20} />
         </div>
         <div className="user-info">
-          <h3>{user?.username || 'Usuario'}</h3>
+          <h3>{user?.fullName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.username || 'Usuario'}</h3>
           <p>{userRole}</p>
         </div>
       </UserProfile>

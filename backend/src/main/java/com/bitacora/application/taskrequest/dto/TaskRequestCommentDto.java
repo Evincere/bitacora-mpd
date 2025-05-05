@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 /**
- * DTO para transferir información de comentarios de solicitudes de tareas entre capas.
+ * DTO para transferir información de comentarios de solicitudes de tareas entre
+ * capas.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TaskRequestCommentDto {
@@ -15,9 +17,11 @@ public class TaskRequestCommentDto {
     private Long userId;
     private String userName;
     private String content;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
+
+    private Set<Long> mentions;
 
     // Constructor por defecto
     public TaskRequestCommentDto() {
@@ -31,6 +35,7 @@ public class TaskRequestCommentDto {
         this.userName = builder.userName;
         this.content = builder.content;
         this.createdAt = builder.createdAt;
+        this.mentions = builder.mentions;
     }
 
     // Getters
@@ -58,6 +63,10 @@ public class TaskRequestCommentDto {
         return createdAt;
     }
 
+    public Set<Long> getMentions() {
+        return mentions;
+    }
+
     // Builder
     public static Builder builder() {
         return new Builder();
@@ -70,6 +79,7 @@ public class TaskRequestCommentDto {
         private String userName;
         private String content;
         private LocalDateTime createdAt;
+        private Set<Long> mentions;
 
         private Builder() {
         }
@@ -101,6 +111,11 @@ public class TaskRequestCommentDto {
 
         public Builder createdAt(LocalDateTime createdAt) {
             this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder mentions(Set<Long> mentions) {
+            this.mentions = mentions;
             return this;
         }
 

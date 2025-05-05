@@ -1,4 +1,4 @@
--- V14__Add_Workflow_Permissions.sql
+-- V16__Add_Workflow_Permissions.sql
 -- Migración para agregar permisos específicos para el flujo de trabajo de actividades
 
 -- Agregar permisos específicos para el flujo de trabajo a los usuarios existentes

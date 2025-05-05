@@ -1,7 +1,9 @@
 package com.bitacora.domain.model.taskrequest;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Representa un comentario en una solicitud de tarea.
@@ -12,6 +14,8 @@ public class TaskRequestComment {
     private Long userId;
     private String content;
     private LocalDateTime createdAt;
+    private Set<Long> readBy = new HashSet<>();
+    private Set<Long> mentions = new HashSet<>();
 
     /**
      * Constructor privado para el patrón Builder.
@@ -73,6 +77,67 @@ public class TaskRequestComment {
         return createdAt;
     }
 
+    /**
+     * Obtiene el conjunto de IDs de usuarios que han leído el comentario.
+     *
+     * @return Conjunto de IDs de usuarios
+     */
+    public Set<Long> getReadBy() {
+        return new HashSet<>(readBy);
+    }
+
+    /**
+     * Marca el comentario como leído por un usuario.
+     *
+     * @param userId ID del usuario que ha leído el comentario
+     * @return true si el usuario se añadió a la lista de lectores, false si ya
+     *         estaba en la lista
+     */
+    public boolean markAsReadBy(Long userId) {
+        return this.readBy.add(userId);
+    }
+
+    /**
+     * Verifica si un usuario ha leído el comentario.
+     *
+     * @param userId ID del usuario
+     * @return true si el usuario ha leído el comentario, false en caso contrario
+     */
+    public boolean isReadBy(Long userId) {
+        return this.readBy.contains(userId);
+    }
+
+    /**
+     * Obtiene el conjunto de IDs de usuarios mencionados en el comentario.
+     *
+     * @return Conjunto de IDs de usuarios mencionados
+     */
+    public Set<Long> getMentions() {
+        return new HashSet<>(mentions);
+    }
+
+    /**
+     * Añade una mención a un usuario en el comentario.
+     *
+     * @param userId ID del usuario mencionado
+     * @return true si el usuario se añadió a la lista de menciones, false si ya
+     *         estaba en la lista
+     */
+    public boolean addMention(Long userId) {
+        return this.mentions.add(userId);
+    }
+
+    /**
+     * Verifica si un usuario está mencionado en el comentario.
+     *
+     * @param userId ID del usuario
+     * @return true si el usuario está mencionado en el comentario, false en caso
+     *         contrario
+     */
+    public boolean isMentioned(Long userId) {
+        return this.mentions.contains(userId);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -81,7 +146,7 @@ public class TaskRequestComment {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        
+
         final TaskRequestComment that = (TaskRequestComment) o;
         return Objects.equals(id, that.id);
     }
@@ -98,6 +163,8 @@ public class TaskRequestComment {
                 ", taskRequestId=" + taskRequestId +
                 ", userId=" + userId +
                 ", createdAt=" + createdAt +
+                ", readByCount=" + (readBy != null ? readBy.size() : 0) +
+                ", mentionsCount=" + (mentions != null ? mentions.size() : 0) +
                 '}';
     }
 
@@ -135,20 +202,34 @@ public class TaskRequestComment {
             return this;
         }
 
+        public Builder readBy(final Set<Long> readBy) {
+            if (readBy != null) {
+                instance.readBy = new HashSet<>(readBy);
+            }
+            return this;
+        }
+
+        public Builder mentions(final Set<Long> mentions) {
+            if (mentions != null) {
+                instance.mentions = new HashSet<>(mentions);
+            }
+            return this;
+        }
+
         public TaskRequestComment build() {
             // Validaciones básicas
             if (instance.content == null || instance.content.trim().isEmpty()) {
                 throw new IllegalArgumentException("El contenido no puede estar vacío");
             }
-            
+
             if (instance.userId == null) {
                 throw new IllegalArgumentException("El identificador del usuario no puede ser nulo");
             }
-            
+
             if (instance.createdAt == null) {
                 instance.createdAt = LocalDateTime.now();
             }
-            
+
             return instance;
         }
     }

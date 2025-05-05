@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import {
   FiFilter,
@@ -11,61 +11,34 @@ import {
   FiChevronDown,
   FiChevronUp,
   FiUserPlus,
-  FiUser
+  FiUser,
+  FiUsers,
+  FiLoader,
+  FiInfo
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
-// Datos de ejemplo para mostrar en la interfaz
-const MOCK_SOLICITUDES = [
-  {
-    id: 1,
-    titulo: 'Solicitud de informe técnico',
-    descripcion: 'Necesito un informe técnico sobre el caso #12345 para presentar en la audiencia del próximo mes.',
-    categoria: 'LEGAL',
-    prioridad: 'HIGH',
-    fechaCreacion: '2025-05-01T10:30:00',
-    fechaLimite: '2025-05-15',
-    estado: 'REQUESTED',
-    solicitante: 'Juan Pérez',
-    asignador: null,
-    ejecutor: null
-  },
-  {
-    id: 2,
-    titulo: 'Revisión de expediente administrativo',
-    descripcion: 'Solicito la revisión del expediente administrativo #54321 para verificar si hay inconsistencias.',
-    categoria: 'ADMINISTRATIVA',
-    prioridad: 'MEDIUM',
-    fechaCreacion: '2025-04-28T14:15:00',
-    fechaLimite: '2025-05-10',
-    estado: 'REQUESTED',
-    solicitante: 'María López',
-    asignador: null,
-    ejecutor: null
-  },
-  {
-    id: 3,
-    titulo: 'Preparación de presentación para audiencia',
-    descripcion: 'Necesito una presentación para la audiencia del caso #67890 que resuma los puntos principales.',
-    categoria: 'LEGAL',
-    prioridad: 'CRITICAL',
-    fechaCreacion: '2025-04-25T09:45:00',
-    fechaLimite: '2025-05-05',
-    estado: 'REQUESTED',
-    solicitante: 'Pedro Gómez',
-    asignador: null,
-    ejecutor: null
+// Hooks y servicios
+import { useAsignacion } from '../hooks/useAsignacion';
+import { TaskRequest } from '@/features/solicitudes/services/solicitudesService';
+import { Ejecutor } from '../services/asignacionService';
+
+// Animación para el spinner
+const SpinAnimation = keyframes`
+  from {
+    transform: rotate(0deg);
   }
-];
+  to {
+    transform: rotate(360deg);
+  }
+`;
 
-// Datos de ejemplo para los ejecutores disponibles
-const MOCK_EJECUTORES = [
-  { id: 1, nombre: 'Ana Martínez', cargaActual: 3, especialidad: 'LEGAL' },
-  { id: 2, nombre: 'Luis Sánchez', cargaActual: 2, especialidad: 'LEGAL' },
-  { id: 3, nombre: 'María López', cargaActual: 1, especialidad: 'FINANCIERA' },
-  { id: 4, nombre: 'Pedro Gómez', cargaActual: 4, especialidad: 'TECNICA' },
-  { id: 5, nombre: 'Sofía Rodríguez', cargaActual: 2, especialidad: 'ADMINISTRATIVA' }
-];
+// Componente para el spinner
+const Spinner = styled(FiLoader)`
+  animation: ${SpinAnimation} 1s linear infinite;
+`;
 
 const PageContainer = styled.div`
   padding: 0;
@@ -101,7 +74,7 @@ const SearchInput = styled.div`
     padding: 10px 12px 10px 36px;
     border-radius: 4px;
     border: 1px solid ${({ theme }) => theme.border};
-    background-color: ${({ theme }) => theme.backgroundInput};
+    background-color: ${({ theme }) => theme.inputBackground};
     color: ${({ theme }) => theme.text};
     font-size: 14px;
     transition: border-color 0.2s;
@@ -125,7 +98,7 @@ const FilterSelect = styled.select`
   padding: 10px 12px;
   border-radius: 4px;
   border: 1px solid ${({ theme }) => theme.border};
-  background-color: ${({ theme }) => theme.backgroundInput};
+  background-color: ${({ theme }) => theme.inputBackground};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
   transition: border-color 0.2s;
@@ -224,47 +197,63 @@ const StatusBadge = styled.span<{ $status: string }>`
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
+  padding: 5px 10px;
   border-radius: 4px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
 
   ${({ $status, theme }) => {
     switch ($status) {
       case 'REQUESTED':
         return `
-          background-color: ${theme.infoLight};
-          color: ${theme.info};
+          background-color: #E3F2FD;
+          color: #0D47A1;
+          border: 1px solid #2196F3;
+        `;
+      case 'SUBMITTED':
+        return `
+          background-color: #E3F2FD;
+          color: #0D47A1;
+          border: 1px solid #2196F3;
         `;
       case 'ASSIGNED':
         return `
-          background-color: ${theme.warningLight};
-          color: ${theme.warning};
+          background-color: #FFF8E1;
+          color: #E65100;
+          border: 1px solid #FFC107;
         `;
       case 'IN_PROGRESS':
         return `
-          background-color: ${theme.primaryLight};
-          color: ${theme.primary};
+          background-color: #EDE7F6;
+          color: #4527A0;
+          border: 1px solid #673AB7;
         `;
       case 'COMPLETED':
         return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
+          background-color: #E8F5E9;
+          color: #1B5E20;
+          border: 1px solid #4CAF50;
         `;
       case 'APPROVED':
         return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
+          background-color: #E8F5E9;
+          color: #1B5E20;
+          border: 1px solid #4CAF50;
         `;
       case 'REJECTED':
         return `
-          background-color: ${theme.errorLight};
-          color: ${theme.error};
+          background-color: #FFEBEE;
+          color: #B71C1C;
+          border: 1px solid #F44336;
         `;
       default:
         return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
+          background-color: #ECEFF1;
+          color: #263238;
+          border: 1px solid #607D8B;
         `;
     }
   }}
@@ -274,42 +263,51 @@ const PriorityBadge = styled.span<{ $priority: string }>`
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
+  padding: 5px 10px;
   border-radius: 4px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
 
   ${({ $priority, theme }) => {
     switch ($priority) {
       case 'CRITICAL':
         return `
-          background-color: ${theme.errorLight};
-          color: ${theme.error};
+          background-color: #FFEBEE;
+          color: #B71C1C;
+          border: 1px solid #F44336;
         `;
       case 'HIGH':
         return `
-          background-color: ${theme.warningLight};
-          color: ${theme.warning};
+          background-color: #FFF3E0;
+          color: #E65100;
+          border: 1px solid #FF9800;
         `;
       case 'MEDIUM':
         return `
-          background-color: ${theme.infoLight};
-          color: ${theme.info};
+          background-color: #E3F2FD;
+          color: #0D47A1;
+          border: 1px solid #2196F3;
         `;
       case 'LOW':
         return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
+          background-color: #E8F5E9;
+          color: #1B5E20;
+          border: 1px solid #4CAF50;
         `;
       case 'TRIVIAL':
         return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
+          background-color: #ECEFF1;
+          color: #263238;
+          border: 1px solid #607D8B;
         `;
       default:
         return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
+          background-color: #ECEFF1;
+          color: #263238;
+          border: 1px solid #607D8B;
         `;
     }
   }}
@@ -362,6 +360,28 @@ const EjecutoresList = styled.div`
   flex-direction: column;
   gap: 8px;
   margin-bottom: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 8px;
+
+  /* Estilo para la barra de desplazamiento */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--primary-color, #6C5CE7);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #5a4bd1;
+  }
 `;
 
 const EjecutorItem = styled.div<{ $selected: boolean }>`
@@ -419,25 +439,31 @@ const CargaIndicator = styled.div<{ $carga: number }>`
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 4px;
   font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 
   ${({ $carga, theme }) => {
     if ($carga <= 2) {
       return `
-        background-color: ${theme.successLight};
-        color: ${theme.success};
+        background-color: #E8F5E9;
+        color: #1B5E20;
+        border: 1px solid #4CAF50;
       `;
     } else if ($carga <= 4) {
       return `
-        background-color: ${theme.warningLight};
-        color: ${theme.warning};
+        background-color: #FFF3E0;
+        color: #E65100;
+        border: 1px solid #FF9800;
       `;
     } else {
       return `
-        background-color: ${theme.errorLight};
-        color: ${theme.error};
+        background-color: #FFEBEE;
+        color: #B71C1C;
+        border: 1px solid #F44336;
       `;
     }
   }}
@@ -478,19 +504,21 @@ const EmptyState = styled.div`
 
 // Función para formatear fechas
 const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
+  try {
+    return format(new Date(dateString), 'dd MMM yyyy', { locale: es });
+  } catch (error) {
+    console.error('Error al formatear fecha:', error);
+    return 'Fecha inválida';
+  }
 };
 
 // Función para obtener el texto de estado
 const getStatusText = (status: string) => {
   switch (status) {
-    case 'REQUESTED':
-      return 'Solicitada';
+    case 'DRAFT':
+      return 'Borrador';
+    case 'SUBMITTED':
+      return 'Enviada';
     case 'ASSIGNED':
       return 'Asignada';
     case 'IN_PROGRESS':
@@ -501,6 +529,8 @@ const getStatusText = (status: string) => {
       return 'Aprobada';
     case 'REJECTED':
       return 'Rechazada';
+    case 'CANCELLED':
+      return 'Cancelada';
     default:
       return status;
   }
@@ -509,7 +539,9 @@ const getStatusText = (status: string) => {
 // Función para obtener el icono de estado
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case 'REQUESTED':
+    case 'DRAFT':
+      return <FiClock size={14} />;
+    case 'SUBMITTED':
       return <FiClock size={14} />;
     case 'ASSIGNED':
       return <FiClock size={14} />;
@@ -520,6 +552,8 @@ const getStatusIcon = (status: string) => {
     case 'APPROVED':
       return <FiCheckCircle size={14} />;
     case 'REJECTED':
+      return <FiXCircle size={14} />;
+    case 'CANCELLED':
       return <FiXCircle size={14} />;
     default:
       return <FiAlertCircle size={14} />;
@@ -573,9 +607,40 @@ const BandejaEntrada: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [selectedEjecutor, setSelectedEjecutor] = useState<number | null>(null);
   const [asignacionNotas, setAsignacionNotas] = useState('');
+  const [showAllExecutors, setShowAllExecutors] = useState(false);
+
+  // Usar el hook personalizado para obtener datos y funcionalidades
+  const {
+    pendingRequests,
+    availableExecutors,
+    isLoadingPendingRequests,
+    isLoadingExecutors,
+    isAssigningTask,
+    assignTaskRequest,
+    filterExecutorsBySpecialty
+  } = useAsignacion();
+
+  // Adaptar los datos del backend al formato esperado por el componente
+  const adaptarSolicitudes = (): any[] => {
+    if (!pendingRequests?.taskRequests) return [];
+
+    return pendingRequests.taskRequests.map(tr => ({
+      id: tr.id,
+      titulo: tr.title,
+      descripcion: tr.description,
+      categoria: tr.category?.name || 'OTRA',
+      prioridad: tr.priority,
+      fechaCreacion: tr.requestDate,
+      fechaLimite: tr.dueDate,
+      estado: tr.status,
+      solicitante: tr.requesterName || (tr.requesterId ? `Usuario #${tr.requesterId}` : 'Desconocido'),
+      asignador: tr.assignerName,
+      ejecutor: tr.executorName
+    }));
+  };
 
   // Filtrar solicitudes según los criterios
-  const filteredSolicitudes = MOCK_SOLICITUDES.filter(solicitud => {
+  const filteredSolicitudes = adaptarSolicitudes().filter(solicitud => {
     const matchesSearch = searchTerm === '' ||
       solicitud.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       solicitud.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
@@ -603,10 +668,12 @@ const BandejaEntrada: React.FC = () => {
       return;
     }
 
-    // Aquí iría la lógica para asignar la solicitud al ejecutor seleccionado
-    const ejecutor = MOCK_EJECUTORES.find(e => e.id === selectedEjecutor);
-
-    toast.success(`Solicitud asignada a ${ejecutor?.nombre}`);
+    // Asignar la solicitud al ejecutor seleccionado
+    assignTaskRequest({
+      taskRequestId: solicitudId,
+      executorId: selectedEjecutor,
+      notes: asignacionNotas
+    });
 
     // Cerrar el panel expandido
     setExpandedId(null);
@@ -616,25 +683,32 @@ const BandejaEntrada: React.FC = () => {
 
   const handleRechazar = (solicitudId: number) => {
     // Aquí iría la lógica para rechazar la solicitud
-    toast.info('Solicitud rechazada');
+    toast.info('Funcionalidad de rechazo no implementada aún');
 
     // Cerrar el panel expandido
     setExpandedId(null);
   };
 
   // Filtrar ejecutores por especialidad según la categoría de la solicitud seleccionada
+  // o mostrar todos los ejecutores disponibles según la preferencia del usuario
   const getEjecutoresFiltrados = (solicitudId: number) => {
-    const solicitud = MOCK_SOLICITUDES.find(s => s.id === solicitudId);
-    if (!solicitud) return MOCK_EJECUTORES;
+    if (!availableExecutors) return [];
+
+    // Si el usuario ha elegido ver todos los ejecutores, devolver la lista completa
+    if (showAllExecutors) {
+      return availableExecutors;
+    }
+
+    // De lo contrario, filtrar por especialidad según la categoría de la solicitud
+    const solicitud = adaptarSolicitudes().find(s => s.id === solicitudId);
+    if (!solicitud) return availableExecutors;
 
     // Si la solicitud tiene una categoría específica, filtrar por especialidad
     if (solicitud.categoria) {
-      return MOCK_EJECUTORES.filter(
-        e => e.especialidad === solicitud.categoria || e.especialidad === 'GENERAL'
-      );
+      return filterExecutorsBySpecialty(solicitud.categoria);
     }
 
-    return MOCK_EJECUTORES;
+    return availableExecutors;
   };
 
   return (
@@ -658,7 +732,7 @@ const BandejaEntrada: React.FC = () => {
           onChange={(e) => setStatusFilter(e.target.value)}
         >
           <option value="">Todos los estados</option>
-          <option value="REQUESTED">Solicitada</option>
+          <option value="SUBMITTED">Enviada</option>
           <option value="ASSIGNED">Asignada</option>
           <option value="IN_PROGRESS">En Progreso</option>
         </FilterSelect>
@@ -685,13 +759,13 @@ const BandejaEntrada: React.FC = () => {
           <option value="RECURSOS_HUMANOS">Recursos Humanos</option>
           <option value="OTRA">Otra</option>
         </FilterSelect>
-        <Button>
-          <FiFilter size={16} />
-          Más filtros
-        </Button>
       </FiltersContainer>
 
-      {filteredSolicitudes.length > 0 ? (
+      {isLoadingPendingRequests ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+          <Spinner size={32} />
+        </div>
+      ) : filteredSolicitudes.length > 0 ? (
         <SolicitudesList>
           {filteredSolicitudes.map((solicitud) => (
             <SolicitudCard key={solicitud.id}>
@@ -721,7 +795,25 @@ const BandejaEntrada: React.FC = () => {
                 </DetailRow>
                 <DetailRow>
                   <DetailLabel>Solicitante:</DetailLabel>
-                  <DetailValue>{solicitud.solicitante}</DetailValue>
+                  <DetailValue>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--primary-color, #6C5CE7)',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                      }}>
+                        {solicitud.solicitante.charAt(0).toUpperCase()}
+                      </div>
+                      {solicitud.solicitante}
+                    </div>
+                  </DetailValue>
                 </DetailRow>
                 <DetailRow>
                   <DetailLabel>Categoría:</DetailLabel>
@@ -731,38 +823,148 @@ const BandejaEntrada: React.FC = () => {
                   <DetailLabel>Fecha de creación:</DetailLabel>
                   <DetailValue>{formatDate(solicitud.fechaCreacion)}</DetailValue>
                 </DetailRow>
-                <DetailRow>
-                  <DetailLabel>Fecha límite:</DetailLabel>
-                  <DetailValue>{formatDate(solicitud.fechaLimite)}</DetailValue>
-                </DetailRow>
+                {solicitud.fechaLimite && (
+                  <DetailRow>
+                    <DetailLabel>Fecha límite:</DetailLabel>
+                    <DetailValue>{formatDate(solicitud.fechaLimite)}</DetailValue>
+                  </DetailRow>
+                )}
 
                 <AsignacionSection>
-                  <AsignacionTitle>Asignar a ejecutor</AsignacionTitle>
+                  <AsignacionTitle>Asignar solicitud</AsignacionTitle>
 
-                  <EjecutoresList>
-                    {getEjecutoresFiltrados(solicitud.id).map((ejecutor) => (
-                      <EjecutorItem
-                        key={ejecutor.id}
-                        $selected={selectedEjecutor === ejecutor.id}
-                        onClick={() => handleSelectEjecutor(ejecutor.id)}
-                      >
-                        <EjecutorInfo>
-                          <EjecutorAvatar>
-                            <FiUser size={16} />
-                          </EjecutorAvatar>
-                          <EjecutorDetails>
-                            <EjecutorName>{ejecutor.nombre}</EjecutorName>
-                            <EjecutorMeta>
-                              <span>Especialidad: {getCategoryText(ejecutor.especialidad)}</span>
-                              <CargaIndicator $carga={ejecutor.cargaActual}>
-                                Carga: {ejecutor.cargaActual} tareas
-                              </CargaIndicator>
-                            </EjecutorMeta>
-                          </EjecutorDetails>
-                        </EjecutorInfo>
-                      </EjecutorItem>
-                    ))}
-                  </EjecutoresList>
+                  <div style={{
+                    marginBottom: '15px',
+                    padding: '12px',
+                    backgroundColor: 'var(--background-dark, #2d2d3a)',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-color-dark, #3f3f4e)',
+                    color: 'var(--text-color-light, #e1e1e6)'
+                  }}>
+                    <p style={{ margin: '0 0 10px 0', fontWeight: 'bold', color: 'var(--primary-color, #6C5CE7)' }}>
+                      <FiInfo size={16} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                      Instrucciones:
+                    </p>
+                    <p style={{ margin: '0', lineHeight: '1.5' }}>
+                      Seleccione un ejecutor de la lista y opcionalmente añada notas de asignación.
+                      Al hacer clic en "Asignar", la solicitud cambiará a estado "Asignada" y se asignará al ejecutor seleccionado.
+                    </p>
+                  </div>
+
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '15px',
+                    padding: '10px',
+                    backgroundColor: 'var(--background-dark, #2d2d3a)',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-color-dark, #3f3f4e)'
+                  }}>
+                    <div style={{ fontWeight: 'bold', color: 'var(--text-color-light, #e1e1e6)' }}>Mostrar ejecutores:</div>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <label style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                        padding: '6px 12px',
+                        borderRadius: '4px',
+                        backgroundColor: !showAllExecutors ? 'var(--primary-color, #6C5CE7)' : 'rgba(108, 92, 231, 0.2)',
+                        color: 'white'
+                      }}>
+                        <input
+                          type="radio"
+                          checked={!showAllExecutors}
+                          onChange={() => setShowAllExecutors(false)}
+                          style={{ marginRight: '6px' }}
+                        />
+                        Recomendados
+                      </label>
+                      <label style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                        padding: '6px 12px',
+                        borderRadius: '4px',
+                        backgroundColor: showAllExecutors ? 'var(--primary-color, #6C5CE7)' : 'rgba(108, 92, 231, 0.2)',
+                        color: 'white'
+                      }}>
+                        <input
+                          type="radio"
+                          checked={showAllExecutors}
+                          onChange={() => setShowAllExecutors(true)}
+                          style={{ marginRight: '6px' }}
+                        />
+                        Todos los ejecutores
+                      </label>
+                    </div>
+                  </div>
+
+                  {isLoadingExecutors ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+                      <Spinner size={24} />
+                    </div>
+                  ) : getEjecutoresFiltrados(solicitud.id).length > 0 ? (
+                    <EjecutoresList>
+                      {getEjecutoresFiltrados(solicitud.id).map((ejecutor) => (
+                        <EjecutorItem
+                          key={ejecutor.id}
+                          $selected={selectedEjecutor === ejecutor.id}
+                          onClick={() => handleSelectEjecutor(ejecutor.id)}
+                        >
+                          <EjecutorInfo>
+                            <EjecutorAvatar>
+                              <FiUser size={16} />
+                            </EjecutorAvatar>
+                            <EjecutorDetails>
+                              <EjecutorName>{ejecutor.fullName}</EjecutorName>
+                              <EjecutorMeta>
+                                <span>Especialidad: {getCategoryText(ejecutor.especialidad || 'GENERAL')}</span>
+                                <CargaIndicator $carga={ejecutor.cargaActual || 0}>
+                                  Carga: {ejecutor.cargaActual || 0} tareas
+                                </CargaIndicator>
+                              </EjecutorMeta>
+                            </EjecutorDetails>
+                          </EjecutorInfo>
+                        </EjecutorItem>
+                      ))}
+                    </EjecutoresList>
+                  ) : (
+                    <div style={{
+                      padding: '20px',
+                      textAlign: 'center',
+                      backgroundColor: 'var(--background-dark, #2d2d3a)',
+                      borderRadius: '8px',
+                      color: 'var(--text-color-light, #e1e1e6)',
+                      border: '1px solid var(--border-color-dark, #3f3f4e)'
+                    }}>
+                      <FiAlertCircle size={24} style={{ marginBottom: '8px', color: 'var(--primary-color, #6C5CE7)' }} />
+                      <p>No hay ejecutores {!showAllExecutors ? 'recomendados' : 'disponibles'} para esta solicitud.</p>
+                      <p style={{ marginTop: '8px', fontSize: '14px' }}>
+                        {!showAllExecutors ? (
+                          <button
+                            onClick={() => setShowAllExecutors(true)}
+                            style={{
+                              background: 'var(--primary-color, #6C5CE7)',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              padding: '8px 12px',
+                              cursor: 'pointer',
+                              fontSize: '14px',
+                              marginTop: '8px',
+                              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                            }}
+                          >
+                            <FiUsers size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                            Ver todos los ejecutores disponibles
+                          </button>
+                        ) : (
+                          'No hay ejecutores disponibles en el sistema. Contacte al administrador.'
+                        )}
+                      </p>
+                    </div>
+                  )}
 
                   <div>
                     <DetailLabel>Notas de asignación:</DetailLabel>
@@ -771,9 +973,13 @@ const BandejaEntrada: React.FC = () => {
                         width: '100%',
                         padding: '10px',
                         borderRadius: '4px',
-                        border: '1px solid #ddd',
+                        border: '1px solid var(--border-color-dark, #3f3f4e)',
+                        backgroundColor: 'var(--background-dark, #2d2d3a)',
+                        color: 'var(--text-color-light, #e1e1e6)',
                         marginTop: '8px',
-                        minHeight: '80px'
+                        minHeight: '80px',
+                        fontSize: '14px',
+                        resize: 'vertical'
                       }}
                       placeholder="Añadir notas o instrucciones para el ejecutor..."
                       value={asignacionNotas}
@@ -789,10 +995,14 @@ const BandejaEntrada: React.FC = () => {
                     <Button
                       $primary
                       onClick={() => handleAsignar(solicitud.id)}
-                      disabled={!selectedEjecutor}
+                      disabled={!selectedEjecutor || isAssigningTask}
                     >
-                      <FiUserPlus size={16} />
-                      Asignar
+                      {isAssigningTask ? (
+                        <Spinner size={16} />
+                      ) : (
+                        <FiUserPlus size={16} />
+                      )}
+                      {isAssigningTask ? 'Asignando...' : 'Asignar'}
                     </Button>
                   </ButtonGroup>
                 </AsignacionSection>

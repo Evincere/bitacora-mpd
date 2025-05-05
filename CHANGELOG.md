@@ -3,6 +3,101 @@
 ## [Unreleased]
 
 ### Agregado
+- Implementación de sistema de comentarios para asignadores
+  - Creación de componente CommentSection reutilizable para mostrar y gestionar comentarios
+  - Implementación de servicio commentService para interactuar con la API de comentarios
+  - Creación de hook useComments para gestionar el estado de los comentarios
+  - Implementación de página DetalleTarea para que los asignadores puedan ver detalles de tareas y comentarios
+  - Actualización de rutas para incluir la página de detalle de tarea
+  - Mejora de la navegación en DashboardAsignador y DistribucionCarga para acceder a los detalles de tareas
+  - Implementación de funcionalidad para que los asignadores puedan interactuar con los solicitantes mediante comentarios
+- Creación de tabla task_request_comment_mentions para almacenar menciones en comentarios
+  - Implementación de migración V19__add_comment_mentions_table.sql para crear la tabla faltante
+  - Corrección del error "Table TASK_REQUEST_COMMENT_MENTIONS not found" al marcar comentarios como leídos
+- Implementación de menciones a usuarios con @ en comentarios
+  - Creación de endpoint para buscar usuarios por nombre o username
+  - Modificación del modelo de comentarios para incluir menciones
+  - Implementación de detección y procesamiento de menciones en el backend
+  - Creación de componente UserMentionSuggestions para mostrar sugerencias al escribir @
+  - Implementación de servicio userSearchService para buscar usuarios
+  - Mejora del componente de entrada de comentarios para detectar y procesar menciones
+  - Implementación de visualización de menciones con resaltado en los comentarios
+  - Adición de botón específico para mencionar usuarios
+  - Implementación de notificaciones para usuarios mencionados
+  - Mejora de la visualización de menciones con avatares de usuario
+  - Adición de la posibilidad de mencionar a todos los usuarios con @all
+  - Implementación de sistema de permisos para controlar quién puede ser mencionado
+- Mejoras en la interfaz de usuario para la asignación de tareas
+  - Implementación de scroll vertical para el listado de ejecutores cuando hay muchos disponibles
+  - Mejora de la consistencia visual con fondos oscuros para elementos informativos
+  - Mejora del contraste en los selectores de ejecutores recomendados/todos
+  - Estilización de la barra de desplazamiento para mejor integración visual
+  - Mejora del campo de notas de asignación con estilos consistentes
+
+- Mejoras en la gestión de errores para comentarios y solicitudes
+  - Creación de tipos de error específicos (CommentException, TaskRequestException) con códigos de error detallados
+  - Implementación de manejador global de excepciones para la API REST
+  - Creación de clases de respuesta de error estandarizadas (ErrorResponse, ValidationErrorResponse)
+  - Actualización de servicios para utilizar las nuevas excepciones
+  - Implementación de servicio de reintentos automáticos en el frontend
+  - Creación de componente ErrorMessage para mostrar mensajes de error amigables
+  - Implementación de almacenamiento temporal de comentarios no enviados
+  - Mejora de la experiencia de usuario con opciones para reintentar acciones fallidas
+  - Procesamiento automático de comentarios pendientes
+
+- Implementación de historial real para solicitudes de tareas
+  - Creación de entidad TaskRequestHistory para almacenar cambios de estado
+  - Implementación de registro automático de cambios de estado en el flujo de trabajo
+  - Creación de endpoint para obtener el historial de una solicitud
+  - Actualización del servicio de solicitudes en el frontend para obtener el historial
+  - Mejora del componente SeguimientoSolicitud para mostrar el historial real
+  - Implementación de indicadores de carga para el historial
+  - Mejora visual del historial con colores según el estado
+
+- Implementación de indicadores de lectura para comentarios
+  - Creación de tabla task_request_comment_read_by para almacenar los usuarios que han leído cada comentario
+  - Actualización del modelo TaskRequestComment para incluir información de lectura
+  - Implementación de endpoints para obtener comentarios con estado de lectura y marcar comentarios como leídos
+  - Actualización del frontend para mostrar indicadores visuales de comentarios leídos/no leídos
+  - Implementación de marcado automático de comentarios como leídos al visualizarlos
+  - Adición de tooltip para mostrar quién ha leído cada comentario
+  - Mejora visual con indicadores de color para comentarios no leídos
+
+- Corrección de contraseñas para usuarios de prueba
+  - Actualización de las contraseñas de los usuarios de prueba (28456789, 25789012, 32345678) para que coincidan con las mostradas en la interfaz de login (Test@1234)
+  - Creación de migración V17__Fix_User_Passwords_For_Test_Users.sql para aplicar los cambios
+  - Reutilización del hash de contraseña verificado de migraciones anteriores ($2a$10$mAzGMRp1DEnHt4VMF4HeUujvEKhHK0SHXzgk0rqPUvNx7hs/0oB6.)
+
+### Corregido
+- Solución de conflictos en la aplicación Spring Boot
+  - Eliminación de clases duplicadas de GlobalExceptionHandler en diferentes paquetes
+  - Consolidación de manejadores de excepciones en una única clase GlobalExceptionHandler
+  - Adición de manejadores específicos para CommentException y TaskRequestException
+  - Renumeración de scripts de migración Flyway para evitar conflictos de versión
+  - Renombrado de V14__Add_Workflow_Permissions.sql a V16__Add_Workflow_Permissions.sql para evitar conflicto con V14__add_comment_read_by_table.sql
+- Solución de problemas de dependencias en el frontend
+  - Creación de componente Tooltip personalizado para reemplazar la dependencia de @mui/material
+  - Integración del componente Tooltip en el sistema de componentes UI compartidos
+  - Actualización de importaciones en SeguimientoSolicitud.tsx para usar el componente personalizado
+  - Eliminación de dependencias innecesarias para reducir el tamaño del bundle
+  - Corrección de errores en la animación de keyframes en SeguimientoSolicitud.tsx
+    - Creación de componente estilizado SpinningLoader para manejar correctamente la animación
+    - Reemplazo de todas las instancias de FiLoader con animación por el nuevo componente
+  - Corrección de la URL y formato de datos para el envío de comentarios en solicitudes
+    - Eliminación del prefijo '/api' duplicado en las URLs de solicitudesService.ts
+    - Corrección de props en componentes estilizados para usar props transitorias ($isRead en lugar de isRead)
+
+### Corregido
+- Integración de frontend con nuevos endpoints de TaskRequest
+  - Actualización de solicitudesService.ts para utilizar los nuevos endpoints de TaskRequest en lugar de los endpoints de Activity
+  - Actualización de useSolicitudes.ts para trabajar con el tipo TaskRequestPageDto
+  - Actualización de MisSolicitudes.tsx para mostrar correctamente los datos de TaskRequest
+  - Actualización de SolicitudForm.tsx para crear solicitudes utilizando el nuevo endpoint
+  - Actualización de SeguimientoSolicitud.tsx para mostrar los detalles de una solicitud utilizando el nuevo endpoint
+  - Implementación de funcionalidad para agregar y persistir comentarios en las solicitudes
+  - Mejora de la interfaz de usuario para comentarios con agrupación por fecha
+  - Implementación de funcionalidad para editar y eliminar comentarios propios
+  - Mejora del diseño de avatares de usuario con colores basados en iniciales
 - Implementación del Sprint 16: Entidad TaskRequest (Solicitud de Tarea)
   - Diseño detallado de la nueva entidad `TaskRequest` separada de `Activity`
   - Implementación de la capa de dominio para la entidad `TaskRequest`

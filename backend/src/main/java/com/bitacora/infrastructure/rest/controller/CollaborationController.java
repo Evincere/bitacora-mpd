@@ -98,7 +98,7 @@ public class CollaborationController {
                 currentUser.getId(), activityId);
 
         boolean success = collaborationService.registerComment(
-                activityId, currentUser.getId(), requestDTO.getComment());
+                activityId, currentUser.getId(), requestDTO.getContent());
 
         if (success) {
             return ResponseEntity.ok("Comentario registrado correctamente");

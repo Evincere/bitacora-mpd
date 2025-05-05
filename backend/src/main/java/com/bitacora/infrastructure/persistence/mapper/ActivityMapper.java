@@ -7,7 +7,8 @@ import com.bitacora.infrastructure.persistence.entity.ActivityEntity;
 import org.springframework.stereotype.Component;
 
 /**
- * Mapper para convertir entre la entidad ActivityEntity y el modelo de dominio Activity.
+ * Mapper para convertir entre la entidad ActivityEntity y el modelo de dominio
+ * Activity.
  */
 @Component("activityEntityMapper")
 public class ActivityMapper {
@@ -40,6 +41,7 @@ public class ActivityMapper {
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .userId(entity.getUserId())
+                .executorId(entity.getExecutorId()) // Añadimos el campo executorId
                 .build();
     }
 
@@ -71,6 +73,7 @@ public class ActivityMapper {
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())
                 .userId(domain.getUserId())
+                .executorId(domain.getExecutorId()) // Añadimos el campo executorId
                 .build();
     }
 }

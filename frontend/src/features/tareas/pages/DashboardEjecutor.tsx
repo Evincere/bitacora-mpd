@@ -14,7 +14,9 @@ import {
   FiRefreshCw,
   FiFilter,
   FiFlag,
-  FiUser
+  FiUser,
+  FiEye,
+  FiPlay
 } from 'react-icons/fi';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -373,7 +375,7 @@ const CalendarDay = styled.div<{ $isToday?: boolean; $hasTask?: boolean; $isPast
   font-size: 14px;
   cursor: pointer;
   position: relative;
-  
+
   ${({ $isToday, $hasTask, $isPast, theme }) => {
     if ($isToday) {
       return `
@@ -385,7 +387,7 @@ const CalendarDay = styled.div<{ $isToday?: boolean; $hasTask?: boolean; $isPast
       return `
         background-color: ${theme.backgroundAlt};
         color: ${theme.text};
-        
+
         &::after {
           content: '';
           position: absolute;
@@ -405,7 +407,7 @@ const CalendarDay = styled.div<{ $isToday?: boolean; $hasTask?: boolean; $isPast
     } else {
       return `
         color: ${theme.text};
-        
+
         &:hover {
           background-color: ${theme.backgroundHover};
         }
@@ -498,17 +500,17 @@ const generateCalendar = () => {
   const today = new Date();
   const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
-  
+
   // Ajustar para que la semana comience en lunes (0 = lunes, 6 = domingo)
   const adjustedFirstDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
-  
+
   const days = [];
-  
+
   // Agregar días vacíos para alinear el primer día del mes
   for (let i = 0; i < adjustedFirstDay; i++) {
     days.push({ day: '', isCurrentMonth: false });
   }
-  
+
   // Agregar los días del mes actual
   for (let i = 1; i <= daysInMonth; i++) {
     const date = new Date(today.getFullYear(), today.getMonth(), i);
@@ -520,13 +522,13 @@ const generateCalendar = () => {
       date
     });
   }
-  
+
   return days;
 };
 
 const DashboardEjecutor: React.FC = () => {
   const navigate = useNavigate();
-  
+
   // Usar el hook personalizado para tareas
   const {
     assignedTasks,
@@ -540,10 +542,10 @@ const DashboardEjecutor: React.FC = () => {
   // Estado para filtros
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [priorityFilter, setPriorityFilter] = useState<string>('');
-  
+
   // Estado para el calendario
   const [calendarDays, setCalendarDays] = useState(generateCalendar());
-  
+
   // Usar datos reales o de ejemplo
   const tareas = assignedTasks || MOCK_TAREAS;
   const tareasProgreso = inProgressTasks || MOCK_TAREAS_PROGRESO;
@@ -566,29 +568,29 @@ const DashboardEjecutor: React.FC = () => {
 
   // Obtener categorías únicas para el filtro
   const uniqueCategories = Array.from(new Set(tareas.map(t => t.category)));
-  
+
   // Obtener prioridades únicas para el filtro
   const uniquePriorities = Array.from(new Set(tareas.map(t => t.priority)));
 
   // Marcar días con tareas en el calendario
   useEffect(() => {
     const updatedCalendar = generateCalendar();
-    
+
     // Marcar días con tareas
     const allTasks = [...tareas, ...tareasProgreso];
     allTasks.forEach(task => {
       if (task.dueDate) {
         const dueDate = new Date(task.dueDate);
         updatedCalendar.forEach((day, index) => {
-          if (day.date && day.date.getDate() === dueDate.getDate() && 
-              day.date.getMonth() === dueDate.getMonth() && 
+          if (day.date && day.date.getDate() === dueDate.getDate() &&
+              day.date.getMonth() === dueDate.getMonth() &&
               day.date.getFullYear() === dueDate.getFullYear()) {
             updatedCalendar[index] = { ...day, hasTask: true };
           }
         });
       }
     });
-    
+
     setCalendarDays(updatedCalendar);
   }, [tareas, tareasProgreso]);
 
@@ -685,10 +687,10 @@ const DashboardEjecutor: React.FC = () => {
             <FiCheckSquare size={18} />
             Tareas Asignadas
           </SectionTitle>
-          
+
           <FilterContainer>
-            <FilterSelect 
-              value={categoryFilter} 
+            <FilterSelect
+              value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
             >
               <option value="">Todas las categorías</option>
@@ -698,9 +700,9 @@ const DashboardEjecutor: React.FC = () => {
                 </option>
               ))}
             </FilterSelect>
-            
-            <FilterSelect 
-              value={priorityFilter} 
+
+            <FilterSelect
+              value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
             >
               <option value="">Todas las prioridades</option>
@@ -711,7 +713,7 @@ const DashboardEjecutor: React.FC = () => {
               ))}
             </FilterSelect>
           </FilterContainer>
-          
+
           {filteredTareas.length > 0 ? (
             <TareasList>
               {filteredTareas.map((tarea) => (
@@ -735,14 +737,26 @@ const DashboardEjecutor: React.FC = () => {
                       <FiUser size={12} style={{ marginRight: '4px' }} />
                       Solicitante: {tarea.requesterName}
                     </TareaRequester>
-                    <TareaAction>
-                      Iniciar tarea
-                      <FiArrowRight size={14} />
-                    </TareaAction>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <TareaAction onClick={(e) => {
+                        e.stopPropagation();
+                        handleStartTask(tarea.id);
+                      }}>
+                        Iniciar tarea
+                        <FiPlay size={14} />
+                      </TareaAction>
+                      <TareaAction onClick={(e) => {
+                        e.stopPropagation();
+                        handleVerTarea(tarea.id);
+                      }}>
+                        Ver detalles
+                        <FiEye size={14} />
+                      </TareaAction>
+                    </div>
                   </TareaFooter>
                 </TareaItem>
               ))}
-              
+
               <div style={{ textAlign: 'center', marginTop: '16px' }}>
                 <Button onClick={handleVerTodasTareas}>
                   Ver todas las tareas asignadas
@@ -763,7 +777,7 @@ const DashboardEjecutor: React.FC = () => {
             <FiClock size={18} />
             Tareas en Progreso
           </SectionTitle>
-          
+
           {tareasProgreso.length > 0 ? (
             <TareasList>
               {tareasProgreso.map((tarea) => (
@@ -782,20 +796,20 @@ const DashboardEjecutor: React.FC = () => {
                     </TareaMeta>
                   </TareaHeader>
                   <TareaDescription>{tarea.description}</TareaDescription>
-                  
+
                   <ProgressContainer>
                     <ProgressHeader>
                       <ProgressLabel>Progreso</ProgressLabel>
                       <ProgressValue>{tarea.progress || 0}%</ProgressValue>
                     </ProgressHeader>
                     <ProgressBar>
-                      <ProgressFill 
-                        $percentage={tarea.progress || 0} 
-                        $color={getProgressColor(tarea.progress || 0)} 
+                      <ProgressFill
+                        $percentage={tarea.progress || 0}
+                        $color={getProgressColor(tarea.progress || 0)}
                       />
                     </ProgressBar>
                   </ProgressContainer>
-                  
+
                   <TareaFooter style={{ marginTop: '8px' }}>
                     <TareaRequester>
                       <FiCalendar size={12} style={{ marginRight: '4px' }} />
@@ -808,7 +822,7 @@ const DashboardEjecutor: React.FC = () => {
                   </TareaFooter>
                 </TareaItem>
               ))}
-              
+
               <div style={{ textAlign: 'center', marginTop: '16px' }}>
                 <Button onClick={handleVerTodoProgreso}>
                   Ver todas las tareas en progreso
@@ -822,7 +836,7 @@ const DashboardEjecutor: React.FC = () => {
               <p>No tienes tareas en curso actualmente.</p>
             </EmptyState>
           )}
-          
+
           <CalendarContainer>
             <CalendarHeader>
               <CalendarTitle>
@@ -830,14 +844,14 @@ const DashboardEjecutor: React.FC = () => {
                 Calendario de Vencimientos
               </CalendarTitle>
             </CalendarHeader>
-            
+
             <CalendarGrid>
               {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, index) => (
                 <CalendarDayHeader key={index}>{day}</CalendarDayHeader>
               ))}
-              
+
               {calendarDays.map((day, index) => (
-                <CalendarDay 
+                <CalendarDay
                   key={index}
                   $isToday={day.isToday}
                   $hasTask={day.hasTask}

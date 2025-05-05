@@ -13,13 +13,14 @@ import org.springframework.stereotype.Repository;
  * Repositorio JPA para la entidad TaskRequestEntity.
  */
 @Repository
-public interface TaskRequestJpaRepository extends JpaRepository<TaskRequestEntity, Long>, JpaSpecificationExecutor<TaskRequestEntity> {
+public interface TaskRequestJpaRepository
+        extends JpaRepository<TaskRequestEntity, Long>, JpaSpecificationExecutor<TaskRequestEntity> {
 
     /**
      * Busca solicitudes por el ID del solicitante.
      *
      * @param requesterId ID del solicitante
-     * @param pageable Información de paginación
+     * @param pageable    Información de paginación
      * @return Página de solicitudes
      */
     Page<TaskRequestEntity> findByRequesterId(Long requesterId, Pageable pageable);
@@ -36,7 +37,7 @@ public interface TaskRequestJpaRepository extends JpaRepository<TaskRequestEntit
      * Busca solicitudes por el ID del asignador.
      *
      * @param assignerId ID del asignador
-     * @param pageable Información de paginación
+     * @param pageable   Información de paginación
      * @return Página de solicitudes
      */
     Page<TaskRequestEntity> findByAssignerId(Long assignerId, Pageable pageable);
@@ -52,7 +53,7 @@ public interface TaskRequestJpaRepository extends JpaRepository<TaskRequestEntit
     /**
      * Busca solicitudes por estado.
      *
-     * @param status Estado de las solicitudes
+     * @param status   Estado de las solicitudes
      * @param pageable Información de paginación
      * @return Página de solicitudes
      */
@@ -65,4 +66,30 @@ public interface TaskRequestJpaRepository extends JpaRepository<TaskRequestEntit
      * @return El número de solicitudes
      */
     long countByStatus(TaskRequestStatusEntity status);
+
+    /**
+     * Busca una solicitud que contenga un comentario con el ID especificado.
+     *
+     * @param commentId ID del comentario
+     * @return La solicitud que contiene el comentario
+     */
+    @org.springframework.data.jpa.repository.Query("SELECT tr FROM TaskRequestEntity tr JOIN tr.comments c WHERE c.id = :commentId")
+    TaskRequestEntity findByCommentId(@org.springframework.data.repository.query.Param("commentId") Long commentId);
+
+    /**
+     * Busca solicitudes por el ID del ejecutor.
+     *
+     * @param executorId ID del ejecutor
+     * @param pageable   Información de paginación
+     * @return Página de solicitudes
+     */
+    Page<TaskRequestEntity> findByExecutorId(Long executorId, Pageable pageable);
+
+    /**
+     * Cuenta el número de solicitudes asignadas a un ejecutor.
+     *
+     * @param executorId ID del ejecutor
+     * @return El número de solicitudes
+     */
+    long countByExecutorId(Long executorId);
 }

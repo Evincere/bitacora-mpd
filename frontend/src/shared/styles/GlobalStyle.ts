@@ -7,6 +7,23 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
 
+  :root {
+    --background-color: ${({ theme }) => theme.background};
+    --background-secondary: ${({ theme }) => theme.backgroundSecondary};
+    --background-tertiary: ${({ theme }) => theme.backgroundTertiary};
+    --background-hover: ${({ theme }) => theme.backgroundHover};
+    --background-alt: ${({ theme }) => theme.backgroundAlt};
+    --text-color: ${({ theme }) => theme.text};
+    --text-secondary: ${({ theme }) => theme.textSecondary};
+    --text-tertiary: ${({ theme }) => theme.textTertiary};
+    --primary-color: ${({ theme }) => theme.primary};
+    --primary-hover: ${({ theme }) => theme.primaryHover};
+    --border-color: ${({ theme }) => theme.border};
+    --input-background: ${({ theme }) => theme.inputBackground};
+    --shadow: ${({ theme }) => theme.shadow};
+    --shadow-hover: ${({ theme }) => theme.shadowHover};
+  }
+
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',

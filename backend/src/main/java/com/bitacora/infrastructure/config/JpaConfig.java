@@ -28,7 +28,7 @@ public class JpaConfig {
     /**
      * Asegura que el EntityManagerFactory se inicialice después de Flyway.
      * Esta anotación se aplica al bean existente creado por Spring Boot.
-     * 
+     *
      * @param dataSource La fuente de datos
      * @return El EntityManagerFactory configurado
      */

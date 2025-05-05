@@ -205,19 +205,31 @@ public class ActivityRepositoryImpl implements ActivityRepository {
             return spec;
         }
 
+        // Log para depuración
+        System.out.println("Filtros recibidos: " + filters);
+
         if (filters.containsKey("type")) {
             String type = (String) filters.get("type");
             spec = spec.and(ActivitySpecifications.hasType(type));
+            System.out.println("Aplicando filtro por tipo: " + type);
         }
 
         if (filters.containsKey("status")) {
             String status = (String) filters.get("status");
             spec = spec.and(ActivitySpecifications.hasStatus(status));
+            System.out.println("Aplicando filtro por estado: " + status);
         }
 
         if (filters.containsKey("userId")) {
             Long userId = Long.valueOf(filters.get("userId").toString());
             spec = spec.and(ActivitySpecifications.belongsToUser(userId));
+            System.out.println("Aplicando filtro por userId: " + userId);
+        }
+
+        if (filters.containsKey("executorId")) {
+            Long executorId = Long.valueOf(filters.get("executorId").toString());
+            spec = spec.and(ActivitySpecifications.hasExecutor(executorId));
+            System.out.println("Aplicando filtro por executorId: " + executorId);
         }
 
         if (filters.containsKey("startDate") || filters.containsKey("endDate")) {

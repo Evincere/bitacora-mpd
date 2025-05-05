@@ -4,8 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FiSend, FiPaperclip, FiAlertCircle, FiInfo, FiLoader, FiX } from 'react-icons/fi';
+import { FiSend, FiPaperclip, FiAlertCircle, FiInfo, FiLoader, FiX, FiSave } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { useQueryClient } from '@tanstack/react-query';
+import { useFormDraft } from '@/core/hooks/useFormDraft';
 
 // Hooks y servicios
 import useSolicitudes from '../hooks/useSolicitudes';
@@ -260,7 +262,9 @@ const InfoBox = styled.div`
 
 const SolicitudForm: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [files, setFiles] = useState<File[]>([]);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
 
   // Usar el hook personalizado para solicitudes
   const {
@@ -273,13 +277,32 @@ const SolicitudForm: React.FC = () => {
     createSolicitud
   } = useSolicitudes();
 
+  // Configurar el hook de borradores
+  const draftKey = 'solicitud-form-draft';
+  const {
+    draftData,
+    hasDraft,
+    lastSaved,
+    saveDraft,
+    discardDraft
+  } = useFormDraft<SolicitudFormData>({
+    titulo: '',
+    descripcion: '',
+    categoria: '',
+    prioridad: '',
+    fechaLimite: '',
+    adjuntos: []
+  }, { key: draftKey });
+
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting }
+    reset,
+    getValues,
+    formState: { errors, isSubmitting, isDirty }
   } = useForm<SolicitudFormData>({
     resolver: zodResolver(solicitudSchema),
-    defaultValues: {
+    defaultValues: hasDraft ? draftData : {
       titulo: '',
       descripcion: '',
       categoria: '',
@@ -288,6 +311,14 @@ const SolicitudForm: React.FC = () => {
       adjuntos: []
     }
   });
+
+  // Cargar el borrador si existe
+  useEffect(() => {
+    if (hasDraft) {
+      reset(draftData);
+      toast.info('Se ha cargado un borrador guardado anteriormente');
+    }
+  }, [hasDraft, draftData, reset]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -298,6 +329,36 @@ const SolicitudForm: React.FC = () => {
 
   const handleRemoveFile = (index: number) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
+
+  const handleSaveDraft = () => {
+    try {
+      setIsSavingDraft(true);
+      const currentValues = getValues();
+      saveDraft(currentValues);
+      toast.success('Borrador guardado correctamente');
+    } catch (error) {
+      console.error('Error al guardar el borrador:', error);
+      toast.error('Error al guardar el borrador');
+    } finally {
+      setIsSavingDraft(false);
+    }
+  };
+
+  const handleDiscardDraft = () => {
+    if (window.confirm('¿Está seguro de que desea descartar el borrador? Esta acción no se puede deshacer.')) {
+      discardDraft();
+      reset({
+        titulo: '',
+        descripcion: '',
+        categoria: '',
+        prioridad: '',
+        fechaLimite: '',
+        adjuntos: []
+      });
+      setFiles([]);
+      toast.info('Borrador descartado');
+    }
   };
 
   const onSubmit = async (data: SolicitudFormData) => {
@@ -313,14 +374,22 @@ const SolicitudForm: React.FC = () => {
           prioridad: data.prioridad,
           fechaLimite: data.fechaLimite
         },
-        files
+        files,
+        submitImmediately: true // Indicar que se debe enviar inmediatamente
       }, {
         onSuccess: (result) => {
           console.log('SolicitudForm: Solicitud creada exitosamente:', result);
           toast.success('Solicitud creada correctamente. Redirigiendo a la lista de solicitudes...');
 
+          // Eliminar el borrador si existe
+          if (hasDraft) {
+            discardDraft();
+          }
+
           // Esperar un momento antes de redirigir para que se complete la invalidación de la caché
           setTimeout(() => {
+            // Forzar una recarga de las solicitudes antes de navegar
+            queryClient.invalidateQueries({ queryKey: ['mySolicitudes'] });
             navigate('/app/solicitudes');
           }, 1000);
         }
@@ -332,7 +401,7 @@ const SolicitudForm: React.FC = () => {
   };
 
   // Determinar si el formulario está en estado de carga
-  const isLoading = isCreatingSolicitud || isUploading;
+  const isLoading = isCreatingSolicitud || isUploading || isSavingDraft;
 
   return (
     <FormContainer>
@@ -493,6 +562,29 @@ const SolicitudForm: React.FC = () => {
           )}
         </FormGroup>
 
+        {hasDraft && (
+          <InfoBox style={{ backgroundColor: 'rgba(255, 193, 7, 0.1)', borderColor: '#ffc107' }}>
+            <div className="icon" style={{ color: '#ffc107' }}>
+              <FiInfo size={20} />
+            </div>
+            <div className="content">
+              <h4>Borrador guardado</h4>
+              <p>
+                Tiene un borrador guardado el {lastSaved ? new Date(lastSaved).toLocaleString() : 'recientemente'}.
+                Puede continuar editando, guardar los cambios o descartar el borrador.
+              </p>
+              <Button
+                type="button"
+                onClick={handleDiscardDraft}
+                style={{ marginTop: '8px', padding: '4px 8px', fontSize: '12px' }}
+                disabled={isLoading}
+              >
+                Descartar borrador
+              </Button>
+            </div>
+          </InfoBox>
+        )}
+
         <ButtonGroup>
           <Button
             type="button"
@@ -502,11 +594,25 @@ const SolicitudForm: React.FC = () => {
             Cancelar
           </Button>
           <Button
+            type="button"
+            onClick={handleSaveDraft}
+            disabled={isLoading || !isDirty}
+            style={{ color: '#0ea5e9', borderColor: '#0ea5e9' }}
+          >
+            {isSavingDraft && (
+              <LoadingSpinner>
+                <FiLoader size={16} />
+              </LoadingSpinner>
+            )}
+            <FiSave size={16} />
+            Guardar borrador
+          </Button>
+          <Button
             type="submit"
             $primary
             disabled={isLoading}
           >
-            {isLoading && (
+            {isCreatingSolicitud && (
               <LoadingSpinner>
                 <FiLoader size={16} />
               </LoadingSpinner>

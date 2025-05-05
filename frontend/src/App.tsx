@@ -7,7 +7,6 @@ import { setUser } from './features/auth/store/authSlice';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastProvider } from './components/ui/Toast';
-import PermissionsDebugger from './components/debug/PermissionsDebugger';
 import AnimatedRoutes from './shared/components/ui/AnimatedRoutes';
 import { RealTimeNotificationProvider } from './features/notifications/contexts/RealTimeNotificationContext';
 import { lightTheme, darkTheme } from '@/shared/styles';
@@ -38,6 +37,7 @@ import SolicitudesRoute from './routes/SolicitudesRoute';
 // Componentes para ASIGNADOR
 import DashboardAsignador from '@/features/asignacion/pages/DashboardAsignador';
 import AsignarTarea from '@/features/asignacion/pages/AsignarTarea';
+import DetalleTarea from '@/features/asignacion/pages/DetalleTarea';
 import BandejaEntrada from '@/features/asignacion/pages/BandejaEntrada';
 import DistribucionCarga from '@/features/asignacion/pages/DistribucionCarga';
 import MetricasAsignacion from '@/features/asignacion/pages/MetricasAsignacion';
@@ -45,6 +45,7 @@ import MetricasAsignacion from '@/features/asignacion/pages/MetricasAsignacion';
 // Componentes para EJECUTOR
 import DashboardEjecutor from '@/features/tareas/pages/DashboardEjecutor';
 import ActualizarProgreso from '@/features/tareas/pages/ActualizarProgreso';
+import DetalleTareaEjecutor from '@/features/tareas/pages/DetalleTarea';
 import MisTareas from '@/features/tareas/pages/MisTareas';
 import ProgresoTareas from '@/features/tareas/pages/ProgresoTareas';
 import HistorialTareas from '@/features/tareas/pages/HistorialTareas';
@@ -85,18 +86,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isAuthenticated, user } = useAppSelector(state => state.auth);
 
   useEffect(() => {
-    console.log('ProtectedRoute: Verificando autenticación en ruta:', location.pathname);
-
     // Verificar si hay token y usuario en localStorage
     const token = localStorage.getItem('bitacora_token');
     const userStr = localStorage.getItem('bitacora_user');
     const userObj = userStr ? JSON.parse(userStr) : null;
-
-    console.log('ProtectedRoute: Verificación detallada:');
-    console.log('- Token en localStorage:', !!token);
-    console.log('- Usuario en localStorage:', !!userObj);
-    console.log('- Estado de autenticación en Redux:', isAuthenticated);
-    console.log('- Usuario en Redux:', user);
 
     // Verificar autenticación
     const timer = setTimeout(() => {
@@ -104,8 +97,6 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
       // Si no hay token o usuario en localStorage, o no está autenticado en Redux
       if (!token || !userObj || !isAuthenticated) {
-        console.log('ProtectedRoute: Usuario no autenticado, redirigiendo a /login');
-
         // Limpiar el estado de autenticación en Redux si es necesario
         if (isAuthenticated || user) {
           dispatch(setUser(null));
@@ -118,7 +109,6 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         if (!user && userObj) {
           dispatch(setUser(userObj));
         }
-        console.log('ProtectedRoute: Usuario autenticado, mostrando contenido protegido');
       }
     }, 300);
 
@@ -148,49 +138,29 @@ function App() {
       const user = userStr ? JSON.parse(userStr) : null;
       const token = localStorage.getItem('bitacora_token');
 
-      console.log('App: Verificando autenticación al iniciar');
-      console.log('App: Token presente:', !!token);
-      console.log('App: Usuario presente:', !!user);
-      console.log('App: Ruta actual:', window.location.pathname);
-
       if (user && token) {
-        console.log('App: Usuario encontrado en localStorage, inicializando estado de autenticación');
-        console.log('App: Datos del usuario:', user);
-        console.log('App: Token (primeros 20 caracteres):', token.substring(0, 20) + '...');
-
         // Actualizar el estado de Redux con el usuario
         dispatch(setUser(user));
-        console.log('App: Estado de autenticación actualizado con usuario:', user.username);
 
         // Si estamos en la página de login o raíz, redirigir a /app
         // Solo redirigir si estamos en la raíz, no en /login (para evitar conflictos con el proceso de login)
         if (window.location.pathname === '/') {
-          console.log('App: Usuario autenticado en página raíz, redirigiendo a /app');
           navigate('/app', { replace: true });
 
           // Como respaldo, intentar también con window.location después de un breve retraso
           setTimeout(() => {
             if (window.location.pathname === '/') {
-              console.log('Redirección con navigate no funcionó, intentando con window.location');
               window.location.href = '/app';
             }
           }, 100);
-        } else if (window.location.pathname === '/login') {
-          console.log('App: Usuario autenticado en página de login, no redirigiendo (lo hará el proceso de login)');
         }
       } else {
-        console.log('App: No hay usuario o token válido en localStorage');
-        if (!user) console.log('App: Usuario no encontrado en localStorage');
-        if (!token) console.log('App: Token no encontrado en localStorage');
-
         // Asegurarse de que el estado de autenticación sea falso
         dispatch(setUser(null));
 
         // Si estamos en una ruta protegida, redirigir a /login
         if (window.location.pathname.startsWith('/app')) {
-          console.log('App: Usuario no autenticado en ruta protegida, redirigiendo a /login');
           setTimeout(() => {
-            console.log('App: Ejecutando redirección a /login');
             window.location.href = '/login';
           }, 300);
         }
@@ -222,27 +192,12 @@ function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Efecto para depuración
-  useEffect(() => {
-    console.log('App: Estado de autenticación cambió a:', isAuthenticated);
-
-    // Si el usuario está autenticado, verificar la ruta actual
-    if (isAuthenticated) {
-      const currentPath = window.location.pathname;
-      console.log('App: Ruta actual con usuario autenticado:', currentPath);
-
-      // Si está en la página de login o raíz, mostrar mensaje de depuración
-      if (currentPath === '/' || currentPath === '/login') {
-        console.log('App: Usuario autenticado en página pública, debería redirigir a /app');
-      }
-    }
-  }, [isAuthenticated]);
+  // No se necesita depuración en producción
 
 
   return (
     <ThemeProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
       <GlobalStyle />
-      <PermissionsDebugger />
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -304,6 +259,7 @@ function App() {
             <Route path="/app/asignacion/*" element={<RoleProtectedRoute allowedRoles={[UserRole.ASIGNADOR, UserRole.ADMIN]} redirectTo="/app" />}>
               <Route path="dashboard" element={<DashboardAsignador />} />
               <Route path="asignar/:id" element={<AsignarTarea />} />
+              <Route path="detalle/:id" element={<DetalleTarea />} />
               <Route path="bandeja" element={<BandejaEntrada />} />
               <Route path="distribucion" element={<DistribucionCarga />} />
               <Route path="metricas" element={<MetricasAsignacion />} />
@@ -313,6 +269,7 @@ function App() {
             <Route path="/app/tareas/*" element={<RoleProtectedRoute allowedRoles={[UserRole.EJECUTOR, UserRole.ADMIN]} redirectTo="/app" />}>
               <Route path="dashboard" element={<DashboardEjecutor />} />
               <Route path="progreso/:id" element={<ActualizarProgreso />} />
+              <Route path="detalle/:id" element={<DetalleTareaEjecutor />} />
               <Route path="asignadas" element={<MisTareas />} />
               <Route path="progreso" element={<ProgresoTareas />} />
               <Route path="historial" element={<HistorialTareas />} />

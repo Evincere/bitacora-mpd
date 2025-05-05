@@ -21,6 +21,7 @@ public class TaskRequest {
     private TaskRequestStatus status;
     private Long requesterId;
     private Long assignerId;
+    private Long executorId;
     private LocalDateTime requestDate;
     private LocalDateTime assignmentDate;
     private String notes;
@@ -40,6 +41,24 @@ public class TaskRequest {
      */
     public static Builder builder() {
         return new Builder();
+    }
+
+    /**
+     * Obtiene el ID del ejecutor asignado a la solicitud.
+     *
+     * @return El ID del ejecutor
+     */
+    public Long getExecutorId() {
+        return executorId;
+    }
+
+    /**
+     * Establece el ID del ejecutor asignado a la solicitud.
+     *
+     * @param executorId El ID del ejecutor
+     */
+    public void setExecutorId(Long executorId) {
+        this.executorId = executorId;
     }
 
     /**
@@ -151,6 +170,15 @@ public class TaskRequest {
     }
 
     /**
+     * Establece las notas adicionales de la solicitud.
+     *
+     * @param notes Las notas
+     */
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    /**
      * Obtiene la lista de archivos adjuntos a la solicitud.
      *
      * @return Lista de adjuntos
@@ -179,11 +207,11 @@ public class TaskRequest {
         if (this.status != TaskRequestStatus.SUBMITTED) {
             throw new IllegalStateException("Solo se pueden asignar solicitudes en estado SUBMITTED");
         }
-        
+
         if (assignerId == null) {
             throw new IllegalArgumentException("El identificador del asignador no puede ser nulo");
         }
-        
+
         this.assignerId = assignerId;
         this.assignmentDate = LocalDateTime.now();
         this.status = TaskRequestStatus.ASSIGNED;
@@ -191,16 +219,52 @@ public class TaskRequest {
     }
 
     /**
-     * Marca la solicitud como completada.
+     * Asigna un ejecutor a la solicitud.
+     *
+     * @param executorId El identificador del ejecutor
+     * @return La solicitud actualizada
+     * @throws IllegalStateException Si la solicitud no está en estado ASSIGNED
+     */
+    public TaskRequest assignExecutor(final Long executorId) {
+        if (this.status != TaskRequestStatus.ASSIGNED) {
+            throw new IllegalStateException("Solo se pueden asignar ejecutores a solicitudes en estado ASSIGNED");
+        }
+
+        if (executorId == null) {
+            throw new IllegalArgumentException("El identificador del ejecutor no puede ser nulo");
+        }
+
+        this.executorId = executorId;
+        return this;
+    }
+
+    /**
+     * Inicia la tarea solicitada, cambiando su estado a IN_PROGRESS.
      *
      * @return La solicitud actualizada
      * @throws IllegalStateException Si la solicitud no está en estado ASSIGNED
      */
-    public TaskRequest complete() {
+    public TaskRequest start() {
         if (this.status != TaskRequestStatus.ASSIGNED) {
-            throw new IllegalStateException("Solo se pueden completar solicitudes en estado ASSIGNED");
+            throw new IllegalStateException("Solo se pueden iniciar solicitudes en estado ASSIGNED");
         }
-        
+
+        this.status = TaskRequestStatus.IN_PROGRESS;
+        return this;
+    }
+
+    /**
+     * Marca la solicitud como completada.
+     *
+     * @return La solicitud actualizada
+     * @throws IllegalStateException Si la solicitud no está en estado ASSIGNED o
+     *                               IN_PROGRESS
+     */
+    public TaskRequest complete() {
+        if (this.status != TaskRequestStatus.ASSIGNED && this.status != TaskRequestStatus.IN_PROGRESS) {
+            throw new IllegalStateException("Solo se pueden completar solicitudes en estado ASSIGNED o IN_PROGRESS");
+        }
+
         this.status = TaskRequestStatus.COMPLETED;
         return this;
     }
@@ -209,13 +273,14 @@ public class TaskRequest {
      * Cancela la solicitud.
      *
      * @return La solicitud actualizada
-     * @throws IllegalStateException Si la solicitud ya está en estado COMPLETED o CANCELLED
+     * @throws IllegalStateException Si la solicitud ya está en estado COMPLETED o
+     *                               CANCELLED
      */
     public TaskRequest cancel() {
         if (this.status == TaskRequestStatus.COMPLETED || this.status == TaskRequestStatus.CANCELLED) {
             throw new IllegalStateException("No se pueden cancelar solicitudes completadas o ya canceladas");
         }
-        
+
         this.status = TaskRequestStatus.CANCELLED;
         return this;
     }
@@ -230,7 +295,7 @@ public class TaskRequest {
         if (comment == null) {
             throw new IllegalArgumentException("El comentario no puede ser nulo");
         }
-        
+
         this.comments.add(comment);
         return this;
     }
@@ -245,8 +310,44 @@ public class TaskRequest {
         if (attachment == null) {
             throw new IllegalArgumentException("El archivo adjunto no puede ser nulo");
         }
-        
+
         this.attachments.add(attachment);
+        return this;
+    }
+
+    /**
+     * Actualiza un comentario existente en la solicitud.
+     *
+     * @param updatedComment El comentario actualizado
+     * @return La solicitud actualizada
+     * @throws IllegalArgumentException Si el comentario no existe en la solicitud
+     */
+    public TaskRequest updateComment(final TaskRequestComment updatedComment) {
+        if (updatedComment == null) {
+            throw new IllegalArgumentException("El comentario no puede ser nulo");
+        }
+
+        if (updatedComment.getId() == null) {
+            throw new IllegalArgumentException("El ID del comentario no puede ser nulo");
+        }
+
+        boolean found = false;
+        List<TaskRequestComment> updatedComments = new ArrayList<>();
+
+        for (TaskRequestComment comment : this.comments) {
+            if (comment.getId().equals(updatedComment.getId())) {
+                updatedComments.add(updatedComment);
+                found = true;
+            } else {
+                updatedComments.add(comment);
+            }
+        }
+
+        if (!found) {
+            throw new IllegalArgumentException("Comentario no encontrado en la solicitud");
+        }
+
+        this.comments = updatedComments;
         return this;
     }
 
@@ -258,7 +359,7 @@ public class TaskRequest {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        
+
         final TaskRequest that = (TaskRequest) o;
         return Objects.equals(id, that.id);
     }
@@ -333,6 +434,11 @@ public class TaskRequest {
             return this;
         }
 
+        public Builder executorId(final Long executorId) {
+            instance.executorId = executorId;
+            return this;
+        }
+
         public Builder requestDate(final LocalDateTime requestDate) {
             instance.requestDate = requestDate;
             return this;
@@ -367,19 +473,19 @@ public class TaskRequest {
             if (instance.title == null || instance.title.trim().isEmpty()) {
                 throw new IllegalArgumentException("El título no puede estar vacío");
             }
-            
+
             if (instance.requesterId == null) {
                 throw new IllegalArgumentException("El identificador del solicitante no puede ser nulo");
             }
-            
+
             if (instance.requestDate == null) {
                 instance.requestDate = LocalDateTime.now();
             }
-            
+
             if (instance.status == null) {
                 instance.status = TaskRequestStatus.DRAFT;
             }
-            
+
             return instance;
         }
     }

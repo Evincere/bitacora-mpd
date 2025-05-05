@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import {
   FiPlus,
@@ -10,11 +10,12 @@ import {
   FiBarChart2,
   FiCalendar,
   FiFileText,
-  FiSend
+  FiSend,
+  FiLoader
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 // Componentes
@@ -22,88 +23,34 @@ import { StatusBadge } from '@/shared/components/ui';
 import { Button } from '@/components/ui';
 
 // Tipos
-import { Activity, ActivityStatus } from '@/types/models';
+import { TaskRequest } from '@/features/solicitudes/services/solicitudesService';
 
 // Servicios y hooks
-// TODO: Implementar servicio y hooks para solicitudes
+import solicitudesService from '@/features/solicitudes/services/solicitudesService';
 
-// Datos de ejemplo (se reemplazarán por datos reales del backend)
-const MOCK_SOLICITUDES = [
-  {
-    id: 1,
-    titulo: 'Solicitud de informe técnico',
-    descripcion: 'Necesito un informe técnico sobre el caso #12345 para presentar en la audiencia del próximo mes.',
-    categoria: 'LEGAL',
-    prioridad: 'HIGH',
-    fechaCreacion: '2025-05-01T10:30:00',
-    fechaLimite: '2025-05-15',
-    estado: 'REQUESTED',
-    solicitante: 'Juan Pérez',
-    asignador: null,
-    ejecutor: null
-  },
-  {
-    id: 2,
-    titulo: 'Análisis de documentación',
-    descripcion: 'Requiero un análisis detallado de la documentación presentada por la contraparte en el caso #54321.',
-    categoria: 'LEGAL',
-    prioridad: 'MEDIUM',
-    fechaCreacion: '2025-04-28T14:15:00',
-    fechaLimite: '2025-05-10',
-    estado: 'ASSIGNED',
-    solicitante: 'Juan Pérez',
-    asignador: 'Carlos Rodríguez',
-    ejecutor: 'Ana Martínez'
-  },
-  {
-    id: 3,
-    titulo: 'Revisión de contrato',
-    descripcion: 'Necesito una revisión del contrato de arrendamiento para el local comercial.',
-    categoria: 'LEGAL',
-    prioridad: 'LOW',
-    fechaCreacion: '2025-04-25T09:45:00',
-    fechaLimite: '2025-05-05',
-    estado: 'IN_PROGRESS',
-    solicitante: 'Juan Pérez',
-    asignador: 'Carlos Rodríguez',
-    ejecutor: 'Luis Sánchez'
-  },
-  {
-    id: 4,
-    titulo: 'Preparación de presentación',
-    descripcion: 'Requiero una presentación para la reunión con el cliente del próximo viernes.',
-    categoria: 'ADMINISTRATIVA',
-    prioridad: 'HIGH',
-    fechaCreacion: '2025-04-20T11:00:00',
-    fechaLimite: '2025-04-30',
-    estado: 'COMPLETED',
-    solicitante: 'Juan Pérez',
-    asignador: 'Carlos Rodríguez',
-    ejecutor: 'María López'
-  },
-  {
-    id: 5,
-    titulo: 'Análisis financiero',
-    descripcion: 'Necesito un análisis financiero de la empresa para la reunión con inversores.',
-    categoria: 'FINANCIERA',
-    prioridad: 'CRITICAL',
-    fechaCreacion: '2025-04-15T16:30:00',
-    fechaLimite: '2025-04-25',
-    estado: 'APPROVED',
-    solicitante: 'Juan Pérez',
-    asignador: 'Carlos Rodríguez',
-    ejecutor: 'Pedro Gómez'
-  }
-];
+// Tipo para las solicitudes adaptadas al formato del dashboard
+interface SolicitudAdaptada {
+  id: number;
+  titulo: string;
+  descripcion: string;
+  categoria: string;
+  prioridad: string;
+  fechaCreacion: string;
+  fechaLimite?: string;
+  estado: string;
+  solicitante: string;
+  asignador?: string;
+  ejecutor?: string;
+}
 
-// Datos de ejemplo para tiempos de respuesta
-const MOCK_TIEMPOS_RESPUESTA = {
-  tiempoPromedioAsignacion: 1.5, // días
-  tiempoPromedioCompletado: 4.2, // días
-  tiempoPromedioAprobacion: 0.8, // días
-  solicitudesCompletadasATiempo: 85, // porcentaje
-  solicitudesRetrasadas: 15 // porcentaje
-};
+// Tipo para las estadísticas de tiempos
+interface TiemposRespuesta {
+  tiempoPromedioAsignacion: number;
+  tiempoPromedioCompletado: number;
+  tiempoPromedioAprobacion: number;
+  solicitudesCompletadasATiempo: number;
+  solicitudesRetrasadas: number;
+}
 
 // Estilos
 const PageContainer = styled.div`
@@ -303,6 +250,21 @@ const EmptyState = styled.div`
   }
 `;
 
+// Animación para el spinner
+const SpinAnimation = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
+
+// Estilos para el spinner
+const Spinner = styled(FiLoader)`
+  animation: ${SpinAnimation} 1s linear infinite;
+`;
+
 // Funciones auxiliares
 const formatDate = (dateString: string) => {
   try {
@@ -353,13 +315,98 @@ const getStatusIcon = (status: string) => {
 
 const DashboardSolicitante: React.FC = () => {
   const navigate = useNavigate();
+  const [solicitudes, setSolicitudes] = useState<SolicitudAdaptada[]>([]);
+  const [tiemposRespuesta, setTiemposRespuesta] = useState<TiemposRespuesta>({
+    tiempoPromedioAsignacion: 0,
+    tiempoPromedioCompletado: 0,
+    tiempoPromedioAprobacion: 0,
+    solicitudesCompletadasATiempo: 0,
+    solicitudesRetrasadas: 0
+  });
 
-  // Estado para almacenar las solicitudes
-  const [solicitudes, setSolicitudes] = useState<any[]>(MOCK_SOLICITUDES);
+  // Consulta para obtener las solicitudes del usuario
+  const {
+    data: solicitudesData,
+    isLoading,
+    error
+  } = useQuery({
+    queryKey: ['mySolicitudes'],
+    queryFn: () => solicitudesService.getMySolicitudes(0, 100), // Obtener todas para calcular estadísticas
+    staleTime: 60000, // 1 minuto
+  });
+
+  // Adaptar los datos del backend al formato esperado por el componente
+  useEffect(() => {
+    if (solicitudesData?.taskRequests) {
+      const solicitudesAdaptadas: SolicitudAdaptada[] = solicitudesData.taskRequests.map(tr => ({
+        id: tr.id,
+        titulo: tr.title,
+        descripcion: tr.description,
+        categoria: tr.category?.name || 'Sin categoría',
+        prioridad: tr.priority,
+        fechaCreacion: tr.requestDate,
+        fechaLimite: tr.dueDate,
+        estado: tr.status,
+        solicitante: tr.requesterName || 'Desconocido',
+        asignador: tr.assignerName,
+        ejecutor: tr.executorName
+      }));
+
+      setSolicitudes(solicitudesAdaptadas);
+
+      // Calcular estadísticas de tiempos
+      if (solicitudesAdaptadas.length > 0) {
+        // Solicitudes con fechas de asignación
+        const solicitudesAsignadas = solicitudesData.taskRequests.filter(tr => tr.assignmentDate);
+
+        // Calcular tiempo promedio de asignación (desde solicitud hasta asignación)
+        const tiemposAsignacion = solicitudesAsignadas.map(tr => {
+          const fechaSolicitud = new Date(tr.requestDate);
+          const fechaAsignacion = new Date(tr.assignmentDate!);
+          return differenceInDays(fechaAsignacion, fechaSolicitud);
+        });
+
+        // Calcular tiempo promedio de completado (desde asignación hasta completado)
+        const solicitudesCompletadas = solicitudesData.taskRequests.filter(tr =>
+          tr.assignmentDate && (tr.status === 'COMPLETED' || tr.status === 'APPROVED' || tr.status === 'REJECTED')
+        );
+
+        const tiemposCompletado = solicitudesCompletadas.map(tr => {
+          const fechaAsignacion = new Date(tr.assignmentDate!);
+          const fechaCompletado = new Date(tr.completionDate || new Date());
+          return differenceInDays(fechaCompletado, fechaAsignacion);
+        });
+
+        // Calcular porcentaje de solicitudes completadas a tiempo
+        const solicitudesConFechaLimite = solicitudesCompletadas.filter(tr => tr.dueDate);
+        const completadasATiempo = solicitudesConFechaLimite.filter(tr => {
+          const fechaCompletado = new Date(tr.completionDate || new Date());
+          const fechaLimite = new Date(tr.dueDate!);
+          return fechaCompletado <= fechaLimite;
+        });
+
+        const porcentajeATiempo = solicitudesConFechaLimite.length > 0
+          ? Math.round((completadasATiempo.length / solicitudesConFechaLimite.length) * 100)
+          : 100;
+
+        setTiemposRespuesta({
+          tiempoPromedioAsignacion: tiemposAsignacion.length > 0
+            ? tiemposAsignacion.reduce((sum, time) => sum + time, 0) / tiemposAsignacion.length
+            : 0,
+          tiempoPromedioCompletado: tiemposCompletado.length > 0
+            ? tiemposCompletado.reduce((sum, time) => sum + time, 0) / tiemposCompletado.length
+            : 0,
+          tiempoPromedioAprobacion: 0, // No tenemos esta información por ahora
+          solicitudesCompletadasATiempo: porcentajeATiempo,
+          solicitudesRetrasadas: 100 - porcentajeATiempo
+        });
+      }
+    }
+  }, [solicitudesData]);
 
   // Calcular estadísticas
   const totalSolicitudes = solicitudes.length;
-  const solicitudesPendientes = solicitudes.filter(s => s.estado === 'REQUESTED').length;
+  const solicitudesPendientes = solicitudes.filter(s => s.estado === 'SUBMITTED').length;
   const solicitudesAsignadas = solicitudes.filter(s => s.estado === 'ASSIGNED' || s.estado === 'IN_PROGRESS').length;
   const solicitudesCompletadas = solicitudes.filter(s => s.estado === 'COMPLETED' || s.estado === 'APPROVED' || s.estado === 'REJECTED').length;
 
@@ -367,15 +414,6 @@ const DashboardSolicitante: React.FC = () => {
   const solicitudesRecientes = [...solicitudes]
     .sort((a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime())
     .slice(0, 5);
-
-  // TODO: Implementar consulta real al backend
-  // const { data, isLoading, error } = useQuery(['solicitudes'], fetchSolicitudes);
-
-  // useEffect(() => {
-  //   if (data) {
-  //     setSolicitudes(data);
-  //   }
-  // }, [data]);
 
   const handleNuevaSolicitud = () => {
     navigate('/app/solicitudes/nueva');
@@ -405,34 +443,58 @@ const DashboardSolicitante: React.FC = () => {
             <FiFileText size={16} />
             Total de Solicitudes
           </StatTitle>
-          <StatValue>{totalSolicitudes}</StatValue>
-          <StatFooter>
-            {solicitudesPendientes} pendientes, {solicitudesAsignadas} en proceso
-          </StatFooter>
+          {isLoading ? (
+            <StatValue><Spinner size={16} /></StatValue>
+          ) : (
+            <>
+              <StatValue>{totalSolicitudes}</StatValue>
+              <StatFooter>
+                {solicitudesPendientes} pendientes, {solicitudesAsignadas} en proceso
+              </StatFooter>
+            </>
+          )}
         </StatCard>
         <StatCard>
           <StatTitle>
             <FiClock size={16} />
             Tiempo Promedio de Asignación
           </StatTitle>
-          <StatValue>{MOCK_TIEMPOS_RESPUESTA.tiempoPromedioAsignacion.toFixed(1)}</StatValue>
-          <StatFooter>días</StatFooter>
+          {isLoading ? (
+            <StatValue><Spinner size={16} /></StatValue>
+          ) : (
+            <>
+              <StatValue>{tiemposRespuesta.tiempoPromedioAsignacion.toFixed(1)}</StatValue>
+              <StatFooter>días</StatFooter>
+            </>
+          )}
         </StatCard>
         <StatCard>
           <StatTitle>
             <FiClock size={16} />
             Tiempo Promedio de Completado
           </StatTitle>
-          <StatValue>{MOCK_TIEMPOS_RESPUESTA.tiempoPromedioCompletado.toFixed(1)}</StatValue>
-          <StatFooter>días</StatFooter>
+          {isLoading ? (
+            <StatValue><Spinner size={16} /></StatValue>
+          ) : (
+            <>
+              <StatValue>{tiemposRespuesta.tiempoPromedioCompletado.toFixed(1)}</StatValue>
+              <StatFooter>días</StatFooter>
+            </>
+          )}
         </StatCard>
         <StatCard>
           <StatTitle>
             <FiCheckCircle size={16} />
             Solicitudes Completadas a Tiempo
           </StatTitle>
-          <StatValue>{MOCK_TIEMPOS_RESPUESTA.solicitudesCompletadasATiempo}%</StatValue>
-          <StatFooter>{MOCK_TIEMPOS_RESPUESTA.solicitudesRetrasadas}% con retraso</StatFooter>
+          {isLoading ? (
+            <StatValue><Spinner size={16} /></StatValue>
+          ) : (
+            <>
+              <StatValue>{tiemposRespuesta.solicitudesCompletadasATiempo}%</StatValue>
+              <StatFooter>{tiemposRespuesta.solicitudesRetrasadas}% con retraso</StatFooter>
+            </>
+          )}
         </StatCard>
       </StatsContainer>
 
@@ -442,8 +504,21 @@ const DashboardSolicitante: React.FC = () => {
             <FiFileText size={18} />
             Solicitudes Recientes
           </SectionTitle>
-          
-          {solicitudesRecientes.length > 0 ? (
+
+          {isLoading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+              <Spinner size={32} />
+            </div>
+          ) : error ? (
+            <EmptyState>
+              <FiAlertCircle size={48} />
+              <h3>Error al cargar solicitudes</h3>
+              <p>No se pudieron cargar las solicitudes. Intente nuevamente.</p>
+              <Button $primary onClick={() => window.location.reload()}>
+                Reintentar
+              </Button>
+            </EmptyState>
+          ) : solicitudesRecientes.length > 0 ? (
             <SolicitudesList>
               {solicitudesRecientes.map((solicitud) => (
                 <SolicitudItem key={solicitud.id} onClick={() => handleVerSolicitud(solicitud.id)}>
@@ -463,7 +538,7 @@ const DashboardSolicitante: React.FC = () => {
                   <SolicitudDescription>{solicitud.descripcion}</SolicitudDescription>
                 </SolicitudItem>
               ))}
-              
+
               <div style={{ textAlign: 'center', marginTop: '16px' }}>
                 <Button onClick={handleVerTodasSolicitudes}>
                   Ver todas las solicitudes
@@ -488,58 +563,78 @@ const DashboardSolicitante: React.FC = () => {
             <FiBarChart2 size={18} />
             Estado de Solicitudes
           </SectionTitle>
-          
-          <ProgressContainer>
-            <ProgressHeader>
-              <ProgressLabel>Solicitadas</ProgressLabel>
-              <ProgressValue>{solicitudesPendientes} de {totalSolicitudes}</ProgressValue>
-            </ProgressHeader>
-            <ProgressBar>
-              <ProgressFill $percentage={(solicitudesPendientes / totalSolicitudes) * 100} />
-            </ProgressBar>
-          </ProgressContainer>
-          
-          <ProgressContainer>
-            <ProgressHeader>
-              <ProgressLabel>En Proceso</ProgressLabel>
-              <ProgressValue>{solicitudesAsignadas} de {totalSolicitudes}</ProgressValue>
-            </ProgressHeader>
-            <ProgressBar>
-              <ProgressFill $percentage={(solicitudesAsignadas / totalSolicitudes) * 100} />
-            </ProgressBar>
-          </ProgressContainer>
-          
-          <ProgressContainer>
-            <ProgressHeader>
-              <ProgressLabel>Completadas</ProgressLabel>
-              <ProgressValue>{solicitudesCompletadas} de {totalSolicitudes}</ProgressValue>
-            </ProgressHeader>
-            <ProgressBar>
-              <ProgressFill $percentage={(solicitudesCompletadas / totalSolicitudes) * 100} />
-            </ProgressBar>
-          </ProgressContainer>
-          
+
+          {isLoading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+              <Spinner size={32} />
+            </div>
+          ) : (
+            <>
+              <ProgressContainer>
+                <ProgressHeader>
+                  <ProgressLabel>Solicitadas</ProgressLabel>
+                  <ProgressValue>{solicitudesPendientes} de {totalSolicitudes}</ProgressValue>
+                </ProgressHeader>
+                <ProgressBar>
+                  <ProgressFill $percentage={totalSolicitudes > 0 ? (solicitudesPendientes / totalSolicitudes) * 100 : 0} />
+                </ProgressBar>
+              </ProgressContainer>
+
+              <ProgressContainer>
+                <ProgressHeader>
+                  <ProgressLabel>En Proceso</ProgressLabel>
+                  <ProgressValue>{solicitudesAsignadas} de {totalSolicitudes}</ProgressValue>
+                </ProgressHeader>
+                <ProgressBar>
+                  <ProgressFill $percentage={totalSolicitudes > 0 ? (solicitudesAsignadas / totalSolicitudes) * 100 : 0} />
+                </ProgressBar>
+              </ProgressContainer>
+
+              <ProgressContainer>
+                <ProgressHeader>
+                  <ProgressLabel>Completadas</ProgressLabel>
+                  <ProgressValue>{solicitudesCompletadas} de {totalSolicitudes}</ProgressValue>
+                </ProgressHeader>
+                <ProgressBar>
+                  <ProgressFill $percentage={totalSolicitudes > 0 ? (solicitudesCompletadas / totalSolicitudes) * 100 : 0} />
+                </ProgressBar>
+              </ProgressContainer>
+            </>
+          )}
+
           <div style={{ marginTop: '24px' }}>
             <SectionTitle>
               <FiClock size={18} />
               Próximas Fechas Límite
             </SectionTitle>
-            
-            {solicitudes
-              .filter(s => s.estado !== 'COMPLETED' && s.estado !== 'APPROVED' && s.estado !== 'REJECTED')
-              .sort((a, b) => new Date(a.fechaLimite).getTime() - new Date(b.fechaLimite).getTime())
-              .slice(0, 3)
-              .map((solicitud) => (
-                <SolicitudItem key={solicitud.id} onClick={() => handleVerSolicitud(solicitud.id)}>
-                  <SolicitudHeader>
-                    <SolicitudTitle>{solicitud.titulo}</SolicitudTitle>
-                    <SolicitudDate>
-                      <FiCalendar size={12} />
-                      {formatDate(solicitud.fechaLimite)}
-                    </SolicitudDate>
-                  </SolicitudHeader>
-                </SolicitudItem>
-              ))}
+
+            {isLoading ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+                <Spinner size={24} />
+              </div>
+            ) : (
+              solicitudes
+                .filter(s => s.fechaLimite && s.estado !== 'COMPLETED' && s.estado !== 'APPROVED' && s.estado !== 'REJECTED')
+                .sort((a, b) => new Date(a.fechaLimite || '').getTime() - new Date(b.fechaLimite || '').getTime())
+                .slice(0, 3)
+                .map((solicitud) => (
+                  <SolicitudItem key={solicitud.id} onClick={() => handleVerSolicitud(solicitud.id)}>
+                    <SolicitudHeader>
+                      <SolicitudTitle>{solicitud.titulo}</SolicitudTitle>
+                      <SolicitudDate>
+                        <FiCalendar size={12} />
+                        {formatDate(solicitud.fechaLimite || '')}
+                      </SolicitudDate>
+                    </SolicitudHeader>
+                  </SolicitudItem>
+                ))
+            )}
+
+            {!isLoading && solicitudes.filter(s => s.fechaLimite && s.estado !== 'COMPLETED' && s.estado !== 'APPROVED' && s.estado !== 'REJECTED').length === 0 && (
+              <div style={{ padding: '10px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                No hay fechas límite próximas
+              </div>
+            )}
           </div>
         </ContentSection>
       </ContentGrid>

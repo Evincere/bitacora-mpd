@@ -47,6 +47,21 @@ public class JwtResponse {
     private String email;
 
     /**
+     * Nombre del usuario.
+     */
+    private String firstName;
+
+    /**
+     * Apellido del usuario.
+     */
+    private String lastName;
+
+    /**
+     * Nombre completo del usuario.
+     */
+    private String fullName;
+
+    /**
      * Rol del usuario.
      */
     private String role;

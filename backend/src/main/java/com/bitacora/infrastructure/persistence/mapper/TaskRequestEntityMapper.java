@@ -18,7 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Mapper para convertir entre entidades JPA y entidades de dominio relacionadas con solicitudes de tareas.
+ * Mapper para convertir entre entidades JPA y entidades de dominio relacionadas
+ * con solicitudes de tareas.
  */
 @Component
 public class TaskRequestEntityMapper {
@@ -35,7 +36,8 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte una entidad JPA TaskRequestEntity a una entidad de dominio TaskRequest.
+     * Convierte una entidad JPA TaskRequestEntity a una entidad de dominio
+     * TaskRequest.
      *
      * @param entity La entidad JPA a convertir
      * @return La entidad de dominio resultante
@@ -55,6 +57,7 @@ public class TaskRequestEntityMapper {
                 .status(mapToDomainStatus(entity.getStatus()))
                 .requesterId(entity.getRequesterId())
                 .assignerId(entity.getAssignerId())
+                .executorId(entity.getExecutorId())
                 .requestDate(entity.getRequestDate())
                 .assignmentDate(entity.getAssignmentDate())
                 .notes(entity.getNotes())
@@ -64,7 +67,8 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte una entidad de dominio TaskRequest a una entidad JPA TaskRequestEntity.
+     * Convierte una entidad de dominio TaskRequest a una entidad JPA
+     * TaskRequestEntity.
      *
      * @param domain La entidad de dominio a convertir
      * @return La entidad JPA resultante
@@ -84,6 +88,7 @@ public class TaskRequestEntityMapper {
                 .status(mapToEntityStatus(domain.getStatus()))
                 .requesterId(domain.getRequesterId())
                 .assignerId(domain.getAssignerId())
+                .executorId(domain.getExecutorId())
                 .requestDate(domain.getRequestDate())
                 .assignmentDate(domain.getAssignmentDate())
                 .notes(domain.getNotes())
@@ -93,7 +98,8 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte una lista de entidades JPA TaskRequestEntity a una lista de entidades de dominio TaskRequest.
+     * Convierte una lista de entidades JPA TaskRequestEntity a una lista de
+     * entidades de dominio TaskRequest.
      *
      * @param entities La lista de entidades JPA a convertir
      * @return La lista de entidades de dominio resultante
@@ -109,7 +115,8 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte una entidad JPA TaskRequestCommentEntity a una entidad de dominio TaskRequestComment.
+     * Convierte una entidad JPA TaskRequestCommentEntity a una entidad de dominio
+     * TaskRequestComment.
      *
      * @param entity La entidad JPA a convertir
      * @return La entidad de dominio resultante
@@ -129,7 +136,8 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte una entidad JPA TaskRequestAttachmentEntity a una entidad de dominio TaskRequestAttachment.
+     * Convierte una entidad JPA TaskRequestAttachmentEntity a una entidad de
+     * dominio TaskRequestAttachment.
      *
      * @param entity La entidad JPA a convertir
      * @return La entidad de dominio resultante
@@ -152,7 +160,8 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte una lista de entidades JPA TaskRequestCommentEntity a una lista de entidades de dominio TaskRequestComment.
+     * Convierte una lista de entidades JPA TaskRequestCommentEntity a una lista de
+     * entidades de dominio TaskRequestComment.
      *
      * @param entities La lista de entidades JPA a convertir
      * @return La lista de entidades de dominio resultante
@@ -168,7 +177,8 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte una lista de entidades JPA TaskRequestAttachmentEntity a una lista de entidades de dominio TaskRequestAttachment.
+     * Convierte una lista de entidades JPA TaskRequestAttachmentEntity a una lista
+     * de entidades de dominio TaskRequestAttachment.
      *
      * @param entities La lista de entidades JPA a convertir
      * @return La lista de entidades de dominio resultante
@@ -184,9 +194,10 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte una entidad de dominio TaskRequestComment a una entidad JPA TaskRequestCommentEntity.
+     * Convierte una entidad de dominio TaskRequestComment a una entidad JPA
+     * TaskRequestCommentEntity.
      *
-     * @param domain La entidad de dominio a convertir
+     * @param domain        La entidad de dominio a convertir
      * @param taskRequestId El ID de la solicitud a la que pertenece el comentario
      * @return La entidad JPA resultante
      */
@@ -211,10 +222,12 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte una entidad de dominio TaskRequestAttachment a una entidad JPA TaskRequestAttachmentEntity.
+     * Convierte una entidad de dominio TaskRequestAttachment a una entidad JPA
+     * TaskRequestAttachmentEntity.
      *
-     * @param domain La entidad de dominio a convertir
-     * @param taskRequestId El ID de la solicitud a la que pertenece el archivo adjunto
+     * @param domain        La entidad de dominio a convertir
+     * @param taskRequestId El ID de la solicitud a la que pertenece el archivo
+     *                      adjunto
      * @return La entidad JPA resultante
      */
     private TaskRequestAttachmentEntity toEntityAttachment(TaskRequestAttachment domain, Long taskRequestId) {
@@ -241,10 +254,12 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte una lista de entidades de dominio TaskRequestComment a una lista de entidades JPA TaskRequestCommentEntity.
+     * Convierte una lista de entidades de dominio TaskRequestComment a una lista de
+     * entidades JPA TaskRequestCommentEntity.
      *
-     * @param domains La lista de entidades de dominio a convertir
-     * @param taskRequestId El ID de la solicitud a la que pertenecen los comentarios
+     * @param domains       La lista de entidades de dominio a convertir
+     * @param taskRequestId El ID de la solicitud a la que pertenecen los
+     *                      comentarios
      * @return La lista de entidades JPA resultante
      */
     private List<TaskRequestCommentEntity> mapToEntityComments(List<TaskRequestComment> domains, Long taskRequestId) {
@@ -258,13 +273,16 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte una lista de entidades de dominio TaskRequestAttachment a una lista de entidades JPA TaskRequestAttachmentEntity.
+     * Convierte una lista de entidades de dominio TaskRequestAttachment a una lista
+     * de entidades JPA TaskRequestAttachmentEntity.
      *
-     * @param domains La lista de entidades de dominio a convertir
-     * @param taskRequestId El ID de la solicitud a la que pertenecen los archivos adjuntos
+     * @param domains       La lista de entidades de dominio a convertir
+     * @param taskRequestId El ID de la solicitud a la que pertenecen los archivos
+     *                      adjuntos
      * @return La lista de entidades JPA resultante
      */
-    private List<TaskRequestAttachmentEntity> mapToEntityAttachments(List<TaskRequestAttachment> domains, Long taskRequestId) {
+    private List<TaskRequestAttachmentEntity> mapToEntityAttachments(List<TaskRequestAttachment> domains,
+            Long taskRequestId) {
         if (domains == null) {
             return new ArrayList<>();
         }
@@ -275,7 +293,8 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte un enum de dominio TaskRequestStatus a un enum de entidad TaskRequestStatusEntity.
+     * Convierte un enum de dominio TaskRequestStatus a un enum de entidad
+     * TaskRequestStatusEntity.
      *
      * @param status El enum de dominio a convertir
      * @return El enum de entidad resultante
@@ -302,7 +321,8 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte un enum de entidad TaskRequestStatusEntity a un enum de dominio TaskRequestStatus.
+     * Convierte un enum de entidad TaskRequestStatusEntity a un enum de dominio
+     * TaskRequestStatus.
      *
      * @param status El enum de entidad a convertir
      * @return El enum de dominio resultante
@@ -329,7 +349,8 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte un enum de dominio TaskRequestPriority a un enum de entidad TaskRequestPriorityEntity.
+     * Convierte un enum de dominio TaskRequestPriority a un enum de entidad
+     * TaskRequestPriorityEntity.
      *
      * @param priority El enum de dominio a convertir
      * @return El enum de entidad resultante
@@ -356,7 +377,8 @@ public class TaskRequestEntityMapper {
     }
 
     /**
-     * Convierte un enum de entidad TaskRequestPriorityEntity a un enum de dominio TaskRequestPriority.
+     * Convierte un enum de entidad TaskRequestPriorityEntity a un enum de dominio
+     * TaskRequestPriority.
      *
      * @param priority El enum de entidad a convertir
      * @return El enum de dominio resultante

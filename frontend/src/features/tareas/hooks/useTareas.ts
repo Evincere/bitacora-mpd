@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import tareasService, { ProgresoRequest, CompletarTareaRequest } from '../services/tareasService';
+import { taskRequestService } from '../../../services/taskRequestService';
 
 /**
  * Hook personalizado para gestionar tareas del ejecutor
@@ -9,7 +10,7 @@ import tareasService, { ProgresoRequest, CompletarTareaRequest } from '../servic
 export const useTareas = () => {
   const queryClient = useQueryClient();
 
-  // Obtener tareas asignadas
+  // Obtener tareas asignadas (desde el endpoint de actividades)
   const {
     data: assignedTasks,
     isLoading: isLoadingAssignedTasks,
@@ -18,6 +19,18 @@ export const useTareas = () => {
   } = useQuery({
     queryKey: ['assignedTasks'],
     queryFn: tareasService.getAssignedTasks,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  });
+
+  // Obtener tareas asignadas al ejecutor (desde el endpoint de task-requests)
+  const {
+    data: tasksAssignedToExecutor,
+    isLoading: isLoadingTasksAssignedToExecutor,
+    error: tasksAssignedToExecutorError,
+    refetch: refetchTasksAssignedToExecutor
+  } = useQuery({
+    queryKey: ['tasksAssignedToExecutor'],
+    queryFn: () => taskRequestService.getTasksAssignedToExecutor(0, 10), // Pasar explícitamente los parámetros
     staleTime: 1000 * 60 * 5, // 5 minutos
   });
 
@@ -91,7 +104,7 @@ export const useTareas = () => {
 
   // Agregar comentario
   const addCommentMutation = useMutation({
-    mutationFn: ({ activityId, comment }: { activityId: number; comment: string }) => 
+    mutationFn: ({ activityId, comment }: { activityId: number; comment: string }) =>
       tareasService.addComment(activityId, comment),
     onSuccess: () => {
       // Invalidar consultas para actualizar los datos
@@ -111,6 +124,7 @@ export const useTareas = () => {
     refetchAssignedTasks();
     refetchInProgressTasks();
     refetchCompletedTasks();
+    refetchTasksAssignedToExecutor();
   };
 
   return {
@@ -118,32 +132,35 @@ export const useTareas = () => {
     assignedTasks,
     inProgressTasks,
     completedTasks,
-    
+    tasksAssignedToExecutor,
+
     // Estados de carga
     isLoadingAssignedTasks,
     isLoadingInProgressTasks,
     isLoadingCompletedTasks,
+    isLoadingTasksAssignedToExecutor,
     isStartingTask: startTaskMutation.isPending,
     isUpdatingProgress: updateProgressMutation.isPending,
     isCompletingTask: completeTaskMutation.isPending,
     isAddingComment: addCommentMutation.isPending,
-    
+
     // Errores
     assignedTasksError,
     inProgressTasksError,
     completedTasksError,
+    tasksAssignedToExecutorError,
     startTaskError: startTaskMutation.error,
     updateProgressError: updateProgressMutation.error,
     completeTaskError: completeTaskMutation.error,
     addCommentError: addCommentMutation.error,
-    
+
     // Métodos
     startTask: startTaskMutation.mutate,
     updateProgress: updateProgressMutation.mutate,
     completeTask: completeTaskMutation.mutate,
     addComment: addCommentMutation.mutate,
     refreshAllData,
-    
+
     // Funciones auxiliares
     getTaskDetails: tareasService.getTaskDetails
   };
