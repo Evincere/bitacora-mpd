@@ -539,7 +539,8 @@ const ActualizarProgreso: React.FC = () => {
       completeTask({
         activityId,
         result: `Tarea completada con un progreso del ${currentProgress}%`,
-        notes: watch('notes')
+        notes: watch('notes'),
+        actualHours: Math.ceil(currentProgress / 10) // Estimación de horas basada en el progreso
       }, {
         onSuccess: () => {
           toast.success('Tarea completada correctamente');

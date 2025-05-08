@@ -16,7 +16,7 @@ import {
 } from 'react-icons/fi';
 import { toggleSidebar } from '@/core/store/uiSlice';
 import { useAppSelector, useAppDispatch } from '@/core/store';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 interface SidebarProps {
   $isOpen: boolean;
@@ -188,7 +188,7 @@ const NavItem = styled(NavLink)<NavItemProps>`
 const Sidebar: React.FC = () => {
   const dispatch = useAppDispatch();
   const { sidebarOpen } = useAppSelector((state) => state.ui);
-  const { currentUser } = useAuth();
+  const { user } = useAuth();
 
   const handleToggleSidebar = () => {
     dispatch(toggleSidebar());
@@ -228,21 +228,21 @@ const Sidebar: React.FC = () => {
         </NavItem>
 
         {/* Menú de Solicitudes de Tareas */}
-        {(currentUser?.roles.includes('ROLE_SOLICITANTE') || currentUser?.roles.includes('ROLE_ADMIN')) && (
+        {(user?.role === 'SOLICITANTE' || user?.role === 'ADMIN') && (
           <NavItem to="/app/task-requests/my-requests" $isOpen={sidebarOpen}>
             <div className="icon"><FiClipboard size={20} /></div>
             <span>Mis Solicitudes</span>
           </NavItem>
         )}
 
-        {(currentUser?.roles.includes('ROLE_ASIGNADOR') || currentUser?.roles.includes('ROLE_ADMIN')) && (
+        {(user?.role === 'ASIGNADOR' || user?.role === 'ADMIN') && (
           <NavItem to="/app/task-requests/assigned" $isOpen={sidebarOpen}>
             <div className="icon"><FiClipboard size={20} /></div>
             <span>Solicitudes Asignadas</span>
           </NavItem>
         )}
 
-        {(currentUser?.roles.includes('ROLE_ASIGNADOR') || currentUser?.roles.includes('ROLE_ADMIN')) && (
+        {(user?.role === 'ASIGNADOR' || user?.role === 'ADMIN') && (
           <NavItem to="/app/task-requests/stats" $isOpen={sidebarOpen}>
             <div className="icon"><FiPieChart size={20} /></div>
             <span>Estadísticas</span>
@@ -254,7 +254,7 @@ const Sidebar: React.FC = () => {
           <span>Categorías</span>
         </NavItem>
 
-        {currentUser?.roles.includes('ROLE_ADMIN') && (
+        {user?.role === 'ADMIN' && (
           <NavItem to="/app/task-requests/all" $isOpen={sidebarOpen}>
             <div className="icon"><FiList size={20} /></div>
             <span>Todas las Solicitudes</span>

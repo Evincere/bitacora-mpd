@@ -68,7 +68,7 @@ public class SecurityConfig {
      *
      * @return El origen de configuración CORS
      */
-    @Value("${cors.allowed-origins:http://localhost:3000,http://localhost:8090}")
+    @Value("${cors.allowed-origins:http://localhost:3000,http://localhost:8090,https://metres-dispatch-takes-reserve.trycloudflare.com}")
     private String[] allowedOrigins;
 
     @Value("${cors.allowed-methods:GET,POST,PUT,PATCH,DELETE,OPTIONS}")

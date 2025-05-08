@@ -141,4 +141,12 @@ public interface NotificationPort {
      * @param notification La notificación de mención
      */
     void sendMentionNotification(String username, MentionNotification notification);
+
+    /**
+     * Envía un evento personalizado a todos los clientes conectados.
+     *
+     * @param eventName El nombre del evento
+     * @param payload   El objeto que contiene los datos del evento
+     */
+    void sendCustomEvent(String eventName, Object payload);
 }

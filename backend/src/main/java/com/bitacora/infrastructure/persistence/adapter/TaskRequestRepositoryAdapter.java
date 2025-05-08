@@ -237,6 +237,8 @@ public class TaskRequestRepositoryAdapter implements TaskRequestRepository {
                 return TaskRequestStatusEntity.SUBMITTED;
             case ASSIGNED:
                 return TaskRequestStatusEntity.ASSIGNED;
+            case IN_PROGRESS:
+                return TaskRequestStatusEntity.IN_PROGRESS;
             case COMPLETED:
                 return TaskRequestStatusEntity.COMPLETED;
             case CANCELLED:

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import asignacionService, { AsignacionRequest, Ejecutor } from '../services/asignacionService';
+import asignacionService, { AsignacionRequest, Ejecutor, RechazoRequest } from '../services/asignacionService';
 import { TaskRequest, TaskRequestPageDto } from '@/features/solicitudes/services/solicitudesService';
 
 /**
@@ -21,7 +21,9 @@ export const useAsignacion = () => {
   } = useQuery({
     queryKey: ['pendingRequests', currentPage, pageSize],
     queryFn: () => asignacionService.getPendingRequests(currentPage, pageSize),
-    staleTime: 1000 * 60 * 2, // 2 minutos
+    staleTime: 1000 * 30, // 30 segundos
+    refetchInterval: 1000 * 60, // Refrescar automáticamente cada minuto
+    refetchOnWindowFocus: true, // Refrescar cuando la ventana recupera el foco
   });
 
   // Obtener ejecutores disponibles
@@ -57,6 +59,26 @@ export const useAsignacion = () => {
         toast.error('La solicitud debe estar en estado ASSIGNED para asignar un ejecutor.');
       } else {
         toast.error(error.message || 'Error al asignar la solicitud');
+      }
+    }
+  });
+
+  // Rechazar solicitud de tarea
+  const rejectTaskRequestMutation = useMutation({
+    mutationFn: (params: { taskRequestId: number, rechazo: RechazoRequest }) =>
+      asignacionService.rejectTaskRequest(params.taskRequestId, params.rechazo),
+    onSuccess: (data) => {
+      // Invalidar consultas para actualizar los datos
+      queryClient.invalidateQueries({ queryKey: ['pendingRequests'] });
+
+      toast.success('Solicitud rechazada correctamente.');
+    },
+    onError: (error: any) => {
+      console.error('Error al rechazar solicitud:', error);
+      if (error.message && error.message.includes('Solo se pueden rechazar solicitudes en estado SUBMITTED')) {
+        toast.error('Esta solicitud no puede ser rechazada porque no está en estado de espera.');
+      } else {
+        toast.error(error.message || 'Error al rechazar la solicitud');
       }
     }
   });
@@ -98,14 +120,17 @@ export const useAsignacion = () => {
     isLoadingPendingRequests,
     isLoadingExecutors,
     isAssigningTask: assignTaskRequestMutation.isPending,
+    isRejectingTask: rejectTaskRequestMutation.isPending,
 
     // Errores
     pendingRequestsError,
     executorsError,
     assignTaskError: assignTaskRequestMutation.error,
+    rejectTaskError: rejectTaskRequestMutation.error,
 
     // Métodos
     assignTaskRequest: assignTaskRequestMutation.mutate,
+    rejectTaskRequest: rejectTaskRequestMutation.mutate,
     handlePageChange,
     handlePageSizeChange,
     refreshAllData,

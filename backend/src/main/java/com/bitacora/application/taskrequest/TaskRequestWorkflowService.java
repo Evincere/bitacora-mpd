@@ -1,6 +1,7 @@
 package com.bitacora.application.taskrequest;
 
 import com.bitacora.application.notification.MentionNotificationService;
+import com.bitacora.domain.event.taskrequest.TaskRequestStatusChangedEvent;
 import com.bitacora.domain.exception.CommentException;
 import com.bitacora.domain.exception.CommentException.CommentErrorCode;
 import com.bitacora.domain.exception.TaskRequestException;
@@ -13,8 +14,11 @@ import com.bitacora.domain.port.UserRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +39,7 @@ public class TaskRequestWorkflowService {
     private final TaskRequestHistoryService historyService;
     private final UserRepository userRepository;
     private final MentionNotificationService mentionNotificationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Constructor.
@@ -43,16 +48,19 @@ public class TaskRequestWorkflowService {
      * @param historyService             Servicio de historial de solicitudes
      * @param userRepository             Repositorio de usuarios
      * @param mentionNotificationService Servicio de notificaciones de menciones
+     * @param eventPublisher             Publicador de eventos
      */
     public TaskRequestWorkflowService(
             final TaskRequestRepository taskRequestRepository,
             final TaskRequestHistoryService historyService,
             final UserRepository userRepository,
-            final MentionNotificationService mentionNotificationService) {
+            final MentionNotificationService mentionNotificationService,
+            final ApplicationEventPublisher eventPublisher) {
         this.taskRequestRepository = taskRequestRepository;
         this.historyService = historyService;
         this.userRepository = userRepository;
         this.mentionNotificationService = mentionNotificationService;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -214,38 +222,64 @@ public class TaskRequestWorkflowService {
     public TaskRequest start(final Long id, final Long executorId, final String notes) {
         logger.info("Iniciando solicitud de tarea con ID: {} por el ejecutor: {}", id, executorId);
 
-        // Buscar la solicitud
-        TaskRequest taskRequest = taskRequestRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Solicitud no encontrada con ID: " + id));
+        try {
+            // Buscar la solicitud
+            TaskRequest taskRequest = taskRequestRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Solicitud no encontrada con ID: " + id));
 
-        // Verificar que el ejecutor coincida
-        if (taskRequest.getExecutorId() != null && !taskRequest.getExecutorId().equals(executorId)) {
-            throw new IllegalArgumentException("El ejecutor con ID: " + executorId +
-                    " no está asignado a esta solicitud");
+            // Verificar que el ejecutor coincida
+            if (taskRequest.getExecutorId() != null && !taskRequest.getExecutorId().equals(executorId)) {
+                throw new IllegalArgumentException("El ejecutor con ID: " + executorId +
+                        " no está asignado a esta solicitud");
+            }
+
+            // Guardar el estado anterior para el evento
+            TaskRequestStatus oldStatus = taskRequest.getStatus();
+
+            // Iniciar la solicitud (el método start de TaskRequest ya verifica el estado)
+            TaskRequest startedTaskRequest = taskRequest.start();
+
+            // Guardar la solicitud actualizada
+            TaskRequest savedTaskRequest = taskRequestRepository.save(startedTaskRequest);
+            logger.info("Solicitud de tarea iniciada con ID: {}", savedTaskRequest.getId());
+
+            // Registrar el cambio de estado en el historial
+            String message = "Solicitud iniciada por el ejecutor";
+            if (notes != null && !notes.trim().isEmpty()) {
+                message += ": " + notes;
+            }
+
+            historyService.recordStatusChange(
+                    savedTaskRequest.getId(),
+                    executorId,
+                    null, // No tenemos el nombre del usuario aquí
+                    TaskRequestStatus.ASSIGNED,
+                    TaskRequestStatus.IN_PROGRESS,
+                    message);
+
+            // Crear una copia del objeto para evitar problemas de transacción
+            final TaskRequest finalSavedTaskRequest = savedTaskRequest;
+            final TaskRequestStatus finalOldStatus = oldStatus;
+
+            // Publicar evento de cambio de estado después de que la transacción se complete
+            // Esto evita problemas de transacción con los listeners
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    try {
+                        eventPublisher.publishEvent(new TaskRequestStatusChangedEvent(finalSavedTaskRequest, finalOldStatus, executorId));
+                        logger.info("Evento de cambio de estado publicado para la solicitud con ID: {}", finalSavedTaskRequest.getId());
+                    } catch (Exception e) {
+                        logger.error("Error al publicar evento de cambio de estado: {}", e.getMessage(), e);
+                    }
+                }
+            });
+
+            return savedTaskRequest;
+        } catch (Exception e) {
+            logger.error("Error al iniciar solicitud de tarea: {}", e.getMessage(), e);
+            throw e;
         }
-
-        // Iniciar la solicitud (el método start de TaskRequest ya verifica el estado)
-        TaskRequest startedTaskRequest = taskRequest.start();
-
-        // Guardar la solicitud actualizada
-        TaskRequest savedTaskRequest = taskRequestRepository.save(startedTaskRequest);
-        logger.info("Solicitud de tarea iniciada con ID: {}", savedTaskRequest.getId());
-
-        // Registrar el cambio de estado en el historial
-        String message = "Solicitud iniciada por el ejecutor";
-        if (notes != null && !notes.trim().isEmpty()) {
-            message += ": " + notes;
-        }
-
-        historyService.recordStatusChange(
-                savedTaskRequest.getId(),
-                executorId,
-                null, // No tenemos el nombre del usuario aquí
-                TaskRequestStatus.ASSIGNED,
-                TaskRequestStatus.IN_PROGRESS,
-                message);
-
-        return savedTaskRequest;
     }
 
     /**
@@ -340,6 +374,48 @@ public class TaskRequestWorkflowService {
                 taskRequest.getStatus(),
                 TaskRequestStatus.CANCELLED,
                 "Solicitud cancelada por el solicitante");
+
+        return savedTaskRequest;
+    }
+
+    /**
+     * Rechaza una solicitud de tarea por parte del asignador.
+     *
+     * @param id             ID de la solicitud
+     * @param assignerId     ID del asignador
+     * @param rejectionReason Motivo del rechazo
+     * @return La solicitud actualizada
+     * @throws IllegalArgumentException Si la solicitud no existe
+     * @throws IllegalStateException    Si la solicitud no está en estado SUBMITTED
+     */
+    @Transactional
+    public TaskRequest reject(final Long id, final Long assignerId, final String rejectionReason) {
+        logger.info("Rechazando solicitud de tarea con ID: {} por el asignador: {}", id, assignerId);
+
+        // Buscar la solicitud
+        TaskRequest taskRequest = taskRequestRepository.findById(id)
+                .orElseThrow(() -> new TaskRequestException(
+                        "Solicitud no encontrada con ID: " + id,
+                        TaskRequestErrorCode.TASK_REQUEST_NOT_FOUND));
+
+        // Rechazar la solicitud (el método reject de TaskRequest ya verifica el estado)
+        TaskRequest rejectedTaskRequest = taskRequest.reject(rejectionReason);
+
+        // Asignar el asignador que rechaza la solicitud
+        rejectedTaskRequest.assign(assignerId);
+
+        // Guardar la solicitud actualizada
+        TaskRequest savedTaskRequest = taskRequestRepository.save(rejectedTaskRequest);
+        logger.info("Solicitud de tarea rechazada con ID: {}", savedTaskRequest.getId());
+
+        // Registrar el cambio de estado en el historial
+        historyService.recordStatusChange(
+                savedTaskRequest.getId(),
+                assignerId,
+                null, // No tenemos el nombre del usuario aquí
+                TaskRequestStatus.SUBMITTED,
+                TaskRequestStatus.CANCELLED,
+                "Solicitud rechazada por el asignador: " + rejectionReason);
 
         return savedTaskRequest;
     }

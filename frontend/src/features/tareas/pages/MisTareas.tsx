@@ -116,9 +116,9 @@ const FilterSelect = styled.select`
 const StyledSelect = styled.select`
   padding: 12px 14px;
   border-radius: 6px;
-  border: 2px solid #d0d5dd;
-  background-color: #ffffff;
-  color: #344054;
+  border: 2px solid ${({ theme }) => theme.border};
+  background-color: ${({ theme }) => theme.backgroundTertiary};
+  color: ${({ theme }) => theme.text};
   font-size: 14px;
   font-weight: 500;
   transition: all 0.2s;
@@ -133,18 +133,20 @@ const StyledSelect = styled.select`
   height: 44px;
 
   &:focus {
-    border-color: #7f56d9;
+    border-color: ${({ theme }) => theme.primary};
     outline: none;
-    box-shadow: 0 0 0 3px rgba(127, 86, 217, 0.2);
+    box-shadow: 0 0 0 3px ${({ theme }) => `${theme.primary}30`};
   }
 
   &:hover {
-    border-color: #b2a3d8;
+    border-color: ${({ theme }) => theme.borderHover || theme.primary + '80'};
   }
 
   option {
     padding: 8px;
     font-weight: 500;
+    background-color: ${({ theme }) => theme.backgroundTertiary};
+    color: ${({ theme }) => theme.text};
   }
 `;
 
@@ -594,7 +596,7 @@ const getStatusIcon = (status: string) => {
     case 'ASSIGNED':
       return <FiClock size={14} />;
     case 'IN_PROGRESS':
-      return <FiClock size={14} />;
+      return <FiPlay size={14} />;
     case 'COMPLETED':
       return <FiCheckCircle size={14} />;
     case 'APPROVED':
@@ -666,8 +668,12 @@ const MisTareas: React.FC = () => {
     completeTask
   } = useTareas();
 
-  // Combinar tareas asignadas y en progreso
-  const allTasks = [...(assignedTasks || []), ...(inProgressTasks || [])];
+  // Registrar los datos para depuración
+  console.log('MisTareas: Datos disponibles:', {
+    assignedTasks: assignedTasks?.length || 0,
+    inProgressTasks: inProgressTasks?.length || 0,
+    taskRequests: tasksAssignedToExecutor?.taskRequests?.length || 0
+  });
 
   // Convertir las tareas asignadas desde el endpoint de task-requests
   const taskRequestTasks = (tasksAssignedToExecutor?.taskRequests || []).map(task => ({
@@ -684,6 +690,47 @@ const MisTareas: React.FC = () => {
     comments: task.notes || ''
   }));
 
+  // Crear un mapa de IDs de tareas en progreso para verificación rápida
+  const inProgressTaskIds = new Set((inProgressTasks || []).map(task => task.id));
+
+  // Filtrar las tareas asignadas para excluir las que ya están en progreso
+  const filteredAssignedTasks = (assignedTasks || []).filter(task => !inProgressTaskIds.has(task.id));
+
+  // Verificar si hay tareas en progreso que no aparecen en la lista de inProgressTasks
+  // Esto puede ocurrir si la tarea se inició pero no se actualizó correctamente en el estado
+  const taskRequestsInProgress = (tasksAssignedToExecutor?.taskRequests || [])
+    .filter(task => task.status === 'IN_PROGRESS')
+    .filter(task => !inProgressTaskIds.has(task.id));
+
+  console.log('MisTareas: Tareas filtradas:', {
+    assignedTasksAfterFilter: filteredAssignedTasks.length,
+    inProgressTasks: inProgressTasks?.length || 0,
+    taskRequestsInProgress: taskRequestsInProgress.length
+  });
+
+  // Convertir las tareas en progreso de task-requests al formato de actividades
+  const taskRequestsAsActivities = taskRequestsInProgress.map(task => ({
+    id: task.id,
+    title: task.title,
+    description: task.description,
+    category: task.category?.name || '',
+    priority: task.priority,
+    status: 'IN_PROGRESS', // Forzar el estado a IN_PROGRESS
+    dueDate: task.dueDate,
+    requestDate: task.requestDate,
+    requesterName: task.requesterName || '',
+    assignerName: task.assignerName || '',
+    comments: task.notes || '',
+    progress: 0
+  }));
+
+  // Combinar tareas asignadas (filtradas), en progreso y las task-requests en progreso
+  const allTasks = [
+    ...filteredAssignedTasks,
+    ...(inProgressTasks || []),
+    ...taskRequestsAsActivities
+  ];
+
   // Convertir las tareas al formato esperado por el componente
   const tareas = [
     // Tareas de actividades (assignedTasks e inProgressTasks)
@@ -695,29 +742,31 @@ const MisTareas: React.FC = () => {
       prioridad: task.priority || 'MEDIUM',
       fechaAsignacion: task.requestDate || '',
       fechaLimite: task.dueDate || '',
-      estado: task.status,
+      estado: task.status, // Usar el estado real de la tarea
       solicitante: task.requesterName || '',
       asignador: task.assignerName || '',
       notas: task.comments || '',
-      progreso: task.progress,
+      progreso: task.progress || 0,
       source: 'activity'
     })),
-    // Tareas de task-requests
-    ...taskRequestTasks.map(task => ({
-      id: task.id,
-      titulo: task.title || '',
-      descripcion: task.description || '',
-      categoria: task.category || '',
-      prioridad: task.priority || 'MEDIUM',
-      fechaAsignacion: task.requestDate || '',
-      fechaLimite: task.dueDate || '',
-      estado: task.status,
-      solicitante: task.requesterName || '',
-      asignador: task.assignerName || '',
-      notas: task.comments || '',
-      progreso: 0,
-      source: 'taskRequest'
-    }))
+    // Tareas de task-requests (solo incluir las que no están en progreso)
+    ...taskRequestTasks
+      .filter(task => !inProgressTaskIds.has(task.id))
+      .map(task => ({
+        id: task.id,
+        titulo: task.title || '',
+        descripcion: task.description || '',
+        categoria: task.category || '',
+        prioridad: task.priority || 'MEDIUM',
+        fechaAsignacion: task.requestDate || '',
+        fechaLimite: task.dueDate || '',
+        estado: task.status,
+        solicitante: task.requesterName || '',
+        asignador: task.assignerName || '',
+        notas: task.comments || '',
+        progreso: 0,
+        source: 'taskRequest'
+      }))
   ];
 
   // Filtrar tareas según los criterios
@@ -752,8 +801,86 @@ const MisTareas: React.FC = () => {
   };
 
   const handleIniciarTarea = (id: number) => {
-    startTask(id);
-    setExpandedId(null);
+    toast.info('Iniciando tarea...');
+
+    // Guardar el estado actual para comparar después
+    const currentAssignedTasks = [...(assignedTasks || [])];
+    const currentInProgressTasks = [...(inProgressTasks || [])];
+
+    console.log('Estado antes de iniciar tarea:', {
+      assignedTasks: currentAssignedTasks,
+      inProgressTasks: currentInProgressTasks
+    });
+
+    try {
+      startTask(id, {
+        onSuccess: (data) => {
+          console.log('Tarea iniciada correctamente. Datos:', data);
+          toast.success('Tarea iniciada correctamente');
+
+          // Recargar los datos para actualizar la UI
+          setTimeout(() => {
+            console.log('Recargando datos después de iniciar tarea...');
+            refreshAllData();
+            setExpandedId(null);
+
+            // Forzar una recarga de la página después de un tiempo
+            setTimeout(() => {
+              console.log('Forzando recarga de la página...');
+              window.location.reload();
+            }, 2000);
+          }, 1000);
+        },
+        onError: (error) => {
+          console.error('Error al iniciar la tarea:', error);
+
+          // Verificar si el error es porque la tarea ya está iniciada
+          if (error.message && (
+              error.message.includes('ya ha sido iniciada') ||
+              error.message.includes('already started') ||
+              error.message.includes('estado actual no permite') ||
+              error.message.includes('403') ||
+              error.message.includes('Forbidden'))) {
+            toast.info('Esta tarea ya ha sido iniciada anteriormente o no tienes permisos para iniciarla');
+
+            // Recargar los datos para actualizar la UI
+            console.log('Recargando datos después de error...');
+            refreshAllData();
+
+            // Forzar una recarga de la página después de un tiempo
+            setTimeout(() => {
+              console.log('Forzando recarga de la página después de error...');
+              window.location.reload();
+            }, 2000);
+          } else if (error.message && error.message.includes('getInProgressTasks is not a function')) {
+            // Error específico que estamos viendo, forzar recarga de la página
+            toast.info('Iniciando tarea... Por favor, espere mientras se actualiza la página.');
+
+            // Forzar una recarga de la página
+            setTimeout(() => {
+              console.log('Forzando recarga de la página debido a error en el servicio...');
+              window.location.reload();
+            }, 1500);
+          } else {
+            toast.error('Error al iniciar la tarea: ' + (error.message || 'Inténtelo de nuevo.'));
+
+            // Forzar una recarga de la página después de un tiempo
+            setTimeout(() => {
+              console.log('Forzando recarga de la página después de error desconocido...');
+              window.location.reload();
+            }, 3000);
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error inesperado al iniciar tarea:', error);
+      toast.error('Error inesperado al iniciar la tarea. La página se recargará automáticamente.');
+
+      // Forzar una recarga de la página
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    }
   };
 
   const handlePausarTarea = (id: number) => {
@@ -765,7 +892,8 @@ const MisTareas: React.FC = () => {
   const handleCompletarTarea = (id: number) => {
     completeTask({
       activityId: id,
-      result: 'Completada satisfactoriamente'
+      result: 'Completada satisfactoriamente',
+      actualHours: 1 // Valor por defecto para las horas reales
     });
     setExpandedId(null);
   };
@@ -936,18 +1064,14 @@ const MisTareas: React.FC = () => {
                         <FiPlay size={14} />
                         Iniciar tarea
                       </ActionButton>
-                      <ActionButton
-                        $variant="secondary"
-                        onClick={() => navigate(`/app/tareas/detalle/${tarea.id}`)}
-                        title="Ver detalles"
-                      >
-                        <FiEye size={14} />
-                        Ver detalles
-                      </ActionButton>
                     </>
                   )}
                   {tarea.estado === 'IN_PROGRESS' && (
                     <>
+                      <ActionButton $variant="primary" onClick={() => navigate(`/app/tareas/actualizar-progreso/${tarea.id}`)}>
+                        <FiEdit size={14} />
+                        Actualizar progreso
+                      </ActionButton>
                       <ActionButton $variant="warning" onClick={() => handlePausarTarea(tarea.id)}>
                         <FiPause size={14} />
                         Pausar
@@ -958,7 +1082,12 @@ const MisTareas: React.FC = () => {
                       </ActionButton>
                     </>
                   )}
-                  <ActionButton onClick={() => navigate(`/app/tareas/detalle/${tarea.id}`)}>
+                  <ActionButton
+                    $variant="secondary"
+                    onClick={() => navigate(`/app/tareas/detalle/${tarea.id}`)}
+                    title="Ver detalles"
+                  >
+                    <FiEye size={14} />
                     Ver detalles
                   </ActionButton>
                 </ActionButtons>

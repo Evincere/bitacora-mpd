@@ -311,6 +311,8 @@ public class TaskRequestEntityMapper {
                 return TaskRequestStatusEntity.SUBMITTED;
             case ASSIGNED:
                 return TaskRequestStatusEntity.ASSIGNED;
+            case IN_PROGRESS:
+                return TaskRequestStatusEntity.IN_PROGRESS;
             case COMPLETED:
                 return TaskRequestStatusEntity.COMPLETED;
             case CANCELLED:
@@ -339,6 +341,8 @@ public class TaskRequestEntityMapper {
                 return TaskRequestStatus.SUBMITTED;
             case ASSIGNED:
                 return TaskRequestStatus.ASSIGNED;
+            case IN_PROGRESS:
+                return TaskRequestStatus.IN_PROGRESS;
             case COMPLETED:
                 return TaskRequestStatus.COMPLETED;
             case CANCELLED:

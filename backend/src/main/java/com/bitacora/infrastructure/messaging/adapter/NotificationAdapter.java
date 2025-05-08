@@ -160,4 +160,10 @@ public class NotificationAdapter implements NotificationPort {
         notification.setType(NotificationType.MENTION);
         messagingTemplate.convertAndSendToUser(username, USER_NOTIFICATION_DESTINATION, notification);
     }
+
+    @Override
+    public void sendCustomEvent(final String eventName, final Object payload) {
+        log.debug("Enviando evento personalizado '{}': {}", eventName, payload);
+        messagingTemplate.convertAndSend("/topic/" + eventName, payload);
+    }
 }

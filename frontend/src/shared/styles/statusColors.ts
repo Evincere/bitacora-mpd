@@ -177,6 +177,21 @@ export const statusColors: StatusColorMap = {
     hover: "rgba(10, 132, 255, 0.3)",
     shadow: "rgba(10, 132, 255, 0.4)",
   },
+  // Estado: En Progreso (Azul/Violeta)
+  IN_PROGRESS: {
+    background: "rgba(85, 85, 255, 0.2)",
+    border: "rgba(85, 85, 255, 0.6)",
+    text: "#3333cc",
+    hover: "rgba(85, 85, 255, 0.3)",
+    shadow: "rgba(85, 85, 255, 0.4)",
+  },
+  "En Progreso": {
+    background: "rgba(85, 85, 255, 0.2)",
+    border: "rgba(85, 85, 255, 0.6)",
+    text: "#3333cc",
+    hover: "rgba(85, 85, 255, 0.3)",
+    shadow: "rgba(85, 85, 255, 0.4)",
+  },
 };
 
 // Colores para los tipos de actividades

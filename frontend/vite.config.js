@@ -20,6 +20,10 @@ export default defineConfig({
     // Habilitar historyApiFallback para que las rutas funcionen correctamente
     historyApiFallback: true,
     port: 3000,
+    allowedHosts: [
+      'localhost',
+      'metres-dispatch-takes-reserve.trycloudflare.com'
+    ],
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
@@ -29,7 +33,7 @@ export default defineConfig({
           proxy.on('error', (err, _req, _res) => {
             console.log('Proxy error:', err);
           });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
+          proxy.on('proxyReq', (_proxyReq, req, _res) => {
             console.log('Proxy request:', req.method, req.url);
           });
           proxy.on('proxyRes', (proxyRes, req, _res) => {

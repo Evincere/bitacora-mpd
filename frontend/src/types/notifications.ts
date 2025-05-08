@@ -8,9 +8,15 @@ export enum NotificationType {
   INFO = 'info',
   TASK_ASSIGNMENT = 'task_assignment',
   TASK_STATUS_CHANGE = 'task_status_change',
+  TASK_COMPLETED = 'task_completed',
+  TASK_STARTED = 'task_started',
+  TASK_REJECTED = 'task_rejected',
+  TASK_APPROVED = 'task_approved',
   DEADLINE_REMINDER = 'deadline_reminder',
   ANNOUNCEMENT = 'announcement',
-  COLLABORATION = 'collaboration'
+  COLLABORATION = 'collaboration',
+  USER_CONNECTED = 'user_connected',
+  USER_DISCONNECTED = 'user_disconnected'
 }
 
 /**
@@ -123,6 +129,77 @@ export interface CollaborationNotification extends RealTimeNotification {
 }
 
 /**
+ * Interfaz para notificaciones de tarea completada.
+ */
+export interface TaskCompletedNotification extends RealTimeNotification {
+  activityId: number;
+  activityTitle: string;
+  completedById: number;
+  completedByName: string;
+  completionDate: number;
+  actualHours: number;
+  notes?: string;
+}
+
+/**
+ * Interfaz para notificaciones de tarea iniciada.
+ */
+export interface TaskStartedNotification extends RealTimeNotification {
+  activityId: number;
+  activityTitle: string;
+  startedById: number;
+  startedByName: string;
+  startDate: number;
+  notes?: string;
+}
+
+/**
+ * Interfaz para notificaciones de tarea rechazada.
+ */
+export interface TaskRejectedNotification extends RealTimeNotification {
+  activityId: number;
+  activityTitle: string;
+  rejectedById: number;
+  rejectedByName: string;
+  rejectionDate: number;
+  reason: string;
+  notes?: string;
+}
+
+/**
+ * Interfaz para notificaciones de tarea aprobada.
+ */
+export interface TaskApprovedNotification extends RealTimeNotification {
+  activityId: number;
+  activityTitle: string;
+  approvedById: number;
+  approvedByName: string;
+  approvalDate: number;
+  notes?: string;
+}
+
+/**
+ * Interfaz para notificaciones de usuario conectado.
+ */
+export interface UserConnectedNotification extends RealTimeNotification {
+  userId: number;
+  userName: string;
+  connectionTime: number;
+  deviceInfo?: string;
+  ipAddress?: string;
+}
+
+/**
+ * Interfaz para notificaciones de usuario desconectado.
+ */
+export interface UserDisconnectedNotification extends RealTimeNotification {
+  userId: number;
+  userName: string;
+  disconnectionTime: number;
+  sessionDuration?: number; // en segundos
+}
+
+/**
  * Función para determinar el tipo específico de notificación.
  *
  * @param notification La notificación a verificar
@@ -139,12 +216,24 @@ export function getNotificationType(notification: RealTimeNotification): string 
       return 'TaskAssignment';
     case NotificationType.TASK_STATUS_CHANGE:
       return 'TaskStatusChange';
+    case NotificationType.TASK_COMPLETED:
+      return 'TaskCompleted';
+    case NotificationType.TASK_STARTED:
+      return 'TaskStarted';
+    case NotificationType.TASK_REJECTED:
+      return 'TaskRejected';
+    case NotificationType.TASK_APPROVED:
+      return 'TaskApproved';
     case NotificationType.DEADLINE_REMINDER:
       return 'DeadlineReminder';
     case NotificationType.ANNOUNCEMENT:
       return 'Announcement';
     case NotificationType.COLLABORATION:
       return 'Collaboration';
+    case NotificationType.USER_CONNECTED:
+      return 'UserConnected';
+    case NotificationType.USER_DISCONNECTED:
+      return 'UserDisconnected';
     default:
       return 'RealTimeNotification';
   }

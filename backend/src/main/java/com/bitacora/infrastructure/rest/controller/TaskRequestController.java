@@ -15,6 +15,7 @@ import com.bitacora.application.taskrequest.mapper.TaskRequestMapper;
 import com.bitacora.domain.model.taskrequest.TaskRequest;
 import com.bitacora.domain.model.taskrequest.TaskRequestComment;
 import com.bitacora.domain.model.taskrequest.TaskRequestStatus;
+import com.bitacora.infrastructure.rest.dto.workflow.RejectTaskRequestDto;
 import com.bitacora.infrastructure.rest.dto.workflow.StartTaskRequestDto;
 import com.bitacora.infrastructure.security.CurrentUser;
 import com.bitacora.infrastructure.security.UserPrincipal;
@@ -453,6 +454,35 @@ public class TaskRequestController {
         logger.info("Cancelando solicitud de tarea con ID: {} para el usuario: {}", id, currentUser.getId());
 
         TaskRequest taskRequest = taskRequestWorkflowService.cancel(id, currentUser.getId());
+
+        return ResponseEntity.ok(taskRequestMapper.toDto(taskRequest));
+    }
+
+    /**
+     * Rechaza una solicitud de tarea.
+     *
+     * @param id                ID de la solicitud
+     * @param rejectTaskRequestDto DTO con los datos del rechazo
+     * @param currentUser       Usuario actual
+     * @return La solicitud actualizada
+     */
+    @PostMapping("/{id}/reject")
+    @PreAuthorize("hasAnyRole('ASIGNADOR', 'ADMIN')")
+    @Operation(summary = "Rechaza una solicitud de tarea", description = "Rechaza una solicitud de tarea en estado SUBMITTED")
+    public ResponseEntity<TaskRequestDto> rejectTaskRequest(
+            @PathVariable Long id,
+            @Valid @RequestBody RejectTaskRequestDto rejectTaskRequestDto,
+            @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser) {
+
+        logger.info("Rechazando solicitud de tarea con ID: {} por el usuario: {}", id, currentUser.getId());
+
+        // Construir el motivo de rechazo completo
+        String rejectionReason = rejectTaskRequestDto.getReason();
+        if (rejectTaskRequestDto.getNotes() != null && !rejectTaskRequestDto.getNotes().isEmpty()) {
+            rejectionReason += ": " + rejectTaskRequestDto.getNotes();
+        }
+
+        TaskRequest taskRequest = taskRequestWorkflowService.reject(id, currentUser.getId(), rejectionReason);
 
         return ResponseEntity.ok(taskRequestMapper.toDto(taskRequest));
     }

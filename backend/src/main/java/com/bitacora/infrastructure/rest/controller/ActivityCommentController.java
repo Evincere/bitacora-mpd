@@ -2,7 +2,7 @@ package com.bitacora.infrastructure.rest.controller;
 
 import com.bitacora.application.activity.ActivityCommentService;
 import com.bitacora.domain.model.activity.ActivityComment;
-import com.bitacora.infrastructure.rest.dto.ActivityCommentDto;
+import com.bitacora.infrastructure.rest.dto.ActivityCommentDTO;
 import com.bitacora.infrastructure.rest.dto.CommentRequestDTO;
 import com.bitacora.infrastructure.rest.mapper.ActivityCommentMapper;
 import com.bitacora.infrastructure.security.UserPrincipal;
@@ -44,16 +44,16 @@ public class ActivityCommentController {
         @GetMapping
         @Operation(summary = "Obtener comentarios de una actividad", description = "Obtiene todos los comentarios de una actividad")
         @PreAuthorize("hasAnyAuthority('READ_ACTIVITIES', 'ROLE_ASIGNADOR')")
-        public ResponseEntity<List<ActivityCommentDto>> getCommentsByActivityId(
+        public ResponseEntity<List<ActivityCommentDTO>> getCommentsByActivityId(
                         @PathVariable Long activityId,
                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
                 log.debug("REST request para obtener comentarios de la actividad con ID: {} por usuario: {}",
                                 activityId, userPrincipal.getUsername());
 
                 List<ActivityComment> comments = activityCommentService.getCommentsByActivityId(activityId);
-                List<ActivityCommentDto> commentDtos = comments.stream()
+                List<ActivityCommentDTO> commentDtos = comments.stream()
                                 .map(comment -> {
-                                        ActivityCommentDto dto = activityCommentMapper.toDto(comment);
+                                        ActivityCommentDTO dto = activityCommentMapper.toDto(comment);
                                         // Marcar como leído por el usuario actual si es el autor
                                         dto.setReadByCurrentUser(comment.getUserId().equals(userPrincipal.getId()));
                                         return dto;
@@ -74,7 +74,7 @@ public class ActivityCommentController {
         @PostMapping
         @Operation(summary = "Crear comentario", description = "Crea un nuevo comentario en una actividad")
         @PreAuthorize("hasAnyAuthority('WRITE_ACTIVITIES', 'ROLE_ASIGNADOR')")
-        public ResponseEntity<ActivityCommentDto> createComment(
+        public ResponseEntity<ActivityCommentDTO> createComment(
                         @PathVariable Long activityId,
                         @Valid @RequestBody CommentRequestDTO commentRequestDTO,
                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
@@ -88,7 +88,7 @@ public class ActivityCommentController {
                                 userPrincipal.getUsername(),
                                 commentRequestDTO.getContent());
 
-                ActivityCommentDto commentDto = activityCommentMapper.toDto(comment);
+                ActivityCommentDTO commentDto = activityCommentMapper.toDto(comment);
                 commentDto.setReadByCurrentUser(true); // El autor siempre ha leído su propio comentario
 
                 return ResponseEntity.status(HttpStatus.CREATED).body(commentDto);
@@ -106,7 +106,7 @@ public class ActivityCommentController {
         @PutMapping("/{commentId}")
         @Operation(summary = "Actualizar comentario", description = "Actualiza un comentario existente")
         @PreAuthorize("hasAnyAuthority('WRITE_ACTIVITIES', 'ROLE_ASIGNADOR')")
-        public ResponseEntity<ActivityCommentDto> updateComment(
+        public ResponseEntity<ActivityCommentDTO> updateComment(
                         @PathVariable Long activityId,
                         @PathVariable Long commentId,
                         @Valid @RequestBody CommentRequestDTO commentRequestDTO,
@@ -120,7 +120,7 @@ public class ActivityCommentController {
                                 commentRequestDTO.getContent(),
                                 userPrincipal.getId());
 
-                ActivityCommentDto commentDto = activityCommentMapper.toDto(comment);
+                ActivityCommentDTO commentDto = activityCommentMapper.toDto(comment);
                 commentDto.setReadByCurrentUser(true); // El autor siempre ha leído su propio comentario
 
                 return ResponseEntity.ok(commentDto);

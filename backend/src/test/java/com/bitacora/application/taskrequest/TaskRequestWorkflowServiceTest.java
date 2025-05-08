@@ -1,6 +1,7 @@
 package com.bitacora.application.taskrequest;
 
 import com.bitacora.application.notification.MentionNotificationService;
+import com.bitacora.domain.event.taskrequest.TaskRequestStatusChangedEvent;
 import com.bitacora.domain.model.taskrequest.TaskRequest;
 import com.bitacora.domain.model.taskrequest.TaskRequestCategory;
 import com.bitacora.domain.model.taskrequest.TaskRequestComment;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -46,6 +48,9 @@ class TaskRequestWorkflowServiceTest {
     @Mock
     private MentionNotificationService mentionNotificationService;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     private TaskRequestWorkflowService taskRequestWorkflowService;
 
     @BeforeEach
@@ -54,7 +59,8 @@ class TaskRequestWorkflowServiceTest {
                 taskRequestRepository,
                 historyService,
                 userRepository,
-                mentionNotificationService);
+                mentionNotificationService,
+                eventPublisher);
     }
 
     @Test
@@ -370,5 +376,141 @@ class TaskRequestWorkflowServiceTest {
                 .requesterId(requesterId)
                 .requestDate(LocalDateTime.now())
                 .build();
+    }
+
+    private TaskRequest createRejectedTaskRequest(Long id, Long requesterId, Long assignerId, String rejectionReason) {
+        return TaskRequest.builder()
+                .id(id)
+                .title("Solicitud de prueba")
+                .description("Descripción de prueba")
+                .category(TaskRequestCategory.builder().id(1L).name("General").build())
+                .priority(TaskRequestPriority.MEDIUM)
+                .status(TaskRequestStatus.CANCELLED)
+                .requesterId(requesterId)
+                .assignerId(assignerId)
+                .requestDate(LocalDateTime.now())
+                .assignmentDate(LocalDateTime.now())
+                .notes(rejectionReason)
+                .build();
+    }
+
+    @Test
+    @DisplayName("Debería rechazar una solicitud correctamente")
+    void shouldRejectTaskRequest() {
+        // Arrange
+        Long taskRequestId = 1L;
+        Long requesterId = 1L;
+        Long assignerId = 2L;
+        String rejectionReason = "No cumple con los requisitos";
+
+        TaskRequest submittedTaskRequest = createSubmittedTaskRequest(taskRequestId, requesterId);
+        TaskRequest rejectedTaskRequest = createRejectedTaskRequest(taskRequestId, requesterId, assignerId, rejectionReason);
+
+        when(taskRequestRepository.findById(taskRequestId)).thenReturn(Optional.of(submittedTaskRequest));
+        when(taskRequestRepository.save(any(TaskRequest.class))).thenReturn(rejectedTaskRequest);
+
+        // Act
+        TaskRequest result = taskRequestWorkflowService.reject(taskRequestId, assignerId, rejectionReason);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(TaskRequestStatus.CANCELLED, result.getStatus());
+        assertEquals(rejectionReason, result.getNotes());
+        assertEquals(assignerId, result.getAssignerId());
+
+        verify(taskRequestRepository).findById(taskRequestId);
+        verify(taskRequestRepository).save(any(TaskRequest.class));
+        verify(historyService).recordStatusChange(
+                eq(taskRequestId),
+                eq(assignerId),
+                isNull(),
+                eq(TaskRequestStatus.SUBMITTED),
+                eq(TaskRequestStatus.CANCELLED),
+                contains(rejectionReason)
+        );
+    }
+
+    @Test
+    @DisplayName("Debería lanzar excepción al rechazar una solicitud que no está en estado SUBMITTED")
+    void shouldThrowExceptionWhenRejectingNonSubmittedTaskRequest() {
+        // Arrange
+        Long taskRequestId = 1L;
+        Long assignerId = 2L;
+        String rejectionReason = "No cumple con los requisitos";
+
+        TaskRequest draftTaskRequest = createDraftTaskRequest(taskRequestId, 1L);
+
+        when(taskRequestRepository.findById(taskRequestId)).thenReturn(Optional.of(draftTaskRequest));
+
+        // Act & Assert
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            taskRequestWorkflowService.reject(taskRequestId, assignerId, rejectionReason);
+        });
+
+        assertEquals("Solo se pueden rechazar solicitudes en estado SUBMITTED", exception.getMessage());
+
+        verify(taskRequestRepository).findById(taskRequestId);
+        verify(taskRequestRepository, never()).save(any(TaskRequest.class));
+    }
+
+    @Test
+    @DisplayName("Debería iniciar una tarea y publicar un evento de cambio de estado")
+    void shouldStartTaskRequestAndPublishEvent() {
+        // Arrange
+        Long taskRequestId = 1L;
+        Long requesterId = 1L;
+        Long assignerId = 2L;
+        Long executorId = 3L;
+        String notes = "Iniciando tarea de prueba";
+
+        TaskRequest assignedTaskRequest = createAssignedTaskRequest(taskRequestId, requesterId, assignerId);
+        assignedTaskRequest.assignExecutor(executorId);
+
+        TaskRequest inProgressTaskRequest = TaskRequest.builder()
+                .id(taskRequestId)
+                .title(assignedTaskRequest.getTitle())
+                .description(assignedTaskRequest.getDescription())
+                .category(assignedTaskRequest.getCategory())
+                .priority(assignedTaskRequest.getPriority())
+                .status(TaskRequestStatus.IN_PROGRESS)
+                .requesterId(requesterId)
+                .assignerId(assignerId)
+                .executorId(executorId)
+                .requestDate(assignedTaskRequest.getRequestDate())
+                .assignmentDate(assignedTaskRequest.getAssignmentDate())
+                .build();
+
+        when(taskRequestRepository.findById(taskRequestId)).thenReturn(Optional.of(assignedTaskRequest));
+        when(taskRequestRepository.save(any(TaskRequest.class))).thenReturn(inProgressTaskRequest);
+
+        // Act
+        TaskRequest result = taskRequestWorkflowService.start(taskRequestId, executorId, notes);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(TaskRequestStatus.IN_PROGRESS, result.getStatus());
+
+        verify(taskRequestRepository).findById(taskRequestId);
+        verify(taskRequestRepository).save(any(TaskRequest.class));
+
+        // Verificar que se registró el cambio de estado en el historial
+        verify(historyService).recordStatusChange(
+                eq(taskRequestId),
+                eq(executorId),
+                isNull(),
+                eq(TaskRequestStatus.ASSIGNED),
+                eq(TaskRequestStatus.IN_PROGRESS),
+                contains(notes)
+        );
+
+        // Verificar que se publicó el evento de cambio de estado
+        ArgumentCaptor<TaskRequestStatusChangedEvent> eventCaptor = ArgumentCaptor.forClass(TaskRequestStatusChangedEvent.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+
+        TaskRequestStatusChangedEvent capturedEvent = eventCaptor.getValue();
+        assertEquals(taskRequestId, capturedEvent.getTaskRequestId());
+        assertEquals(TaskRequestStatus.ASSIGNED, capturedEvent.getOldStatus());
+        assertEquals(TaskRequestStatus.IN_PROGRESS, capturedEvent.getNewStatus());
+        assertEquals(executorId, capturedEvent.getUserId());
     }
 }

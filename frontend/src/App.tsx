@@ -65,6 +65,7 @@ const ActivityFormPage = lazy(() => import('./features/activities/pages/Activity
 const ActivityCalendarPage = lazy(() => import('./features/activities/pages/ActivityCalendarPage'));
 const Profile = lazy(() => import('./features/profile/Profile'));
 const NotFound = lazy(() => import('./shared/components/ui/NotFound'));
+const PermissionsDebugPage = lazy(() => import('./pages/debug/PermissionsDebugPage'));
 
 // Componente de carga para Suspense
 const LoadingFallback = () => (
@@ -302,6 +303,17 @@ function App() {
             <Route element={<RoleProtectedRoute allowedRoles={[UserRole.ADMIN]} redirectTo="/app" />}>
               <Route index element={<DashboardReportes />} />
             </Route>
+          </Route>
+
+          {/* Ruta para depuración de permisos */}
+          <Route path="/app/debug/permissions" element={
+            <ProtectedRoute>
+              <RealTimeNotificationProvider>
+                <RoleBasedLayout />
+              </RealTimeNotificationProvider>
+            </ProtectedRoute>
+          }>
+            <Route index element={<PermissionsDebugPage />} />
           </Route>
 
           {/* Redirección para rutas de dashboard antiguas */}

@@ -8,6 +8,8 @@ class CollaborationService {
   private activityEditors: Map<number, number> = new Map();
   private currentUser: number | null = null;
   private isInitialized: boolean = false;
+  private connectedUsers: Map<number, { userName: string, lastActivity: number }> = new Map();
+  private userActivityTimeout: number = 5 * 60 * 1000; // 5 minutos de inactividad antes de considerar desconectado
 
   /**
    * Inicializa el servicio de colaboración.
@@ -225,6 +227,111 @@ class CollaborationService {
     this.activityEditors.clear();
     this.currentUser = null;
     this.isInitialized = false;
+    this.connectedUsers.clear();
+  }
+
+  /**
+   * Registra un usuario como conectado.
+   *
+   * @param userId El ID del usuario
+   * @param userName El nombre del usuario
+   */
+  public registerConnectedUser(userId: number, userName: string): void {
+    this.connectedUsers.set(userId, {
+      userName,
+      lastActivity: Date.now()
+    });
+
+    // Enviar evento al servidor
+    websocketService.send('user_connected', {
+      userId,
+      userName,
+      connectionTime: Date.now()
+    });
+
+    console.log(`Usuario ${userName} (${userId}) registrado como conectado`);
+  }
+
+  /**
+   * Actualiza la actividad de un usuario.
+   *
+   * @param userId El ID del usuario
+   */
+  public updateUserActivity(userId: number): void {
+    const user = this.connectedUsers.get(userId);
+    if (user) {
+      this.connectedUsers.set(userId, {
+        ...user,
+        lastActivity: Date.now()
+      });
+    }
+  }
+
+  /**
+   * Registra un usuario como desconectado.
+   *
+   * @param userId El ID del usuario
+   */
+  public registerDisconnectedUser(userId: number): void {
+    const user = this.connectedUsers.get(userId);
+    if (user) {
+      // Enviar evento al servidor
+      websocketService.send('user_disconnected', {
+        userId,
+        userName: user.userName,
+        disconnectionTime: Date.now(),
+        sessionDuration: Math.floor((Date.now() - user.lastActivity) / 1000)
+      });
+
+      console.log(`Usuario ${user.userName} (${userId}) registrado como desconectado`);
+      this.connectedUsers.delete(userId);
+    }
+  }
+
+  /**
+   * Obtiene la lista de usuarios conectados.
+   *
+   * @returns Lista de usuarios conectados
+   */
+  public getConnectedUsers(): { userId: number, userName: string, lastActivity: number }[] {
+    const now = Date.now();
+    const activeUsers: { userId: number, userName: string, lastActivity: number }[] = [];
+
+    // Filtrar usuarios inactivos
+    this.connectedUsers.forEach((user, userId) => {
+      if (now - user.lastActivity < this.userActivityTimeout) {
+        activeUsers.push({
+          userId,
+          userName: user.userName,
+          lastActivity: user.lastActivity
+        });
+      } else {
+        // Registrar como desconectado si ha pasado el tiempo de inactividad
+        this.registerDisconnectedUser(userId);
+      }
+    });
+
+    return activeUsers;
+  }
+
+  /**
+   * Verifica si un usuario está conectado.
+   *
+   * @param userId El ID del usuario
+   * @returns true si el usuario está conectado
+   */
+  public isUserConnected(userId: number): boolean {
+    const user = this.connectedUsers.get(userId);
+    if (!user) return false;
+
+    const now = Date.now();
+    if (now - user.lastActivity >= this.userActivityTimeout) {
+      // Registrar como desconectado si ha pasado el tiempo de inactividad
+      this.registerDisconnectedUser(userId);
+      return false;
+    }
+
+    return true;
   }
 }
 
@@ -249,6 +356,12 @@ export const useCollaboration = () => {
     getViewerCount: collaborationService.getViewerCount.bind(collaborationService),
     updateViewers: collaborationService.updateViewers.bind(collaborationService),
     updateEditor: collaborationService.updateEditor.bind(collaborationService),
-    clear: collaborationService.clear.bind(collaborationService)
+    clear: collaborationService.clear.bind(collaborationService),
+    // Nuevos métodos para gestionar usuarios conectados
+    registerConnectedUser: collaborationService.registerConnectedUser.bind(collaborationService),
+    updateUserActivity: collaborationService.updateUserActivity.bind(collaborationService),
+    registerDisconnectedUser: collaborationService.registerDisconnectedUser.bind(collaborationService),
+    getConnectedUsers: collaborationService.getConnectedUsers.bind(collaborationService),
+    isUserConnected: collaborationService.isUserConnected.bind(collaborationService)
   };
 };

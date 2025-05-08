@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -10,9 +10,16 @@ import {
   FiEdit,
   FiCheck,
   FiPaperclip,
-  FiMessageSquare
+  FiMessageSquare,
+  FiLoader,
+  FiRefreshCw,
+  FiShield
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import AddExecutePermission from '@/components/debug/AddExecutePermission';
+
+// Hooks y servicios
+import useTareas from '../hooks/useTareas';
 
 // Datos de ejemplo para mostrar en la interfaz
 const MOCK_TAREAS_EN_PROGRESO = [
@@ -487,24 +494,105 @@ const getCategoryText = (category: string) => {
 const ProgresoTareas: React.FC = () => {
   const navigate = useNavigate();
 
+  // Usar el hook personalizado para tareas
+  const {
+    inProgressTasks = [],
+    isLoadingInProgressTasks,
+    refreshAllData,
+    completeTask
+  } = useTareas();
+
+  // Convertir las tareas al formato esperado por el componente
+  const tareas = (inProgressTasks || []).map(task => ({
+    id: task.id,
+    titulo: task.title || '',
+    descripcion: task.description || '',
+    categoria: task.category || '',
+    prioridad: task.priority || 'MEDIUM',
+    fechaAsignacion: task.requestDate || '',
+    fechaLimite: task.dueDate || '',
+    estado: task.status,
+    solicitante: task.requesterName || '',
+    asignador: task.assignerName || '',
+    notas: task.comments || '',
+    progreso: task.progress || 0,
+    ultimaActualizacion: task.updatedAt || new Date().toISOString(),
+    comentarios: task.comments ? [{ id: 1, fecha: task.updatedAt || '', usuario: task.requesterName || '', mensaje: task.comments }] : []
+  }));
+
+  // Cargar datos al montar el componente
+  useEffect(() => {
+    console.log('ProgresoTareas: Montando componente...');
+
+    // Cargar datos iniciales
+    refreshAllData();
+
+    // Recargar datos después de un breve retraso para asegurar que estén actualizados
+    setTimeout(() => {
+      console.log('ProgresoTareas: Recarga adicional de datos...');
+      refreshAllData();
+    }, 2000);
+
+    // Configurar un intervalo para actualizar los datos cada 15 segundos
+    const intervalId = setInterval(() => {
+      console.log('ProgresoTareas: Actualizando datos de tareas en progreso...');
+      refreshAllData();
+    }, 15000);
+
+    // Limpiar el intervalo al desmontar el componente
+    return () => {
+      console.log('ProgresoTareas: Desmontando componente, limpiando intervalo');
+      clearInterval(intervalId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Efecto para registrar cambios en las tareas en progreso
+  useEffect(() => {
+    console.log('ProgresoTareas: Tareas en progreso actualizadas:', inProgressTasks);
+  }, [inProgressTasks]);
+
   const handleActualizarProgreso = (id: number) => {
     navigate(`/app/tareas/actualizar-progreso/${id}`);
   };
 
   const handleCompletarTarea = (id: number) => {
-    // Aquí iría la lógica para completar la tarea
-    toast.success('Tarea completada correctamente');
+    completeTask({
+      activityId: id,
+      result: 'Completada satisfactoriamente',
+      actualHours: 1 // Valor por defecto para las horas reales
+    }, {
+      onSuccess: () => {
+        toast.success('Tarea completada correctamente');
+        refreshAllData();
+      }
+    });
+  };
+
+  const handleRefresh = () => {
+    refreshAllData();
+    toast.info('Actualizando datos...');
   };
 
   return (
     <PageContainer>
       <PageHeader>
         <PageTitle>Tareas en Progreso</PageTitle>
+        <ActionButton onClick={handleRefresh}>
+          <FiRefreshCw size={16} />
+          Actualizar
+        </ActionButton>
       </PageHeader>
 
-      {MOCK_TAREAS_EN_PROGRESO.length > 0 ? (
+      {isLoadingInProgressTasks ? (
+        <EmptyState>
+          <FiLoader size={48} style={{ animation: 'spin 1s linear infinite' }} />
+          <h3>Cargando tareas</h3>
+          <p>Por favor, espere mientras se cargan las tareas en progreso.</p>
+        </EmptyState>
+      ) : tareas.length > 0 ? (
         <TareasGrid>
-          {MOCK_TAREAS_EN_PROGRESO.map((tarea) => (
+          {tareas.map((tarea) => (
             <TareaCard key={tarea.id}>
               <TareaHeader>
                 <TareaTitle>{tarea.titulo}</TareaTitle>
@@ -579,9 +667,16 @@ const ProgresoTareas: React.FC = () => {
         <EmptyState>
           <FiAlertCircle size={48} />
           <h3>No hay tareas en progreso</h3>
-          <p>Actualmente no tienes tareas en estado "En Progreso".</p>
+          <p>Actualmente no tienes tareas en estado "En Progreso". Puedes iniciar una tarea desde la sección "Mis Tareas".</p>
+          <ActionButton onClick={handleRefresh} style={{ marginTop: '16px' }}>
+            <FiRefreshCw size={16} />
+            Actualizar datos
+          </ActionButton>
         </EmptyState>
       )}
+
+      {/* Componente para añadir el permiso EXECUTE_ACTIVITIES */}
+      <AddExecutePermission />
     </PageContainer>
   );
 };

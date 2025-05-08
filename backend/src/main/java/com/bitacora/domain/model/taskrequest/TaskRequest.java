@@ -286,6 +286,27 @@ public class TaskRequest {
     }
 
     /**
+     * Rechaza la solicitud por parte del asignador.
+     *
+     * @param rejectionReason El motivo del rechazo
+     * @return La solicitud actualizada
+     * @throws IllegalStateException Si la solicitud no está en estado SUBMITTED
+     */
+    public TaskRequest reject(final String rejectionReason) {
+        if (this.status != TaskRequestStatus.SUBMITTED) {
+            throw new IllegalStateException("Solo se pueden rechazar solicitudes en estado SUBMITTED");
+        }
+
+        if (rejectionReason == null || rejectionReason.trim().isEmpty()) {
+            throw new IllegalArgumentException("El motivo de rechazo no puede estar vacío");
+        }
+
+        this.notes = rejectionReason;
+        this.status = TaskRequestStatus.CANCELLED;
+        return this;
+    }
+
+    /**
      * Añade un comentario a la solicitud.
      *
      * @param comment El comentario a añadir

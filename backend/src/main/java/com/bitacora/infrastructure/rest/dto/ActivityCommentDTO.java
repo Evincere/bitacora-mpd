@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActivityCommentDto {
+public class ActivityCommentDTO {
     private Long id;
     private Long activityId;
     private Long userId;

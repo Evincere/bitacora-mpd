@@ -3,6 +3,18 @@ import { io, Socket } from 'socket.io-client';
 import { RealTimeNotification } from '@/core/types/models';
 import { toast } from 'react-toastify';
 import { useAppSelector } from '@/core/store';
+import { useQueryClient } from '@tanstack/react-query';
+
+// Importar tipos de notificaciones
+import {
+  NotificationType,
+  TaskCompletedNotification,
+  TaskStartedNotification,
+  TaskRejectedNotification,
+  TaskApprovedNotification,
+  UserConnectedNotification,
+  UserDisconnectedNotification
+} from '@/types/notifications';
 
 interface RealTimeNotificationContextType {
   notifications: RealTimeNotification[];
@@ -26,6 +38,8 @@ export const RealTimeNotificationProvider: React.FC<RealTimeNotificationProvider
   const [reconnectDisabled, setReconnectDisabled] = useState(false);
   // Usar toast directamente desde react-toastify
   const { isAuthenticated } = useAppSelector(state => state.auth);
+  // Obtener el cliente de consulta para invalidar consultas cuando sea necesario
+  const queryClient = useQueryClient();
 
   // Constantes para la reconexión
   const MAX_RECONNECT_ATTEMPTS = 5;
@@ -251,8 +265,130 @@ export const RealTimeNotificationProvider: React.FC<RealTimeNotificationProvider
       // Añadir la notificación a la lista
       setNotifications(prev => [notification, ...prev]);
 
-      // Mostrar un toast para la notificación
-      toast.info(`${notification.title}: ${notification.message}`);
+      // Mostrar un toast para la notificación con estilo según el tipo
+      switch (notification.type) {
+        case NotificationType.TASK_COMPLETED:
+          toast.success(`${notification.title}: ${notification.message}`);
+          // Invalidar consultas relacionadas con tareas
+          queryClient.invalidateQueries({ queryKey: ['tasks'] });
+          queryClient.invalidateQueries({ queryKey: ['completedTasks'] });
+          break;
+        case NotificationType.TASK_STARTED:
+          toast.info(`${notification.title}: ${notification.message}`);
+          // Invalidar consultas relacionadas con tareas
+          queryClient.invalidateQueries({ queryKey: ['tasks'] });
+          queryClient.invalidateQueries({ queryKey: ['inProgressTasks'] });
+          break;
+        case NotificationType.TASK_REJECTED:
+          toast.error(`${notification.title}: ${notification.message}`);
+          // Invalidar consultas relacionadas con tareas
+          queryClient.invalidateQueries({ queryKey: ['tasks'] });
+          break;
+        case NotificationType.TASK_APPROVED:
+          toast.success(`${notification.title}: ${notification.message}`);
+          // Invalidar consultas relacionadas con tareas
+          queryClient.invalidateQueries({ queryKey: ['tasks'] });
+          queryClient.invalidateQueries({ queryKey: ['approvedTasks'] });
+          break;
+        case NotificationType.USER_CONNECTED:
+        case NotificationType.USER_DISCONNECTED:
+          // No mostrar toast para estos tipos de notificaciones
+          break;
+        case NotificationType.TASK_ASSIGNMENT:
+          toast.info(`${notification.title}: ${notification.message}`);
+          // Invalidar consultas relacionadas con tareas asignadas
+          queryClient.invalidateQueries({ queryKey: ['assignedTasks'] });
+          break;
+        case NotificationType.TASK_STATUS_CHANGE:
+          toast.info(`${notification.title}: ${notification.message}`);
+          // Invalidar todas las consultas relacionadas con tareas
+          queryClient.invalidateQueries({ queryKey: ['tasks'] });
+          break;
+        case 'TASK_REQUEST':
+          toast.info(`${notification.title}: ${notification.message}`);
+          // Invalidar consulta de solicitudes pendientes
+          console.log('Invalidando consulta de solicitudes pendientes debido a nueva solicitud');
+          queryClient.invalidateQueries({ queryKey: ['pendingRequests'] });
+          break;
+        default:
+          toast.info(`${notification.title}: ${notification.message}`);
+      }
+    });
+
+    // Escuchar eventos específicos de nuevas solicitudes
+    newSocket.on('new-task-request', (data: any) => {
+      console.log('Nueva solicitud de tarea recibida:', data);
+
+      // Invalidar la consulta de solicitudes pendientes para forzar una recarga
+      queryClient.invalidateQueries({ queryKey: ['pendingRequests'] });
+
+      // Mostrar una notificación toast
+      toast.info('Se ha recibido una nueva solicitud de tarea');
+    });
+
+    // Escuchar eventos de tarea completada
+    newSocket.on('task-completed', (data: TaskCompletedNotification) => {
+      console.log('Tarea completada recibida:', data);
+
+      // Invalidar consultas relacionadas con tareas
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['completedTasks'] });
+
+      // Mostrar una notificación toast
+      toast.success(`Tarea completada: ${data.activityTitle}`);
+    });
+
+    // Escuchar eventos de tarea iniciada
+    newSocket.on('task-started', (data: TaskStartedNotification) => {
+      console.log('Tarea iniciada recibida:', data);
+
+      // Invalidar consultas relacionadas con tareas
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['inProgressTasks'] });
+
+      // Mostrar una notificación toast
+      toast.info(`Tarea iniciada: ${data.activityTitle}`);
+    });
+
+    // Escuchar eventos de tarea rechazada
+    newSocket.on('task-rejected', (data: TaskRejectedNotification) => {
+      console.log('Tarea rechazada recibida:', data);
+
+      // Invalidar consultas relacionadas con tareas
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+
+      // Mostrar una notificación toast
+      toast.error(`Tarea rechazada: ${data.activityTitle}`);
+    });
+
+    // Escuchar eventos de tarea aprobada
+    newSocket.on('task-approved', (data: TaskApprovedNotification) => {
+      console.log('Tarea aprobada recibida:', data);
+
+      // Invalidar consultas relacionadas con tareas
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['approvedTasks'] });
+
+      // Mostrar una notificación toast
+      toast.success(`Tarea aprobada: ${data.activityTitle}`);
+    });
+
+    // Escuchar eventos de usuario conectado
+    newSocket.on('user-connected', (data: UserConnectedNotification) => {
+      console.log('Usuario conectado:', data);
+
+      // No mostrar toast para no sobrecargar la interfaz
+      // Pero sí añadir a la lista de notificaciones
+      setNotifications(prev => [data, ...prev]);
+    });
+
+    // Escuchar eventos de usuario desconectado
+    newSocket.on('user-disconnected', (data: UserDisconnectedNotification) => {
+      console.log('Usuario desconectado:', data);
+
+      // No mostrar toast para no sobrecargar la interfaz
+      // Pero sí añadir a la lista de notificaciones
+      setNotifications(prev => [data, ...prev]);
     });
 
     // Manejar evento de notificaciones iniciales
@@ -262,7 +398,7 @@ export const RealTimeNotificationProvider: React.FC<RealTimeNotificationProvider
     });
 
     return newSocket;
-  }, [reconnectAttempts, reconnectDisabled, notifications.length, toast, MAX_RECONNECT_ATTEMPTS, RECONNECT_INTERVAL, isAuthenticated]);
+  }, [reconnectAttempts, reconnectDisabled, notifications.length, toast, MAX_RECONNECT_ATTEMPTS, RECONNECT_INTERVAL, isAuthenticated, queryClient]);
   // Inicializar la conexión WebSocket
   useEffect(() => {
     // Limpiar estado al montar el componente

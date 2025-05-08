@@ -14,8 +14,12 @@ import {
   FiLoader,
   FiDownload,
   FiPlay,
-  FiPause
+  FiPause,
+  FiShield
 } from 'react-icons/fi';
+import AddExecutePermission from '@/components/debug/AddExecutePermission';
+import ConnectedUsers from '@/components/ui/Collaboration/ConnectedUsers';
+import ActivityNotifications from '@/components/ui/Notifications/ActivityNotifications';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -76,6 +80,16 @@ const ContentGrid = styled.div`
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
+  }
+`;
+
+const SidePanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    grid-column: 1 / -1;
   }
 `;
 
@@ -323,7 +337,7 @@ const LoadingContainer = styled.div`
 // Función para formatear fechas
 const formatDate = (dateString?: string) => {
   if (!dateString) return 'No especificada';
-  
+
   try {
     const date = new Date(dateString);
     return format(date, "d 'de' MMMM 'de' yyyy", { locale: es });
@@ -533,7 +547,8 @@ const DetalleTarea: React.FC = () => {
 
     completeTask({
       activityId,
-      result: 'Tarea completada satisfactoriamente'
+      result: 'Tarea completada satisfactoriamente',
+      actualHours: 1 // Valor por defecto para las horas reales
     }, {
       onSuccess: () => {
         toast.success('Tarea completada correctamente');
@@ -649,7 +664,7 @@ const DetalleTarea: React.FC = () => {
 
             <ActionButtonsContainer>
               {tarea.status === 'ASSIGNED' && (
-                <ActionButton 
+                <ActionButton
                   onClick={handleIniciarTarea}
                   disabled={isStartingTask}
                 >
@@ -658,7 +673,7 @@ const DetalleTarea: React.FC = () => {
                 </ActionButton>
               )}
               {tarea.status === 'IN_PROGRESS' && (
-                <ActionButton 
+                <ActionButton
                   onClick={handleCompletarTarea}
                   disabled={isCompletingTask}
                 >
@@ -683,6 +698,18 @@ const DetalleTarea: React.FC = () => {
           />
         </ContentSection>
       </ContentGrid>
+
+      {/* Panel lateral con información adicional */}
+      <SidePanel>
+        {/* Componente para mostrar los usuarios conectados */}
+        <ConnectedUsers refreshInterval={30000} />
+
+        {/* Componente para mostrar las notificaciones de actividad */}
+        <ActivityNotifications maxItems={5} />
+      </SidePanel>
+
+      {/* Componente para añadir el permiso EXECUTE_ACTIVITIES */}
+      <AddExecutePermission />
     </PageContainer>
   );
 };

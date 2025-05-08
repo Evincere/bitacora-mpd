@@ -8,6 +8,11 @@ export interface AsignacionRequest {
   notes?: string;
 }
 
+export interface RechazoRequest {
+  reason: string;
+  notes?: string;
+}
+
 export interface AsignacionResponse {
   id: number;
   status: string;
@@ -313,6 +318,28 @@ const asignacionService = {
       return response;
     } catch (error) {
       console.error('Error al asignar solicitud de tarea:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Rechaza una solicitud de tarea
+   * @param taskRequestId ID de la solicitud
+   * @param rechazo Datos del rechazo
+   * @returns La solicitud actualizada
+   */
+  async rejectTaskRequest(taskRequestId: number, rechazo: RechazoRequest): Promise<TaskRequest> {
+    try {
+      console.log('Rechazando solicitud de tarea:', taskRequestId, rechazo);
+
+      const response = await api.post(`task-requests/${taskRequestId}/reject`, {
+        json: rechazo
+      }).json();
+
+      console.log('Respuesta de rechazo de solicitud:', response);
+      return response;
+    } catch (error) {
+      console.error('Error al rechazar solicitud de tarea:', error);
       throw error;
     }
   }

@@ -1,7 +1,7 @@
 package com.bitacora.infrastructure.rest.mapper;
 
 import com.bitacora.domain.model.activity.ActivityComment;
-import com.bitacora.infrastructure.rest.dto.ActivityCommentDto;
+import com.bitacora.infrastructure.rest.dto.ActivityCommentDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,12 +20,12 @@ public class ActivityCommentMapper {
      * @param comment El modelo de dominio ActivityComment
      * @return El DTO ActivityCommentDto
      */
-    public ActivityCommentDto toDto(ActivityComment comment) {
+    public ActivityCommentDTO toDto(ActivityComment comment) {
         if (comment == null) {
             return null;
         }
 
-        return ActivityCommentDto.builder()
+        return ActivityCommentDTO.builder()
                 .id(comment.getId())
                 .activityId(comment.getActivityId())
                 .userId(comment.getUserId())
@@ -46,7 +46,7 @@ public class ActivityCommentMapper {
      * @param comments Lista de modelos de dominio ActivityComment
      * @return Lista de DTOs ActivityCommentDto
      */
-    public List<ActivityCommentDto> toDtoList(List<ActivityComment> comments) {
+    public List<ActivityCommentDTO> toDtoList(List<ActivityComment> comments) {
         if (comments == null) {
             return null;
         }

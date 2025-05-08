@@ -616,7 +616,9 @@ const BandejaEntrada: React.FC = () => {
     isLoadingPendingRequests,
     isLoadingExecutors,
     isAssigningTask,
+    isRejectingTask,
     assignTaskRequest,
+    rejectTaskRequest,
     filterExecutorsBySpecialty
   } = useAsignacion();
 
@@ -681,12 +683,49 @@ const BandejaEntrada: React.FC = () => {
     setAsignacionNotas('');
   };
 
+  const [rechazoReason, setRechazoReason] = useState('');
+  const [rechazoNotes, setRechazoNotes] = useState('');
+  const [showRechazoModal, setShowRechazoModal] = useState(false);
+  const [solicitudIdToReject, setSolicitudIdToReject] = useState<number | null>(null);
+
   const handleRechazar = (solicitudId: number) => {
-    // Aquí iría la lógica para rechazar la solicitud
-    toast.info('Funcionalidad de rechazo no implementada aún');
+    // Mostrar modal de rechazo
+    setSolicitudIdToReject(solicitudId);
+    setShowRechazoModal(true);
+  };
+
+  const confirmRechazar = () => {
+    if (!solicitudIdToReject) return;
+
+    if (!rechazoReason.trim()) {
+      toast.error('Debe proporcionar un motivo de rechazo');
+      return;
+    }
+
+    // Rechazar la solicitud
+    rejectTaskRequest({
+      taskRequestId: solicitudIdToReject,
+      rechazo: {
+        reason: rechazoReason,
+        notes: rechazoNotes
+      }
+    });
+
+    // Limpiar el estado
+    setRechazoReason('');
+    setRechazoNotes('');
+    setShowRechazoModal(false);
+    setSolicitudIdToReject(null);
 
     // Cerrar el panel expandido
     setExpandedId(null);
+  };
+
+  const cancelRechazar = () => {
+    setRechazoReason('');
+    setRechazoNotes('');
+    setShowRechazoModal(false);
+    setSolicitudIdToReject(null);
   };
 
   // Filtrar ejecutores por especialidad según la categoría de la solicitud seleccionada
@@ -760,6 +799,97 @@ const BandejaEntrada: React.FC = () => {
           <option value="OTRA">Otra</option>
         </FilterSelect>
       </FiltersContainer>
+
+      {/* Modal de rechazo */}
+      {showRechazoModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'var(--background-secondary, #2d2d3a)',
+            borderRadius: '8px',
+            padding: '24px',
+            width: '500px',
+            maxWidth: '90%',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
+          }}>
+            <h3 style={{ margin: '0 0 16px', color: 'var(--text-color, #e1e1e6)' }}>Rechazar Solicitud</h3>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-color, #e1e1e6)', fontWeight: 'bold' }}>
+                Motivo de rechazo: *
+              </label>
+              <input
+                type="text"
+                value={rechazoReason}
+                onChange={(e) => setRechazoReason(e.target.value)}
+                placeholder="Ej: No cumple con los requisitos"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  border: '1px solid var(--border-color, #3f3f4e)',
+                  backgroundColor: 'var(--background-dark, #1e1e2a)',
+                  color: 'var(--text-color, #e1e1e6)'
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-color, #e1e1e6)', fontWeight: 'bold' }}>
+                Notas adicionales:
+              </label>
+              <textarea
+                value={rechazoNotes}
+                onChange={(e) => setRechazoNotes(e.target.value)}
+                placeholder="Detalles adicionales sobre el rechazo..."
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  border: '1px solid var(--border-color, #3f3f4e)',
+                  backgroundColor: 'var(--background-dark, #1e1e2a)',
+                  color: 'var(--text-color, #e1e1e6)',
+                  minHeight: '100px',
+                  resize: 'vertical'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <Button onClick={cancelRechazar}>
+                Cancelar
+              </Button>
+              <Button
+                $primary
+                onClick={confirmRechazar}
+                disabled={isRejectingTask}
+              >
+                {isRejectingTask ? (
+                  <>
+                    <Spinner size={16} />
+                    Rechazando...
+                  </>
+                ) : (
+                  <>
+                    <FiXCircle size={16} />
+                    Confirmar Rechazo
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isLoadingPendingRequests ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>

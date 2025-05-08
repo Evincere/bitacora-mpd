@@ -83,6 +83,21 @@ public class TaskRequestHistoryMapper {
             return null;
         }
 
-        return TaskRequestStatusEntity.valueOf(status.name());
+        switch (status) {
+            case DRAFT:
+                return TaskRequestStatusEntity.DRAFT;
+            case SUBMITTED:
+                return TaskRequestStatusEntity.SUBMITTED;
+            case ASSIGNED:
+                return TaskRequestStatusEntity.ASSIGNED;
+            case IN_PROGRESS:
+                return TaskRequestStatusEntity.IN_PROGRESS;
+            case COMPLETED:
+                return TaskRequestStatusEntity.COMPLETED;
+            case CANCELLED:
+                return TaskRequestStatusEntity.CANCELLED;
+            default:
+                return null;
+        }
     }
 }

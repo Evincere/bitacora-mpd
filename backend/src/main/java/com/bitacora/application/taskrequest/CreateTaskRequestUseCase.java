@@ -1,5 +1,6 @@
 package com.bitacora.application.taskrequest;
 
+import com.bitacora.domain.event.taskrequest.TaskRequestCreatedEvent;
 import com.bitacora.domain.model.taskrequest.TaskRequest;
 import com.bitacora.domain.model.taskrequest.TaskRequestCategory;
 import com.bitacora.domain.model.taskrequest.TaskRequestPriority;
@@ -9,8 +10,11 @@ import com.bitacora.domain.port.repository.TaskRequestRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -25,17 +29,21 @@ public class CreateTaskRequestUseCase {
 
     private final TaskRequestRepository taskRequestRepository;
     private final TaskRequestCategoryRepository categoryRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Constructor.
      *
      * @param taskRequestRepository Repositorio de solicitudes de tareas
      * @param categoryRepository Repositorio de categorías de solicitudes
+     * @param eventPublisher Publicador de eventos
      */
     public CreateTaskRequestUseCase(final TaskRequestRepository taskRequestRepository,
-                                   final TaskRequestCategoryRepository categoryRepository) {
+                                   final TaskRequestCategoryRepository categoryRepository,
+                                   final ApplicationEventPublisher eventPublisher) {
         this.taskRequestRepository = taskRequestRepository;
         this.categoryRepository = categoryRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -58,9 +66,9 @@ public class CreateTaskRequestUseCase {
                                   final LocalDateTime dueDate,
                                   final String notes,
                                   final Long requesterId) {
-        
+
         logger.info("Creando borrador de solicitud de tarea para el solicitante: {}", requesterId);
-        
+
         // Obtener la categoría si se proporciona un ID, o la categoría por defecto si no
         TaskRequestCategory category = null;
         if (categoryId != null) {
@@ -71,12 +79,12 @@ public class CreateTaskRequestUseCase {
                 logger.warn("Categoría con ID {} no encontrada, usando categoría por defecto", categoryId);
             }
         }
-        
+
         if (category == null) {
             category = categoryRepository.findDefault()
                     .orElseThrow(() -> new IllegalStateException("No se encontró una categoría por defecto"));
         }
-        
+
         // Crear la solicitud
         TaskRequest taskRequest = TaskRequest.builder()
                 .title(title)
@@ -89,11 +97,11 @@ public class CreateTaskRequestUseCase {
                 .requestDate(LocalDateTime.now())
                 .notes(notes)
                 .build();
-        
+
         // Guardar la solicitud
         TaskRequest savedTaskRequest = taskRequestRepository.save(taskRequest);
         logger.info("Borrador de solicitud de tarea creado con ID: {}", savedTaskRequest.getId());
-        
+
         return savedTaskRequest;
     }
 
@@ -117,9 +125,9 @@ public class CreateTaskRequestUseCase {
                                       final LocalDateTime dueDate,
                                       final String notes,
                                       final Long requesterId) {
-        
+
         logger.info("Creando y enviando solicitud de tarea para el solicitante: {}", requesterId);
-        
+
         // Obtener la categoría si se proporciona un ID, o la categoría por defecto si no
         TaskRequestCategory category = null;
         if (categoryId != null) {
@@ -130,12 +138,12 @@ public class CreateTaskRequestUseCase {
                 logger.warn("Categoría con ID {} no encontrada, usando categoría por defecto", categoryId);
             }
         }
-        
+
         if (category == null) {
             category = categoryRepository.findDefault()
                     .orElseThrow(() -> new IllegalStateException("No se encontró una categoría por defecto"));
         }
-        
+
         // Crear la solicitud
         TaskRequest taskRequest = TaskRequest.builder()
                 .title(title)
@@ -148,11 +156,25 @@ public class CreateTaskRequestUseCase {
                 .requestDate(LocalDateTime.now())
                 .notes(notes)
                 .build();
-        
+
         // Guardar la solicitud
         TaskRequest savedTaskRequest = taskRequestRepository.save(taskRequest);
         logger.info("Solicitud de tarea creada y enviada con ID: {}", savedTaskRequest.getId());
-        
+
+        // Publicar evento de creación de solicitud después de que la transacción se complete
+        final TaskRequest finalSavedTaskRequest = savedTaskRequest;
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                try {
+                    eventPublisher.publishEvent(new TaskRequestCreatedEvent(finalSavedTaskRequest));
+                    logger.info("Evento de creación de solicitud publicado para la solicitud con ID: {}", finalSavedTaskRequest.getId());
+                } catch (Exception e) {
+                    logger.error("Error al publicar evento de creación de solicitud: {}", e.getMessage(), e);
+                }
+            }
+        });
+
         return savedTaskRequest;
     }
 }
