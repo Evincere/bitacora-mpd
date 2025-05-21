@@ -9,7 +9,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 /**
  * Configuración del servidor WebSocket.
- * Esta clase configura el servidor WebSocket para permitir la comunicación en tiempo real.
+ * Esta clase configura el servidor WebSocket para permitir la comunicación en
+ * tiempo real.
  */
 @Configuration
 @EnableWebSocketMessageBroker
@@ -17,27 +18,35 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     /**
      * Configura el registro de endpoints STOMP.
+     * 
      * @param registry El registro de endpoints STOMP
      */
     @Override
     public void registerStompEndpoints(@NonNull final StompEndpointRegistry registry) {
+        // Registrar el endpoint /ws para acceso directo
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*") // En producción, limitar a dominios específicos
                 .withSockJS(); // Habilitar SockJS para compatibilidad con navegadores antiguos
+
+        // Registrar el endpoint /api/ws para acceso a través del context-path
+        registry.addEndpoint("/api/ws")
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
     }
 
     /**
      * Configura el broker de mensajes.
+     * 
      * @param registry El registro del broker de mensajes
      */
     @Override
     public void configureMessageBroker(@NonNull final MessageBrokerRegistry registry) {
         // Prefijo para endpoints que manejan mensajes del cliente
         registry.setApplicationDestinationPrefixes("/app");
-        
+
         // Habilitar broker simple en memoria con prefijos para tópicos y colas
         registry.enableSimpleBroker("/topic", "/queue", "/user");
-        
+
         // Prefijo para mensajes dirigidos a usuarios específicos
         registry.setUserDestinationPrefix("/user");
     }

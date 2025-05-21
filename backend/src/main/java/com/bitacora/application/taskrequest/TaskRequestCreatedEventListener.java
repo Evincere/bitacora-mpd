@@ -5,6 +5,7 @@ import com.bitacora.domain.model.notification.NotificationType;
 import com.bitacora.domain.model.notification.RealTimeNotification;
 import com.bitacora.domain.model.taskrequest.TaskRequestStatus;
 import com.bitacora.domain.port.notification.NotificationPort;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -43,7 +43,8 @@ public class TaskRequestCreatedEventListener {
                 // Enviar notificación a todos los asignadores
                 sendNotificationToAssigners(event);
 
-                // Enviar evento específico de nueva solicitud para actualizar la bandeja de entrada
+                // Enviar evento específico de nueva solicitud para actualizar la bandeja de
+                // entrada
                 sendNewTaskRequestEvent(event);
             }
         } catch (Exception e) {
@@ -74,7 +75,8 @@ public class TaskRequestCreatedEventListener {
     }
 
     /**
-     * Envía un evento específico de nueva solicitud para actualizar la bandeja de entrada.
+     * Envía un evento específico de nueva solicitud para actualizar la bandeja de
+     * entrada.
      *
      * @param event El evento de creación de solicitud
      */
@@ -83,8 +85,7 @@ public class TaskRequestCreatedEventListener {
         TaskRequestCreatedEventData eventData = new TaskRequestCreatedEventData(
                 event.getTaskRequestId(),
                 event.getTitle(),
-                event.getRequesterId()
-        );
+                event.getRequesterId());
 
         // Enviar evento a través del canal de WebSocket
         notificationPort.sendCustomEvent("new-task-request", eventData);
@@ -93,6 +94,8 @@ public class TaskRequestCreatedEventListener {
 
     /**
      * Clase interna para los datos del evento de nueva solicitud.
+     * Los getters son necesarios para la serialización JSON aunque no se usen
+     * localmente.
      */
     private static class TaskRequestCreatedEventData {
         private final Long id;
@@ -105,14 +108,17 @@ public class TaskRequestCreatedEventListener {
             this.requesterId = requesterId;
         }
 
+        @JsonProperty
         public Long getId() {
             return id;
         }
 
+        @JsonProperty
         public String getTitle() {
             return title;
         }
 
+        @JsonProperty
         public Long getRequesterId() {
             return requesterId;
         }

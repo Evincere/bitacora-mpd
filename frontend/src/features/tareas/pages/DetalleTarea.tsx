@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -15,9 +15,12 @@ import {
   FiDownload,
   FiPlay,
   FiPause,
-  FiShield
+  FiShield,
+  FiPaperclip,
+  FiX,
+  FiUpload
 } from 'react-icons/fi';
-import AddExecutePermission from '@/components/debug/AddExecutePermission';
+
 import ConnectedUsers from '@/components/ui/Collaboration/ConnectedUsers';
 import ActivityNotifications from '@/components/ui/Notifications/ActivityNotifications';
 import { toast } from 'react-toastify';
@@ -240,6 +243,15 @@ const AttachmentItem = styled.div`
   background-color: ${({ theme }) => theme.backgroundAlt};
   border-radius: 4px;
   font-size: 14px;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.backgroundHover};
+    border-color: ${({ theme }) => theme.border};
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
 
   a {
     display: flex;
@@ -247,6 +259,8 @@ const AttachmentItem = styled.div`
     gap: 8px;
     color: ${({ theme }) => theme.primary};
     text-decoration: none;
+    width: 100%;
+    padding: 4px;
 
     &:hover {
       text-decoration: underline;
@@ -302,6 +316,99 @@ const ActionButtonSecondary = styled(ActionButton)`
   &:hover {
     background-color: ${({ theme }) => theme.backgroundHover};
     color: ${({ theme }) => theme.text};
+  }
+`;
+
+const FileUploadContainer = styled.div`
+  margin-top: 16px;
+  border: 2px dashed ${({ theme }) => theme.border};
+  border-radius: 8px;
+  padding: 16px;
+  background-color: ${({ theme }) => theme.backgroundAlt};
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.primary};
+    background-color: ${({ theme }) => theme.backgroundHover};
+  }
+`;
+
+const FileInput = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  button {
+    width: 100%;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: ${({ theme }) => theme.textSecondary};
+    font-size: 14px;
+    font-weight: 500;
+
+    &:hover {
+      color: ${({ theme }) => theme.primary};
+    }
+  }
+`;
+
+const HiddenInput = styled.input`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+`;
+
+const FileList = styled.div`
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const FileItem = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: ${({ theme }) => theme.backgroundSecondary};
+  border-radius: 4px;
+  border: 1px solid ${({ theme }) => theme.border};
+`;
+
+const FileInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: ${({ theme }) => theme.text};
+`;
+
+const RemoveButton = styled.button`
+  background: none;
+  border: none;
+  color: ${({ theme }) => theme.textSecondary};
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.backgroundHover};
+    color: ${({ theme }) => theme.error};
   }
 `;
 
@@ -418,13 +525,17 @@ const DetalleTarea: React.FC = () => {
   // Estado para almacenar los detalles de la tarea
   const [tarea, setTarea] = useState<Activity | null>(null);
   const [isLoadingTarea, setIsLoadingTarea] = useState(true);
+  const [files, setFiles] = useState<File[]>([]);
+  const [showFileUpload, setShowFileUpload] = useState(false);
 
   // Usar el hook personalizado para tareas
   const {
     startTask,
     completeTask,
+    uploadAttachments,
     isStartingTask,
-    isCompletingTask
+    isCompletingTask,
+    isUploading
   } = useTareas();
 
   // Usar el hook personalizado para comentarios
@@ -452,9 +563,41 @@ const DetalleTarea: React.FC = () => {
     }
   }, [tarea, refetchComments]);
 
-  // Cargar los detalles de la tarea
-  useEffect(() => {
-    const fetchTarea = async () => {
+  // Manejadores para la subida de archivos
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
+
+  const handleUploadFiles = async () => {
+    if (files.length === 0) {
+      toast.warning('No hay archivos para subir');
+      return;
+    }
+
+    try {
+      await uploadAttachments({ taskId: activityId, files });
+      setFiles([]);
+      setShowFileUpload(false);
+
+      // Recargar los detalles de la tarea para mostrar los nuevos archivos
+      setTimeout(() => {
+        fetchTarea();
+      }, 1000);
+    } catch (error) {
+      console.error('Error al subir archivos:', error);
+      toast.error('Error al subir archivos');
+    }
+  };
+
+  // Función para cargar los detalles de la tarea
+  const fetchTarea = async () => {
       if (!activityId) return;
 
       try {
@@ -519,6 +662,8 @@ const DetalleTarea: React.FC = () => {
       }
     };
 
+  // Cargar los detalles de la tarea al montar el componente
+  useEffect(() => {
     fetchTarea();
   }, [activityId]);
 
@@ -643,23 +788,99 @@ const DetalleTarea: React.FC = () => {
               {tarea.description || 'Sin descripción'}
             </TareaDescription>
 
+            <SectionTitle>
+              <FiFileText size={18} />
+              Archivos adjuntos
+              {(tarea.status === 'ASSIGNED' || tarea.status === 'IN_PROGRESS') && (
+                <ActionButtonSecondary
+                  onClick={() => setShowFileUpload(!showFileUpload)}
+                  style={{ marginLeft: 'auto', padding: '4px 8px', fontSize: '12px' }}
+                >
+                  {showFileUpload ? <FiX size={14} /> : <FiPaperclip size={14} />}
+                  {showFileUpload ? 'Cancelar' : 'Adjuntar archivos'}
+                </ActionButtonSecondary>
+              )}
+            </SectionTitle>
+
+            {showFileUpload && (
+              <FileUploadContainer>
+                <FileInput>
+                  <button type="button" disabled={isUploading}>
+                    <FiPaperclip size={16} />
+                    Seleccionar archivos
+                  </button>
+                  <HiddenInput
+                    type="file"
+                    multiple
+                    onChange={handleFileChange}
+                    disabled={isUploading}
+                  />
+                </FileInput>
+                {files.length > 0 && (
+                  <>
+                    <FileList>
+                      {files.map((file, index) => (
+                        <FileItem key={index}>
+                          <FileInfo>
+                            <FiPaperclip size={14} />
+                            {file.name} ({(file.size / 1024).toFixed(1)} KB)
+                          </FileInfo>
+                          {!isUploading && (
+                            <RemoveButton
+                              type="button"
+                              onClick={() => handleRemoveFile(index)}
+                              title="Eliminar archivo"
+                            >
+                              <FiX size={14} />
+                            </RemoveButton>
+                          )}
+                        </FileItem>
+                      ))}
+                    </FileList>
+                    <ActionButton
+                      onClick={handleUploadFiles}
+                      disabled={isUploading}
+                      style={{ marginTop: '12px', width: 'auto', alignSelf: 'flex-end' }}
+                    >
+                      {isUploading ? <FiLoader size={16} /> : <FiUpload size={16} />}
+                      {isUploading ? 'Subiendo...' : 'Subir archivos'}
+                    </ActionButton>
+                  </>
+                )}
+              </FileUploadContainer>
+            )}
+
             {tarea.attachments && tarea.attachments.length > 0 && (
-              <>
-                <SectionTitle>
-                  <FiFileText size={18} />
-                  Archivos adjuntos
-                </SectionTitle>
-                <AttachmentsList>
-                  {tarea.attachments.map((attachment, index) => (
-                    <AttachmentItem key={index}>
-                      <a href={attachment.downloadUrl} target="_blank" rel="noopener noreferrer">
-                        <FiDownload size={16} />
-                        {attachment.fileName} ({(attachment.fileSize / 1024).toFixed(1)} KB)
-                      </a>
-                    </AttachmentItem>
-                  ))}
-                </AttachmentsList>
-              </>
+              <AttachmentsList>
+                {tarea.attachments.map((attachment, index) => (
+                  <AttachmentItem key={index} title="Haz clic para descargar el archivo">
+                    <a
+                      href={attachment.downloadUrl}
+                      download={attachment.fileName}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        // Crear un enlace temporal para forzar la descarga
+                        const link = document.createElement('a');
+                        link.href = attachment.downloadUrl;
+                        link.setAttribute('download', attachment.fileName);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        toast.success(`Descargando ${attachment.fileName}...`);
+                      }}
+                    >
+                      <FiDownload size={16} />
+                      {attachment.fileName} ({(attachment.fileSize / 1024).toFixed(1)} KB)
+                    </a>
+                  </AttachmentItem>
+                ))}
+              </AttachmentsList>
+            )}
+
+            {!tarea.attachments || tarea.attachments.length === 0 && !showFileUpload && (
+              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', fontStyle: 'italic' }}>
+                No hay archivos adjuntos para esta tarea.
+              </p>
             )}
 
             <ActionButtonsContainer>
@@ -708,8 +929,7 @@ const DetalleTarea: React.FC = () => {
         <ActivityNotifications maxItems={5} />
       </SidePanel>
 
-      {/* Componente para añadir el permiso EXECUTE_ACTIVITIES */}
-      <AddExecutePermission />
+
     </PageContainer>
   );
 };

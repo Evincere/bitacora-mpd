@@ -1,7 +1,8 @@
 package com.bitacora.infrastructure.persistence.entity;
 
 /**
- * Enumeración que representa los posibles estados de una solicitud de tarea en la base de datos.
+ * Enumeración que representa los posibles estados de una solicitud de tarea en
+ * la base de datos.
  */
 public enum TaskRequestStatusEntity {
     /**
@@ -10,12 +11,14 @@ public enum TaskRequestStatusEntity {
     DRAFT,
 
     /**
-     * Enviada: La solicitud ha sido enviada al asignador pero aún no ha sido procesada.
+     * Enviada: La solicitud ha sido enviada al asignador pero aún no ha sido
+     * procesada.
      */
     SUBMITTED,
 
     /**
-     * Asignada: La solicitud ha sido procesada por el asignador y asignada a un ejecutor.
+     * Asignada: La solicitud ha sido procesada por el asignador y asignada a un
+     * ejecutor.
      */
     ASSIGNED,
 
@@ -32,5 +35,11 @@ public enum TaskRequestStatusEntity {
     /**
      * Cancelada: La solicitud ha sido cancelada y no será procesada.
      */
-    CANCELLED
+    CANCELLED,
+
+    /**
+     * Rechazada: La solicitud ha sido rechazada por el asignador y debe ser
+     * corregida.
+     */
+    REJECTED
 }

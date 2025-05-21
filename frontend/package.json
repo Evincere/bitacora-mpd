@@ -15,7 +15,10 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.4",
     "@hookform/resolvers": "^3.3.4",
+    "@mui/material": "^5.15.14",
     "@reduxjs/toolkit": "^1.9.5",
     "@tanstack/react-query": "^5.0.0",
     "@tanstack/react-query-devtools": "^5.0.0",

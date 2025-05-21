@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 
 /**
- * DTO para transferir información de archivos adjuntos de solicitudes de tareas entre capas.
+ * DTO para transferir información de archivos adjuntos de solicitudes de tareas
+ * entre capas.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TaskRequestAttachmentDto {
@@ -18,7 +19,8 @@ public class TaskRequestAttachmentDto {
     private String fileType;
     private String filePath;
     private Long fileSize;
-    
+    private String downloadUrl;
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime uploadedAt;
 
@@ -36,6 +38,7 @@ public class TaskRequestAttachmentDto {
         this.fileType = builder.fileType;
         this.filePath = builder.filePath;
         this.fileSize = builder.fileSize;
+        this.downloadUrl = builder.downloadUrl;
         this.uploadedAt = builder.uploadedAt;
     }
 
@@ -76,6 +79,10 @@ public class TaskRequestAttachmentDto {
         return uploadedAt;
     }
 
+    public String getDownloadUrl() {
+        return downloadUrl;
+    }
+
     // Builder
     public static Builder builder() {
         return new Builder();
@@ -90,6 +97,7 @@ public class TaskRequestAttachmentDto {
         private String fileType;
         private String filePath;
         private Long fileSize;
+        private String downloadUrl;
         private LocalDateTime uploadedAt;
 
         private Builder() {
@@ -132,6 +140,11 @@ public class TaskRequestAttachmentDto {
 
         public Builder fileSize(Long fileSize) {
             this.fileSize = fileSize;
+            return this;
+        }
+
+        public Builder downloadUrl(String downloadUrl) {
+            this.downloadUrl = downloadUrl;
             return this;
         }
 

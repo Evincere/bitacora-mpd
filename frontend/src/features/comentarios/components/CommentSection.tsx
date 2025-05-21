@@ -1,11 +1,33 @@
-import React, { useState, useRef } from 'react';
-import styled from 'styled-components';
-import { FiUser, FiSend, FiEye, FiEdit2, FiTrash2, FiX, FiCheck, FiMessageSquare } from 'react-icons/fi';
+import React, { useState, useRef, useEffect } from 'react';
+import styled, { keyframes } from 'styled-components';
+import {
+  FiUser,
+  FiSend,
+  FiEye,
+  FiEdit2,
+  FiTrash2,
+  FiX,
+  FiCheck,
+  FiMessageSquare,
+  FiPaperclip,
+  FiFile,
+  FiDownload,
+  FiLoader
+} from 'react-icons/fi';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'react-toastify';
 
 // Tipos
+interface Attachment {
+  id: number;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  downloadUrl: string;
+  uploadedAt: string;
+}
+
 interface Comment {
   id: number;
   userId: number;
@@ -15,18 +37,21 @@ interface Comment {
   createdAt: string;
   readBy?: number[];
   readByCurrentUser?: boolean;
+  attachments?: Attachment[];
 }
 
 interface CommentSectionProps {
   comments: Comment[];
   isLoading: boolean;
-  onAddComment: (content: string) => Promise<void>;
+  onAddComment: (content: string, files?: File[]) => Promise<void>;
   onEditComment?: (id: number, content: string) => Promise<void>;
   onDeleteComment?: (id: number) => Promise<void>;
   onMarkAsRead?: (id: number) => Promise<void>;
+  onDownloadAttachment?: (attachmentId: number, fileName: string) => Promise<void>;
   currentUserId?: number;
   placeholder?: string;
   readOnly?: boolean;
+  allowAttachments?: boolean;
 }
 
 // Componentes estilizados
@@ -322,6 +347,163 @@ const ButtonGroup = styled.div`
   justify-content: flex-end;
 `;
 
+// Componentes para archivos adjuntos
+const AttachmentsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  background-color: ${({ theme }) => `${theme.backgroundTertiary}50`};
+`;
+
+const AttachmentItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background-color: ${({ theme }) => theme.backgroundSecondary};
+  border: 1px solid ${({ theme }) => theme.border};
+  font-size: 12px;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.backgroundHover};
+  }
+`;
+
+const AttachmentName = styled.span`
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const AttachmentSize = styled.span`
+  color: ${({ theme }) => theme.textSecondary};
+  font-size: 11px;
+`;
+
+const AttachmentAction = styled.button`
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: 4px;
+  color: ${({ theme }) => theme.textSecondary};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: ${({ theme }) => theme.primary};
+    background-color: ${({ theme }) => `${theme.primary}15`};
+  }
+`;
+
+const FileInputContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+`;
+
+const FileInput = styled.div`
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    background-color: ${({ theme }) => theme.backgroundSecondary};
+    border: 1px solid ${({ theme }) => theme.border};
+    color: ${({ theme }) => theme.text};
+    font-size: 12px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: ${({ theme }) => theme.backgroundHover};
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+`;
+
+const HiddenInput = styled.input`
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+`;
+
+const SelectedFilesList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+`;
+
+const SelectedFileItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: ${({ theme }) => `${theme.primary}15`};
+  font-size: 12px;
+  max-width: 200px;
+`;
+
+const SelectedFileName = styled.span`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const RemoveFileButton = styled.button`
+  background: none;
+  border: none;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.textSecondary};
+  cursor: pointer;
+
+  &:hover {
+    color: ${({ theme }) => theme.error};
+  }
+`;
+
+// Animación para el spinner
+const spinAnimation = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
+
+const LoadingSpinner = styled(FiLoader)`
+  animation: ${spinAnimation} 1s linear infinite;
+`;
+
 // Componente principal
 const CommentSection: React.FC<CommentSectionProps> = ({
   comments,
@@ -330,14 +512,18 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   onEditComment,
   onDeleteComment,
   onMarkAsRead,
+  onDownloadAttachment,
   currentUserId,
   placeholder = 'Escribe un comentario...',
-  readOnly = false
+  readOnly = false,
+  allowAttachments = true
 }) => {
   const [commentContent, setCommentContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [showAttachmentInput, setShowAttachmentInput] = useState(false);
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
   // Formatear fecha
@@ -350,18 +536,102 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     }
   };
 
+  // Manejar selección de archivos
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB en bytes
+      const MAX_TOTAL_FILES = 5; // Máximo 5 archivos por comentario
+
+      // Convertir FileList a array
+      const newFiles = Array.from(e.target.files);
+
+      // Validar el número total de archivos
+      if (selectedFiles.length + newFiles.length > MAX_TOTAL_FILES) {
+        toast.error(`No puedes adjuntar más de ${MAX_TOTAL_FILES} archivos por comentario`);
+        e.target.value = '';
+        return;
+      }
+
+      // Validar el tamaño de los archivos
+      const oversizedFiles = newFiles.filter(file => file.size > MAX_FILE_SIZE);
+      if (oversizedFiles.length > 0) {
+        const fileNames = oversizedFiles.map(file => file.name).join(', ');
+        toast.error(`Los siguientes archivos exceden el tamaño máximo permitido (15MB): ${fileNames}`);
+
+        // Filtrar solo los archivos válidos
+        const validFiles = newFiles.filter(file => file.size <= MAX_FILE_SIZE);
+        setSelectedFiles(prev => [...prev, ...validFiles]);
+      } else {
+        // Todos los archivos son válidos
+        setSelectedFiles(prev => [...prev, ...newFiles]);
+      }
+
+      // Limpiar el input para permitir seleccionar el mismo archivo nuevamente
+      e.target.value = '';
+    }
+  };
+
+  // Eliminar un archivo seleccionado
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Limpiar todos los archivos seleccionados
+  const clearSelectedFiles = () => {
+    setSelectedFiles([]);
+  };
+
+  // Manejar descarga de archivo adjunto
+  const handleDownloadAttachment = async (attachmentId: number, fileName: string) => {
+    if (!onDownloadAttachment) return;
+
+    try {
+      await onDownloadAttachment(attachmentId, fileName);
+    } catch (error) {
+      console.error('Error al descargar archivo:', error);
+      toast.error('Error al descargar el archivo');
+    }
+  };
+
   // Manejar envío de comentario
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!commentContent.trim() || submitting) return;
+    if ((!commentContent.trim() && selectedFiles.length === 0) || submitting) return;
+
+    // Validar el tamaño de los archivos antes de enviar
+    const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB en bytes
+    const oversizedFiles = selectedFiles.filter(file => file.size > MAX_FILE_SIZE);
+
+    if (oversizedFiles.length > 0) {
+      const fileNames = oversizedFiles.map(file => file.name).join(', ');
+      toast.error(`Los siguientes archivos exceden el tamaño máximo permitido (15MB): ${fileNames}`);
+      return;
+    }
 
     setSubmitting(true);
     try {
-      await onAddComment(commentContent);
+      // Enviar comentario con archivos adjuntos si hay alguno
+      await onAddComment(commentContent, selectedFiles.length > 0 ? selectedFiles : undefined);
+
+      // Limpiar formulario
       setCommentContent('');
-    } catch (error) {
+      clearSelectedFiles();
+      setShowAttachmentInput(false);
+
+      toast.success('Comentario enviado correctamente');
+    } catch (error: any) {
       console.error('Error al enviar comentario:', error);
-      toast.error('Error al enviar el comentario');
+
+      // Mostrar mensaje de error específico si está disponible
+      if (error.message && typeof error.message === 'string') {
+        if (error.message.includes('tamaño') || error.message.includes('excede')) {
+          toast.error(`Error: ${error.message}`);
+        } else {
+          toast.error('Error al enviar el comentario. Por favor, intente nuevamente.');
+        }
+      } else {
+        toast.error('Error al enviar el comentario. Por favor, intente nuevamente.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -440,6 +710,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         <LoadingState>
           <SpinningLoader />
           <p>Cargando comentarios...</p>
+          <p style={{ fontSize: '12px', opacity: 0.7, marginTop: '4px' }}>
+            Obteniendo datos desde el servidor
+          </p>
         </LoadingState>
       ) : comments && comments.length > 0 ? (
         <CommentsList>
@@ -496,12 +769,35 @@ const CommentSection: React.FC<CommentSectionProps> = ({
                       </ButtonGroup>
                     </CommentEditForm>
                   ) : (
-                    <CommentText $isRead={safeComment.readByCurrentUser}>
-                      {safeComment.content}
-                      <ReadIndicator $isRead={safeComment.readByCurrentUser}>
-                        <FiEye size={14} title={safeComment.readByCurrentUser ? "Leído" : "No leído"} />
-                      </ReadIndicator>
-                    </CommentText>
+                    <>
+                      <CommentText $isRead={safeComment.readByCurrentUser}>
+                        {safeComment.content}
+                        <ReadIndicator $isRead={safeComment.readByCurrentUser}>
+                          <FiEye size={14} title={safeComment.readByCurrentUser ? "Leído" : "No leído"} />
+                        </ReadIndicator>
+                      </CommentText>
+
+                      {/* Mostrar archivos adjuntos si existen */}
+                      {safeComment.attachments && safeComment.attachments.length > 0 && (
+                        <AttachmentsList>
+                          {safeComment.attachments.map((attachment) => (
+                            <AttachmentItem key={attachment.id}>
+                              <FiFile size={14} />
+                              <AttachmentName>{attachment.fileName}</AttachmentName>
+                              <AttachmentSize>
+                                {(attachment.fileSize / 1024).toFixed(1)} KB
+                              </AttachmentSize>
+                              <AttachmentAction
+                                onClick={() => handleDownloadAttachment(attachment.id, attachment.fileName)}
+                                title="Descargar archivo"
+                              >
+                                <FiDownload size={14} />
+                              </AttachmentAction>
+                            </AttachmentItem>
+                          ))}
+                        </AttachmentsList>
+                      )}
+                    </>
                   )}
 
                   {!isEditing && (
@@ -541,6 +837,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         <EmptyState>
           <FiMessageSquare size={24} />
           <p>No hay comentarios todavía</p>
+          <p style={{ fontSize: '14px', opacity: 0.7, marginTop: '8px' }}>
+            Sé el primero en comentar en esta solicitud
+          </p>
         </EmptyState>
       )}
 
@@ -553,11 +852,60 @@ const CommentSection: React.FC<CommentSectionProps> = ({
             onChange={(e) => setCommentContent(e.target.value)}
             disabled={submitting}
           />
-          <SendButton type="submit" disabled={!commentContent.trim() || submitting}>
-            <FiSend size={16} />
-            Enviar
-          </SendButton>
+
+          {/* Botones de acción */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {/* Botón para adjuntar archivos */}
+            {allowAttachments && (
+              <FileInput>
+                <button
+                  type="button"
+                  onClick={() => setShowAttachmentInput(!showAttachmentInput)}
+                  disabled={submitting}
+                >
+                  <FiPaperclip size={16} />
+                  {selectedFiles.length > 0 ? `${selectedFiles.length} archivo(s)` : 'Adjuntar'}
+                </button>
+                <HiddenInput
+                  type="file"
+                  multiple
+                  onChange={handleFileChange}
+                  disabled={submitting}
+                />
+              </FileInput>
+            )}
+
+            {/* Botón de enviar */}
+            <SendButton
+              type="submit"
+              disabled={((!commentContent.trim() && selectedFiles.length === 0) || submitting)}
+            >
+              <FiSend size={16} />
+              Enviar
+            </SendButton>
+          </div>
         </CommentForm>
+      )}
+
+      {/* Lista de archivos seleccionados */}
+      {selectedFiles.length > 0 && (
+        <SelectedFilesList>
+          {selectedFiles.map((file, index) => (
+            <SelectedFileItem key={index}>
+              <FiFile size={14} />
+              <SelectedFileName>{file.name}</SelectedFileName>
+              <AttachmentSize>({(file.size / 1024).toFixed(1)} KB)</AttachmentSize>
+              <RemoveFileButton
+                type="button"
+                onClick={() => handleRemoveFile(index)}
+                disabled={submitting}
+                title="Eliminar archivo"
+              >
+                <FiX size={14} />
+              </RemoveFileButton>
+            </SelectedFileItem>
+          ))}
+        </SelectedFilesList>
       )}
     </Container>
   );

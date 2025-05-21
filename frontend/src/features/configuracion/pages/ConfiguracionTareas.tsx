@@ -1,8 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { FiSettings, FiInfo } from 'react-icons/fi';
-import CategoriasList from '@/features/categorias/components/CategoriasList';
-import PrioridadesList from '@/features/prioridades/components/PrioridadesList';
+import { CategoriasList, PrioridadesList } from '../components';
 
 const PageContainer = styled.div`
   padding: 0;
@@ -33,21 +32,21 @@ const InfoBox = styled.div`
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  
+
   .icon {
     color: ${({ theme }) => theme.info};
     margin-top: 2px;
   }
-  
+
   .content {
     flex: 1;
-    
+
     h4 {
       margin: 0 0 8px;
       font-size: 16px;
       color: ${({ theme }) => theme.text};
     }
-    
+
     p {
       margin: 0;
       font-size: 14px;
@@ -60,7 +59,7 @@ const ConfigGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
-  
+
   @media (max-width: 992px) {
     grid-template-columns: 1fr;
   }

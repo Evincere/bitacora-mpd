@@ -10,6 +10,7 @@ public class TaskRequestAttachment {
     private Long id;
     private Long taskRequestId;
     private Long userId;
+    private Long commentId; // ID del comentario al que está asociado (opcional)
     private String fileName;
     private String fileType;
     private String filePath;
@@ -23,7 +24,8 @@ public class TaskRequestAttachment {
     }
 
     /**
-     * Crea una nueva instancia de TaskRequestAttachment utilizando el patrón Builder.
+     * Crea una nueva instancia de TaskRequestAttachment utilizando el patrón
+     * Builder.
      *
      * @return Un nuevo builder para TaskRequestAttachment
      */
@@ -41,7 +43,8 @@ public class TaskRequestAttachment {
     }
 
     /**
-     * Obtiene el identificador de la solicitud a la que pertenece este archivo adjunto.
+     * Obtiene el identificador de la solicitud a la que pertenece este archivo
+     * adjunto.
      *
      * @return El identificador de la solicitud
      */
@@ -56,6 +59,17 @@ public class TaskRequestAttachment {
      */
     public Long getUserId() {
         return userId;
+    }
+
+    /**
+     * Obtiene el identificador del comentario al que está asociado este archivo
+     * adjunto.
+     *
+     * @return El identificador del comentario, o null si no está asociado a ningún
+     *         comentario
+     */
+    public Long getCommentId() {
+        return commentId;
     }
 
     /**
@@ -111,7 +125,7 @@ public class TaskRequestAttachment {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        
+
         final TaskRequestAttachment that = (TaskRequestAttachment) o;
         return Objects.equals(id, that.id);
     }
@@ -126,6 +140,8 @@ public class TaskRequestAttachment {
         return "TaskRequestAttachment{" +
                 "id=" + id +
                 ", taskRequestId=" + taskRequestId +
+                ", userId=" + userId +
+                ", commentId=" + commentId +
                 ", fileName='" + fileName + '\'' +
                 ", fileType='" + fileType + '\'' +
                 ", fileSize=" + fileSize +
@@ -154,6 +170,11 @@ public class TaskRequestAttachment {
 
         public Builder userId(final Long userId) {
             instance.userId = userId;
+            return this;
+        }
+
+        public Builder commentId(final Long commentId) {
+            instance.commentId = commentId;
             return this;
         }
 
@@ -187,19 +208,19 @@ public class TaskRequestAttachment {
             if (instance.fileName == null || instance.fileName.trim().isEmpty()) {
                 throw new IllegalArgumentException("El nombre del archivo no puede estar vacío");
             }
-            
+
             if (instance.filePath == null || instance.filePath.trim().isEmpty()) {
                 throw new IllegalArgumentException("La ruta del archivo no puede estar vacía");
             }
-            
+
             if (instance.userId == null) {
                 throw new IllegalArgumentException("El identificador del usuario no puede ser nulo");
             }
-            
+
             if (instance.uploadedAt == null) {
                 instance.uploadedAt = LocalDateTime.now();
             }
-            
+
             return instance;
         }
     }

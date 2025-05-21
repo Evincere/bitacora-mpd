@@ -10,6 +10,7 @@ import DashboardSolicitante from '@/features/solicitudes/pages/DashboardSolicita
 import SolicitudForm from '@/features/solicitudes/pages/SolicitudForm';
 import MisSolicitudes from '@/features/solicitudes/pages/MisSolicitudes';
 import SeguimientoSolicitud from '@/features/solicitudes/pages/SeguimientoSolicitud';
+import SeguimientoGeneral from '@/features/solicitudes/pages/SeguimientoGeneral';
 
 // Componentes para ASIGNADOR
 import DashboardAsignador from '@/features/asignacion/pages/DashboardAsignador';
@@ -50,6 +51,7 @@ const RoleBasedRoutes: React.FC = () => {
           <Route path="app/solicitudes/dashboard" element={<DashboardSolicitante />} />
           <Route path="app/solicitudes/nueva" element={<SolicitudForm />} />
           <Route path="app/solicitudes" element={<MisSolicitudes />} />
+          <Route path="app/solicitudes/seguimiento" element={<SeguimientoGeneral />} />
           <Route path="app/solicitudes/seguimiento/:id" element={<SeguimientoSolicitud />} />
         </Route>
 

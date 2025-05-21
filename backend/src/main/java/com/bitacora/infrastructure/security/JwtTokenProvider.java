@@ -1,48 +1,29 @@
 package com.bitacora.infrastructure.security;
 
 import com.bitacora.domain.model.user.User;
+import com.bitacora.infrastructure.security.token.TokenFactory;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * Proveedor de tokens JWT para autenticación y autorización.
+ * Utiliza el patrón Factory para la creación de tokens.
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    @Value("${spring.jwt.secret:${jwt.secret:bitacoraSecretKey2023SecureApplicationWithLongSecretKey}}")
-    private String secretKey;
-
-    @Value("${spring.jwt.expiration:${jwt.expiration:86400000}}")
-    private long validityInMilliseconds;
-
-    @Value("${spring.jwt.refresh-expiration:${jwt.refresh-expiration:604800000}}")
-    private long refreshValidityInMilliseconds;
-
-    private Key key;
-
-    /**
-     * Inicializa la clave secreta.
-     */
-    @PostConstruct
-    protected void init() {
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
-    }
+    private final TokenFactory tokenFactory;
 
     /**
      * Crea un token JWT para un usuario.
@@ -52,7 +33,7 @@ public class JwtTokenProvider {
      * @return El token JWT
      */
     public String createToken(User user, Collection<? extends GrantedAuthority> authorities) {
-        return createToken(user, authorities, validityInMilliseconds, false);
+        return tokenFactory.createAccessToken(user, authorities);
     }
 
     /**
@@ -63,42 +44,7 @@ public class JwtTokenProvider {
      * @return El token de refresco JWT
      */
     public String createRefreshToken(User user, Collection<? extends GrantedAuthority> authorities) {
-        return createToken(user, authorities, refreshValidityInMilliseconds, true);
-    }
-
-    /**
-     * Crea un token JWT para un usuario con la validez especificada.
-     *
-     * @param user           El usuario
-     * @param authorities    Las autoridades del usuario
-     * @param validityMillis La validez del token en milisegundos
-     * @param isRefreshToken Indica si es un token de refresco
-     * @return El token JWT
-     */
-    private String createToken(User user, Collection<? extends GrantedAuthority> authorities,
-            long validityMillis, boolean isRefreshToken) {
-        Claims claims = Jwts.claims().setSubject(user.getUsername());
-        claims.put("id", user.getId());
-        claims.put("email", user.getEmail().getValue());
-        claims.put("firstName", user.getPersonName().getFirstName());
-        claims.put("lastName", user.getPersonName().getLastName());
-        claims.put("role", user.getRole().name());
-        claims.put("isRefreshToken", isRefreshToken);
-
-        Set<String> authoritiesSet = authorities.stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toSet());
-        claims.put("authorities", authoritiesSet);
-
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + validityMillis);
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(validity)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+        return tokenFactory.createRefreshToken(user, authorities);
     }
 
     /**
@@ -108,24 +54,32 @@ public class JwtTokenProvider {
      * @return La autenticación
      */
     public Authentication getAuthentication(String token) {
+        // Validar el token
+        if (!validateToken(token)) {
+            throw new JwtException("Token inválido");
+        }
+
+        // Obtener información del token
+        String username = getUsername(token);
+        Long userId = getUserId(token);
+
+        // Obtener claims del token para extraer autoridades
         Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(tokenFactory.getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
 
-        String username = claims.getSubject();
-        Long id = claims.get("id", Long.class);
-
         @SuppressWarnings("unchecked")
         List<String> authorities = claims.get("authorities", List.class);
 
+        // Convertir autoridades a objetos SimpleGrantedAuthority
         List<SimpleGrantedAuthority> grantedAuthorities = authorities.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
-        UserPrincipal principal = new UserPrincipal(id, username, "", grantedAuthorities);
-
+        // Crear principal y autenticación
+        UserPrincipal principal = new UserPrincipal(userId, username, "", grantedAuthorities);
         return new UsernamePasswordAuthenticationToken(principal, "", grantedAuthorities);
     }
 
@@ -136,16 +90,7 @@ public class JwtTokenProvider {
      * @return true si el token es válido, false en caso contrario
      */
     public boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            log.error("Token JWT inválido: {}", e.getMessage());
-            return false;
-        }
+        return tokenFactory.validateToken(token);
     }
 
     /**
@@ -155,18 +100,7 @@ public class JwtTokenProvider {
      * @return true si el token es un token de refresco, false en caso contrario
      */
     public boolean isRefreshToken(String token) {
-        try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-
-            return Boolean.TRUE.equals(claims.get("isRefreshToken", Boolean.class));
-        } catch (JwtException | IllegalArgumentException e) {
-            log.error("Error al verificar si el token es de refresco: {}", e.getMessage());
-            return false;
-        }
+        return tokenFactory.isRefreshToken(token);
     }
 
     /**
@@ -176,27 +110,7 @@ public class JwtTokenProvider {
      * @return El nombre de usuario
      */
     public String getUsername(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-    /**
-     * Obtiene la fecha de expiración a partir de un token JWT.
-     *
-     * @param token El token JWT
-     * @return La fecha de expiración
-     */
-    public Date getExpirationDateFromToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
+        return tokenFactory.getUsername(token);
     }
 
     /**
@@ -206,30 +120,56 @@ public class JwtTokenProvider {
      * @return El ID de usuario
      */
     public Long getUserId(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("id", Long.class);
+        return tokenFactory.getUserId(token);
+    }
+
+    /**
+     * Obtiene la fecha de expiración a partir de un token JWT.
+     *
+     * @param token El token JWT
+     * @return La fecha de expiración
+     */
+    public Date getExpirationDateFromToken(String token) {
+        return tokenFactory.getExpirationDate(token);
+    }
+
+    /**
+     * Obtiene el ID de usuario a partir de un token JWT.
+     * Este método es un alias de getUserId para mantener compatibilidad con código
+     * existente.
+     *
+     * @param token El token JWT
+     * @return El ID de usuario
+     */
+    public Long getUserIdFromToken(String token) {
+        return getUserId(token);
     }
 
     /**
      * Obtiene el ID de usuario a partir de un nombre de usuario.
-     * Este método busca el usuario en la base de datos y devuelve su ID.
+     * Este método busca el usuario en el contexto de seguridad actual y devuelve su
+     * ID.
      *
      * @param username El nombre de usuario
      * @return El ID de usuario
      */
     public Long getUserIdFromUsername(String username) {
-        // Implementación temporal: buscar el token actual en el contexto de seguridad
-        // y extraer el ID de usuario
+        // Obtener la autenticación actual del contexto de seguridad
         Authentication authentication = org.springframework.security.core.context.SecurityContextHolder
                 .getContext().getAuthentication();
+
+        // Verificar si hay una autenticación válida y si el principal es un
+        // UserPrincipal
         if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal) {
             UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
-            return principal.getId();
+
+            // Verificar si el nombre de usuario coincide
+            if (principal.getUsername().equals(username)) {
+                return principal.getId();
+            }
         }
+
+        // Si no se encuentra el usuario, lanzar una excepción
         throw new IllegalStateException("No se pudo obtener el ID de usuario para: " + username);
     }
 }

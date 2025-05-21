@@ -242,10 +242,46 @@ public class UserSessionService {
                     "Sesión inactiva",
                     "Tu sesión ha estado inactiva durante más de 30 minutos");
         }
-
         if (!inactiveSessions.isEmpty()) {
             log.debug("Detectadas {} sesiones inactivas", inactiveSessions.size());
         }
+    }
+
+    /**
+     * Busca una sesión por su token de refresco.
+     *
+     * @param refreshToken El token de refresco
+     * @return Un Optional con la sesión si se encuentra, o un Optional vacío si no
+     *         existe
+     */
+    public Optional<String> findSessionByRefreshToken(String refreshToken) {
+        return sessionPort.findByRefreshToken(refreshToken)
+                .filter(session -> session.getStatus() == UserSession.SessionStatus.ACTIVE)
+                .map(UserSession::getToken);
+    }
+
+    /**
+     * Verifica si un token está en la lista negra.
+     * Un token está en la lista negra si pertenece a una sesión cerrada, revocada o
+     * expirada.
+     *
+     * @param token El token JWT
+     * @return true si el token está en la lista negra, false en caso contrario
+     */
+    public boolean isTokenBlacklisted(String token) {
+        Optional<UserSession> sessionOpt = sessionPort.findByToken(token);
+
+        if (sessionOpt.isEmpty()) {
+            // Si no se encuentra la sesión, el token no está en la lista negra
+            return false;
+        }
+
+        UserSession session = sessionOpt.get();
+
+        // Verificar si la sesión está cerrada, revocada o expirada
+        return session.getStatus() == UserSession.SessionStatus.CLOSED ||
+                session.getStatus() == UserSession.SessionStatus.REVOKED ||
+                session.getStatus() == UserSession.SessionStatus.EXPIRED;
     }
 
     /**

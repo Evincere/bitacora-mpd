@@ -31,11 +31,14 @@ const Badge = styled.span<BadgeProps>`
     flex-shrink: 0;
   }
 
-  background-color: ${({ $normalizedCategory }) => {
+  background-color: ${({ $normalizedCategory, theme }) => {
+    // Usar un fondo oscuro basado en el tema, pero manteniendo la identidad del color de categoría
     if (categoryColors[$normalizedCategory]) {
-      return categoryColors[$normalizedCategory].background;
+      const baseColor = categoryColors[$normalizedCategory].text;
+      // Crear un fondo oscuro con una ligera transparencia del color de la categoría
+      return `${baseColor}20`; // 20 es la opacidad en hexadecimal (equivalente a 0.125)
     }
-    return categoryColors.default.background;
+    return theme.backgroundSecondary;
   }};
 
   color: ${({ $normalizedCategory }) => {
@@ -60,11 +63,13 @@ const Badge = styled.span<BadgeProps>`
       }
       return categoryColors.default.shadow;
     }};
-    background-color: ${({ $normalizedCategory }) => {
+    background-color: ${({ $normalizedCategory, theme }) => {
       if (categoryColors[$normalizedCategory]) {
-        return categoryColors[$normalizedCategory].hover;
+        const baseColor = categoryColors[$normalizedCategory].text;
+        // Crear un fondo oscuro con una mayor opacidad para el hover
+        return `${baseColor}30`; // 30 es la opacidad en hexadecimal (equivalente a 0.188)
       }
-      return categoryColors.default.hover;
+      return theme.backgroundHover;
     }};
   }
 `;

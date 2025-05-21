@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
- * Entidad JPA para representar un archivo adjunto de solicitud de tarea en la base de datos.
+ * Entidad JPA para representar un archivo adjunto de solicitud de tarea en la
+ * base de datos.
  */
 @Entity
 @Table(name = "task_request_attachments")
@@ -32,6 +33,9 @@ public class TaskRequestAttachmentEntity {
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
+
+    @Column(name = "comment_id")
+    private Long commentId;
 
     @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;
@@ -62,6 +66,7 @@ public class TaskRequestAttachmentEntity {
         this.id = builder.id;
         this.taskRequest = builder.taskRequest;
         this.userId = builder.userId;
+        this.commentId = builder.commentId;
         this.fileName = builder.fileName;
         this.fileType = builder.fileType;
         this.filePath = builder.filePath;
@@ -93,6 +98,14 @@ public class TaskRequestAttachmentEntity {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public Long getCommentId() {
+        return commentId;
+    }
+
+    public void setCommentId(Long commentId) {
+        this.commentId = commentId;
     }
 
     public String getFileName() {
@@ -137,8 +150,10 @@ public class TaskRequestAttachmentEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         TaskRequestAttachmentEntity that = (TaskRequestAttachmentEntity) o;
         return Objects.equals(id, that.id);
     }
@@ -154,6 +169,7 @@ public class TaskRequestAttachmentEntity {
                 "id=" + id +
                 ", taskRequestId=" + (taskRequest != null ? taskRequest.getId() : null) +
                 ", userId=" + userId +
+                ", commentId=" + commentId +
                 ", fileName='" + fileName + '\'' +
                 ", fileType='" + fileType + '\'' +
                 ", fileSize=" + fileSize +
@@ -168,6 +184,7 @@ public class TaskRequestAttachmentEntity {
         private Long id;
         private TaskRequestEntity taskRequest;
         private Long userId;
+        private Long commentId;
         private String fileName;
         private String fileType;
         private String filePath;
@@ -193,6 +210,11 @@ public class TaskRequestAttachmentEntity {
 
         public Builder userId(Long userId) {
             this.userId = userId;
+            return this;
+        }
+
+        public Builder commentId(Long commentId) {
+            this.commentId = commentId;
             return this;
         }
 

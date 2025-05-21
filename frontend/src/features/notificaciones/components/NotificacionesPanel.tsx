@@ -17,79 +17,33 @@ import {
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useRealTimeNotifications } from '@/features/notifications/contexts/RealTimeNotificationContext';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 
-// Datos de ejemplo para mostrar en la interfaz
-const MOCK_NOTIFICACIONES = [
-  {
-    id: 1,
-    tipo: 'ASIGNACION',
-    titulo: 'Nueva tarea asignada',
-    mensaje: 'Se te ha asignado la tarea "Revisión de contrato" con prioridad Alta.',
-    fecha: '2025-05-01T10:30:00',
-    leida: false,
-    entidadId: 101,
-    entidadTipo: 'TAREA',
-    datos: {
-      prioridad: 'HIGH',
-      fechaLimite: '2025-05-10'
-    }
-  },
-  {
-    id: 2,
-    tipo: 'CAMBIO_ESTADO',
-    titulo: 'Tarea completada',
-    mensaje: 'La tarea "Análisis financiero" ha sido marcada como completada por María López.',
-    fecha: '2025-04-30T15:45:00',
-    leida: true,
-    entidadId: 301,
-    entidadTipo: 'TAREA',
-    datos: {
-      estadoAnterior: 'IN_PROGRESS',
-      estadoNuevo: 'COMPLETED'
-    }
-  },
-  {
-    id: 3,
-    tipo: 'FECHA_LIMITE',
-    titulo: 'Tarea próxima a vencer',
-    mensaje: 'La tarea "Preparación de informe legal" vence en 24 horas.',
-    fecha: '2025-04-29T09:15:00',
-    leida: false,
-    entidadId: 202,
-    entidadTipo: 'TAREA',
-    datos: {
-      prioridad: 'MEDIUM',
-      fechaLimite: '2025-05-15'
-    }
-  },
-  {
-    id: 4,
-    tipo: 'COMENTARIO',
-    titulo: 'Nuevo comentario',
-    mensaje: 'Pedro Gómez ha comentado en la tarea "Análisis de caso".',
-    fecha: '2025-04-28T14:30:00',
-    leida: true,
-    entidadId: 103,
-    entidadTipo: 'TAREA',
-    datos: {
-      comentario: '¿Cómo va el avance? Necesitamos tener esto listo para la audiencia.'
-    }
-  },
-  {
-    id: 5,
-    tipo: 'SISTEMA',
-    titulo: 'Sesión iniciada en nuevo dispositivo',
-    mensaje: 'Se ha detectado un inicio de sesión desde una nueva ubicación.',
-    fecha: '2025-04-27T08:45:00',
-    leida: true,
-    entidadId: null,
-    entidadTipo: null,
-    datos: {
-      ubicacion: 'Buenos Aires, Argentina',
-      dispositivo: 'Chrome en Windows'
-    }
+// Mapeo de tipos de notificaciones del backend a tipos locales
+const mapTipoNotificacion = (tipo: string) => {
+  switch (tipo) {
+    case 'TASK_ASSIGNMENT':
+      return 'ASIGNACION';
+    case 'TASK_STATUS_CHANGE':
+      return 'CAMBIO_ESTADO';
+    case 'DEADLINE_REMINDER':
+      return 'FECHA_LIMITE';
+    case 'COLLABORATION':
+    case 'MENTION':
+      return 'COMENTARIO';
+    case 'ANNOUNCEMENT':
+    case 'SYSTEM':
+    case 'ERROR':
+    case 'SUCCESS':
+    case 'INFO':
+    case 'WARNING':
+      return 'SISTEMA';
+    default:
+      return 'SISTEMA';
   }
-];
+};
 
 const PanelContainer = styled.div<{ $isOpen: boolean }>`
   position: fixed;
@@ -383,8 +337,27 @@ interface NotificacionesPanelProps {
 
 const NotificacionesPanel: React.FC<NotificacionesPanelProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-  const [notificaciones, setNotificaciones] = useState(MOCK_NOTIFICACIONES);
   const [filtroActivo, setFiltroActivo] = useState('TODAS');
+
+  // Usar el contexto de notificaciones reales
+  const { notifications, markAsRead, markAllAsRead, unreadCount } = useRealTimeNotifications();
+
+  // Adaptar las notificaciones del contexto al formato esperado por el componente
+  const adaptarNotificaciones = () => {
+    return notifications.map(notification => ({
+      id: notification.id,
+      tipo: mapTipoNotificacion(notification.type),
+      titulo: notification.title,
+      mensaje: notification.message,
+      fecha: notification.createdAt,
+      leida: notification.read,
+      entidadId: notification.link ? parseInt(notification.link.split('/').pop() || '0') : null,
+      entidadTipo: notification.link?.includes('tareas') ? 'TAREA' : 'OTRO',
+      datos: {}
+    }));
+  };
+
+  const notificaciones = adaptarNotificaciones();
 
   const filteredNotificaciones = notificaciones.filter(notificacion => {
     if (filtroActivo === 'TODAS') return true;
@@ -392,19 +365,17 @@ const NotificacionesPanel: React.FC<NotificacionesPanelProps> = ({ isOpen, onClo
     return notificacion.tipo === filtroActivo;
   });
 
-  const noLeidasCount = notificaciones.filter(n => !n.leida).length;
-
-  const handleMarcarLeida = (id: number, event: React.MouseEvent) => {
+  const handleMarcarLeida = (id: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    setNotificaciones(notificaciones.map(n =>
-      n.id === id ? { ...n, leida: true } : n
-    ));
+    markAsRead(id);
     toast.success('Notificación marcada como leída');
   };
 
-  const handleEliminar = (id: number, event: React.MouseEvent) => {
+  const handleEliminar = (id: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    setNotificaciones(notificaciones.filter(n => n.id !== id));
+    // No hay una función para eliminar notificaciones en el contexto,
+    // pero podríamos marcarla como leída para que no aparezca en el contador
+    markAsRead(id);
     toast.success('Notificación eliminada');
   };
 
@@ -417,14 +388,12 @@ const NotificacionesPanel: React.FC<NotificacionesPanelProps> = ({ isOpen, onClo
 
     // Marcar como leída
     if (!notificacion.leida) {
-      setNotificaciones(notificaciones.map(n =>
-        n.id === notificacion.id ? { ...n, leida: true } : n
-      ));
+      markAsRead(notificacion.id);
     }
   };
 
   const handleMarcarTodasLeidas = () => {
-    setNotificaciones(notificaciones.map(n => ({ ...n, leida: true })));
+    markAllAsRead();
     toast.success('Todas las notificaciones marcadas como leídas');
   };
 
@@ -462,28 +431,23 @@ const NotificacionesPanel: React.FC<NotificacionesPanelProps> = ({ isOpen, onClo
     }
   };
 
-  // Formatear fecha relativa
+  // Formatear fecha relativa usando date-fns
   const formatearFechaRelativa = (fechaStr: string) => {
-    const fecha = new Date(fechaStr);
-    const ahora = new Date();
-    const diferencia = ahora.getTime() - fecha.getTime();
+    try {
+      const fecha = new Date(fechaStr);
 
-    const minutos = Math.floor(diferencia / (1000 * 60));
-    const horas = Math.floor(diferencia / (1000 * 60 * 60));
-    const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+      // Verificar si la fecha es válida
+      if (isNaN(fecha.getTime())) {
+        return 'Fecha desconocida';
+      }
 
-    if (minutos < 60) {
-      return `Hace ${minutos} ${minutos === 1 ? 'minuto' : 'minutos'}`;
-    } else if (horas < 24) {
-      return `Hace ${horas} ${horas === 1 ? 'hora' : 'horas'}`;
-    } else if (dias < 7) {
-      return `Hace ${dias} ${dias === 1 ? 'día' : 'días'}`;
-    } else {
-      return fecha.toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
+      return formatDistanceToNow(fecha, {
+        addSuffix: true,
+        locale: es
       });
+    } catch (error) {
+      console.error('Error al formatear fecha:', error);
+      return 'Fecha desconocida';
     }
   };
 
@@ -493,7 +457,7 @@ const NotificacionesPanel: React.FC<NotificacionesPanelProps> = ({ isOpen, onClo
         <PanelTitle>
           <FiBell size={18} />
           Notificaciones
-          {noLeidasCount > 0 && <Badge>{noLeidasCount}</Badge>}
+          {unreadCount > 0 && <Badge>{unreadCount}</Badge>}
         </PanelTitle>
         <CloseButton onClick={onClose}>
           <FiX size={20} />

@@ -317,6 +317,8 @@ public class TaskRequestEntityMapper {
                 return TaskRequestStatusEntity.COMPLETED;
             case CANCELLED:
                 return TaskRequestStatusEntity.CANCELLED;
+            case REJECTED:
+                return TaskRequestStatusEntity.REJECTED;
             default:
                 return TaskRequestStatusEntity.DRAFT;
         }
@@ -347,6 +349,8 @@ public class TaskRequestEntityMapper {
                 return TaskRequestStatus.COMPLETED;
             case CANCELLED:
                 return TaskRequestStatus.CANCELLED;
+            case REJECTED:
+                return TaskRequestStatus.REJECTED;
             default:
                 return TaskRequestStatus.DRAFT;
         }

@@ -34,7 +34,13 @@ public enum TaskRequestStatus {
     /**
      * Cancelada: La solicitud ha sido cancelada y no será procesada.
      */
-    CANCELLED("Cancelada");
+    CANCELLED("Cancelada"),
+
+    /**
+     * Rechazada: La solicitud ha sido rechazada por el asignador y debe ser
+     * corregida.
+     */
+    REJECTED("Rechazada");
 
     private final String displayName;
 

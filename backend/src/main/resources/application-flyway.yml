@@ -1,12 +1,18 @@
 spring:
   # Configuración específica para resolver el problema de dependencia circular
   # entre Flyway y JPA
-  
+
   # Desactivar la configuración automática de Flyway
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
-  
+
+  # Configuración de Flyway
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    out-of-order: true
+
   # Configuración de JPA
   jpa:
     properties:
@@ -16,3 +22,7 @@ spring:
           auto: none
     # Desactivar la inicialización de datos después de JPA
     defer-datasource-initialization: false
+
+  # Permitir sobrescritura de beans para resolver la dependencia circular
+  main:
+    allow-bean-definition-overriding: true

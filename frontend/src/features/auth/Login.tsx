@@ -94,10 +94,13 @@ const ErrorMessage = styled.div`
   color: ${({ theme }) => theme.error};
   font-size: 14px;
   margin-top: 10px;
-  padding: 10px;
+  padding: 12px;
   background-color: rgba(255, 59, 48, 0.1);
   border-radius: 4px;
   text-align: center;
+  border-left: 3px solid ${({ theme }) => theme.error};
+  font-weight: 500;
+  line-height: 1.4;
 `;
 
 const HelpText = styled.div`
@@ -182,7 +185,15 @@ const Login: React.FC = () => {
   useEffect(() => {
     if (authError) {
       console.log('Login: Error de autenticación recibido:', authError);
-      setError(authError.message || 'Error al iniciar sesión. Verifique sus credenciales.');
+
+      // Personalizar mensaje de error según el tipo
+      if (authError.message?.includes('Failed to fetch') ||
+          authError.message?.includes('ERR_CONNECTION_REFUSED') ||
+          authError.message?.includes('NetworkError')) {
+        setError('No se pudo conectar con el servidor. Verifique que el servidor esté en funcionamiento o contacte al administrador del sistema.');
+      } else {
+        setError(authError.message || 'Error al iniciar sesión. Verifique sus credenciales.');
+      }
     }
   }, [authError]);
 

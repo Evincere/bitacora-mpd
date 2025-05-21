@@ -16,9 +16,14 @@ import {
   FiCalendar,
   FiUser,
   FiRefreshCw,
-  FiEye
+  FiEye,
+  FiEdit,
+  FiTag
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+
+// Componentes UI
+import { RefreshButton, FilterBadge } from '@/shared/components/ui';
 
 // Hooks y servicios
 import useTareas from '../hooks/useTareas';
@@ -658,11 +663,9 @@ const MisTareas: React.FC = () => {
   const {
     assignedTasks = [],
     inProgressTasks = [],
-    tasksAssignedToExecutor = { taskRequests: [] },
     isLoadingAssignedTasks,
     isLoadingInProgressTasks,
-    isLoadingTasksAssignedToExecutor,
-    tasksAssignedToExecutorError,
+    assignedTasksError,
     refreshAllData,
     startTask,
     completeTask
@@ -671,24 +674,8 @@ const MisTareas: React.FC = () => {
   // Registrar los datos para depuración
   console.log('MisTareas: Datos disponibles:', {
     assignedTasks: assignedTasks?.length || 0,
-    inProgressTasks: inProgressTasks?.length || 0,
-    taskRequests: tasksAssignedToExecutor?.taskRequests?.length || 0
+    inProgressTasks: inProgressTasks?.length || 0
   });
-
-  // Convertir las tareas asignadas desde el endpoint de task-requests
-  const taskRequestTasks = (tasksAssignedToExecutor?.taskRequests || []).map(task => ({
-    id: task.id,
-    title: task.title,
-    description: task.description,
-    category: task.category?.name || '',
-    priority: task.priority,
-    status: 'ASSIGNED', // Las tareas de task-requests asignadas a un ejecutor siempre están en estado ASSIGNED
-    dueDate: task.dueDate,
-    requestDate: task.requestDate,
-    requesterName: task.requesterName || '',
-    assignerName: task.assignerName || '',
-    comments: task.notes || ''
-  }));
 
   // Crear un mapa de IDs de tareas en progreso para verificación rápida
   const inProgressTaskIds = new Set((inProgressTasks || []).map(task => task.id));
@@ -696,78 +683,33 @@ const MisTareas: React.FC = () => {
   // Filtrar las tareas asignadas para excluir las que ya están en progreso
   const filteredAssignedTasks = (assignedTasks || []).filter(task => !inProgressTaskIds.has(task.id));
 
-  // Verificar si hay tareas en progreso que no aparecen en la lista de inProgressTasks
-  // Esto puede ocurrir si la tarea se inició pero no se actualizó correctamente en el estado
-  const taskRequestsInProgress = (tasksAssignedToExecutor?.taskRequests || [])
-    .filter(task => task.status === 'IN_PROGRESS')
-    .filter(task => !inProgressTaskIds.has(task.id));
-
   console.log('MisTareas: Tareas filtradas:', {
     assignedTasksAfterFilter: filteredAssignedTasks.length,
-    inProgressTasks: inProgressTasks?.length || 0,
-    taskRequestsInProgress: taskRequestsInProgress.length
+    inProgressTasks: inProgressTasks?.length || 0
   });
 
-  // Convertir las tareas en progreso de task-requests al formato de actividades
-  const taskRequestsAsActivities = taskRequestsInProgress.map(task => ({
-    id: task.id,
-    title: task.title,
-    description: task.description,
-    category: task.category?.name || '',
-    priority: task.priority,
-    status: 'IN_PROGRESS', // Forzar el estado a IN_PROGRESS
-    dueDate: task.dueDate,
-    requestDate: task.requestDate,
-    requesterName: task.requesterName || '',
-    assignerName: task.assignerName || '',
-    comments: task.notes || '',
-    progress: 0
-  }));
-
-  // Combinar tareas asignadas (filtradas), en progreso y las task-requests en progreso
+  // Combinar tareas asignadas (filtradas) y en progreso
   const allTasks = [
     ...filteredAssignedTasks,
-    ...(inProgressTasks || []),
-    ...taskRequestsAsActivities
+    ...(inProgressTasks || [])
   ];
 
   // Convertir las tareas al formato esperado por el componente
-  const tareas = [
-    // Tareas de actividades (assignedTasks e inProgressTasks)
-    ...allTasks.map(task => ({
-      id: task.id,
-      titulo: task.title || '',
-      descripcion: task.description || '',
-      categoria: task.category || '',
-      prioridad: task.priority || 'MEDIUM',
-      fechaAsignacion: task.requestDate || '',
-      fechaLimite: task.dueDate || '',
-      estado: task.status, // Usar el estado real de la tarea
-      solicitante: task.requesterName || '',
-      asignador: task.assignerName || '',
-      notas: task.comments || '',
-      progreso: task.progress || 0,
-      source: 'activity'
-    })),
-    // Tareas de task-requests (solo incluir las que no están en progreso)
-    ...taskRequestTasks
-      .filter(task => !inProgressTaskIds.has(task.id))
-      .map(task => ({
-        id: task.id,
-        titulo: task.title || '',
-        descripcion: task.description || '',
-        categoria: task.category || '',
-        prioridad: task.priority || 'MEDIUM',
-        fechaAsignacion: task.requestDate || '',
-        fechaLimite: task.dueDate || '',
-        estado: task.status,
-        solicitante: task.requesterName || '',
-        asignador: task.assignerName || '',
-        notas: task.comments || '',
-        progreso: 0,
-        source: 'taskRequest'
-      }))
-  ];
+  const tareas = allTasks.map(task => ({
+    id: task.id,
+    titulo: task.title || '',
+    descripcion: task.description || '',
+    categoria: task.category || '',
+    prioridad: task.priority || 'MEDIUM',
+    fechaAsignacion: task.requestDate || '',
+    fechaLimite: task.dueDate || '',
+    estado: task.status, // Usar el estado real de la tarea
+    solicitante: task.requesterName || '',
+    asignador: task.assignerName || '',
+    notas: task.comments || '',
+    progreso: task.progress || 0,
+    source: task.source || 'activity'
+  }));
 
   // Filtrar tareas según los criterios
   const filteredTareas = tareas.filter(tarea => {
@@ -817,6 +759,26 @@ const MisTareas: React.FC = () => {
         onSuccess: (data) => {
           console.log('Tarea iniciada correctamente. Datos:', data);
           toast.success('Tarea iniciada correctamente');
+
+          // Actualizar manualmente las listas de tareas
+          if (data && data.id) {
+            // Encontrar la tarea en la lista de tareas asignadas
+            const taskIndex = currentAssignedTasks.findIndex(task => task.id === data.id);
+
+            if (taskIndex !== -1) {
+              // Crear una copia de la tarea con estado actualizado
+              const updatedTask = {
+                ...currentAssignedTasks[taskIndex],
+                status: 'IN_PROGRESS'
+              };
+
+              // Actualizar la lista de tareas en progreso manualmente
+              const updatedInProgressTasks = [...currentInProgressTasks, updatedTask];
+              console.log('Actualizando manualmente tareas en progreso:', updatedInProgressTasks);
+
+              // No es necesario eliminar de las asignadas, ya que el filtro lo hará automáticamente
+            }
+          }
 
           // Recargar los datos para actualizar la UI
           setTimeout(() => {
@@ -902,10 +864,12 @@ const MisTareas: React.FC = () => {
     <PageContainer>
       <PageHeader>
         <PageTitle>Mis Tareas</PageTitle>
-        <Button onClick={handleRefresh}>
-          <FiRefreshCw size={16} />
-          Actualizar
-        </Button>
+        <RefreshButton
+          onClick={handleRefresh}
+          isLoading={isLoadingAssignedTasks || isLoadingInProgressTasks}
+          label="Actualizar"
+          title="Actualizar lista de tareas"
+        />
       </PageHeader>
 
       <FiltersContainer>
@@ -918,48 +882,57 @@ const MisTareas: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </SearchInput>
-        <StyledSelect
+
+        <FilterBadge
+          label="Estado"
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="custom-select"
-        >
-          <option value="">Todos los estados</option>
-          <option value="ASSIGNED">Asignada</option>
-          <option value="IN_PROGRESS">En Progreso</option>
-          <option value="COMPLETED">Completada</option>
-        </StyledSelect>
-        <StyledSelect
+          onChange={setStatusFilter}
+          options={[
+            { value: "ASSIGNED", label: "Asignada" },
+            { value: "IN_PROGRESS", label: "En Progreso" },
+            { value: "COMPLETED", label: "Completada" }
+          ]}
+          placeholder="Todos los estados"
+          icon={<FiClock size={14} />}
+        />
+
+        <FilterBadge
+          label="Prioridad"
           value={priorityFilter}
-          onChange={(e) => setPriorityFilter(e.target.value)}
-          className="custom-select"
-        >
-          <option value="">Todas las prioridades</option>
-          <option value="CRITICAL">Crítica</option>
-          <option value="HIGH">Alta</option>
-          <option value="MEDIUM">Media</option>
-          <option value="LOW">Baja</option>
-          <option value="TRIVIAL">Trivial</option>
-        </StyledSelect>
-        <StyledSelect
+          onChange={setPriorityFilter}
+          options={[
+            { value: "CRITICAL", label: "Crítica" },
+            { value: "HIGH", label: "Alta" },
+            { value: "MEDIUM", label: "Media" },
+            { value: "LOW", label: "Baja" },
+            { value: "TRIVIAL", label: "Trivial" }
+          ]}
+          placeholder="Todas las prioridades"
+        />
+
+        <FilterBadge
+          label="Categoría"
           value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="custom-select"
-        >
-          <option value="">Todas las categorías</option>
-          <option value="ADMINISTRATIVA">Administrativa</option>
-          <option value="LEGAL">Legal</option>
-          <option value="TECNICA">Técnica</option>
-          <option value="FINANCIERA">Financiera</option>
-          <option value="RECURSOS_HUMANOS">Recursos Humanos</option>
-          <option value="OTRA">Otra</option>
-        </StyledSelect>
+          onChange={setCategoryFilter}
+          options={[
+            { value: "ADMINISTRATIVA", label: "Administrativa" },
+            { value: "LEGAL", label: "Legal" },
+            { value: "TECNICA", label: "Técnica" },
+            { value: "FINANCIERA", label: "Financiera" },
+            { value: "RECURSOS_HUMANOS", label: "Recursos Humanos" },
+            { value: "OTRA", label: "Otra" }
+          ]}
+          placeholder="Todas las categorías"
+          icon={<FiTag size={14} />}
+        />
+
         <Button>
           <FiFilter size={16} />
           Más filtros
         </Button>
       </FiltersContainer>
 
-      {isLoadingAssignedTasks || isLoadingInProgressTasks || isLoadingTasksAssignedToExecutor ? (
+      {isLoadingAssignedTasks || isLoadingInProgressTasks ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '50px 0' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ marginBottom: '20px' }}>
@@ -969,7 +942,7 @@ const MisTareas: React.FC = () => {
             <p style={{ color: '#667085' }}>Estamos obteniendo tus tareas asignadas</p>
           </div>
         </div>
-      ) : tasksAssignedToExecutorError ? (
+      ) : assignedTasksError ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '50px 0' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ marginBottom: '20px' }}>
@@ -978,12 +951,13 @@ const MisTareas: React.FC = () => {
             <h3 style={{ marginBottom: '10px', color: '#344054' }}>Error al cargar tareas</h3>
             <p style={{ color: '#667085' }}>Hubo un problema al obtener tus tareas asignadas</p>
             <pre style={{ textAlign: 'left', background: '#f5f5f5', padding: '10px', borderRadius: '4px', marginTop: '10px', fontSize: '12px', maxHeight: '200px', overflow: 'auto' }}>
-              {JSON.stringify(tasksAssignedToExecutorError, null, 2)}
+              {JSON.stringify(assignedTasksError, null, 2)}
             </pre>
-            <Button onClick={handleRefresh} style={{ marginTop: '20px' }}>
-              <FiRefreshCw size={16} />
-              Intentar nuevamente
-            </Button>
+            <RefreshButton
+              onClick={handleRefresh}
+              style={{ marginTop: '20px' }}
+              label="Intentar nuevamente"
+            />
           </div>
         </div>
       ) : filteredTareas.length > 0 ? (
@@ -1100,10 +1074,11 @@ const MisTareas: React.FC = () => {
           <FiAlertCircle size={48} />
           <h3>No se encontraron tareas</h3>
           <p>No hay tareas asignadas a tu usuario en este momento. Utiliza el botón "Actualizar" para refrescar los datos.</p>
-          <Button onClick={handleRefresh} style={{ marginTop: '20px' }}>
-            <FiRefreshCw size={16} />
-            Actualizar datos
-          </Button>
+          <RefreshButton
+            onClick={handleRefresh}
+            style={{ marginTop: '20px' }}
+            label="Actualizar datos"
+          />
         </EmptyState>
       )}
     </PageContainer>

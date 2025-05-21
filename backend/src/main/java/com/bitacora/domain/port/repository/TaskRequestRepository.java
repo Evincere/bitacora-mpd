@@ -95,6 +95,26 @@ public interface TaskRequestRepository {
     List<TaskRequest> findByStatus(TaskRequestStatus status, int page, int size);
 
     /**
+     * Busca solicitudes por estado y ejecutor.
+     *
+     * @param status     Estado de las solicitudes
+     * @param executorId ID del ejecutor
+     * @param page       Número de página (0-indexed)
+     * @param size       Tamaño de la página
+     * @return Lista de solicitudes con el estado y ejecutor especificados
+     */
+    List<TaskRequest> findByStatusAndExecutorId(TaskRequestStatus status, Long executorId, int page, int size);
+
+    /**
+     * Cuenta el número de solicitudes con un estado y ejecutor específicos.
+     *
+     * @param status     Estado de las solicitudes
+     * @param executorId ID del ejecutor
+     * @return El número de solicitudes
+     */
+    long countByStatusAndExecutorId(TaskRequestStatus status, Long executorId);
+
+    /**
      * Cuenta el número de solicitudes con un estado específico.
      *
      * @param status Estado de las solicitudes

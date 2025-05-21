@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import {
   FiBell,
@@ -12,7 +12,9 @@ import {
   FiSmartphone,
   FiSave
 } from 'react-icons/fi';
-import { toast } from 'react-toastify';
+import { useToastContext } from '@/components/ui';
+import { useUserNotificationPreferences, useUpdateUserNotificationPreferences } from '../hooks/useNotificationConfig';
+import NotificationTemplates from '../components/NotificationTemplates';
 
 const PageContainer = styled.div`
   padding: 0;
@@ -182,8 +184,11 @@ const SaveButton = styled.button`
 `;
 
 const ConfiguracionNotificaciones: React.FC = () => {
+  const { showSuccess, showError } = useToastContext();
+  const { data: userPreferences, isLoading, isError } = useUserNotificationPreferences();
+  const updatePreferences = useUpdateUserNotificationPreferences();
 
-  // Estado para las preferencias de notificaciones
+  // Estado local para las preferencias de notificaciones
   const [preferencias, setPreferencias] = useState({
     asignacion: {
       app: true,
@@ -212,6 +217,13 @@ const ConfiguracionNotificaciones: React.FC = () => {
     }
   });
 
+  // Actualizar el estado local cuando se cargan las preferencias del usuario
+  useEffect(() => {
+    if (userPreferences && userPreferences.types) {
+      setPreferencias(userPreferences.types);
+    }
+  }, [userPreferences]);
+
   const handleToggleChannel = (tipo: string, canal: string) => {
     setPreferencias({
       ...preferencias,
@@ -222,9 +234,12 @@ const ConfiguracionNotificaciones: React.FC = () => {
     });
   };
 
-  const handleSavePreferences = () => {
-    // Aquí iría la lógica para guardar las preferencias en el backend
-    toast.success('Preferencias de notificaciones guardadas correctamente');
+  const handleSavePreferences = async () => {
+    try {
+      await updatePreferences.mutateAsync({ types: preferencias });
+    } catch (error) {
+      console.error('Error al guardar preferencias:', error);
+    }
   };
 
   return (
@@ -546,6 +561,9 @@ const ConfiguracionNotificaciones: React.FC = () => {
           </SaveButton>
         </SectionContent>
       </ConfigSection>
+
+      {/* Componente de plantillas de notificación */}
+      <NotificationTemplates />
     </PageContainer>
   );
 };

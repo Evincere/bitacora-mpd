@@ -4,6 +4,7 @@ import com.bitacora.domain.model.activity.Activity;
 import com.bitacora.domain.model.activity.ActivityStatus;
 import com.bitacora.domain.model.activity.ActivityType;
 import com.bitacora.application.activity.ActivityService;
+import com.bitacora.application.activity.ActivityWorkloadService;
 import com.bitacora.infrastructure.rest.dto.ActivityCreateDto;
 import com.bitacora.infrastructure.rest.dto.ActivityDto;
 import com.bitacora.infrastructure.rest.dto.ActivityUpdateDto;
@@ -46,6 +47,7 @@ public class ActivityController {
 
     private final ActivityService activityService;
     private final ActivityJpaRepository activityJpaRepository;
+    private final ActivityWorkloadService activityWorkloadService;
 
     /**
      * Obtiene todas las actividades con paginación.
@@ -328,6 +330,37 @@ public class ActivityController {
             log.error("Error al obtener estadísticas por estado: {}", e.getMessage(), e);
             Map<String, Object> errorItem = new HashMap<>();
             errorItem.put("error", "Error al procesar estadísticas por estado");
+            errorItem.put("message", e.getMessage());
+
+            List<Map<String, Object>> errorResult = new ArrayList<>();
+            errorResult.add(errorItem);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResult);
+        }
+    }
+
+    /**
+     * Obtiene estadísticas de distribución de carga de trabajo.
+     *
+     * @return Una respuesta con la distribución de carga de trabajo
+     */
+    @GetMapping("/stats/workload")
+    @Operation(summary = "Obtener distribución de carga de trabajo", description = "Obtiene la distribución de carga de trabajo por ejecutor")
+    @PreAuthorize("hasAnyRole('ASIGNADOR', 'ADMIN')")
+    public ResponseEntity<List<Map<String, Object>>> getWorkloadDistribution() {
+        try {
+            log.info("Obteniendo distribución de carga de trabajo");
+
+            // Obtener la distribución de carga de trabajo del servicio
+            List<Map<String, Object>> result = activityWorkloadService.getWorkloadDistribution();
+
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error al obtener distribución de carga de trabajo: {}", e.getMessage(), e);
+
+            // Crear una respuesta de error
+            Map<String, Object> errorItem = new HashMap<>();
+            errorItem.put("error", "Error al procesar distribución de carga de trabajo");
             errorItem.put("message", e.getMessage());
 
             List<Map<String, Object>> errorResult = new ArrayList<>();

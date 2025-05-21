@@ -11,17 +11,26 @@ import {
   FiLogOut,
   FiSettings,
   FiSave,
-  FiRefreshCw
+  FiRefreshCw,
+  FiLoader
 } from 'react-icons/fi';
-import { toast } from 'react-toastify';
-import {
-  calendarIntegrationService,
-  CalendarIntegrationConfig
-} from '../services/CalendarIntegrationService';
-import {
-  driveIntegrationService,
-  DriveIntegrationConfig
-} from '../services/DriveIntegrationService';
+import { useToastContext } from '@/components/ui';
+import { useIntegrations, useToggleIntegration, useSyncIntegration } from '../hooks/useIntegrations';
+import { realCalendarIntegrationService } from '../services/RealCalendarIntegrationService';
+import { realDriveIntegrationService } from '../services/RealDriveIntegrationService';
+import SyncHistory from '../components/SyncHistory';
+import ConnectionTest from '../components/ConnectionTest';
+import { calendarIntegrationService as mockCalendarIntegrationService, CalendarIntegrationConfig } from '../services/CalendarIntegrationService';
+import { driveIntegrationService as mockDriveIntegrationService, DriveIntegrationConfig } from '../services/DriveIntegrationService';
+
+// Usar los servicios reales o mock según el entorno
+const calendarIntegrationService = process.env.NODE_ENV === 'production'
+  ? realCalendarIntegrationService
+  : mockCalendarIntegrationService;
+
+const driveIntegrationService = process.env.NODE_ENV === 'production'
+  ? realDriveIntegrationService
+  : mockDriveIntegrationService;
 
 const PageContainer = styled.div`
   padding: 0;
@@ -265,6 +274,10 @@ const ButtonGroup = styled.div`
 `;
 
 const ConfiguracionIntegraciones: React.FC = () => {
+  const { showSuccess, showError } = useToastContext();
+  const { data: integrations, isLoading: isLoadingIntegrations } = useIntegrations();
+  const toggleIntegration = useToggleIntegration();
+  const syncIntegration = useSyncIntegration();
 
   // Estado para Google Calendar
   const [calendarAuthenticated, setCalendarAuthenticated] = useState(false);
@@ -295,6 +308,11 @@ const ConfiguracionIntegraciones: React.FC = () => {
   useEffect(() => {
     const loadCalendarState = async () => {
       try {
+        // Inicializar el servicio si es necesario
+        if ('initialize' in calendarIntegrationService) {
+          await (calendarIntegrationService as any).initialize();
+        }
+
         const isAuthenticated = await calendarIntegrationService.isAuthenticated();
         setCalendarAuthenticated(isAuthenticated);
 
@@ -309,6 +327,11 @@ const ConfiguracionIntegraciones: React.FC = () => {
 
     const loadDriveState = async () => {
       try {
+        // Inicializar el servicio si es necesario
+        if ('initialize' in driveIntegrationService) {
+          await (driveIntegrationService as any).initialize();
+        }
+
         const isAuthenticated = await driveIntegrationService.isAuthenticated();
         setDriveAuthenticated(isAuthenticated);
 
@@ -330,10 +353,14 @@ const ConfiguracionIntegraciones: React.FC = () => {
     try {
       await calendarIntegrationService.authenticate();
       setCalendarAuthenticated(true);
-      toast.success('Autenticación con Google Calendar exitosa');
+      showSuccess('Autenticación con Google Calendar exitosa');
+
+      // Actualizar la configuración después de la autenticación
+      const config = await calendarIntegrationService.getConfig();
+      setCalendarConfig(config);
     } catch (error) {
       console.error('Error al autenticar con Google Calendar:', error);
-      toast.error('Error al autenticar con Google Calendar');
+      showError('Error al autenticar con Google Calendar');
     }
   };
 
@@ -341,30 +368,36 @@ const ConfiguracionIntegraciones: React.FC = () => {
     try {
       await calendarIntegrationService.logout();
       setCalendarAuthenticated(false);
-      toast.success('Sesión cerrada con Google Calendar');
+      showSuccess('Sesión cerrada con Google Calendar');
     } catch (error) {
       console.error('Error al cerrar sesión con Google Calendar:', error);
-      toast.error('Error al cerrar sesión con Google Calendar');
+      showError('Error al cerrar sesión con Google Calendar');
     }
   };
 
   const handleCalendarSync = async () => {
     try {
-      const result = await calendarIntegrationService.syncEvents();
-      toast.success(`Sincronización completada: ${result.created} creados, ${result.updated} actualizados, ${result.deleted} eliminados`);
+      // Usar el hook de sincronización si está disponible
+      if (integrations?.find(i => i.id === 'google-calendar')) {
+        await syncIntegration.mutateAsync('google-calendar');
+      } else {
+        // Fallback al método directo
+        const result = await calendarIntegrationService.syncEvents();
+        showSuccess(`Sincronización completada: ${result.created} creados, ${result.updated} actualizados, ${result.deleted} eliminados`);
+      }
     } catch (error) {
       console.error('Error al sincronizar con Google Calendar:', error);
-      toast.error('Error al sincronizar con Google Calendar');
+      showError('Error al sincronizar con Google Calendar');
     }
   };
 
   const handleSaveCalendarConfig = async () => {
     try {
       await calendarIntegrationService.updateConfig(calendarConfig);
-      toast.success('Configuración de Google Calendar guardada');
+      showSuccess('Configuración de Google Calendar guardada');
     } catch (error) {
       console.error('Error al guardar la configuración de Google Calendar:', error);
-      toast.error('Error al guardar la configuración de Google Calendar');
+      showError('Error al guardar la configuración de Google Calendar');
     }
   };
 
@@ -373,10 +406,14 @@ const ConfiguracionIntegraciones: React.FC = () => {
     try {
       await driveIntegrationService.authenticate();
       setDriveAuthenticated(true);
-      toast.success('Autenticación con Google Drive exitosa');
+      showSuccess('Autenticación con Google Drive exitosa');
+
+      // Actualizar la configuración después de la autenticación
+      const config = await driveIntegrationService.getConfig();
+      setDriveConfig(config);
     } catch (error) {
       console.error('Error al autenticar con Google Drive:', error);
-      toast.error('Error al autenticar con Google Drive');
+      showError('Error al autenticar con Google Drive');
     }
   };
 
@@ -384,30 +421,45 @@ const ConfiguracionIntegraciones: React.FC = () => {
     try {
       await driveIntegrationService.logout();
       setDriveAuthenticated(false);
-      toast.success('Sesión cerrada con Google Drive');
+      showSuccess('Sesión cerrada con Google Drive');
     } catch (error) {
       console.error('Error al cerrar sesión con Google Drive:', error);
-      toast.error('Error al cerrar sesión con Google Drive');
+      showError('Error al cerrar sesión con Google Drive');
     }
   };
 
   const handleDriveSync = async () => {
     try {
-      const result = await driveIntegrationService.syncFiles();
-      toast.success(`Sincronización completada: ${result.uploaded} subidos, ${result.downloaded} descargados, ${result.deleted} eliminados`);
+      // Usar el hook de sincronización si está disponible
+      if (integrations?.find(i => i.id === 'google-drive')) {
+        await syncIntegration.mutateAsync('google-drive');
+      } else {
+        // Fallback al método directo
+        const result = await driveIntegrationService.syncFiles();
+        showSuccess(`Sincronización completada: ${result.uploaded} subidos, ${result.downloaded} descargados, ${result.deleted} eliminados`);
+      }
     } catch (error) {
       console.error('Error al sincronizar con Google Drive:', error);
-      toast.error('Error al sincronizar con Google Drive');
+      showError('Error al sincronizar con Google Drive');
     }
   };
 
   const handleSaveDriveConfig = async () => {
     try {
       await driveIntegrationService.updateConfig(driveConfig);
-      toast.success('Configuración de Google Drive guardada');
+      showSuccess('Configuración de Google Drive guardada');
     } catch (error) {
       console.error('Error al guardar la configuración de Google Drive:', error);
-      toast.error('Error al guardar la configuración de Google Drive');
+      showError('Error al guardar la configuración de Google Drive');
+    }
+  };
+
+  // Función para habilitar/deshabilitar una integración
+  const handleToggleIntegration = async (id: string, enabled: boolean) => {
+    try {
+      await toggleIntegration.mutateAsync({ id, enabled });
+    } catch (error) {
+      console.error(`Error al ${enabled ? 'habilitar' : 'deshabilitar'} la integración:`, error);
     }
   };
 
@@ -718,6 +770,32 @@ const ConfiguracionIntegraciones: React.FC = () => {
           </CardContent>
         </IntegrationCard>
       </IntegrationGrid>
+
+      {/* Componentes adicionales para Google Calendar */}
+      {calendarAuthenticated && (
+        <>
+          <ConnectionTest
+            integrationId="google-calendar"
+            integrationName="Google Calendar"
+          />
+          <SyncHistory
+            integrationId="google-calendar"
+          />
+        </>
+      )}
+
+      {/* Componentes adicionales para Google Drive */}
+      {driveAuthenticated && (
+        <>
+          <ConnectionTest
+            integrationId="google-drive"
+            integrationName="Google Drive"
+          />
+          <SyncHistory
+            integrationId="google-drive"
+          />
+        </>
+      )}
     </PageContainer>
   );
 };

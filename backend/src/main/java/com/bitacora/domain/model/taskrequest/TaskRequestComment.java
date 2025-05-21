@@ -12,6 +12,7 @@ public class TaskRequestComment {
     private Long id;
     private Long taskRequestId;
     private Long userId;
+    private String userName;
     private String content;
     private LocalDateTime createdAt;
     private Set<Long> readBy = new HashSet<>();
@@ -57,6 +58,15 @@ public class TaskRequestComment {
      */
     public Long getUserId() {
         return userId;
+    }
+
+    /**
+     * Obtiene el nombre de usuario que creó el comentario.
+     *
+     * @return El nombre de usuario
+     */
+    public String getUserName() {
+        return userName;
     }
 
     /**
@@ -162,6 +172,7 @@ public class TaskRequestComment {
                 "id=" + id +
                 ", taskRequestId=" + taskRequestId +
                 ", userId=" + userId +
+                ", userName='" + userName + '\'' +
                 ", createdAt=" + createdAt +
                 ", readByCount=" + (readBy != null ? readBy.size() : 0) +
                 ", mentionsCount=" + (mentions != null ? mentions.size() : 0) +
@@ -189,6 +200,11 @@ public class TaskRequestComment {
 
         public Builder userId(final Long userId) {
             instance.userId = userId;
+            return this;
+        }
+
+        public Builder userName(final String userName) {
+            instance.userName = userName;
             return this;
         }
 

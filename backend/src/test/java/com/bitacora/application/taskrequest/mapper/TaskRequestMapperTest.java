@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +19,6 @@ import com.bitacora.domain.model.taskrequest.TaskRequestComment;
 import com.bitacora.domain.model.user.Email;
 import com.bitacora.domain.model.user.PersonName;
 import com.bitacora.domain.model.user.User;
-import com.bitacora.domain.model.user.UserRole;
 import com.bitacora.domain.port.UserRepository;
 
 public class TaskRequestMapperTest {

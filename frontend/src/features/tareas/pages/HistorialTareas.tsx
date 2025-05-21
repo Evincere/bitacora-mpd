@@ -11,8 +11,14 @@ import {
   FiChevronUp,
   FiCalendar,
   FiFileText,
-  FiDownload
+  FiDownload,
+  FiTag,
+  FiEye
 } from 'react-icons/fi';
+import { StatusBadge, PriorityBadge, CategoryBadge } from '@/shared/components/ui';
+import { toast } from 'react-toastify';
+import TaskReportModal from '../components/TaskReportModal';
+import taskReportService, { TaskReportData } from '../services/taskReportService';
 
 // Datos de ejemplo para mostrar en la interfaz
 const MOCK_HISTORIAL_TAREAS = [
@@ -116,15 +122,16 @@ const HeaderActions = styled.div`
 `;
 
 const Button = styled.button<{ $primary?: boolean }>`
-  padding: 10px 16px;
-  border-radius: 4px;
-  font-weight: 500;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
   font-size: 14px;
   display: flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   ${({ $primary, theme }) =>
     $primary
@@ -135,15 +142,31 @@ const Button = styled.button<{ $primary?: boolean }>`
 
     &:hover {
       background-color: ${theme.primaryDark};
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
   `
       : `
-    background-color: transparent;
+    background-color: ${theme.backgroundSecondary};
     color: ${theme.textSecondary};
     border: 1px solid ${theme.border};
 
     &:hover {
       background-color: ${theme.backgroundHover};
+      color: ${theme.text};
+      border-color: ${theme.borderHover};
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
   `}
 `;
@@ -162,43 +185,62 @@ const SearchInput = styled.div`
 
   input {
     width: 100%;
-    padding: 10px 12px 10px 36px;
-    border-radius: 4px;
+    padding: 12px 14px 12px 40px;
+    border-radius: 8px;
     border: 1px solid ${({ theme }) => theme.border};
     background-color: ${({ theme }) => theme.backgroundTertiary};
     color: ${({ theme }) => theme.text};
     font-size: 14px;
     transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
     &:focus {
       border-color: ${({ theme }) => theme.primary};
       outline: none;
-      box-shadow: 0 0 0 2px ${({ theme }) => `${theme.primary}30`};
+      box-shadow: 0 0 0 3px ${({ theme }) => `${theme.primary}30`};
+    }
+
+    &:hover {
+      border-color: ${({ theme }) => theme.borderHover};
     }
   }
 
   svg {
     position: absolute;
-    left: 12px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
     color: ${({ theme }) => theme.textSecondary};
+    font-size: 16px;
   }
 `;
 
 const FilterSelect = styled.select`
-  padding: 10px 12px;
-  border-radius: 4px;
+  padding: 12px 14px;
+  border-radius: 8px;
   border: 1px solid ${({ theme }) => theme.border};
-  background-color: ${({ theme }) => theme.backgroundInput};
+  background-color: ${({ theme }) => theme.backgroundTertiary};
   color: ${({ theme }) => theme.text};
   font-size: 14px;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
   min-width: 150px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
 
   &:focus {
     border-color: ${({ theme }) => theme.primary};
     outline: none;
+    box-shadow: 0 0 0 3px ${({ theme }) => `${theme.primary}30`};
+  }
+
+  &:hover {
+    border-color: ${({ theme }) => theme.borderHover};
   }
 `;
 
@@ -211,29 +253,60 @@ const StatsContainer = styled.div`
 
 const StatCard = styled.div`
   background-color: ${({ theme }) => theme.backgroundSecondary};
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: 12px;
+  padding: 20px;
   box-shadow: ${({ theme }) => theme.shadow};
   display: flex;
   flex-direction: column;
+  border: 1px solid ${({ theme }) => theme.border};
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${({ theme }) => theme.shadowHover};
+    border-color: ${({ theme }) => theme.borderHover};
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, ${({ theme }) => theme.primary}, ${({ theme }) => theme.secondary});
+    opacity: 0.7;
+  }
 `;
 
 const StatTitle = styled.div`
   font-size: 14px;
   color: ${({ theme }) => theme.textSecondary};
   margin-bottom: 8px;
+  margin-left: 8px;
+  font-weight: 500;
 `;
 
 const StatValue = styled.div`
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
   color: ${({ theme }) => theme.text};
+  margin-left: 8px;
+  background: linear-gradient(90deg, ${({ theme }) => theme.primary}, ${({ theme }) => theme.secondary});
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
 `;
 
 const StatFooter = styled.div`
   font-size: 12px;
   color: ${({ theme }) => theme.textSecondary};
   margin-top: 8px;
+  margin-left: 8px;
+  font-weight: 500;
 `;
 
 const TareasList = styled.div`
@@ -244,23 +317,46 @@ const TareasList = styled.div`
 
 const TareaCard = styled.div`
   background-color: ${({ theme }) => theme.backgroundSecondary};
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: ${({ theme }) => theme.shadow};
   overflow: hidden;
   transition: all 0.3s ease;
+  border: 1px solid ${({ theme }) => theme.border};
+  position: relative;
 
   &:hover {
     box-shadow: ${({ theme }) => theme.shadowHover};
+    transform: translateY(-2px);
+    border-color: ${({ theme }) => theme.borderHover};
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, ${({ theme }) => theme.primary}, ${({ theme }) => theme.secondary});
+    opacity: 0.7;
   }
 `;
 
 const TareaHeader = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 16px;
+  align-items: flex-start;
+  padding: 20px;
   border-bottom: 1px solid ${({ theme }) => theme.border};
   cursor: pointer;
+  background-color: ${({ theme }) => `${theme.backgroundSecondary}99`};
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.backgroundHover};
+  }
 `;
 
 const TareaTitle = styled.h3`
@@ -286,107 +382,21 @@ const TareaDate = styled.div`
   font-size: 13px;
 `;
 
-const StatusBadge = styled.span<{ $status: string }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-
-  ${({ $status, theme }) => {
-    switch ($status) {
-      case 'REQUESTED':
-        return `
-          background-color: ${theme.infoLight};
-          color: ${theme.info};
-        `;
-      case 'ASSIGNED':
-        return `
-          background-color: ${theme.warningLight};
-          color: ${theme.warning};
-        `;
-      case 'IN_PROGRESS':
-        return `
-          background-color: ${theme.primaryLight};
-          color: ${theme.primary};
-        `;
-      case 'COMPLETED':
-        return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
-        `;
-      case 'APPROVED':
-        return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
-        `;
-      case 'REJECTED':
-        return `
-          background-color: ${theme.errorLight};
-          color: ${theme.error};
-        `;
-      default:
-        return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
-        `;
-    }
-  }}
-`;
-
-const PriorityBadge = styled.span<{ $priority: string }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-
-  ${({ $priority, theme }) => {
-    switch ($priority) {
-      case 'CRITICAL':
-        return `
-          background-color: ${theme.errorLight};
-          color: ${theme.error};
-        `;
-      case 'HIGH':
-        return `
-          background-color: ${theme.warningLight};
-          color: ${theme.warning};
-        `;
-      case 'MEDIUM':
-        return `
-          background-color: ${theme.infoLight};
-          color: ${theme.info};
-        `;
-      case 'LOW':
-        return `
-          background-color: ${theme.successLight};
-          color: ${theme.success};
-        `;
-      case 'TRIVIAL':
-        return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
-        `;
-      default:
-        return `
-          background-color: ${theme.backgroundHover};
-          color: ${theme.textSecondary};
-        `;
-    }
-  }}
+const BadgesContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
 `;
 
 const TareaDetails = styled.div<{ $isOpen: boolean }>`
-  padding: ${({ $isOpen }) => ($isOpen ? '16px' : '0')};
+  padding: ${({ $isOpen }) => ($isOpen ? '20px' : '0')};
   max-height: ${({ $isOpen }) => ($isOpen ? '1000px' : '0')};
   overflow: hidden;
   transition: all 0.3s ease;
   border-top: ${({ $isOpen, theme }) => ($isOpen ? `1px solid ${theme.border}` : 'none')};
+  background-color: ${({ theme }) => theme.backgroundTertiary};
+  box-shadow: ${({ $isOpen }) => ($isOpen ? 'inset 0 2px 4px rgba(0, 0, 0, 0.05)' : 'none')};
 `;
 
 const DetailRow = styled.div`
@@ -413,42 +423,71 @@ const DetailValue = styled.div`
 
 const FeedbackBox = styled.div<{ $isPositive: boolean }>`
   background-color: ${({ $isPositive, theme }) =>
-    $isPositive ? `${theme.successLight}` : `${theme.errorLight}`};
-  border-radius: 4px;
-  padding: 12px;
+    $isPositive ? `${theme.success}20` : `${theme.error}20`};
+  border-radius: 8px;
+  padding: 16px;
   margin-top: 16px;
+  border: 1.5px solid ${({ $isPositive, theme }) =>
+    $isPositive ? `${theme.success}70` : `${theme.error}70`};
+  box-shadow: 0 3px 6px ${({ $isPositive, theme }) =>
+    $isPositive ? `${theme.success}30` : `${theme.error}30`};
+  transition: all 0.2s ease;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 10px ${({ $isPositive, theme }) =>
+      $isPositive ? `${theme.success}40` : `${theme.error}40`};
+  }
 
   h4 {
-    margin: 0 0 8px;
+    margin: 0 0 10px;
     font-size: 14px;
+    font-weight: 700;
     color: ${({ $isPositive, theme }) =>
       $isPositive ? theme.success : theme.error};
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
   }
 
   p {
     margin: 0;
     font-size: 14px;
     color: ${({ theme }) => theme.text};
+    line-height: 1.5;
   }
 `;
 
 const ActionButton = styled.button`
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-weight: 500;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
   font-size: 13px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   cursor: pointer;
   transition: all 0.2s;
   background-color: ${({ theme }) => theme.backgroundAlt};
   color: ${({ theme }) => theme.textSecondary};
-  border: none;
+  border: 1px solid ${({ theme }) => theme.border};
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
   &:hover {
     background-color: ${({ theme }) => theme.backgroundHover};
     color: ${({ theme }) => theme.text};
+    border-color: ${({ theme }) => theme.borderHover};
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -457,24 +496,45 @@ const EmptyState = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 48px;
   background-color: ${({ theme }) => theme.backgroundSecondary};
-  border-radius: 8px;
+  border-radius: 12px;
   text-align: center;
+  border: 1px solid ${({ theme }) => theme.border};
+  box-shadow: ${({ theme }) => theme.shadow};
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, ${({ theme }) => theme.primary}, ${({ theme }) => theme.secondary});
+    opacity: 0.5;
+  }
 
   svg {
     color: ${({ theme }) => theme.textSecondary};
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    opacity: 0.7;
   }
 
   h3 {
-    margin: 0 0 8px;
+    margin: 0 0 12px;
     color: ${({ theme }) => theme.text};
+    font-size: 20px;
+    font-weight: 600;
   }
 
   p {
-    margin: 0 0 20px;
+    margin: 0 0 24px;
     color: ${({ theme }) => theme.textSecondary};
+    font-size: 15px;
+    max-width: 500px;
+    line-height: 1.5;
   }
 `;
 
@@ -585,6 +645,12 @@ const HistorialTareas: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
 
+  // Estado para el modal de informe detallado
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [reportData, setReportData] = useState<TaskReportData | null>(null);
+  const [isLoadingReport, setIsLoadingReport] = useState(false);
+
   // Calcular estadísticas
   const totalTareas = MOCK_HISTORIAL_TAREAS.length;
   const tareasAprobadas = MOCK_HISTORIAL_TAREAS.filter(t => t.estado === 'APPROVED').length;
@@ -626,9 +692,146 @@ const HistorialTareas: React.FC = () => {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  const handleDescargarInforme = (id: number) => {
-    // Aquí iría la lógica para descargar el informe
-    console.log(`Descargando informe de la tarea ${id}`);
+  const handleDescargarInforme = async (id: number) => {
+    try {
+      setSelectedTaskId(id);
+      setIsLoadingReport(true);
+
+      // En un entorno real, obtendríamos los datos del servicio
+      // const data = await taskReportService.getTaskReport(id);
+
+      // Para este ejemplo, vamos a simular los datos con la información de MOCK_HISTORIAL_TAREAS
+      const tarea = MOCK_HISTORIAL_TAREAS.find(t => t.id === id);
+
+      if (!tarea) {
+        toast.error('No se encontró la tarea seleccionada');
+        setIsLoadingReport(false);
+        return;
+      }
+
+      // Simular datos para el informe
+      const mockReportData: TaskReportData = {
+        id: tarea.id,
+        title: tarea.titulo,
+        description: tarea.descripcion,
+        category: tarea.categoria,
+        priority: tarea.prioridad,
+        status: tarea.estado,
+        dueDate: tarea.fechaLimite,
+        requestDate: tarea.fechaAsignacion,
+        completionDate: tarea.fechaCompletado,
+        requesterName: tarea.solicitante,
+        assignerName: tarea.asignador,
+        executorName: 'Matías Silva',
+        timeSpent: tarea.tiempoCompletado,
+        approvalComment: tarea.comentarioAprobacion,
+        rejectionReason: tarea.comentarioRechazo,
+
+        // Datos simulados para el historial
+        history: [
+          {
+            id: 1,
+            date: tarea.fechaAsignacion,
+            previousStatus: 'DRAFT',
+            newStatus: 'SUBMITTED',
+            userId: 1,
+            userName: tarea.solicitante,
+            notes: 'Solicitud enviada'
+          },
+          {
+            id: 2,
+            date: new Date(new Date(tarea.fechaAsignacion).getTime() + 86400000).toISOString(), // +1 día
+            previousStatus: 'SUBMITTED',
+            newStatus: 'ASSIGNED',
+            userId: 2,
+            userName: tarea.asignador,
+            notes: 'Tarea asignada a ejecutor'
+          },
+          {
+            id: 3,
+            date: new Date(new Date(tarea.fechaAsignacion).getTime() + 172800000).toISOString(), // +2 días
+            previousStatus: 'ASSIGNED',
+            newStatus: 'IN_PROGRESS',
+            userId: 3,
+            userName: 'Matías Silva',
+            notes: 'Tarea iniciada'
+          },
+          {
+            id: 4,
+            date: tarea.fechaCompletado,
+            previousStatus: 'IN_PROGRESS',
+            newStatus: 'COMPLETED',
+            userId: 3,
+            userName: 'Matías Silva',
+            notes: 'Tarea completada'
+          },
+          {
+            id: 5,
+            date: new Date(new Date(tarea.fechaCompletado).getTime() + 86400000).toISOString(), // +1 día
+            previousStatus: 'COMPLETED',
+            newStatus: tarea.estado,
+            userId: 2,
+            userName: tarea.asignador,
+            notes: tarea.comentarioAprobacion || tarea.comentarioRechazo || 'Tarea revisada'
+          }
+        ],
+
+        // Datos simulados para los comentarios
+        comments: [
+          {
+            id: 1,
+            userId: 1,
+            userName: tarea.solicitante,
+            content: 'Por favor, completar esta tarea lo antes posible.',
+            createdAt: tarea.fechaAsignacion
+          },
+          {
+            id: 2,
+            userId: 3,
+            userName: 'Matías Silva',
+            content: 'Estoy trabajando en ello, debería estar listo pronto.',
+            createdAt: new Date(new Date(tarea.fechaAsignacion).getTime() + 259200000).toISOString() // +3 días
+          },
+          {
+            id: 3,
+            userId: 3,
+            userName: 'Matías Silva',
+            content: 'He completado la tarea según lo solicitado.',
+            createdAt: tarea.fechaCompletado
+          }
+        ],
+
+        // Datos simulados para los archivos adjuntos
+        attachments: [
+          {
+            id: 1,
+            fileName: `informe_${tarea.id}.pdf`,
+            fileSize: 1024 * 1024 * 2.5, // 2.5 MB
+            fileType: 'application/pdf',
+            uploadDate: tarea.fechaCompletado,
+            downloadUrl: '#',
+            uploadedBy: 'Matías Silva'
+          },
+          {
+            id: 2,
+            fileName: `anexo_${tarea.id}.docx`,
+            fileSize: 1024 * 512, // 512 KB
+            fileType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            uploadDate: tarea.fechaCompletado,
+            downloadUrl: '#',
+            uploadedBy: 'Matías Silva'
+          }
+        ]
+      };
+
+      setReportData(mockReportData);
+      setIsReportModalOpen(true);
+    } catch (error) {
+      console.error('Error al obtener el informe:', error);
+      toast.error('Error al obtener el informe detallado');
+    } finally {
+      setIsLoadingReport(false);
+    }
   };
 
   return (
@@ -715,17 +918,24 @@ const HistorialTareas: React.FC = () => {
           {filteredTareas.map((tarea) => (
             <TareaCard key={tarea.id}>
               <TareaHeader onClick={() => toggleExpand(tarea.id)}>
-                <TareaTitle>
-                  {tarea.titulo}
-                </TareaTitle>
+                <div>
+                  <TareaTitle>
+                    {tarea.titulo}
+                  </TareaTitle>
+                  <BadgesContainer>
+                    <StatusBadge status={tarea.estado}>
+                      {getStatusIcon(tarea.estado)}
+                      {getStatusText(tarea.estado)}
+                    </StatusBadge>
+                    <PriorityBadge priority={tarea.prioridad}>
+                      {getPriorityText(tarea.prioridad)}
+                    </PriorityBadge>
+                    <CategoryBadge category={tarea.categoria}>
+                      {getCategoryText(tarea.categoria)}
+                    </CategoryBadge>
+                  </BadgesContainer>
+                </div>
                 <TareaMeta>
-                  <StatusBadge $status={tarea.estado}>
-                    {getStatusIcon(tarea.estado)}
-                    {getStatusText(tarea.estado)}
-                  </StatusBadge>
-                  <PriorityBadge $priority={tarea.prioridad}>
-                    {getPriorityText(tarea.prioridad)}
-                  </PriorityBadge>
                   <TareaDate>
                     <FiCalendar size={14} />
                     {formatDate(tarea.fechaCompletado)}
@@ -765,14 +975,20 @@ const HistorialTareas: React.FC = () => {
 
                 {tarea.estado === 'APPROVED' && tarea.comentarioAprobacion && (
                   <FeedbackBox $isPositive={true}>
-                    <h4>Comentario de aprobación</h4>
+                    <h4>
+                      <FiCheckCircle size={16} />
+                      Comentario de aprobación
+                    </h4>
                     <p>{tarea.comentarioAprobacion}</p>
                   </FeedbackBox>
                 )}
 
                 {tarea.estado === 'REJECTED' && tarea.comentarioRechazo && (
                   <FeedbackBox $isPositive={false}>
-                    <h4>Motivo de rechazo</h4>
+                    <h4>
+                      <FiXCircle size={16} />
+                      Motivo de rechazo
+                    </h4>
                     <p>{tarea.comentarioRechazo}</p>
                   </FeedbackBox>
                 )}
@@ -793,6 +1009,15 @@ const HistorialTareas: React.FC = () => {
           <h3>No se encontraron tareas</h3>
           <p>No hay tareas en el historial que coincidan con los criterios de búsqueda o filtros aplicados.</p>
         </EmptyState>
+      )}
+
+      {/* Modal de informe detallado */}
+      {reportData && (
+        <TaskReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          taskData={reportData}
+        />
       )}
     </PageContainer>
   );

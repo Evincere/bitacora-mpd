@@ -27,18 +27,24 @@ const Badge = styled.span<BadgeProps>`
     flex-shrink: 0;
   }
 
-  background-color: ${({ $normalizedPriority }) => {
+  background-color: ${({ $normalizedPriority, theme }) => {
+    // Usar un fondo oscuro basado en el tema, pero manteniendo la identidad del color de prioridad
     if (priorityColors[$normalizedPriority]) {
-      return priorityColors[$normalizedPriority].background;
+      const baseColor = priorityColors[$normalizedPriority].text;
+      // Crear un fondo oscuro con una ligera transparencia del color de la prioridad
+      return `${baseColor}20`; // 20 es la opacidad en hexadecimal (equivalente a 0.125)
     }
-    return priorityColors.default.background;
+    return theme.backgroundSecondary;
   }};
 
-  color: ${({ $normalizedPriority }) => {
+  color: ${({ $normalizedPriority, theme }) => {
     if (priorityColors[$normalizedPriority]) {
-      return priorityColors[$normalizedPriority].text;
+      // Aumentar el brillo del color del texto para mejorar el contraste con el fondo oscuro
+      const baseColor = priorityColors[$normalizedPriority].text;
+      // Usar un color más brillante para mejorar la legibilidad
+      return baseColor;
     }
-    return priorityColors.default.text;
+    return theme.text;
   }};
 
   border: 1.5px solid ${({ $normalizedPriority }) => {
@@ -56,11 +62,13 @@ const Badge = styled.span<BadgeProps>`
       }
       return priorityColors.default.shadow;
     }};
-    background-color: ${({ $normalizedPriority }) => {
+    background-color: ${({ $normalizedPriority, theme }) => {
       if (priorityColors[$normalizedPriority]) {
-        return priorityColors[$normalizedPriority].hover;
+        const baseColor = priorityColors[$normalizedPriority].text;
+        // Crear un fondo oscuro con una mayor opacidad para el hover
+        return `${baseColor}30`; // 30 es la opacidad en hexadecimal (equivalente a 0.188)
       }
-      return priorityColors.default.hover;
+      return theme.backgroundHover;
     }};
   }
 `;

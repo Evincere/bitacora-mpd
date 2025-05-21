@@ -43,6 +43,11 @@ public class TaskRequestHistoryService {
         log.debug("Registrando cambio de estado para solicitud {}: {} -> {}",
                 taskRequestId, previousStatus, newStatus);
 
+        // Verificar que newStatus no sea nulo
+        if (newStatus == null) {
+            throw new IllegalArgumentException("El nuevo estado no puede ser nulo");
+        }
+
         TaskRequestHistory history = TaskRequestHistory.createStatusChange(
                 taskRequestId, userId, userName, previousStatus, newStatus, notes);
         return taskRequestHistoryRepository.save(history);

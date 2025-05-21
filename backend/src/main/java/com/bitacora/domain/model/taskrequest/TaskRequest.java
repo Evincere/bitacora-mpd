@@ -302,7 +302,23 @@ public class TaskRequest {
         }
 
         this.notes = rejectionReason;
-        this.status = TaskRequestStatus.CANCELLED;
+        this.status = TaskRequestStatus.REJECTED;
+        return this;
+    }
+
+    /**
+     * Reenvía una solicitud rechazada, cambiando su estado a SUBMITTED.
+     *
+     * @return La solicitud actualizada
+     * @throws IllegalStateException Si la solicitud no está en estado REJECTED
+     */
+    public TaskRequest resubmit() {
+        if (this.status != TaskRequestStatus.REJECTED) {
+            throw new IllegalStateException("Solo se pueden reenviar solicitudes en estado REJECTED");
+        }
+
+        this.status = TaskRequestStatus.SUBMITTED;
+        this.requestDate = LocalDateTime.now();
         return this;
     }
 

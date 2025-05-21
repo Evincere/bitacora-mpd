@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FiBell } from 'react-icons/fi';
 import NotificacionesPanel from './NotificacionesPanel';
+import { useRealTimeNotifications } from '@/features/notifications/contexts/RealTimeNotificationContext';
 
 const ButtonContainer = styled.div`
   position: relative;
@@ -60,7 +61,8 @@ interface NotificacionesButtonProps {
 
 const NotificacionesButton: React.FC<NotificacionesButtonProps> = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [notificacionesNoLeidas, setNotificacionesNoLeidas] = useState(3);
+  // Usar el contexto de notificaciones reales
+  const { unreadCount } = useRealTimeNotifications();
 
   const togglePanel = () => {
     setIsOpen(!isOpen);
@@ -70,28 +72,15 @@ const NotificacionesButton: React.FC<NotificacionesButtonProps> = () => {
     setIsOpen(false);
   };
 
-  // Simulación de recepción de notificaciones en tiempo real
-  useEffect(() => {
-    // Simulamos la llegada de una nueva notificación cada 30 segundos
-    const interval = setInterval(() => {
-      // Solo para demostración, en un caso real esto vendría de un WebSocket
-      if (Math.random() > 0.7) {
-        setNotificacionesNoLeidas(prev => prev + 1);
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <>
       <ButtonContainer>
         <IconButton onClick={togglePanel}>
           <FiBell size={20} />
-          {notificacionesNoLeidas > 0 && <Badge>{notificacionesNoLeidas}</Badge>}
+          {unreadCount > 0 && <Badge>{unreadCount}</Badge>}
         </IconButton>
       </ButtonContainer>
-      
+
       <Backdrop $isOpen={isOpen} onClick={closePanel} />
       <NotificacionesPanel isOpen={isOpen} onClose={closePanel} />
     </>

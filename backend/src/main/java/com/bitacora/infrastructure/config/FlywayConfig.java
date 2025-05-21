@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.flyway.FlywayProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Configuración personalizada para Flyway.
- * Esta configuración resuelve el problema de dependencia circular entre Flyway y JPA.
+ * Esta configuración resuelve el problema de dependencia circular entre Flyway
+ * y JPA.
  */
 @Slf4j
 @Configuration
@@ -35,7 +36,7 @@ public class FlywayConfig {
      * @return Una instancia de Flyway configurada
      */
     @Bean(name = "flyway")
-    @DependsOn("dataSource")
+    @Primary
     public Flyway flyway(DataSource dataSource) {
         log.info("Inicializando Flyway manualmente...");
         log.info("Perfiles activos: {}", String.join(", ", env.getActiveProfiles()));
@@ -47,29 +48,36 @@ public class FlywayConfig {
         // Configurar Flyway con todas las propiedades necesarias
         org.flywaydb.core.api.configuration.FluentConfiguration config = Flyway.configure()
                 .dataSource(dataSource)
-                .locations(locations)
                 .baselineOnMigrate(flywayProperties.isBaselineOnMigrate())
                 .outOfOrder(flywayProperties.isOutOfOrder());
 
-        // Ignorar migraciones de PostgreSQL en modo desarrollo
+        // Configurar las ubicaciones de las migraciones
         if (Arrays.asList(env.getActiveProfiles()).contains("dev")) {
-            log.info("Ignorando migraciones de PostgreSQL en modo desarrollo");
+            log.info("Configurando migraciones para entorno de desarrollo (H2)");
             config.locations("classpath:db/migration", "classpath:db/migration/dev")
-                  .ignoreMigrationPatterns("*:missing")
-                  .ignoreMigrationPatterns("*:ignored");
+                    .ignoreMigrationPatterns("*:missing")
+                    .ignoreMigrationPatterns("*:ignored");
+        } else if (Arrays.asList(env.getActiveProfiles()).contains("prod")) {
+            log.info("Configurando migraciones para entorno de producción (PostgreSQL)");
+            config.locations("classpath:db/migration", "classpath:db/migration/prod")
+                    .ignoreMigrationPatterns("*:missing")
+                    .ignoreMigrationPatterns("*:ignored");
+        } else {
+            log.info("Usando configuración de migraciones por defecto");
+            config.locations(locations);
         }
 
-        Flyway flyway = config.load();
+        try {
+            Flyway flyway = config.load();
 
-        // Verificar si estamos en modo desarrollo
-        if (Arrays.asList(env.getActiveProfiles()).contains("dev")) {
-            log.info("Ejecutando en modo desarrollo con H2 en memoria");
+            // Ejecutar las migraciones
+            flyway.migrate();
+
+            log.info("Migraciones de Flyway completadas correctamente");
+            return flyway;
+        } catch (Exception e) {
+            log.error("Error al ejecutar las migraciones de Flyway: {}", e.getMessage(), e);
+            throw e;
         }
-
-        // Ejecutar las migraciones
-        flyway.migrate();
-
-        log.info("Migraciones de Flyway completadas correctamente");
-        return flyway;
     }
 }

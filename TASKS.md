@@ -1,5 +1,669 @@
 # Plan de Implementación - Proyecto Bitácora
 
+## Tareas Completadas Recientemente
+
+### Mejora del Sistema de Autenticación y Seguridad
+- [x] Unificación de controladores de autenticación
+  - [x] Consolidar `AuthController.java` y `RootAuthController.java` en un único controlador
+  - [x] Actualizar las configuraciones de seguridad correspondientes
+  - [x] Asegurar que todas las rutas de autenticación funcionen correctamente
+- [x] Mejora del manejo de tokens
+  - [x] Implementar un servicio de tokens mejorado (`tokenService.ts`)
+  - [x] Implementar un manejo más seguro de tokens en el frontend
+  - [x] Implementar decodificación y validación de tokens JWT en el cliente
+- [x] Mejora de la gestión de errores
+  - [x] Implementar un servicio centralizado de manejo de errores (`errorHandlingService.ts`)
+  - [x] Mejorar los mensajes de error para el usuario
+  - [x] Implementar manejo consistente de errores en el flujo de autenticación
+- [x] Implementación de cliente HTTP con interceptores
+  - [x] Crear cliente HTTP con manejo automático de tokens y errores (`apiClient.ts`)
+  - [x] Implementar renovación automática de tokens
+  - [x] Actualizar servicios para utilizar el nuevo cliente HTTP
+- [x] Aplicación de patrones de diseño
+  - [x] Implementar patrón Strategy para diferentes mecanismos de autenticación
+  - [x] Implementar patrón Factory para la creación de tokens
+  - [x] Implementar patrón Chain of Responsibility para filtros de seguridad
+  - [x] Corrección de errores en el sistema de autenticación
+
+### Implementación de funcionalidad para editar y reenviar solicitudes rechazadas
+- [x] Implementación de funcionalidad para editar y reenviar solicitudes rechazadas
+  - [x] Creada ruta `/app/solicitudes/editar/:id` para editar solicitudes rechazadas
+  - [x] Modificado el componente `SolicitudForm` para soportar la edición de solicitudes existentes
+  - [x] Añadida funcionalidad para cargar los datos de la solicitud rechazada en el formulario
+  - [x] Implementada visualización de archivos adjuntos existentes y capacidad para añadir nuevos
+  - [x] Añadido botón "Guardar y reenviar" para actualizar y reenviar la solicitud en un solo paso
+  - [x] Añadido botón "Guardar cambios" para actualizar la solicitud sin reenviarla
+  - [x] Añadido botón de edición en la vista de seguimiento de solicitudes rechazadas
+  - [x] Añadido botón de edición en la lista de solicitudes para solicitudes rechazadas
+  - [x] Actualizado el hook `useSolicitudes` para soportar la actualización y reenvío de solicitudes
+  - [x] Actualizado el servicio `solicitudesService` para incluir métodos de actualización
+  - [x] Mejorada la experiencia de usuario con mensajes claros sobre el motivo del rechazo
+  - [x] Implementada validación para asegurar que solo se puedan editar solicitudes en estado REJECTED
+
+### Corrección de errores en la interfaz de usuario y funcionalidad
+- [x] Corregido error 500 al rechazar solicitudes de tareas como usuario asignador
+  - [x] Corregido el error "La columna NEW_STATUS no permite valores nulos (NULL)" al rechazar solicitudes
+  - [x] Actualizado el método `mapStatusToEntity` en `TaskRequestHistoryMapper` para incluir el estado `REJECTED`
+  - [x] Mejorado el método `recordStatusChange` en `TaskRequestHistoryService` para validar que `newStatus` no sea nulo
+  - [x] Creada nueva migración `V25__Fix_Rejected_Status_In_Task_Requests.sql` para corregir inconsistencias en la base de datos
+  - [x] Corregido el problema de desajuste entre los estados esperados y reales en las solicitudes rechazadas
+  - [x] Mejorado el servicio `TaskRequestWorkflowService.reject` para validar el estado de la solicitud antes de intentar rechazarla
+  - [x] Mejorado el componente `RechazarSolicitudModal` para mostrar alertas cuando la solicitud no está en estado SUBMITTED
+  - [x] Corregido error de importación en `RechazarSolicitudModal.tsx` utilizando `ErrorAlert` en lugar de `Alert`
+  - [x] Implementada validación previa en el frontend para verificar el estado de la solicitud antes de enviar la petición
+  - [x] Mejorado el servicio `asignacionService.rejectTaskRequest` para asegurar que los datos enviados coincidan con lo que espera el backend
+  - [x] Implementado manejo de errores más detallado en `useAsignacion` para proporcionar mensajes específicos según el tipo de error
+  - [x] Añadida actualización automática de datos después de un error para asegurar que la interfaz muestra el estado actual
+  - [x] Mejorada la invalidación de consultas para actualizar correctamente todos los datos relacionados
+
+### Corrección de errores en la interfaz de usuario y visualización de datos
+- [x] Corregido error en la visualización de fechas en las tarjetas de seguimiento
+  - [x] Mejorada la función `formatDate` en `SeguimientoGeneral.tsx` para manejar correctamente fechas inválidas o nulas
+  - [x] Implementada validación robusta para prevenir errores al formatear fechas
+  - [x] Añadido manejo de errores con mensajes descriptivos cuando una fecha no es válida
+  - [x] Mejorada la experiencia de usuario al mostrar mensajes claros cuando hay problemas con las fechas
+
+### Corrección de errores en el sistema de comentarios y WebSockets
+- [x] Corregido error al crear comentarios con archivos adjuntos (múltiples representaciones de la misma entidad)
+  - [x] Modificado el flujo de creación de comentarios para evitar guardar la misma entidad dos veces
+  - [x] Optimizado el servicio TaskRequestCommentService para usar una única operación de guardado
+  - [x] Eliminada la operación redundante de guardar el comentario antes de añadirlo a la solicitud
+  - [x] Mejorado el manejo de errores con mensajes más descriptivos
+- [x] Corregido error en la configuración de WebSockets
+  - [x] Añadido endpoint adicional `/api/ws` para compatibilidad con el context-path de la aplicación
+  - [x] Mantenido el endpoint original `/ws` para compatibilidad con código existente
+  - [x] Solucionado el error "No endpoint GET /api/ws/" que impedía la conexión de WebSockets
+  - [x] Mejorada la configuración para soportar tanto acceso directo como a través del context-path
+
+### Mejora de los mensajes de error en la interfaz de usuario
+- [x] Creado componente ErrorAlert con estilo glassmorphism para mostrar errores de forma consistente
+- [x] Implementado componente ErrorSolicitud especializado para errores al cargar solicitudes
+- [x] Mejorada la experiencia visual con animaciones y efectos de transición
+- [x] Añadida información contextual sobre posibles causas y soluciones
+- [x] Implementado botón de reintento con animación al hacer hover
+- [x] Mantenida la consistencia visual con el tema general de la aplicación
+
+### Corrección de error 400 (Bad Request) al enviar comentarios con archivos adjuntos
+- [x] Añadida configuración de Spring para multipart con límites adecuados de tamaño de archivos
+- [x] Implementada validación de tamaño de archivos en el backend y frontend
+- [x] Creado manejador de excepciones para errores de carga de archivos
+- [x] Mejorados los mensajes de error para proporcionar información clara al usuario
+- [x] Implementada validación previa en el frontend para evitar enviar archivos demasiado grandes
+- [x] Limitado el número máximo de archivos adjuntos por comentario
+- [x] Mejorada la experiencia de usuario con mensajes de error específicos
+
+## Fase 2: Refactorización y Aplicación de Patrones de Diseño
+
+### Aplicación de Patrones de Diseño en el Backend
+- [x] Implementar el Patrón Strategy para Autenticación
+  - [x] Crear interfaz `AuthenticationStrategy` con método `authenticate`
+  - [x] Implementar estrategias concretas: `JwtAuthenticationStrategy`, `RefreshTokenAuthenticationStrategy`
+  - [x] Refactorizar `AuthService` para usar el patrón Strategy
+- [x] Implementar el Patrón Factory para Creación de Tokens
+  - [x] Crear interfaz `TokenFactory` con métodos para crear diferentes tipos de tokens
+  - [x] Implementar `JwtTokenFactory` que encapsule la lógica de creación de tokens JWT
+  - [x] Refactorizar `JwtTokenProvider` para usar la fábrica de tokens
+- [x] Implementar el Patrón Chain of Responsibility para Filtros de Seguridad
+  - [x] Crear clase base abstracta `SecurityFilterHandler` con método `handle`
+  - [x] Implementar manejadores concretos: `JwtValidationHandler`, `BlacklistCheckHandler`, `PermissionsHandler`
+  - [x] Refactorizar los filtros para usar la cadena de responsabilidad
+
+### Aplicación de Patrones de Diseño en el Frontend
+- [x] Implementar el Patrón Observer para Eventos de Autenticación
+  - [x] Crear clase `AuthEventEmitter` que implemente el patrón Observer
+  - [x] Definir eventos como `login`, `logout`, `tokenExpired`, `tokenRefreshed`
+  - [x] Permitir que componentes se suscriban a estos eventos
+  - [x] Refactorizar servicios para emitir eventos en momentos clave
+- [ ] Implementar el Patrón Adapter para Servicios de Autenticación
+  - [ ] Crear interfaz común `AuthServiceInterface`
+  - [ ] Implementar adaptadores para los diferentes servicios de autenticación
+  - [ ] Unificar la API de autenticación
+  - [ ] Eliminar código duplicado entre servicios
+- [ ] Implementar el Patrón Proxy para Interceptar Peticiones HTTP
+  - [ ] Crear un proxy que intercepte todas las peticiones HTTP
+  - [ ] Implementar lógica para añadir tokens, manejar errores y renovar tokens
+  - [ ] Centralizar la lógica de manejo de peticiones HTTP
+
+### Eliminación de Código Duplicado
+- [ ] Unificar Servicios de Autenticación en el Frontend
+  - [ ] Consolidar toda la lógica de autenticación en un único servicio
+  - [ ] Eliminar archivos duplicados
+  - [ ] Actualizar todas las referencias a los servicios antiguos
+- [ ] Unificar Hooks de Autenticación
+  - [ ] Consolidar toda la lógica en un único hook
+  - [ ] Eliminar hooks duplicados
+  - [ ] Actualizar todas las referencias a los hooks antiguos
+- [ ] Unificar Manejo de Errores
+  - [ ] Consolidar toda la lógica de manejo de errores en `errorHandlingService.ts`
+  - [ ] Eliminar código duplicado en los diferentes servicios
+  - [ ] Implementar un sistema consistente de manejo de errores
+
+### Mejora de la Estructura de Carpetas y Nomenclatura
+- [ ] Reorganizar Estructura de Carpetas en el Frontend
+  - [ ] Mover todos los servicios de autenticación a `frontend/src/core/auth/`
+  - [ ] Mover todos los hooks de autenticación a `frontend/src/core/auth/hooks/`
+  - [ ] Mover todos los componentes de autenticación a `frontend/src/features/auth/components/`
+  - [ ] Actualizar todas las importaciones
+- [ ] Estandarizar Nomenclatura
+  - [ ] Usar nombres consistentes para servicios, hooks y componentes
+  - [ ] Seguir convenciones de nomenclatura para interfaces, tipos y clases
+  - [ ] Documentar todas las funciones y clases con JSDoc/TSDoc
+
+### Implementación de Pruebas Unitarias
+- [ ] Pruebas para Servicios de Backend
+  - [ ] Implementar pruebas unitarias para los servicios de autenticación
+  - [ ] Implementar pruebas para la generación y validación de tokens
+  - [ ] Implementar pruebas para los filtros de seguridad
+- [ ] Pruebas para Servicios de Frontend
+  - [ ] Implementar pruebas unitarias para los servicios de autenticación
+  - [ ] Implementar pruebas para el manejo de tokens
+  - [ ] Implementar pruebas para el manejo de errores
+
+## Sprint 20: Implementación de Apache Kafka - Sistema de Notificaciones en Tiempo Real
+
+### Descripción del Sprint
+Este sprint se enfocará en la implementación inicial de Apache Kafka en el proyecto, comenzando con el sistema de notificaciones en tiempo real. Se establecerá la infraestructura básica de Kafka y se migrará el sistema actual de notificaciones a un modelo basado en eventos, mejorando la fiabilidad, escalabilidad y persistencia de las notificaciones.
+
+### Objetivos
+- Establecer la infraestructura básica de Apache Kafka
+- Capacitar al equipo en los conceptos fundamentales de Kafka
+- Migrar el sistema de notificaciones actual a un modelo basado en eventos
+- Mejorar la fiabilidad y persistencia de las notificaciones
+- Implementar un sistema de entrega garantizada de notificaciones
+
+### 1. Capacitación y Preparación (3 días)
+
+#### Historia de Usuario: Capacitación del Equipo
+**Como** miembro del equipo de desarrollo
+**Quiero** comprender los conceptos fundamentales de Apache Kafka
+**Para** poder implementar y mantener eficazmente soluciones basadas en eventos
+
+**Tareas:**
+- [ ] Organizar taller de capacitación sobre conceptos básicos de Kafka (1 día)
+  - [ ] Tópicos, particiones y grupos de consumidores
+  - [ ] Productores y consumidores
+  - [ ] Garantías de entrega y ordenamiento
+  - [ ] Configuración y administración básica
+- [ ] Crear documentación interna sobre mejores prácticas de Kafka (0.5 días)
+  - [ ] Guía de diseño de tópicos
+  - [ ] Estrategias de particionado
+  - [ ] Patrones de consumo
+  - [ ] Manejo de errores y recuperación
+- [ ] Preparar entorno de desarrollo con Kafka (1.5 días)
+  - [ ] Configurar Docker Compose para Kafka y ZooKeeper
+  - [ ] Implementar scripts de inicialización para tópicos
+  - [ ] Configurar herramientas de monitoreo básicas
+  - [ ] Crear guía de inicio rápido para desarrolladores
+
+**Criterios de Aceptación:**
+- El equipo ha completado el taller de capacitación
+- Existe documentación interna accesible sobre Kafka
+- El entorno de desarrollo con Kafka está funcionando
+- Los desarrolladores pueden crear y consumir mensajes de prueba
+
+**Riesgos:**
+- Curva de aprendizaje empinada para algunos miembros del equipo
+- **Mitigación:** Proporcionar recursos adicionales y sesiones de seguimiento
+
+### 2. Implementación de Infraestructura Kafka (4 días)
+
+#### Historia de Usuario: Infraestructura Kafka
+**Como** arquitecto del sistema
+**Quiero** establecer una infraestructura robusta de Apache Kafka
+**Para** soportar comunicación asíncrona confiable entre componentes del sistema
+
+**Tareas:**
+- [ ] Implementar configuración de Kafka en Spring Boot (1 día)
+  - [ ] Añadir dependencias de Spring Kafka
+  - [ ] Configurar propiedades de conexión
+  - [ ] Implementar beans de configuración para productores y consumidores
+  - [ ] Configurar serialización/deserialización de mensajes
+- [ ] Diseñar e implementar estructura de tópicos (1 día)
+  - [ ] Definir esquema de nombres para tópicos
+  - [ ] Crear tópico `notifications` con particiones adecuadas
+  - [ ] Configurar políticas de retención
+  - [ ] Implementar script de creación de tópicos
+- [ ] Implementar servicios base para Kafka (1 día)
+  - [ ] Crear `KafkaProducerService` genérico
+  - [ ] Implementar `KafkaConsumerService` con manejo de errores
+  - [ ] Desarrollar mecanismos de retry para mensajes fallidos
+  - [ ] Implementar monitoreo básico de productores y consumidores
+- [ ] Configurar seguridad y monitoreo (1 día)
+  - [ ] Implementar autenticación para conexiones Kafka
+  - [ ] Configurar TLS para comunicaciones seguras
+  - [ ] Integrar métricas de Kafka con Actuator
+  - [ ] Implementar alertas para problemas de conexión
+
+**Criterios de Aceptación:**
+- La aplicación puede conectarse a Kafka y enviar/recibir mensajes
+- Los tópicos están correctamente configurados con particiones adecuadas
+- Existen mecanismos de retry y manejo de errores
+- La comunicación con Kafka es segura
+- Se pueden monitorear métricas básicas de Kafka
+
+**Riesgos:**
+- Problemas de configuración en diferentes entornos
+- **Mitigación:** Documentar detalladamente la configuración y usar propiedades externalizadas
+
+### 3. Migración del Sistema de Notificaciones (5 días)
+
+#### Historia de Usuario: Notificaciones Basadas en Eventos
+**Como** usuario del sistema
+**Quiero** recibir notificaciones confiables y en tiempo real
+**Para** estar informado sobre eventos importantes relacionados con mis tareas
+
+**Tareas:**
+- [ ] Adaptar el modelo de dominio para eventos (1 día)
+  - [ ] Crear clases de eventos de dominio para notificaciones
+  - [ ] Implementar serializadores/deserializadores para eventos
+  - [ ] Actualizar el modelo de notificaciones para soportar persistencia
+  - [ ] Implementar mappers entre eventos y entidades
+- [ ] Implementar productores de eventos de notificación (1 día)
+  - [ ] Crear `NotificationEventProducer` para publicar eventos
+  - [ ] Integrar con servicios existentes que generan notificaciones
+  - [ ] Implementar estrategia de particionado basada en destinatario
+  - [ ] Añadir cabeceras para metadatos y trazabilidad
+- [ ] Implementar consumidores de eventos de notificación (2 días)
+  - [ ] Crear `NotificationEventConsumer` para procesar eventos
+  - [ ] Implementar persistencia de notificaciones en base de datos
+  - [ ] Desarrollar integración con WebSockets para entrega en tiempo real
+  - [ ] Implementar mecanismo de confirmación de entrega
+- [ ] Actualizar la interfaz de usuario (1 día)
+  - [ ] Adaptar componentes de notificación para el nuevo modelo
+  - [ ] Implementar indicadores de estado de entrega
+  - [ ] Mejorar la experiencia de usuario con animaciones
+  - [ ] Añadir soporte para notificaciones offline
+
+**Criterios de Aceptación:**
+- Las notificaciones se generan, persisten y entregan de manera confiable
+- El sistema mantiene el estado de las notificaciones entre sesiones
+- Las notificaciones se entregan en tiempo real cuando es posible
+- Las notificaciones pendientes se entregan cuando el usuario se conecta
+- La interfaz de usuario muestra claramente el estado de las notificaciones
+
+**Riesgos:**
+- Posible pérdida de mensajes durante la migración
+- **Mitigación:** Implementar sistema dual durante la transición y validar entregas
+
+**Dependencias:**
+- Requiere que la infraestructura de Kafka esté operativa
+
+### 4. Pruebas y Optimización (3 días)
+
+#### Historia de Usuario: Sistema de Notificaciones Confiable
+**Como** administrador del sistema
+**Quiero** asegurarme de que el sistema de notificaciones sea confiable y eficiente
+**Para** garantizar que los usuarios reciban información importante sin problemas
+
+**Tareas:**
+- [ ] Implementar pruebas automatizadas (1 día)
+  - [ ] Crear pruebas unitarias para productores y consumidores
+  - [ ] Implementar pruebas de integración con TestContainers
+  - [ ] Desarrollar pruebas de carga para escenarios de alto volumen
+  - [ ] Implementar pruebas de recuperación ante fallos
+- [ ] Optimizar configuración de Kafka (1 día)
+  - [ ] Ajustar parámetros de batch para productores
+  - [ ] Optimizar configuración de consumidores
+  - [ ] Implementar compresión de mensajes
+  - [ ] Ajustar timeouts y reintentos
+- [ ] Implementar monitoreo avanzado (1 día)
+  - [ ] Crear dashboard de métricas de Kafka
+  - [ ] Implementar alertas para problemas operativos
+  - [ ] Desarrollar herramientas de diagnóstico
+  - [ ] Documentar procedimientos de solución de problemas
+
+**Criterios de Aceptación:**
+- Las pruebas automatizadas verifican la confiabilidad del sistema
+- El sistema puede manejar picos de carga sin degradación
+- Existen métricas y alertas para monitorear el sistema
+- La documentación de operaciones está completa
+
+**Riesgos:**
+- Rendimiento subóptimo en producción
+- **Mitigación:** Realizar pruebas de carga realistas y ajustar configuración
+
+## Sprint 21: Implementación de Apache Kafka - Seguimiento de Cambios Basado en Eventos
+
+### Descripción del Sprint
+Este sprint se enfocará en implementar un sistema de seguimiento de cambios basado en eventos utilizando Apache Kafka. Se aplicará el patrón Event Sourcing para registrar todos los cambios de estado en solicitudes y tareas, permitiendo un historial completo y auditado, así como la capacidad de reconstruir el estado en cualquier punto del tiempo.
+
+### Objetivos
+- Implementar el patrón Event Sourcing para solicitudes y tareas
+- Crear un historial inmutable de todos los cambios de estado
+- Mejorar la capacidad de auditoría del sistema
+- Implementar proyecciones para reconstruir estados
+- Sentar las bases para funcionalidades avanzadas como "viaje en el tiempo"
+
+### 1. Diseño del Modelo de Eventos (3 días)
+
+#### Historia de Usuario: Historial Completo de Cambios
+**Como** administrador del sistema
+**Quiero** tener un registro inmutable de todos los cambios en solicitudes y tareas
+**Para** poder auditar y entender la evolución de cada elemento
+
+**Tareas:**
+- [ ] Diseñar jerarquía de eventos de dominio (1 día)
+  - [ ] Crear clase base `DomainEvent` con metadatos comunes
+  - [ ] Implementar eventos específicos para solicitudes (`TaskRequestEvent`)
+  - [ ] Implementar eventos específicos para actividades (`ActivityEvent`)
+  - [ ] Definir esquemas de serialización para eventos
+- [ ] Diseñar estructura de tópicos para eventos (1 día)
+  - [ ] Crear tópico `task-request-events` con particionado por ID
+  - [ ] Crear tópico `activity-events` con particionado por ID
+  - [ ] Configurar políticas de retención para almacenamiento a largo plazo
+  - [ ] Implementar compactación para eventos del mismo agregado
+- [ ] Implementar generación de eventos desde el dominio (1 día)
+  - [ ] Modificar entidades de dominio para generar eventos
+  - [ ] Implementar mecanismo para capturar y publicar eventos
+  - [ ] Crear servicio para publicar eventos en Kafka
+  - [ ] Implementar transacciones que abarquen base de datos y Kafka
+
+**Criterios de Aceptación:**
+- Existe un modelo de eventos bien definido para el dominio
+- Los tópicos están correctamente configurados para almacenamiento a largo plazo
+- Las entidades de dominio generan eventos apropiados en cada cambio
+- Los eventos se publican de manera confiable en Kafka
+
+**Riesgos:**
+- Diseño inadecuado de eventos que no capture toda la información necesaria
+- **Mitigación:** Revisión exhaustiva del modelo de dominio y validación con expertos
+
+**Dependencias:**
+- Requiere la infraestructura básica de Kafka del Sprint 20
+
+### 2. Implementación de Event Sourcing (5 días)
+
+#### Historia de Usuario: Reconstrucción de Estado
+**Como** desarrollador del sistema
+**Quiero** poder reconstruir el estado de cualquier entidad a partir de su historial de eventos
+**Para** implementar funcionalidades avanzadas y garantizar la integridad de los datos
+
+**Tareas:**
+- [ ] Implementar productores de eventos de dominio (1 día)
+  - [ ] Crear `DomainEventProducer` genérico
+  - [ ] Implementar productores específicos para cada tipo de evento
+  - [ ] Integrar con servicios de aplicación existentes
+  - [ ] Implementar manejo de errores y reintentos
+- [ ] Implementar almacenamiento de eventos (1 día)
+  - [ ] Crear tablas para almacenar eventos en la base de datos
+  - [ ] Implementar repositorio para eventos
+  - [ ] Crear índices para búsqueda eficiente
+  - [ ] Implementar políticas de retención
+- [ ] Desarrollar proyecciones para reconstrucción de estado (2 días)
+  - [ ] Crear servicio `EventSourcingService` para reconstruir estado
+  - [ ] Implementar proyecciones específicas para solicitudes
+  - [ ] Implementar proyecciones específicas para actividades
+  - [ ] Crear caché para proyecciones frecuentes
+- [ ] Implementar consistencia eventual (1 día)
+  - [ ] Crear mecanismo para sincronizar estado entre proyecciones
+  - [ ] Implementar manejo de eventos fuera de orden
+  - [ ] Desarrollar estrategia para resolver conflictos
+  - [ ] Crear mecanismo de recuperación para proyecciones corruptas
+
+**Criterios de Aceptación:**
+- Los eventos de dominio se publican y almacenan correctamente
+- Es posible reconstruir el estado completo de una entidad a partir de sus eventos
+- Las proyecciones se mantienen actualizadas con nuevos eventos
+- El sistema maneja correctamente eventos fuera de orden y conflictos
+
+**Riesgos:**
+- Complejidad en la implementación de proyecciones y manejo de eventos
+- **Mitigación:** Comenzar con casos simples y aumentar gradualmente la complejidad
+
+### 3. Implementación de Historial de Cambios (4 días)
+
+#### Historia de Usuario: Visualización de Historial
+**Como** usuario del sistema
+**Quiero** ver un historial detallado de cambios en solicitudes y tareas
+**Para** entender su evolución y tomar decisiones informadas
+
+**Tareas:**
+- [ ] Implementar API para consulta de historial (1 día)
+  - [ ] Crear endpoint para obtener historial de solicitudes
+  - [ ] Crear endpoint para obtener historial de actividades
+  - [ ] Implementar filtros y paginación
+  - [ ] Optimizar consultas para rendimiento
+- [ ] Desarrollar consumidores para generar vistas de historial (1 día)
+  - [ ] Crear `HistoryViewConsumer` para procesar eventos
+  - [ ] Implementar almacenamiento optimizado para consultas
+  - [ ] Desarrollar lógica para agregar metadatos útiles
+  - [ ] Implementar caché para consultas frecuentes
+- [ ] Implementar interfaz de usuario para historial (2 días)
+  - [ ] Crear componente `ChangeHistoryTimeline` para visualizar cambios
+  - [ ] Implementar filtros y búsqueda en la interfaz
+  - [ ] Desarrollar visualización detallada de cada cambio
+  - [ ] Añadir comparación visual entre estados
+
+**Criterios de Aceptación:**
+- La API proporciona acceso eficiente al historial de cambios
+- La interfaz de usuario muestra claramente la evolución de solicitudes y tareas
+- Es posible filtrar y buscar en el historial
+- La visualización es intuitiva y proporciona contexto útil
+
+**Riesgos:**
+- Rendimiento deficiente con historiales muy largos
+- **Mitigación:** Implementar paginación eficiente y optimizar consultas
+
+**Dependencias:**
+- Requiere la implementación de Event Sourcing
+
+### 4. Pruebas y Optimización (3 días)
+
+#### Historia de Usuario: Sistema de Historial Confiable
+**Como** administrador del sistema
+**Quiero** asegurarme de que el sistema de historial sea confiable y eficiente
+**Para** garantizar la integridad de los datos históricos y un buen rendimiento
+
+**Tareas:**
+- [ ] Implementar pruebas automatizadas (1 día)
+  - [ ] Crear pruebas unitarias para productores y consumidores
+  - [ ] Implementar pruebas de integración para Event Sourcing
+  - [ ] Desarrollar pruebas de reconstrucción de estado
+  - [ ] Implementar pruebas de rendimiento para consultas de historial
+- [ ] Optimizar rendimiento (1 día)
+  - [ ] Ajustar configuración de Kafka para eventos de dominio
+  - [ ] Optimizar índices en la base de datos
+  - [ ] Implementar estrategias de caché
+  - [ ] Ajustar tamaño de batch para consumidores
+- [ ] Implementar herramientas de diagnóstico (1 día)
+  - [ ] Crear dashboard para monitoreo de eventos
+  - [ ] Implementar alertas para problemas de procesamiento
+  - [ ] Desarrollar herramientas para reprocessar eventos
+  - [ ] Documentar procedimientos de recuperación
+
+**Criterios de Aceptación:**
+- Las pruebas automatizadas verifican la confiabilidad del sistema
+- El rendimiento de las consultas de historial es aceptable incluso con grandes volúmenes
+- Existen herramientas para diagnosticar y resolver problemas
+- La documentación de operaciones está completa
+
+**Riesgos:**
+- Crecimiento excesivo del volumen de eventos
+- **Mitigación:** Implementar políticas de retención y compactación adecuadas
+
+## Sprint 22: Implementación de Apache Kafka - CQRS y Optimización de Consultas
+
+### Descripción del Sprint
+Este sprint se enfocará en implementar el patrón CQRS (Command Query Responsibility Segregation) utilizando Apache Kafka para separar las operaciones de lectura y escritura, optimizando el rendimiento y la escalabilidad del sistema. Se crearán vistas especializadas para diferentes casos de uso y se implementarán mecanismos para mantenerlas actualizadas.
+
+### Objetivos
+- Implementar el patrón CQRS para separar operaciones de lectura y escritura
+- Crear vistas especializadas para diferentes casos de uso
+- Optimizar el rendimiento de consultas complejas
+- Mejorar la escalabilidad del sistema
+- Implementar mecanismos para mantener la consistencia entre comandos y consultas
+
+### 1. Diseño e Implementación de CQRS (5 días)
+
+#### Historia de Usuario: Consultas Optimizadas
+**Como** usuario del sistema
+**Quiero** que las consultas complejas se ejecuten rápidamente
+**Para** obtener la información que necesito sin demoras
+
+**Tareas:**
+- [ ] Diseñar arquitectura CQRS (1 día)
+  - [ ] Definir separación clara entre comandos y consultas
+  - [ ] Identificar vistas especializadas necesarias
+  - [ ] Diseñar flujo de datos entre escritura y lectura
+  - [ ] Documentar estrategia de consistencia
+- [ ] Implementar lado de comandos (2 días)
+  - [ ] Refactorizar servicios existentes para enfocarse en comandos
+  - [ ] Implementar validación de comandos
+  - [ ] Crear manejadores de comandos que generen eventos
+  - [ ] Implementar transacciones que abarquen base de datos y Kafka
+- [ ] Implementar lado de consultas (2 días)
+  - [ ] Crear esquemas de base de datos optimizados para consultas
+  - [ ] Implementar repositorios específicos para consultas
+  - [ ] Desarrollar servicios de consulta especializados
+  - [ ] Implementar caché para consultas frecuentes
+
+**Criterios de Aceptación:**
+- Existe una separación clara entre operaciones de lectura y escritura
+- Los comandos generan eventos que actualizan las vistas de consulta
+- Las consultas se ejecutan contra modelos optimizados
+- El rendimiento de las consultas mejora significativamente
+
+**Riesgos:**
+- Complejidad adicional en la arquitectura
+- **Mitigación:** Documentación clara y capacitación del equipo
+
+**Dependencias:**
+- Requiere la implementación de Event Sourcing del Sprint 21
+
+### 2. Implementación de Vistas Especializadas (4 días)
+
+#### Historia de Usuario: Vistas Personalizadas
+**Como** usuario con diferentes roles en el sistema
+**Quiero** tener vistas optimizadas para mis necesidades específicas
+**Para** acceder rápidamente a la información relevante para mi rol
+
+**Tareas:**
+- [ ] Identificar y diseñar vistas especializadas (1 día)
+  - [ ] Vista de bandeja de entrada para asignadores
+  - [ ] Vista de tareas pendientes para ejecutores
+  - [ ] Vista de seguimiento para solicitantes
+  - [ ] Vista de dashboard para administradores
+- [ ] Implementar consumidores para vistas especializadas (2 días)
+  - [ ] Crear `ViewModelConsumer` genérico
+  - [ ] Implementar consumidores específicos para cada vista
+  - [ ] Desarrollar lógica para transformar eventos en modelos de vista
+  - [ ] Implementar almacenamiento eficiente para vistas
+- [ ] Implementar API para vistas especializadas (1 día)
+  - [ ] Crear endpoints para cada vista especializada
+  - [ ] Implementar filtros y paginación optimizados
+  - [ ] Desarrollar DTOs específicos para cada vista
+  - [ ] Documentar API con OpenAPI
+
+**Criterios de Aceptación:**
+- Existen vistas especializadas para diferentes roles y casos de uso
+- Las vistas se mantienen actualizadas con los eventos del sistema
+- La API proporciona acceso eficiente a las vistas
+- El rendimiento de las consultas es óptimo incluso con grandes volúmenes de datos
+
+**Riesgos:**
+- Proliferación excesiva de vistas especializadas
+- **Mitigación:** Análisis cuidadoso de necesidades reales y consolidación donde sea posible
+
+### 3. Actualización de la Interfaz de Usuario (3 días)
+
+#### Historia de Usuario: Interfaz Adaptativa
+**Como** usuario del sistema
+**Quiero** que la interfaz se adapte a mis necesidades específicas
+**Para** trabajar de manera más eficiente
+
+**Tareas:**
+- [ ] Adaptar componentes existentes para CQRS (1 día)
+  - [ ] Actualizar servicios de frontend para usar nuevos endpoints
+  - [ ] Implementar manejo de consistencia eventual en la UI
+  - [ ] Desarrollar indicadores de estado de sincronización
+  - [ ] Optimizar estrategias de caché en el cliente
+- [ ] Implementar nuevas vistas en la interfaz (1 día)
+  - [ ] Crear componentes para vistas especializadas
+  - [ ] Implementar filtros y búsqueda optimizados
+  - [ ] Desarrollar visualizaciones personalizadas por rol
+  - [ ] Mejorar la navegación entre vistas
+- [ ] Mejorar experiencia de usuario con datos en tiempo real (1 día)
+  - [ ] Implementar actualizaciones en tiempo real con WebSockets
+  - [ ] Desarrollar animaciones para cambios de estado
+  - [ ] Implementar notificaciones de cambios relevantes
+  - [ ] Optimizar rendimiento de actualizaciones frecuentes
+
+**Criterios de Aceptación:**
+- La interfaz de usuario utiliza eficientemente las vistas especializadas
+- La experiencia de usuario es fluida incluso con datos cambiantes
+- Los usuarios reciben feedback visual sobre el estado de sincronización
+- La interfaz se adapta a diferentes roles y necesidades
+
+**Riesgos:**
+- Problemas de usabilidad con consistencia eventual
+- **Mitigación:** Diseño cuidadoso de la experiencia de usuario y feedback claro
+
+**Dependencias:**
+- Requiere la implementación de vistas especializadas
+
+### 4. Pruebas y Optimización (3 días)
+
+#### Historia de Usuario: Sistema Escalable y Confiable
+**Como** administrador del sistema
+**Quiero** asegurarme de que el sistema sea escalable y confiable
+**Para** soportar el crecimiento futuro y garantizar una buena experiencia de usuario
+
+**Tareas:**
+- [ ] Implementar pruebas automatizadas (1 día)
+  - [ ] Crear pruebas unitarias para componentes CQRS
+  - [ ] Implementar pruebas de integración para flujo completo
+  - [ ] Desarrollar pruebas de rendimiento para consultas
+  - [ ] Implementar pruebas de consistencia eventual
+- [ ] Optimizar rendimiento y escalabilidad (1 día)
+  - [ ] Ajustar configuración de Kafka para escalabilidad
+  - [ ] Optimizar consultas y índices en la base de datos
+  - [ ] Implementar estrategias de caché en múltiples niveles
+  - [ ] Configurar sharding para vistas de alto volumen
+- [ ] Implementar monitoreo y herramientas operativas (1 día)
+  - [ ] Crear dashboard para monitoreo de CQRS
+  - [ ] Implementar alertas para problemas de sincronización
+  - [ ] Desarrollar herramientas para resincronizar vistas
+  - [ ] Documentar procedimientos operativos
+
+**Criterios de Aceptación:**
+- Las pruebas automatizadas verifican la confiabilidad del sistema
+- El sistema puede escalar horizontalmente para manejar mayor carga
+- Existen herramientas para monitorear y resolver problemas
+- La documentación operativa está completa
+
+**Riesgos:**
+- Complejidad operativa del sistema CQRS
+- **Mitigación:** Herramientas de monitoreo robustas y documentación detallada
+
+### 5. Documentación y Capacitación (2 días)
+
+#### Historia de Usuario: Conocimiento Compartido
+**Como** miembro del equipo de desarrollo
+**Quiero** entender completamente la arquitectura CQRS implementada
+**Para** poder mantener y extender el sistema de manera efectiva
+
+**Tareas:**
+- [ ] Crear documentación técnica detallada (1 día)
+  - [ ] Documentar arquitectura CQRS implementada
+  - [ ] Crear diagramas de flujo de datos
+  - [ ] Documentar patrones y decisiones de diseño
+  - [ ] Crear guías para extender el sistema
+- [ ] Realizar sesiones de capacitación (1 día)
+  - [ ] Organizar taller sobre la arquitectura implementada
+  - [ ] Crear ejercicios prácticos para el equipo
+  - [ ] Documentar preguntas frecuentes y soluciones
+  - [ ] Preparar materiales de referencia rápida
+
+**Criterios de Aceptación:**
+- Existe documentación técnica completa y actualizada
+- El equipo ha participado en sesiones de capacitación
+- Los desarrolladores pueden explicar la arquitectura CQRS
+- Existen recursos de referencia para consulta rápida
+
+**Riesgos:**
+- Rotación de personal que lleve a pérdida de conocimiento
+- **Mitigación:** Documentación exhaustiva y sesiones de capacitación periódicas
+
 ## Sprint 1: Fundamentos y Arquitectura Base
 
 ### 1. Migración Arquitectura Backend
@@ -330,6 +994,498 @@
 - [x] Mejorar el manejo de errores
   - [x] Crear tipos específicos de errores en el backend
   - [x] Implementar mapeo de errores en el frontend
+
+## Sprint 23: Mejora del Rol de Administrador (COMPLETADO)
+
+### Descripción del Sprint
+Este sprint se enfocó en mejorar y completar las funcionalidades del rol de administrador en la plataforma, implementando interfaces completas para la gestión de usuarios, configuración del sistema, y herramientas administrativas avanzadas. Se aplicaron patrones de diseño adecuados y se mejoró la calidad del código existente.
+
+### Objetivos Alcanzados
+- ✅ Implementar una interfaz completa para la gestión de usuarios y roles
+- ✅ Desarrollar herramientas de configuración del sistema para administradores
+- ✅ Implementar integraciones con servicios externos
+- ✅ Crear panel de configuración general con múltiples secciones
+
+### Próximos Objetivos (Sprint 24)
+- Mejorar los dashboards y reportes administrativos
+- Implementar funcionalidades de auditoría y seguimiento
+- Refactorizar el código existente para seguir principios SOLID y patrones de diseño adecuados
+
+### 1. Gestión de Usuarios y Roles (5 días)
+
+#### Historia de Usuario: Gestión Completa de Usuarios
+**Como** administrador del sistema
+**Quiero** tener una interfaz completa para gestionar usuarios y sus roles
+**Para** mantener el control de acceso al sistema de manera eficiente
+
+**Tareas:**
+- [x] Implementar interfaz de listado de usuarios (1 día)
+  - [x] Crear componente `UserList` con filtros avanzados
+  - [x] Implementar paginación y ordenamiento
+  - [x] Mostrar información relevante de cada usuario
+  - [x] Añadir acciones rápidas (activar/desactivar, editar, eliminar)
+- [x] Desarrollar formulario de creación/edición de usuarios (1 día)
+  - [x] Crear componente `UserForm` con validación avanzada
+  - [x] Implementar selección de roles y permisos
+  - [x] Añadir validación de campos críticos (email, contraseña)
+  - [x] Implementar previsualización de permisos efectivos
+- [x] Implementar gestión de roles y permisos (1.5 días)
+  - [x] Crear componente `PermissionsManager` para administrar permisos
+  - [x] Implementar matriz de permisos por rol
+  - [ ] Añadir funcionalidad para crear/editar roles personalizados
+  - [x] Implementar herencia de permisos entre roles
+
+
+**Criterios de Aceptación:**
+- La interfaz permite listar, filtrar y buscar usuarios eficientemente
+- Es posible crear, editar y eliminar usuarios con todos sus atributos
+- Se pueden gestionar roles y permisos de manera granular
+- La interfaz es intuitiva y proporciona feedback claro al usuario
+
+### 2. Configuración del Sistema (4 días)
+
+#### Historia de Usuario: Herramientas de Configuración Avanzada
+**Como** administrador del sistema
+**Quiero** tener acceso a herramientas de configuración avanzada
+**Para** personalizar y optimizar el funcionamiento del sistema
+
+**Tareas:**
+- [x] Implementar gestión de categorías y prioridades (1 día)
+  - [x] Completar componente `ConfiguracionTareas` existente
+  - [x] Añadir CRUD completo para categorías
+  - [x] Implementar gestión de prioridades con niveles personalizables
+  - [x] Añadir opción para desactivar categorías sin eliminarlas
+- [x] Desarrollar configuración de notificaciones (1 día)
+  - [x] Completar componente `ConfiguracionNotificaciones` existente
+  - [x] Implementar plantillas de notificaciones personalizables
+  - [x] Añadir configuración de canales de notificación
+  - [x] Implementar reglas de notificación por evento y rol
+- [x] Implementar configuración de integraciones (1 día)
+  - [x] Completar componente `ConfiguracionIntegraciones` existente
+  - [x] Implementar integración real con Google Calendar
+  - [x] Añadir integración con Google Drive para almacenamiento
+  - [x] Desarrollar sistema de prueba de conexión para integraciones
+- [x] Crear panel de configuración general (1 día)
+  - [x] Desarrollar componente `ConfiguracionGeneral`
+  - [x] Implementar ajustes de rendimiento y caché
+  - [x] Añadir configuración de políticas de seguridad
+  - [x] Implementar gestión de plantillas de correo electrónico
+
+**Criterios de Aceptación:**
+- Las categorías y prioridades se pueden gestionar completamente
+- La configuración de notificaciones permite personalización avanzada
+- Las integraciones externas funcionan correctamente
+- La configuración general permite ajustar parámetros del sistema
+- Los cambios en la configuración se aplican correctamente
+
+## Sprint 24: Dashboards, Reportes y Herramientas Administrativas Avanzadas
+
+### Descripción del Sprint
+Este sprint se enfocará en mejorar los dashboards administrativos, implementar reportes avanzados y desarrollar herramientas de diagnóstico y mantenimiento para administradores. También se trabajará en la refactorización del código existente para mejorar su calidad y mantenibilidad.
+
+### Objetivos
+- Implementar dashboards administrativos avanzados con métricas en tiempo real
+- Desarrollar sistema de reportes personalizables y programados
+- Crear herramientas de diagnóstico y mantenimiento del sistema
+- Refactorizar componentes administrativos para mejorar la calidad del código
+- Implementar pruebas automatizadas para funcionalidades administrativas
+
+### 1. Dashboards y Reportes Administrativos (4 días)
+
+#### Historia de Usuario: Información Gerencial Completa
+**Como** administrador del sistema
+**Quiero** tener acceso a dashboards y reportes avanzados
+**Para** tomar decisiones basadas en datos y monitorear el sistema
+
+**Tareas:**
+- [x] Mejorar dashboard administrativo (1 día)
+  - [x] Refactorizar componente `AdminDashboardContent` existente
+  - [x] Implementar métricas en tiempo real
+  - [x] Añadir gráficos interactivos con filtros
+  - [x] Implementar alertas visuales para situaciones críticas
+- [x] Desarrollar reportes personalizables (1 día)
+  - [x] Crear componente `ReportBuilder` para reportes ad-hoc
+  - [x] Implementar selección de dimensiones y métricas
+  - [x] Añadir visualizaciones configurables
+  - [x] Implementar exportación en múltiples formatos
+- [x] Implementar reportes programados (1 día)
+  - [x] Crear componente `ScheduledReportsList` para gestionar reportes
+  - [x] Implementar configuración de frecuencia y destinatarios
+  - [x] Añadir opciones de formato de exportación
+  - [x] Desarrollar plantillas de reportes predefinidos
+- [ ] Crear panel de monitoreo del sistema (1 día)
+  - [ ] Desarrollar componente `SystemMonitor`
+  - [ ] Implementar visualización de métricas de rendimiento
+  - [ ] Añadir monitoreo de errores y excepciones
+  - [ ] Implementar alertas configurables
+
+**Criterios de Aceptación:**
+- ✅ El dashboard administrativo muestra información relevante y actualizada
+- ✅ Es posible crear reportes personalizados con múltiples dimensiones
+- ✅ Los reportes se pueden programar y distribuir automáticamente
+- ⬜ El panel de monitoreo proporciona visibilidad del estado del sistema
+- ✅ La información se presenta de manera clara y accionable
+
+### 2. Herramientas Administrativas Avanzadas (3 días)
+
+#### Historia de Usuario: Herramientas de Diagnóstico y Mantenimiento
+**Como** administrador del sistema
+**Quiero** tener acceso a herramientas avanzadas de diagnóstico y mantenimiento
+**Para** resolver problemas y mantener el sistema funcionando óptimamente
+
+**Tareas:**
+- [x] Implementar herramientas de diagnóstico (1 día)
+  - [x] Crear componente `SystemMonitor` para análisis del sistema
+  - [x] Implementar verificación de integridad de datos
+  - [x] Añadir detección de inconsistencias
+  - [x] Desarrollar herramientas de resolución automática
+- [x] Desarrollar herramientas de mantenimiento (1 día)
+  - [x] Crear componente `MaintenanceTasksCard` para tareas de mantenimiento
+  - [x] Implementar limpieza de datos antiguos
+  - [x] Añadir optimización de base de datos
+  - [x] Desarrollar gestión de caché del sistema
+- [x] Implementar gestión de backups (1 día)
+  - [x] Crear funcionalidad para gestionar copias de seguridad
+  - [x] Implementar programación de backups automáticos
+  - [x] Añadir restauración selectiva de datos
+  - [x] Desarrollar verificación de integridad de backups
+
+**Criterios de Aceptación:**
+- ✅ Las herramientas de diagnóstico detectan y resuelven problemas comunes
+- ✅ Las herramientas de mantenimiento permiten optimizar el sistema
+- ✅ La gestión de backups funciona de manera confiable
+- ✅ Las herramientas son accesibles solo para administradores
+- ✅ Existe documentación clara sobre el uso de cada herramienta
+
+### 3. Refactorización y Mejora de Código (4 días)
+
+#### Historia de Usuario: Código Mantenible y Extensible
+**Como** desarrollador del sistema
+**Quiero** que el código relacionado con funcionalidades administrativas sea limpio y mantenible
+**Para** facilitar futuras mejoras y extensiones
+
+**Tareas:**
+- [ ] Refactorizar componentes administrativos (1 día)
+  - [ ] Dividir `AdminDashboardContent` en componentes más pequeños
+  - [ ] Aplicar principio de responsabilidad única
+  - [ ] Implementar patrones de diseño adecuados
+  - [ ] Mejorar la reutilización de código
+- [ ] Mejorar la arquitectura de servicios administrativos (1 día)
+  - [ ] Implementar patrón Facade para servicios administrativos
+  - [ ] Aplicar principio de inversión de dependencias
+  - [ ] Mejorar la testabilidad de los servicios
+  - [ ] Documentar la arquitectura de servicios
+- [ ] Implementar pruebas automatizadas (1 día)
+  - [ ] Crear pruebas unitarias para componentes administrativos
+  - [ ] Implementar pruebas de integración para flujos administrativos
+  - [ ] Añadir pruebas end-to-end para funcionalidades críticas
+  - [ ] Configurar CI/CD para ejecutar pruebas automáticamente
+- [ ] Mejorar la documentación técnica (1 día)
+  - [ ] Documentar la arquitectura administrativa
+  - [ ] Crear guías para extender funcionalidades administrativas
+  - [ ] Documentar decisiones de diseño y patrones utilizados
+  - [ ] Implementar documentación en código con JSDoc/TSDoc
+
+**Criterios de Aceptación:**
+- Los componentes administrativos siguen principios SOLID
+- La arquitectura de servicios es clara y mantenible
+- Existen pruebas automatizadas con buena cobertura
+- La documentación técnica es completa y actualizada
+- El código es fácil de entender y extender
+
+### 4. Sistema de Auditoría de Usuarios (2 días)
+
+#### Historia de Usuario: Seguimiento Completo de Actividad
+**Como** administrador del sistema
+**Quiero** tener un sistema completo de auditoría de usuarios
+**Para** monitorear la actividad y garantizar la seguridad del sistema
+
+**Tareas:**
+- [x] Desarrollar sistema de auditoría de usuarios (1 día)
+  - [x] Crear componente `UserAuditLog` para visualizar actividad
+  - [x] Implementar filtros por usuario, acción y fecha
+  - [x] Mostrar cambios detallados en cada acción
+  - [x] Añadir exportación de registros de auditoría
+- [x] Implementar alertas y notificaciones de seguridad (1 día)
+  - [x] Crear sistema de detección de actividades sospechosas
+  - [x] Implementar notificaciones para administradores
+  - [x] Desarrollar panel de alertas de seguridad
+  - [x] Añadir configuración de umbrales y reglas de alerta
+
+**Criterios de Aceptación:**
+- ✅ El sistema registra todas las acciones relevantes de los usuarios
+- ✅ Es posible filtrar y buscar en los registros de auditoría
+- ✅ Se pueden exportar los registros para análisis externos
+- ✅ Las alertas de seguridad se generan automáticamente
+- ✅ Los administradores reciben notificaciones sobre actividades sospechosas
+
+## Sprint 19: Mejora de Experiencia de Usuario para Ejecutores
+
+### Descripción del Sprint
+Este sprint se enfocará en mejorar la experiencia de usuario para el rol de EJECUTOR, haciendo que la interfaz sea más dinámica y responda al estado actual de las tareas asignadas. Se implementarán mejoras visuales y funcionales para proporcionar una experiencia más intuitiva y contextual.
+
+### Objetivos
+- Implementar una interfaz dinámica que responda al estado actual de las tareas
+- Mejorar la retroalimentación visual para el usuario ejecutor
+- Optimizar la visualización de información relevante según el contexto
+- Implementar mensajes informativos claros cuando no hay tareas
+- Mejorar la experiencia general del usuario ejecutor
+
+### 1. Mejora del Dashboard del Ejecutor (2 días)
+- [x] Implementar interfaz dinámica que responda al estado actual de las tareas
+  - [x] Deshabilitar o no mostrar el botón "Iniciar Tarea" cuando no hay tareas pendientes
+  - [x] Mostrar mensajes informativos cuando no hay tareas asignadas
+  - [x] Actualizar automáticamente los componentes del dashboard para reflejar el estado real
+  - [x] Proporcionar retroalimentación visual clara sobre las acciones disponibles
+  - [x] Mejorar los mensajes de estado vacío en las listas de tareas y gráficos
+  - [x] Implementar alerta informativa cuando no hay tareas asignadas
+  - [x] Optimizar la experiencia visual con mensajes contextuales
+
+### 2. Mejora del Sistema de Badges/Pills en Historial de Tareas (2 días)
+- [x] Implementar sistema unificado de badges para estado, prioridad y categoría de tareas
+  - [x] Reemplazar los badges locales por componentes compartidos StatusBadge, PriorityBadge y CategoryBadge
+  - [x] Añadir badge de categoría a las tarjetas de tareas
+  - [x] Mejorar el contraste entre las tarjetas y el fondo
+  - [x] Añadir efectos visuales sutiles para mejorar la jerarquía visual
+  - [x] Implementar consistencia visual en toda la aplicación
+  - [x] Mejorar la experiencia visual con animaciones y efectos hover
+  - [x] Optimizar la organización visual de los badges para mejor legibilidad
+  - [x] Mejorar el diseño de los filtros y controles de búsqueda
+
+### 3. Implementación de Sistema Unificado de Badges con Fondos Oscuros (2 días)
+- [x] Modificar el componente PriorityBadge para utilizar fondos oscuros
+  - [x] Mantener los colores actuales para bordes, sombras y texto
+  - [x] Implementar fondos oscuros consistentes con el tema de la aplicación
+  - [x] Mejorar el contraste entre el texto y el fondo para garantizar la legibilidad
+  - [x] Implementar transiciones suaves entre estados normal y hover
+
+- [x] Aplicar el mismo principio de diseño a StatusBadge y CategoryBadge
+  - [x] Modificar StatusBadge para utilizar fondos oscuros manteniendo los colores originales
+  - [x] Modificar CategoryBadge para utilizar fondos oscuros manteniendo los colores originales
+  - [x] Asegurar consistencia visual entre todos los tipos de badges
+  - [x] Mantener la identidad visual distintiva de cada tipo de badge
+  - [x] Implementar efectos hover coherentes en todos los componentes
+
+### 4. Ajustes Específicos de Colores en Badges (1 día)
+- [x] Intercambiar colores entre badges de estado "APROBADA" y prioridad "BAJA"
+  - [x] Modificar los colores del badge de estado APPROVED para usar los colores de la prioridad LOW
+  - [x] Modificar los colores del badge de prioridad LOW para usar los colores del estado APPROVED
+  - [x] Mantener la consistencia visual con el sistema unificado de badges con fondos oscuros
+  - [x] Asegurar que los cambios no afecten la legibilidad de los badges
+
+## Sprint 18: Mejoras de Experiencia de Usuario y Corrección de Errores
+
+### Descripción del Sprint
+Este sprint se enfocará en mejorar la experiencia de usuario, corregir errores existentes y añadir funcionalidades que mejoren la usabilidad de la aplicación. Se dará especial atención a la interacción con archivos adjuntos y a la experiencia de los usuarios ejecutores y solicitantes.
+
+### Objetivos
+- Mejorar la interacción con archivos adjuntos para usuarios ejecutores y solicitantes
+- Corregir errores de interfaz y funcionalidad
+- Optimizar la experiencia de usuario en diferentes roles
+- Mejorar la visualización de información relevante
+- Implementar feedback visual para acciones del usuario
+- Mejorar la sección de Historial de tareas para el rol EJECUTOR
+- Mejorar la consistencia visual de botones y filtros en la interfaz
+
+### 1. Mejora de Interacción con Archivos Adjuntos (2 días)
+- [x] Mejorar la visualización de archivos adjuntos en la vista de detalle de tarea para ejecutores
+- [x] Implementar funcionalidad de descarga al hacer clic en los archivos adjuntos
+- [x] Añadir efectos visuales para indicar que los archivos son interactivos
+- [x] Mejorar la experiencia de usuario con notificaciones toast al descargar archivos
+- [x] Añadir título descriptivo a los elementos de archivos adjuntos
+- [x] Implementar capacidad para que los ejecutores puedan adjuntar nuevos archivos a las tareas asignadas
+- [x] Añadir visualización de archivos adjuntos en la página de seguimiento de solicitud para usuarios solicitantes
+- [x] Implementar funcionalidad de descarga de archivos adjuntos para usuarios solicitantes
+- [x] Implementar funcionalidad para adjuntar archivos a comentarios en el chat de solicitudes
+
+### 2. Corrección de Errores (1 día)
+- [x] Solucionar error de formato de fecha en ActualizarProgreso.tsx
+- [x] Implementar validación robusta para el manejo de fechas nulas o inválidas
+- [x] Corregir problema con tareas iniciadas que no aparecen en la sección "En Progreso"
+- [x] Mejorar la obtención de tareas en progreso para incluir tanto actividades como solicitudes
+
+### 3. Mejora de Funcionalidades para Usuario Asignador (2 días)
+- [x] Implementar funcionalidad para editar tareas como usuario asignador
+  - [x] Crear componente EditarTarea.tsx para permitir la edición de solicitudes y tareas
+  - [x] Implementar formulario con validación para editar campos de la tarea
+  - [x] Conectar con la API para actualizar los datos de la tarea
+- [x] Implementar funcionalidad para reasignar tareas a otros ejecutores
+  - [x] Crear componente ReasignarTarea.tsx para permitir la reasignación de tareas
+  - [x] Implementar selección de ejecutores disponibles
+  - [x] Conectar con la API para actualizar el ejecutor asignado
+- [x] Actualizar las rutas en App.tsx para incluir las nuevas páginas
+- [x] Mejorar la navegación entre las páginas de detalle, edición y reasignación
+
+### 4. Mejora de Dashboard para Usuario Solicitante (2 días)
+- [x] Mejorar el dashboard de solicitante para mostrar valores reales
+  - [x] Implementar actualización automática de datos al cargar el dashboard
+  - [x] Añadir botón de recarga manual para actualizar los datos
+  - [x] Optimizar la obtención de datos para evitar problemas de caché
+  - [x] Mejorar la visualización de estadísticas con datos reales
+  - [x] Implementar validación robusta para manejar respuestas de API vacías o erróneas
+  - [x] Implementar carga forzada de estadísticas al iniciar el dashboard
+  - [x] Mejorar el manejo de errores en las peticiones a la API
+  - [x] Implementar actualización periódica de datos cada 30 segundos
+  - [x] Reemplazar el cliente ky por fetch nativo para evitar problemas de caché
+
+### 5. Mejora de la Sección de Historial de Tareas para Ejecutores (2 días)
+- [x] Implementar informe detallado de tareas
+  - [x] Crear componente modal TaskReportModal para mostrar información detallada
+  - [x] Implementar visualización de historial completo de cambios de estado
+  - [x] Añadir sección para mostrar comentarios asociados a la tarea
+  - [x] Implementar visualización de archivos adjuntos con opción de descarga
+  - [x] Incluir métricas de tiempo dedicado y fechas relevantes
+  - [x] Mejorar la presentación de información del solicitante y asignador
+- [x] Rediseñar el mensaje de aprobación
+  - [x] Mejorar la coherencia visual con el sistema de badges implementado
+  - [x] Optimizar el contraste y legibilidad del texto
+  - [x] Implementar diseño más elegante y profesional
+  - [x] Añadir iconos para mejorar la experiencia visual
+  - [x] Mantener la información importante con presentación más armónica
+
+### 6. Mejora de la Consistencia Visual de Botones y Filtros (1 día)
+- [x] Crear componentes reutilizables para botones y filtros
+  - [x] Implementar componente RefreshButton para botones de actualización
+  - [x] Implementar componente FilterBadge para filtros con estilo de badge
+  - [x] Añadir soporte para diferentes tamaños y variantes
+  - [x] Implementar animaciones y efectos visuales coherentes
+- [x] Actualizar componentes existentes para usar los nuevos componentes
+  - [x] Modificar MisTareas.tsx para usar RefreshButton y FilterBadge
+  - [x] Modificar ProgresoTareas.tsx para usar RefreshButton y FilterBadge
+  - [x] Actualizar estilos para mantener coherencia con el sistema de badges
+  - [x] Mejorar la experiencia visual con transiciones suaves
+- [x] Implementar funcionalidades de filtrado mejoradas
+  - [x] Añadir filtros de búsqueda, categoría y prioridad a la sección "En Progreso"
+  - [x] Implementar mensaje informativo cuando no hay resultados que coincidan con los filtros
+  - [x] Añadir botón para limpiar filtros cuando no se encuentran resultados
+- [x] Asegurar responsividad y accesibilidad
+  - [x] Verificar que los componentes se vean bien en diferentes tamaños de pantalla
+  - [x] Implementar atributos aria para mejorar la accesibilidad
+  - [x] Asegurar suficiente contraste para todos los elementos interactivos
+
+## Sprint 17: Refactorización de Dashboards y Mejora de Interfaces por Rol
+
+### Descripción del Sprint
+Este sprint se enfocará en refactorizar la estructura de dashboards para eliminar la redundancia actual donde cada usuario ve dos dashboards (uno común y otro específico a su rol). El objetivo es crear una experiencia más coherente y personalizada para cada rol de usuario.
+
+### Objetivos
+- Eliminar la redundancia en los dashboards
+- Crear un dashboard unificado basado en roles
+- Simplificar la navegación
+- Mejorar la experiencia de usuario
+- Optimizar el rendimiento de carga de datos
+
+### 1. Análisis y Planificación (2 días)
+
+#### 1.1 Análisis de la estructura actual (1 día)
+- [x] Documentar la estructura actual de dashboards y sus componentes
+- [x] Identificar componentes duplicados y funcionalidades redundantes
+- [x] Analizar las necesidades específicas de cada rol (SOLICITANTE, ASIGNADOR, EJECUTOR, ADMIN)
+- [x] Crear diagramas de la estructura actual y la propuesta
+
+#### 1.2 Diseño de la nueva arquitectura (1 día)
+- [x] Diseñar la estructura del nuevo dashboard unificado
+- [x] Definir qué componentes se mostrarán para cada rol
+- [x] Crear mockups de la nueva interfaz
+- [x] Documentar la estrategia de migración
+
+### 2. Implementación del Dashboard Unificado (3 días)
+
+#### 2.1 Crear componente de dashboard inteligente (1 día)
+- [x] Implementar componente `SmartDashboard` que cargue contenido según el rol
+- [x] Crear lógica para detectar el rol del usuario actual
+- [x] Implementar sistema de secciones condicionales basadas en rol
+- [x] Añadir soporte para personalización (opcional)
+
+#### 2.2 Refactorizar componentes existentes (1 día)
+- [x] Extraer lógica específica de cada rol en componentes reutilizables
+- [x] Eliminar duplicación de código entre dashboards
+- [x] Crear componentes de sección modulares (estadísticas, tareas pendientes, etc.)
+- [x] Implementar sistema de configuración para mostrar/ocultar secciones
+
+#### 2.3 Implementar secciones específicas por rol (1 día)
+- [x] Implementar secciones para SOLICITANTE
+  - [x] Resumen de solicitudes (pendientes, en proceso, completadas)
+  - [x] Tiempos de respuesta
+  - [x] Próximas fechas límite
+  - [x] Solicitudes recientes
+  - [x] Botón destacado para nueva solicitud
+- [x] Implementar secciones para ASIGNADOR
+  - [x] Bandeja de entrada de solicitudes pendientes
+  - [x] Distribución de carga de trabajo
+  - [x] Métricas de asignación
+  - [x] Tareas por vencer
+  - [x] Botón destacado para ver bandeja de entrada
+  - [x] Mostrar datos reales en el dashboard
+  - [x] Implementar notificaciones cuando una tarea es completada por un ejecutor
+- [x] Implementar secciones para EJECUTOR
+  - [x] Tareas asignadas y en progreso
+  - [x] Calendario de vencimientos
+  - [x] Progreso de tareas actuales
+  - [x] Estadísticas de rendimiento
+  - [x] Botón destacado para ver tareas asignadas
+- [x] Implementar secciones para ADMIN
+  - [x] Vista general del sistema
+  - [x] Métricas globales
+  - [x] Distribución de carga
+  - [x] Actividad reciente
+  - [x] Enlaces a configuración y reportes
+
+### 3. Actualización de Rutas y Navegación (2 días)
+
+#### 3.1 Simplificar estructura de rutas (1 día)
+- [x] Actualizar `App.tsx` para usar el nuevo dashboard unificado
+- [x] Eliminar rutas a dashboards específicos por rol
+- [x] Mantener rutas específicas para otras funcionalidades
+- [x] Implementar redirecciones para mantener compatibilidad con enlaces existentes
+
+#### 3.2 Mejorar navegación lateral (1 día)
+- [x] Actualizar `RoleBasedSidebar.tsx` para simplificar opciones de menú
+- [x] Eliminar enlaces redundantes a dashboards específicos
+- [x] Mantener solo el dashboard principal como punto de entrada
+- [x] Mejorar la organización de opciones por rol
+
+### 4. Mejoras Visuales y de Experiencia de Usuario (2 días)
+
+#### 4.1 Mejorar diseño visual del dashboard (1 día)
+- [x] Implementar tarjetas más grandes y visualmente atractivas para estadísticas
+- [x] Crear sistema de colores coherente para indicadores
+- [x] Añadir visualizaciones interactivas (gráficos, calendarios)
+- [x] Mejorar la responsividad para diferentes tamaños de pantalla
+
+#### 4.2 Implementar transiciones y animaciones (1 día)
+- [x] Añadir transiciones suaves entre secciones
+- [x] Implementar animaciones para carga de datos
+- [x] Mejorar feedback visual para acciones del usuario
+- [x] Optimizar rendimiento de animaciones
+
+### 5. Pruebas y Optimización (2 días)
+
+#### 5.1 Implementar pruebas (1 día)
+- [ ] Crear pruebas unitarias para el nuevo dashboard
+- [ ] Implementar pruebas de integración para verificar funcionalidad
+- [ ] Realizar pruebas de rendimiento
+- [ ] Verificar compatibilidad en diferentes navegadores
+
+#### 5.2 Optimizar rendimiento (1 día)
+- [ ] Implementar carga diferida de secciones
+- [ ] Optimizar consultas de datos para cada sección
+- [ ] Implementar caché para datos que cambian con poca frecuencia
+- [ ] Medir y mejorar tiempos de carga
+
+### 6. Documentación y Despliegue (1 día)
+- [ ] Actualizar documentación técnica
+- [ ] Crear guía de usuario para la nueva interfaz
+- [ ] Actualizar CHANGELOG.md con los cambios realizados
+- [ ] Preparar para despliegue en producción
+
+### Criterios de Aceptación
+- El dashboard unificado muestra contenido relevante según el rol del usuario
+- No hay duplicación de información entre dashboards
+- La navegación es clara e intuitiva
+- El rendimiento es igual o mejor que la versión anterior
+- Todos los roles pueden acceder a la información que necesitan
+- La documentación está actualizada
 
 ## Sprint 9: Mejoras de Rendimiento y Experiencia de Usuario
 
@@ -761,6 +1917,9 @@ Solución implementada:
   - [x] Crear sistema de guardado automático en localStorage
   - [x] Añadir recuperación de borradores al abrir formulario
   - [x] Implementar gestión de múltiples borradores
+  - [x] Reemplazar sistema manual de borradores por autoguardado inteligente en formularios de solicitudes
+  - [x] Implementar guardado automático después de 3 segundos de inactividad
+  - [x] Añadir indicador visual sutil de autoguardado
 - [x] Desarrollar sistema de plantillas
   - [x] Crear interfaz para guardar actividades como plantillas
   - [x] Implementar selector de plantillas al crear actividades
@@ -1914,3 +3073,53 @@ Este sprint se enfocará en implementar pruebas unitarias y de integración para
 - Las pruebas de integración están implementadas y pasan
 - La cobertura de código ha mejorado
 - La documentación está actualizada
+
+## Sprint 24: Refactorización y Mejora de Código
+
+### Descripción del Sprint
+Este sprint se enfocó en la refactorización y mejora del código existente, corrigiendo errores, mejorando la estructura de clases y paquetes, y optimizando el rendimiento general del sistema.
+
+### Objetivos
+- Corregir errores de compilación y advertencias
+- Mejorar la estructura de clases y paquetes
+- Optimizar consultas y operaciones de base de datos
+- Implementar mejores prácticas de programación
+- Resolver problemas de dependencias circulares en el backend
+
+### Tareas Completadas
+- [x] Refactorización y mejora de código (1 día)
+  - [x] Corregir errores de compilación en el sistema de auditoría
+    - [x] Separar la clase `JpaUserAuditLogRepositoryImpl` en su propio archivo
+    - [x] Eliminar archivo duplicado `JpaUserAuditLogRepository.java`
+    - [x] Corregir errores de importación en `UserAuditController.java`
+    - [x] Añadir inyección de dependencia para `UserAuditLogRepository` en el controlador
+  - [x] Corregir errores en el controlador de auditoría
+    - [x] Corregir método `getAuditLogById` para usar el repositorio correcto
+    - [x] Corregir importaciones faltantes para `Map` y `HashMap`
+  - [x] Corregir advertencias en el código
+    - [x] Añadir anotaciones `@JsonProperty` para métodos de serialización JSON en `TaskRequestCreatedEventListener`
+    - [x] Eliminar importaciones no utilizadas en `UserAuditLogEntity`
+    - [x] Eliminar variable no utilizada en `TaskRequestWorkflowService`
+    - [x] Añadir anotaciones `@NonNull` en `SecurityFilterHandler`
+    - [x] Corregir importaciones y campos no utilizados en `TaskRequestCommentAttachmentController`
+    - [x] Mejorar parámetros `@RequestParam` para eliminar advertencias
+    - [x] Configurar lifecycle mapping en `pom.xml` para resolver problemas de plugins Maven
+  - [x] Mejorar la estructura de clases y paquetes
+    - [x] Organizar correctamente las implementaciones de repositorios
+    - [x] Seguir el principio de una clase pública por archivo
+  - [x] Implementar mejores prácticas de programación
+    - [x] Seguir principios SOLID en la implementación de repositorios
+    - [x] Mejorar la inyección de dependencias
+    - [x] Documentar adecuadamente el código con comentarios explicativos
+- [x] Resolver problemas de dependencias circulares en el backend (1 día)
+  - [x] Configurar `@EnableJpaRepositories` para escanear todos los paquetes relevantes de una vez
+  - [x] Crear documento de buenas prácticas para repositorios JPA en `docs/jpa-repositories-best-practices.md`
+  - [x] Implementar convenciones de nombres para evitar dependencias circulares
+  - [x] Mejorar la documentación sobre prevención de dependencias circulares en repositorios
+
+### Criterios de Aceptación
+- ✅ Los errores de compilación han sido corregidos
+- ✅ Las advertencias del IDE han sido resueltas o documentadas
+- ✅ La estructura de clases y paquetes sigue las mejores prácticas
+- ✅ El código sigue los principios SOLID
+- ✅ La aplicación compila y funciona correctamente

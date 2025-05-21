@@ -14,7 +14,8 @@ import {
   FiInfo,
   FiArrowLeft,
   FiCheck,
-  FiLoader
+  FiLoader,
+  FiDownload
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
@@ -224,6 +225,46 @@ const ButtonGroup = styled.div`
   justify-content: flex-end;
   gap: 12px;
   margin-top: 24px;
+`;
+
+const AttachmentsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+`;
+
+const AttachmentItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: ${({ theme }) => theme.backgroundAlt};
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.backgroundHover};
+    border-color: ${({ theme }) => theme.border};
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: ${({ theme }) => theme.primary};
+    text-decoration: none;
+    width: 100%;
+    padding: 4px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 `;
 
 const Button = styled.button<{ $primary?: boolean }>`
@@ -512,15 +553,30 @@ const AsignarTarea: React.FC = () => {
                   <FiFileText size={18} />
                   Archivos adjuntos
                 </SectionTitle>
-                <ul>
+                <AttachmentsList>
                   {solicitud.attachments.map((attachment, index) => (
-                    <li key={index}>
-                      <a href={attachment.downloadUrl} target="_blank" rel="noopener noreferrer">
+                    <AttachmentItem key={index} title="Haz clic para descargar el archivo">
+                      <a
+                        href={attachment.downloadUrl}
+                        download={attachment.fileName}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          // Crear un enlace temporal para forzar la descarga
+                          const link = document.createElement('a');
+                          link.href = attachment.downloadUrl;
+                          link.setAttribute('download', attachment.fileName);
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                          toast.success(`Descargando ${attachment.fileName}...`);
+                        }}
+                      >
+                        <FiDownload size={16} />
                         {attachment.fileName} ({(attachment.fileSize / 1024).toFixed(1)} KB)
                       </a>
-                    </li>
+                    </AttachmentItem>
                   ))}
-                </ul>
+                </AttachmentsList>
               </>
             )}
           </SolicitudDetails>

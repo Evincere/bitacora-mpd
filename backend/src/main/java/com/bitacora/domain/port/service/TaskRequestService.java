@@ -9,7 +9,8 @@ import java.util.Optional;
 
 /**
  * Interfaz que define las operaciones de servicio para la entidad TaskRequest.
- * Esta interfaz define las operaciones de negocio relacionadas con las solicitudes de tareas.
+ * Esta interfaz define las operaciones de negocio relacionadas con las
+ * solicitudes de tareas.
  */
 public interface TaskRequestService {
 
@@ -24,18 +25,19 @@ public interface TaskRequestService {
     /**
      * Envía una solicitud de tarea, cambiando su estado de DRAFT a SUBMITTED.
      *
-     * @param id ID de la solicitud
+     * @param id          ID de la solicitud
      * @param requesterId ID del solicitante
      * @return La solicitud actualizada
-     * @throws IllegalStateException Si la solicitud no está en estado DRAFT
-     * @throws IllegalArgumentException Si el ID del solicitante no coincide con el de la solicitud
+     * @throws IllegalStateException    Si la solicitud no está en estado DRAFT
+     * @throws IllegalArgumentException Si el ID del solicitante no coincide con el
+     *                                  de la solicitud
      */
     TaskRequest submit(Long id, Long requesterId);
 
     /**
      * Asigna una solicitud de tarea a un asignador.
      *
-     * @param id ID de la solicitud
+     * @param id         ID de la solicitud
      * @param assignerId ID del asignador
      * @return La solicitud actualizada
      * @throws IllegalStateException Si la solicitud no está en estado SUBMITTED
@@ -54,18 +56,20 @@ public interface TaskRequestService {
     /**
      * Cancela una solicitud.
      *
-     * @param id ID de la solicitud
+     * @param id          ID de la solicitud
      * @param requesterId ID del solicitante
      * @return La solicitud actualizada
-     * @throws IllegalStateException Si la solicitud ya está en estado COMPLETED o CANCELLED
-     * @throws IllegalArgumentException Si el ID del solicitante no coincide con el de la solicitud
+     * @throws IllegalStateException    Si la solicitud ya está en estado COMPLETED
+     *                                  o CANCELLED
+     * @throws IllegalArgumentException Si el ID del solicitante no coincide con el
+     *                                  de la solicitud
      */
     TaskRequest cancel(Long id, Long requesterId);
 
     /**
      * Añade un comentario a una solicitud.
      *
-     * @param id ID de la solicitud
+     * @param id      ID de la solicitud
      * @param comment El comentario a añadir
      * @return La solicitud actualizada
      */
@@ -92,8 +96,8 @@ public interface TaskRequestService {
      * Busca solicitudes por el ID del solicitante.
      *
      * @param requesterId ID del solicitante
-     * @param page Número de página (0-indexed)
-     * @param size Tamaño de la página
+     * @param page        Número de página (0-indexed)
+     * @param size        Tamaño de la página
      * @return Lista de solicitudes del solicitante
      */
     List<TaskRequest> findByRequesterId(Long requesterId, int page, int size);
@@ -102,8 +106,8 @@ public interface TaskRequestService {
      * Busca solicitudes por el ID del asignador.
      *
      * @param assignerId ID del asignador
-     * @param page Número de página (0-indexed)
-     * @param size Tamaño de la página
+     * @param page       Número de página (0-indexed)
+     * @param size       Tamaño de la página
      * @return Lista de solicitudes asignadas por el asignador
      */
     List<TaskRequest> findByAssignerId(Long assignerId, int page, int size);
@@ -112,11 +116,31 @@ public interface TaskRequestService {
      * Busca solicitudes por estado.
      *
      * @param status Estado de las solicitudes
-     * @param page Número de página (0-indexed)
-     * @param size Tamaño de la página
+     * @param page   Número de página (0-indexed)
+     * @param size   Tamaño de la página
      * @return Lista de solicitudes con el estado especificado
      */
     List<TaskRequest> findByStatus(TaskRequestStatus status, int page, int size);
+
+    /**
+     * Busca solicitudes por estado y ejecutor.
+     *
+     * @param status     Estado de las solicitudes
+     * @param executorId ID del ejecutor
+     * @param page       Número de página (0-indexed)
+     * @param size       Tamaño de la página
+     * @return Lista de solicitudes con el estado y ejecutor especificados
+     */
+    List<TaskRequest> findByStatusAndExecutorId(TaskRequestStatus status, Long executorId, int page, int size);
+
+    /**
+     * Cuenta el número de solicitudes con un estado y ejecutor específicos.
+     *
+     * @param status     Estado de las solicitudes
+     * @param executorId ID del ejecutor
+     * @return El número de solicitudes
+     */
+    long countByStatusAndExecutorId(TaskRequestStatus status, Long executorId);
 
     /**
      * Obtiene estadísticas de solicitudes por estado.

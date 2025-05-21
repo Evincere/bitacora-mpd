@@ -52,13 +52,14 @@ const Badge = styled.span<BadgeProps>`
     flex-shrink: 0;
   }
 
-  background-color: ${({ $normalizedStatus }) => {
+  background-color: ${({ $normalizedStatus, theme }) => {
+    // Usar un fondo oscuro basado en el tema, pero manteniendo la identidad del color de estado
     if (statusColors[$normalizedStatus]) {
-      // Aumentar la opacidad para mejorar el contraste
-      const color = statusColors[$normalizedStatus].background;
-      return color.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/, 'rgba($1, $2, $3, 0.25)');
+      const baseColor = statusColors[$normalizedStatus].text;
+      // Crear un fondo oscuro con una ligera transparencia del color del estado
+      return `${baseColor}20`; // 20 es la opacidad en hexadecimal (equivalente a 0.125)
     }
-    return statusColors.default.background;
+    return theme.backgroundSecondary;
   }};
 
   color: ${({ $normalizedStatus }) => {
@@ -85,13 +86,13 @@ const Badge = styled.span<BadgeProps>`
       }
       return statusColors.default.shadow;
     }};
-    background-color: ${({ $normalizedStatus }) => {
+    background-color: ${({ $normalizedStatus, theme }) => {
       if (statusColors[$normalizedStatus]) {
-        // Aumentar la opacidad para mejorar el contraste en hover
-        const color = statusColors[$normalizedStatus].hover;
-        return color.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/, 'rgba($1, $2, $3, 0.35)');
+        const baseColor = statusColors[$normalizedStatus].text;
+        // Crear un fondo oscuro con una mayor opacidad para el hover
+        return `${baseColor}30`; // 30 es la opacidad en hexadecimal (equivalente a 0.188)
       }
-      return statusColors.default.hover;
+      return theme.backgroundHover;
     }};
   }
 `;

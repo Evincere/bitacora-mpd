@@ -13,10 +13,15 @@ import {
   FiMessageSquare,
   FiLoader,
   FiRefreshCw,
-  FiShield
+  FiShield,
+  FiTag,
+  FiFilter,
+  FiSearch
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import AddExecutePermission from '@/components/debug/AddExecutePermission';
+
+// Componentes UI
+import { RefreshButton, FilterBadge } from '@/shared/components/ui';
 
 // Hooks y servicios
 import useTareas from '../hooks/useTareas';
@@ -81,6 +86,50 @@ const PageTitle = styled.h1`
   color: ${({ theme }) => theme.text};
 `;
 
+const FiltersContainer = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+`;
+
+const SearchInput = styled.div`
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  max-width: 400px;
+
+  svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: ${({ theme }) => theme.textSecondary};
+  }
+
+  input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    border-radius: 20px;
+    border: 1.5px solid ${({ theme }) => `${theme.primary}70`};
+    background-color: ${({ theme }) => `${theme.primary}20`};
+    color: ${({ theme }) => theme.text};
+    font-size: 14px;
+    transition: all 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: ${({ theme }) => theme.primary};
+      box-shadow: 0 0 0 3px ${({ theme }) => `${theme.primary}30`};
+    }
+
+    &::placeholder {
+      color: ${({ theme }) => theme.textSecondary};
+    }
+  }
+`;
+
 const TareasGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -120,11 +169,17 @@ const TareaMeta = styled.div`
 const StatusBadge = styled.span<{ $status: string }>`
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 4px;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 700;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
 
   ${({ $status, theme }) => {
     switch ($status) {
@@ -170,11 +225,17 @@ const StatusBadge = styled.span<{ $status: string }>`
 const PriorityBadge = styled.span<{ $priority: string }>`
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 4px;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 700;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
 
   ${({ $priority, theme }) => {
     switch ($priority) {
@@ -241,24 +302,38 @@ const ProgressLabel = styled.div`
   color: ${({ theme }) => theme.text};
 `;
 
-const ProgressValue = styled.div`
-  font-size: 14px;
-  color: ${({ theme }) => theme.textSecondary};
+const ProgressValue = styled.div<{ $percentage: number }>`
+  font-size: 16px;
+  font-weight: 700;
+  color: ${({ $percentage, theme }) => {
+    if ($percentage < 25) return theme.error;
+    if ($percentage < 50) return theme.warning;
+    if ($percentage < 75) return theme.info;
+    return theme.success;
+  }};
+  transition: color 0.3s ease;
 `;
 
 const ProgressBar = styled.div`
-  height: 8px;
+  height: 10px;
   background-color: ${({ theme }) => theme.backgroundAlt};
-  border-radius: 4px;
+  border-radius: 6px;
   overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
 
 const ProgressFill = styled.div<{ $percentage: number }>`
   height: 100%;
   width: ${({ $percentage }) => `${$percentage}%`};
-  background-color: ${({ theme }) => theme.primary};
-  border-radius: 4px;
-  transition: width 0.3s ease;
+  background-color: ${({ $percentage, theme }) => {
+    if ($percentage < 25) return theme.error;
+    if ($percentage < 50) return theme.warning;
+    if ($percentage < 75) return theme.info;
+    return theme.success;
+  }};
+  border-radius: 6px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 `;
 
 const TareaDescription = styled.p`
@@ -298,6 +373,69 @@ const TareaInfoLabel = styled.span`
 const TareaInfoValue = styled.span`
   color: ${({ theme }) => theme.text};
   font-weight: 500;
+`;
+
+const TimeRemainingBadge = styled.div<{ $isOverdue: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+  background-color: ${({ $isOverdue, theme }) =>
+    $isOverdue ? theme.errorLight : theme.infoLight};
+  color: ${({ $isOverdue, theme }) =>
+    $isOverdue ? theme.error : theme.info};
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  }
+`;
+
+const EstimatedCompletionDate = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+  background-color: ${({ theme }) => theme.backgroundTertiary};
+  color: ${({ theme }) => theme.textSecondary};
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  }
+`;
+
+const ProgressStats = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 12px;
+  color: ${({ theme }) => theme.textSecondary};
+`;
+
+const ProgressStat = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const Divider = styled.div`
+  height: 1px;
+  background-color: ${({ theme }) => theme.border};
+  margin: 12px 0;
+  opacity: 0.5;
 `;
 
 const TareaActions = styled.div`
@@ -393,24 +531,111 @@ const EmptyState = styled.div`
 
 // Función para formatear fechas
 const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
+  if (!dateString) return 'Fecha no disponible';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Fecha inválida';
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  } catch (error) {
+    console.error('Error al formatear fecha:', error);
+    return 'Error en fecha';
+  }
 };
 
 // Función para formatear fechas con hora
 const formatDateTime = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  if (!dateString) return 'Fecha no disponible';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Fecha inválida';
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (error) {
+    console.error('Error al formatear fecha y hora:', error);
+    return 'Error en fecha';
+  }
+};
+
+// Función para calcular días restantes hasta la fecha límite
+const getDaysRemaining = (dueDate: string): { days: number; isOverdue: boolean; text: string } => {
+  if (!dueDate) return { days: 0, isOverdue: false, text: 'Sin fecha límite' };
+
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dueDateObj = new Date(dueDate);
+    dueDateObj.setHours(0, 0, 0, 0);
+
+    if (isNaN(dueDateObj.getTime())) {
+      return { days: 0, isOverdue: false, text: 'Fecha inválida' };
+    }
+
+    const diffTime = dueDateObj.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return {
+        days: Math.abs(diffDays),
+        isOverdue: true,
+        text: `Vencida hace ${Math.abs(diffDays)} día${Math.abs(diffDays) !== 1 ? 's' : ''}`
+      };
+    } else if (diffDays === 0) {
+      return { days: 0, isOverdue: false, text: 'Vence hoy' };
+    } else if (diffDays === 1) {
+      return { days: 1, isOverdue: false, text: 'Vence mañana' };
+    } else {
+      return { days: diffDays, isOverdue: false, text: `${diffDays} días restantes` };
+    }
+  } catch (error) {
+    console.error('Error al calcular días restantes:', error);
+    return { days: 0, isOverdue: false, text: 'Error en cálculo' };
+  }
+};
+
+// Función para estimar la fecha de finalización basada en el progreso actual
+const getEstimatedCompletionDate = (startDate: string, dueDate: string, progress: number): string => {
+  if (!startDate || !dueDate || progress <= 0) return 'No disponible';
+
+  try {
+    const start = new Date(startDate);
+    const due = new Date(dueDate);
+
+    if (isNaN(start.getTime()) || isNaN(due.getTime())) {
+      return 'Datos insuficientes';
+    }
+
+    // Si el progreso es 100%, la fecha estimada es ahora
+    if (progress >= 100) return 'Completada';
+
+    // Calcular el tiempo total asignado para la tarea
+    const totalTaskTime = due.getTime() - start.getTime();
+
+    // Calcular el tiempo que debería tomar completar el resto del trabajo
+    const remainingWork = 100 - progress;
+    const timePerProgressPoint = totalTaskTime / 100;
+    const remainingTime = remainingWork * timePerProgressPoint;
+
+    // Calcular la fecha estimada de finalización
+    const now = new Date();
+    const estimatedCompletionTime = now.getTime() + remainingTime;
+    const estimatedCompletionDate = new Date(estimatedCompletionTime);
+
+    // Formatear la fecha estimada
+    return formatDate(estimatedCompletionDate.toISOString());
+  } catch (error) {
+    console.error('Error al calcular fecha estimada de finalización:', error);
+    return 'Error en cálculo';
+  }
 };
 
 // Función para obtener el texto de estado
@@ -493,6 +718,9 @@ const getCategoryText = (category: string) => {
 
 const ProgresoTareas: React.FC = () => {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('');
 
   // Usar el hook personalizado para tareas
   const {
@@ -519,6 +747,24 @@ const ProgresoTareas: React.FC = () => {
     ultimaActualizacion: task.updatedAt || new Date().toISOString(),
     comentarios: task.comments ? [{ id: 1, fecha: task.updatedAt || '', usuario: task.requesterName || '', mensaje: task.comments }] : []
   }));
+
+  // Filtrar tareas según los criterios seleccionados
+  const filteredTareas = tareas.filter(tarea => {
+    // Filtrar por término de búsqueda
+    const matchesSearch = searchTerm === '' ||
+      tarea.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tarea.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tarea.solicitante.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Filtrar por categoría
+    const matchesCategory = categoryFilter === '' || tarea.categoria === categoryFilter;
+
+    // Filtrar por prioridad
+    const matchesPriority = priorityFilter === '' || tarea.prioridad === priorityFilter;
+
+    // Devolver true solo si cumple todos los criterios
+    return matchesSearch && matchesCategory && matchesPriority;
+  });
 
   // Cargar datos al montar el componente
   useEffect(() => {
@@ -578,11 +824,56 @@ const ProgresoTareas: React.FC = () => {
     <PageContainer>
       <PageHeader>
         <PageTitle>Tareas en Progreso</PageTitle>
-        <ActionButton onClick={handleRefresh}>
-          <FiRefreshCw size={16} />
-          Actualizar
-        </ActionButton>
+        <RefreshButton
+          onClick={handleRefresh}
+          isLoading={isLoadingInProgressTasks}
+          label="Actualizar"
+          title="Actualizar lista de tareas en progreso"
+        />
       </PageHeader>
+
+      <FiltersContainer>
+        <SearchInput>
+          <FiSearch size={16} />
+          <input
+            type="text"
+            placeholder="Buscar tareas..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </SearchInput>
+
+        <FilterBadge
+          label="Categoría"
+          value={categoryFilter}
+          onChange={setCategoryFilter}
+          options={[
+            { value: "ADMINISTRATIVA", label: "Administrativa" },
+            { value: "LEGAL", label: "Legal" },
+            { value: "TECNICA", label: "Técnica" },
+            { value: "FINANCIERA", label: "Financiera" },
+            { value: "RECURSOS_HUMANOS", label: "Recursos Humanos" },
+            { value: "OTRA", label: "Otra" }
+          ]}
+          placeholder="Todas las categorías"
+          icon={<FiTag size={14} />}
+        />
+
+        <FilterBadge
+          label="Prioridad"
+          value={priorityFilter}
+          onChange={setPriorityFilter}
+          options={[
+            { value: "CRITICAL", label: "Crítica" },
+            { value: "HIGH", label: "Alta" },
+            { value: "MEDIUM", label: "Media" },
+            { value: "LOW", label: "Baja" },
+            { value: "TRIVIAL", label: "Trivial" }
+          ]}
+          placeholder="Todas las prioridades"
+          icon={<FiClock size={14} />}
+        />
+      </FiltersContainer>
 
       {isLoadingInProgressTasks ? (
         <EmptyState>
@@ -590,9 +881,9 @@ const ProgresoTareas: React.FC = () => {
           <h3>Cargando tareas</h3>
           <p>Por favor, espere mientras se cargan las tareas en progreso.</p>
         </EmptyState>
-      ) : tareas.length > 0 ? (
+      ) : filteredTareas.length > 0 ? (
         <TareasGrid>
-          {tareas.map((tarea) => (
+          {filteredTareas.map((tarea) => (
             <TareaCard key={tarea.id}>
               <TareaHeader>
                 <TareaTitle>{tarea.titulo}</TareaTitle>
@@ -610,23 +901,59 @@ const ProgresoTareas: React.FC = () => {
                 <ProgressContainer>
                   <ProgressHeader>
                     <ProgressLabel>Progreso</ProgressLabel>
-                    <ProgressValue>{tarea.progreso}%</ProgressValue>
+                    <ProgressValue $percentage={tarea.progreso}>{tarea.progreso}%</ProgressValue>
                   </ProgressHeader>
                   <ProgressBar>
                     <ProgressFill $percentage={tarea.progreso} />
                   </ProgressBar>
+                  <ProgressStats>
+                    <ProgressStat>
+                      <FiClock size={12} />
+                      Inicio: {formatDate(tarea.fechaAsignacion)}
+                    </ProgressStat>
+                    <ProgressStat>
+                      <FiCalendar size={12} />
+                      Límite: {formatDate(tarea.fechaLimite)}
+                    </ProgressStat>
+                  </ProgressStats>
                 </ProgressContainer>
 
                 <TareaDescription>{tarea.descripcion}</TareaDescription>
 
+                {/* Información de tiempo restante y estimación */}
+                {(() => {
+                  const timeRemaining = getDaysRemaining(tarea.fechaLimite);
+                  const estimatedDate = getEstimatedCompletionDate(
+                    tarea.fechaAsignacion,
+                    tarea.fechaLimite,
+                    tarea.progreso
+                  );
+
+                  return (
+                    <>
+                      <TimeRemainingBadge $isOverdue={timeRemaining.isOverdue}>
+                        {timeRemaining.isOverdue ? <FiAlertCircle size={14} /> : <FiClock size={14} />}
+                        {timeRemaining.text}
+                      </TimeRemainingBadge>
+
+                      <EstimatedCompletionDate>
+                        <FiCalendar size={14} />
+                        Finalización estimada: {estimatedDate}
+                      </EstimatedCompletionDate>
+
+                      <Divider />
+                    </>
+                  );
+                })()}
+
                 <TareaInfoList>
                   <TareaInfoItem>
                     <TareaInfoIcon>
-                      <FiCalendar size={14} />
+                      <FiShield size={14} />
                     </TareaInfoIcon>
                     <TareaInfoContent>
-                      <TareaInfoLabel>Fecha límite:</TareaInfoLabel>
-                      <TareaInfoValue>{formatDate(tarea.fechaLimite)}</TareaInfoValue>
+                      <TareaInfoLabel>Categoría:</TareaInfoLabel>
+                      <TareaInfoValue>{getCategoryText(tarea.categoria)}</TareaInfoValue>
                     </TareaInfoContent>
                   </TareaInfoItem>
                   <TareaInfoItem>
@@ -663,20 +990,36 @@ const ProgresoTareas: React.FC = () => {
             </TareaCard>
           ))}
         </TareasGrid>
-      ) : (
+      ) : tareas.length === 0 ? (
         <EmptyState>
           <FiAlertCircle size={48} />
           <h3>No hay tareas en progreso</h3>
           <p>Actualmente no tienes tareas en estado "En Progreso". Puedes iniciar una tarea desde la sección "Mis Tareas".</p>
-          <ActionButton onClick={handleRefresh} style={{ marginTop: '16px' }}>
-            <FiRefreshCw size={16} />
-            Actualizar datos
-          </ActionButton>
+          <RefreshButton
+            onClick={handleRefresh}
+            style={{ marginTop: '16px' }}
+            label="Actualizar datos"
+          />
+        </EmptyState>
+      ) : (
+        <EmptyState>
+          <FiFilter size={48} />
+          <h3>No se encontraron tareas</h3>
+          <p>No hay tareas que coincidan con los filtros seleccionados. Intenta cambiar los criterios de búsqueda.</p>
+          <RefreshButton
+            onClick={() => {
+              setSearchTerm('');
+              setCategoryFilter('');
+              setPriorityFilter('');
+            }}
+            style={{ marginTop: '16px' }}
+            label="Limpiar filtros"
+            title="Limpiar todos los filtros"
+          />
         </EmptyState>
       )}
 
-      {/* Componente para añadir el permiso EXECUTE_ACTIVITIES */}
-      <AddExecutePermission />
+
     </PageContainer>
   );
 };

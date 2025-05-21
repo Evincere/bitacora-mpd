@@ -55,13 +55,13 @@ export const priorityColors: PriorityColorMap = {
     hover: "rgba(59, 130, 246, 0.35)",
     shadow: "rgba(59, 130, 246, 0.5)",
   },
-  // Prioridad: Baja (Verde)
+  // Prioridad: Baja (Verde - Ahora con colores de APPROVED)
   LOW: {
-    background: "rgba(16, 185, 129, 0.25)",
-    border: "rgba(16, 185, 129, 0.7)",
-    text: "#065f46",
-    hover: "rgba(16, 185, 129, 0.35)",
-    shadow: "rgba(16, 185, 129, 0.5)",
+    background: "rgba(46, 213, 115, 0.2)",
+    border: "rgba(46, 213, 115, 0.6)",
+    text: "#0e8c3c",
+    hover: "rgba(46, 213, 115, 0.3)",
+    shadow: "rgba(46, 213, 115, 0.4)",
   },
   // Prioridad: Trivial (Gris)
   TRIVIAL: {

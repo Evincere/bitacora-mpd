@@ -1,16 +1,13 @@
 import { AuthResponse, LoginCredentials } from '@/types/api';
+import tokenService from '@/core/utils/tokenService';
+import errorHandlingService, { ApiError } from '@/core/utils/errorHandlingService';
+import apiClient from '@/core/api/apiClient';
+import { toast } from 'react-toastify';
+import { authEvents } from '@/core/events/AuthEventEmitter';
+import { AuthEventType } from '@/core/types/auth-events';
 
-// Obtener la URL base de la API desde las variables de entorno
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
-// Asegurarse de que la ruta sea correcta
-const API_URL = `${API_BASE_URL}/auth`;
-
-// URL completa del backend para uso directo
-const BACKEND_URL = 'http://localhost:8080';
-
-console.log('API_BASE_URL:', API_BASE_URL);
-console.log('API_URL:', API_URL);
-console.log('BACKEND_URL:', BACKEND_URL);
+// Constante para la clave de almacenamiento del usuario
+const USER_KEY = 'bitacora_user';
 
 /**
  * Inicia sesión con las credenciales proporcionadas
@@ -22,29 +19,19 @@ const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
   console.log('URL de login:', '/api/auth/login');
 
   try {
-    // Usar una URL relativa para que sea manejada por el proxy de Vite
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(credentials)
-    }).then(res => {
-      if (!res.ok) {
-        throw new Error(`Error en login: ${res.status} ${res.statusText}`);
-      }
-      return res.json();
-    });
+    // Usar el cliente HTTP con manejo automático de errores
+    const response = await apiClient.post<AuthResponse>('/auth/login', credentials, { skipAuth: true });
 
     console.log('Respuesta de login:', response);
+    toast.success('Inicio de sesión exitoso');
 
     if (response) {
-      // Guardar datos de autenticación en localStorage
-      localStorage.setItem('bitacora_token', response.token);
+      // Guardar tokens usando el servicio de tokens
+      tokenService.setToken(response.token);
 
       // Si hay refreshToken en la respuesta, guardarlo
       if (response.refreshToken) {
-        localStorage.setItem('bitacora_refresh_token', response.refreshToken);
+        tokenService.setRefreshToken(response.refreshToken);
       }
 
       // Guardar datos del usuario
@@ -68,37 +55,111 @@ const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
       // Depuración
       console.log('authService: Datos del usuario a guardar en localStorage:', userData);
 
-      localStorage.setItem('bitacora_user', JSON.stringify(userData));
+      localStorage.setItem(USER_KEY, JSON.stringify(userData));
 
       // Verificar que los datos se hayan guardado correctamente
-      const savedToken = localStorage.getItem('bitacora_token');
-      const savedUser = localStorage.getItem('bitacora_user');
+      const token = tokenService.getToken();
+      const savedUser = localStorage.getItem(USER_KEY);
 
-      console.log('Datos guardados en localStorage:');
-      console.log('- Token guardado:', !!savedToken);
+      console.log('Datos guardados:');
+      console.log('- Token guardado:', !!token);
       console.log('- Usuario guardado:', !!savedUser);
 
       // Si no se guardaron los datos correctamente, lanzar un error
-      if (!savedToken || !savedUser) {
+      if (!token || !savedUser) {
         throw new Error('No se pudieron guardar los datos de autenticación');
       }
+
+      // Verificar si el token es válido y no ha expirado
+      if (tokenService.isTokenExpired(response.token)) {
+        console.warn('El token recibido ya ha expirado');
+      } else {
+        const expirationTime = tokenService.getTokenExpirationTime();
+        console.log(`El token expirará en ${expirationTime} segundos`);
+      }
+
+      // Emitir evento de login exitoso
+      authEvents.emit(AuthEventType.LOGIN, {
+        timestamp: Date.now(),
+        userId: response.userId,
+        username: response.username,
+        role: response.role,
+        permissions: permissions
+      });
     }
 
     return response;
   } catch (error) {
     console.error('Error en login:', error);
+
+    // Emitir evento de error de autenticación
+    const apiError = error as ApiError;
+    authEvents.emit(AuthEventType.AUTH_ERROR, {
+      timestamp: Date.now(),
+      errorCode: apiError.status || 500,
+      errorMessage: apiError.message || 'Error desconocido al iniciar sesión',
+      errorType: 'credentials',
+      attemptedAction: 'login',
+      username: credentials.username
+    });
+
     throw error;
   }
 };
 
 /**
  * Cierra la sesión del usuario actual
+ * @param sendRequest Indica si se debe enviar una petición al servidor para invalidar el token
+ * @returns Promesa que se resuelve cuando se completa el cierre de sesión
  */
-const logout = (): void => {
-  // Eliminar todos los datos de autenticación
-  localStorage.removeItem('bitacora_token');
-  // localStorage.removeItem('bitacora_refresh_token');
-  localStorage.removeItem('bitacora_user');
+const logout = async (sendRequest: boolean = true): Promise<void> => {
+  try {
+    // Si se debe enviar una petición al servidor
+    if (sendRequest) {
+      const token = tokenService.getToken();
+
+      if (token) {
+        // Usar el cliente HTTP con manejo automático de errores
+        await apiClient.post('/auth/logout', {});
+        toast.info('Sesión cerrada correctamente');
+      }
+    }
+  } catch (error) {
+    console.error('Error al cerrar sesión en el servidor:', error);
+    // No mostrar error al usuario, ya que de todas formas se limpiará la sesión localmente
+  } finally {
+    // Obtener datos del usuario antes de limpiar
+    const userJson = localStorage.getItem(USER_KEY);
+    let userId: number | undefined;
+    let username: string | undefined;
+
+    if (userJson) {
+      try {
+        const userData = JSON.parse(userJson);
+        userId = userData.id;
+        username = userData.username;
+      } catch (e) {
+        console.error('Error al parsear datos de usuario:', e);
+      }
+    }
+
+    // Limpiar tokens y datos de usuario localmente
+    tokenService.clearTokens();
+    localStorage.removeItem(USER_KEY);
+
+    // Emitir evento de logout
+    authEvents.emit(AuthEventType.LOGOUT, {
+      timestamp: Date.now(),
+      userId,
+      username,
+      reason: 'user_initiated'
+    });
+
+    // Redirigir al login si no estamos ya en esa página
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login';
+    }
+  }
 };
 
 const authService = {

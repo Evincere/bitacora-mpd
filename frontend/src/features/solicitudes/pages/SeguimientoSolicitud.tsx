@@ -21,8 +21,12 @@ import {
   FiX,
   FiEye,
   FiRefreshCw,
-  FiAtSign
+  FiAtSign,
+  FiInfo,
+  FiDownload,
+  FiFile
 } from 'react-icons/fi';
+import CommentSection from '@/features/comentarios/components/CommentSection';
 import { toast } from 'react-toastify';
 import solicitudesService, { TaskRequest, TaskRequestHistory } from '../services/solicitudesService';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
@@ -33,6 +37,7 @@ import useAuth from '@/features/auth/hooks/useAuth';
 import UserMentionSuggestions from '../components/UserMentionSuggestions';
 import CommentTextWithMentions from '../components/CommentText';
 import userSearchService, { User as UserType } from '@/features/usuarios/services/userSearchService';
+import SeguimientoVisual from '../components/SeguimientoVisual';
 
 // Animación de rotación para el loader
 const spin = keyframes`
@@ -49,23 +54,7 @@ const SpinningLoader = styled(FiLoader)`
   animation: ${spin} 1s linear infinite;
 `;
 
-// Datos de ejemplo para comentarios
-// El historial ahora se cargará desde el backend
-
-const MOCK_COMENTARIOS = [
-  {
-    id: 1,
-    fecha: '2025-05-01T14:30:00',
-    usuario: 'Adriana Sánchez',
-    mensaje: '¿Podría proporcionar más detalles sobre el caso?'
-  },
-  {
-    id: 2,
-    fecha: '2025-05-01T15:45:00',
-    usuario: 'Juan Pérez',
-    mensaje: 'Es para el expediente 12345, necesito que se realice antes del viernes.'
-  }
-];
+// Los comentarios se cargan desde el backend en la función fetchComments
 
 const PageContainer = styled.div`
   padding: 0;
@@ -697,6 +686,47 @@ const SendButton = styled.button`
   }
 `;
 
+const AttachmentsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+`;
+
+const AttachmentItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: ${({ theme }) => theme.backgroundAlt};
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.backgroundHover};
+    border-color: ${({ theme }) => theme.border};
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: ${({ theme }) => theme.primary};
+    text-decoration: none;
+    width: 100%;
+    padding: 4px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
+
 // Función para formatear fechas
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -866,9 +896,11 @@ const SeguimientoSolicitud: React.FC = () => {
   const [solicitud, setSolicitud] = useState<TaskRequest | null>(null);
   const [historial, setHistorial] = useState<TaskRequestHistory[]>([]);
   const [comentarios, setComentarios] = useState<any[]>([]);
+  const [archivosAdjuntos, setArchivosAdjuntos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingComments, setLoadingComments] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [loadingAttachments, setLoadingAttachments] = useState(false);
   const [sendingComment, setSendingComment] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [comentario, setComentario] = useState('');
@@ -890,11 +922,23 @@ const SeguimientoSolicitud: React.FC = () => {
   const [mentionStartIndex, setMentionStartIndex] = useState(-1);
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Función para cargar los comentarios
+  // Función para cargar los comentarios reales desde el backend
   const fetchComments = async (taskRequestId: number) => {
     try {
       setLoadingComments(true);
+      console.log(`Obteniendo comentarios para la solicitud ${taskRequestId}...`);
+
+      // Obtener comentarios con estado de lectura desde el servicio
       const comments = await solicitudesService.getCommentsWithReadStatus(taskRequestId);
+
+      if (!comments || comments.length === 0) {
+        console.log('No se encontraron comentarios para esta solicitud');
+        setComentarios([]);
+        setLoadingComments(false);
+        return;
+      }
+
+      console.log(`Se encontraron ${comments.length} comentarios`);
 
       // Mapear los comentarios al formato esperado por el componente
       const mappedComments = comments.map((comment: any) => {
@@ -906,15 +950,7 @@ const SeguimientoSolicitud: React.FC = () => {
           ? `${currentUser.firstName} ${currentUser.lastName}`.trim() || currentUser.username || currentUser.email
           : comment.userFullName || comment.userName || comment.userEmail || 'Usuario sin nombre';
 
-        console.log('Datos del comentario:', {
-          id: comment.id,
-          userId: comment.userId,
-          userName: comment.userName,
-          userFullName: comment.userFullName,
-          userEmail: comment.userEmail,
-          content: comment.content
-        });
-
+        // Verificar que el comentario tenga todos los campos necesarios
         return {
           id: comment.id,
           fecha: comment.createdAt,
@@ -922,14 +958,17 @@ const SeguimientoSolicitud: React.FC = () => {
           userId: comment.userId,
           mensaje: comment.content,
           readBy: comment.readBy || [],
-          readByCurrentUser: comment.readByCurrentUser || false
+          readByCurrentUser: comment.readByCurrentUser || false,
+          attachments: comment.attachments || []
         };
       });
 
       setComentarios(mappedComments);
-      setLoadingComments(false);
     } catch (err) {
       console.error('Error al cargar comentarios:', err);
+      toast.error('No se pudieron cargar los comentarios. Por favor, intente nuevamente.');
+      setComentarios([]);
+    } finally {
       setLoadingComments(false);
     }
   };
@@ -945,6 +984,20 @@ const SeguimientoSolicitud: React.FC = () => {
     } catch (err) {
       console.error('Error al cargar historial:', err);
       setLoadingHistory(false);
+    }
+  };
+
+  // Función para cargar los archivos adjuntos
+  const fetchAttachments = async (taskRequestId: number) => {
+    try {
+      setLoadingAttachments(true);
+      const attachments = await solicitudesService.getAttachments(taskRequestId);
+      console.log('Archivos adjuntos obtenidos:', attachments);
+      setArchivosAdjuntos(attachments);
+      setLoadingAttachments(false);
+    } catch (err) {
+      console.error('Error al cargar archivos adjuntos:', err);
+      setLoadingAttachments(false);
     }
   };
 
@@ -965,6 +1018,9 @@ const SeguimientoSolicitud: React.FC = () => {
 
         // Cargar el historial real
         await fetchHistory(Number(id));
+
+        // Cargar los archivos adjuntos
+        await fetchAttachments(Number(id));
 
         setLoading(false);
       } catch (err) {
@@ -1337,6 +1393,7 @@ const SeguimientoSolicitud: React.FC = () => {
                 setSolicitud(data);
                 await fetchComments(Number(id));
                 await fetchHistory(Number(id));
+                await fetchAttachments(Number(id));
                 setLoading(false);
               } catch (err) {
                 console.error('Error al cargar la solicitud:', err);
@@ -1374,6 +1431,74 @@ const SeguimientoSolicitud: React.FC = () => {
         <PageTitle>Seguimiento de Solicitud</PageTitle>
       </PageHeader>
 
+      {/* Nuevo componente visual de seguimiento */}
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <FiInfo size={18} />
+            Estado de la Solicitud
+          </CardTitle>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            {solicitud.status === 'REJECTED' && currentUser?.id === solicitud.requesterId && (
+              <Tooltip content="Editar solicitud rechazada">
+                <button
+                  onClick={() => navigate(`/app/solicitudes/editar/${solicitud.id}`)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                    border: '1px solid #ddd',
+                    background: 'white',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    color: '#333'
+                  }}
+                >
+                  <FiEdit2 size={14} />
+                  Editar
+                </button>
+              </Tooltip>
+            )}
+            <StatusBadge $status={solicitud.status}>
+              {getStatusIcon(solicitud.status)}
+              {getStatusText(solicitud.status)}
+            </StatusBadge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <h3 style={{ marginTop: 0, marginBottom: '20px' }}>{solicitud.title}</h3>
+
+          {/* Componente visual de seguimiento */}
+          <SeguimientoVisual solicitud={solicitud} historial={historial} />
+
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginTop: '20px',
+            padding: '15px',
+            backgroundColor: 'rgba(0,0,0,0.03)',
+            borderRadius: '8px'
+          }}>
+            <div>
+              <strong>Solicitante:</strong> {solicitud.requesterName}
+            </div>
+            <div>
+              <strong>Fecha de solicitud:</strong> {formatDateTime(solicitud.requestDate)}
+            </div>
+            <div>
+              <strong>Última actualización:</strong> {
+                historial.length > 0
+                  ? formatDateTime(historial[historial.length - 1].changeDate)
+                  : formatDateTime(solicitud.requestDate)
+              }
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <ContentContainer>
         <MainContent>
           <Card>
@@ -1382,16 +1507,7 @@ const SeguimientoSolicitud: React.FC = () => {
                 <FiFileText size={18} />
                 Detalles de la Solicitud
               </CardTitle>
-              <StatusBadge $status={solicitud.status}>
-                {getStatusIcon(solicitud.status)}
-                {getStatusText(solicitud.status)}
-              </StatusBadge>
-            </CardHeader>
-            <CardContent>
-              <h3 style={{ marginTop: 0 }}>{solicitud.title}</h3>
-              <p>{solicitud.description}</p>
-
-              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
                 <PriorityBadge $priority={solicitud.priority}>
                   {getPriorityText(solicitud.priority)}
                 </PriorityBadge>
@@ -1399,52 +1515,101 @@ const SeguimientoSolicitud: React.FC = () => {
                   {getCategoryText(solicitud.category?.name || 'GENERAL')}
                 </CategoryBadge>
               </div>
+            </CardHeader>
+            <CardContent>
+              <p style={{ marginTop: 0 }}>{solicitud.description}</p>
 
-              <DetailItem>
-                <DetailIcon>
-                  <FiCalendar size={18} />
-                </DetailIcon>
-                <DetailContent>
-                  <DetailLabel>Fecha de creación</DetailLabel>
-                  <DetailValue>{formatDateTime(solicitud.requestDate)}</DetailValue>
-                </DetailContent>
-              </DetailItem>
+              {/* Sección de archivos adjuntos */}
+              {loadingAttachments ? (
+                <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                  <SpinningLoader size={24} />
+                  <p>Cargando archivos adjuntos...</p>
+                </div>
+              ) : archivosAdjuntos && archivosAdjuntos.length > 0 ? (
+                <div style={{ marginTop: '20px' }}>
+                  <h4 style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FiFileText size={16} />
+                    Archivos adjuntos
+                  </h4>
+                  <AttachmentsList>
+                    {archivosAdjuntos.map((attachment, index) => (
+                      <AttachmentItem key={index} title="Haz clic para descargar el archivo">
+                        <a
+                          href={attachment.downloadUrl}
+                          download={attachment.fileName}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            // Crear un enlace temporal para forzar la descarga
+                            const link = document.createElement('a');
+                            link.href = attachment.downloadUrl;
+                            link.setAttribute('download', attachment.fileName);
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            toast.success(`Descargando ${attachment.fileName}...`);
+                          }}
+                        >
+                          <FiDownload size={16} />
+                          {attachment.fileName} ({(attachment.fileSize / 1024).toFixed(1)} KB)
+                        </a>
+                      </AttachmentItem>
+                    ))}
+                  </AttachmentsList>
+                </div>
+              ) : null}
 
-              {solicitud.dueDate && (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+                gap: '16px',
+                marginTop: '20px'
+              }}>
                 <DetailItem>
                   <DetailIcon>
-                    <FiClock size={18} />
+                    <FiCalendar size={18} />
                   </DetailIcon>
                   <DetailContent>
-                    <DetailLabel>Fecha límite</DetailLabel>
-                    <DetailValue>{formatDate(solicitud.dueDate)}</DetailValue>
+                    <DetailLabel>Fecha de creación</DetailLabel>
+                    <DetailValue>{formatDateTime(solicitud.requestDate)}</DetailValue>
                   </DetailContent>
                 </DetailItem>
-              )}
 
-              {solicitud.assignerId && (
-                <DetailItem>
-                  <DetailIcon>
-                    <FiUser size={18} />
-                  </DetailIcon>
-                  <DetailContent>
-                    <DetailLabel>Asignador</DetailLabel>
-                    <DetailValue>{solicitud.assignerName || `ID: ${solicitud.assignerId}`}</DetailValue>
-                  </DetailContent>
-                </DetailItem>
-              )}
+                {solicitud.dueDate && (
+                  <DetailItem>
+                    <DetailIcon>
+                      <FiClock size={18} />
+                    </DetailIcon>
+                    <DetailContent>
+                      <DetailLabel>Fecha límite</DetailLabel>
+                      <DetailValue>{formatDate(solicitud.dueDate)}</DetailValue>
+                    </DetailContent>
+                  </DetailItem>
+                )}
 
-              {solicitud.executorId && (
-                <DetailItem>
-                  <DetailIcon>
-                    <FiUser size={18} />
-                  </DetailIcon>
-                  <DetailContent>
-                    <DetailLabel>Ejecutor</DetailLabel>
-                    <DetailValue>{solicitud.executorName || `ID: ${solicitud.executorId}`}</DetailValue>
-                  </DetailContent>
-                </DetailItem>
-              )}
+                {solicitud.assignerId && (
+                  <DetailItem>
+                    <DetailIcon>
+                      <FiUser size={18} />
+                    </DetailIcon>
+                    <DetailContent>
+                      <DetailLabel>Asignador</DetailLabel>
+                      <DetailValue>{solicitud.assignerName || `ID: ${solicitud.assignerId}`}</DetailValue>
+                    </DetailContent>
+                  </DetailItem>
+                )}
+
+                {solicitud.executorId && (
+                  <DetailItem>
+                    <DetailIcon>
+                      <FiUser size={18} />
+                    </DetailIcon>
+                    <DetailContent>
+                      <DetailLabel>Ejecutor</DetailLabel>
+                      <DetailValue>{solicitud.executorName || `ID: ${solicitud.executorId}`}</DetailValue>
+                    </DetailContent>
+                  </DetailItem>
+                )}
+              </div>
             </CardContent>
           </Card>
 
@@ -1456,205 +1621,69 @@ const SeguimientoSolicitud: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {loadingComments ? (
-                <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                  <SpinningLoader size={24} />
-                  <p>Cargando comentarios...</p>
-                </div>
-              ) : comentarios && comentarios.length > 0 ? (
-                <CommentsList>
-                  {groupCommentsByDate(comentarios).map((group) => (
-                    <CommentGroup key={group.date}>
-                      <CommentDateDivider>
-                        <CommentDateLabel>{formatDateForGroup(group.date)}</CommentDateLabel>
-                      </CommentDateDivider>
-                      {group.comments.map((comment: any) => {
-                        // Obtener la inicial del usuario
-                        const userInitial = comment.usuario ? comment.usuario.charAt(0) : '';
-
-                        // Verificar si este comentario está siendo editado
-                        const isEditing = editingCommentId === comment.id;
-
-                        // Verificar si el comentario es del usuario actual
-                        const isCurrentUserComment = currentUser && comment.userId === currentUser.id;
-
-                        return (
-                          <CommentItem key={comment.id}>
-                            <CommentAvatar $userInitial={userInitial}>
-                              {userInitial || <FiUser size={18} />}
-                            </CommentAvatar>
-                            <CommentContent>
-                              <CommentHeader>
-                                <CommentAuthor>{comment.usuario}</CommentAuthor>
-                                <CommentDate>{formatTime(comment.fecha)}</CommentDate>
-                              </CommentHeader>
-
-                              {isEditing ? (
-                                <CommentEditForm onSubmit={(e) => handleSaveEdit(e, comment.id)}>
-                                  <CommentInput
-                                    value={editedCommentText}
-                                    onChange={(e) => setEditedCommentText(e.target.value)}
-                                    disabled={isEditingComment}
-                                  />
-                                  <ButtonGroup>
-                                    <CommentActionButton
-                                      type="button"
-                                      onClick={handleCancelEdit}
-                                      disabled={isEditingComment}
-                                    >
-                                      <FiX size={16} />
-                                      Cancelar
-                                    </CommentActionButton>
-                                    <SendButton
-                                      type="submit"
-                                      disabled={!editedCommentText.trim() || isEditingComment}
-                                    >
-                                      {isEditingComment ? (
-                                        <>
-                                          <SpinningLoader size={16} />
-                                          Guardando...
-                                        </>
-                                      ) : (
-                                        <>
-                                          <FiSave size={16} />
-                                          Guardar
-                                        </>
-                                      )}
-                                    </SendButton>
-                                  </ButtonGroup>
-                                </CommentEditForm>
-                              ) : (
-                                <CommentText $isRead={comment.readByCurrentUser}>
-                                  <CommentTextWithMentions content={comment.mensaje} />
-                                  <ReadIndicator $isRead={comment.readByCurrentUser} />
-
-                                  <CommentActions>
-                                    {comment.readBy && comment.readBy.length > 0 && (
-                                      <Tooltip
-                                        title={
-                                          <div>
-                                            <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
-                                              Leído por:
-                                            </div>
-                                            <ul style={{ margin: 0, paddingLeft: '16px' }}>
-                                              {comment.readBy.map((userId: number) => (
-                                                <li key={userId}>{userId === comment.userId ? `${comment.usuario} (autor)` : `Usuario ID: ${userId}`}</li>
-                                              ))}
-                                            </ul>
-                                          </div>
-                                        }
-                                        arrow
-                                      >
-                                        <CommentActionButton>
-                                          <FiEye size={14} />
-                                          <span style={{ marginLeft: '4px', fontSize: '12px' }}>
-                                            {comment.readBy.length}
-                                          </span>
-                                        </CommentActionButton>
-                                      </Tooltip>
-                                    )}
-
-                                    {isCurrentUserComment && (
-                                      <>
-                                        <CommentActionButton
-                                          onClick={() => handleEditComment(comment)}
-                                          disabled={isDeletingComment}
-                                        >
-                                          <FiEdit2 size={14} />
-                                        </CommentActionButton>
-                                        <CommentActionButton
-                                          onClick={() => handleDeleteComment(comment.id)}
-                                          disabled={isDeletingComment}
-                                        >
-                                          <FiTrash2 size={14} />
-                                        </CommentActionButton>
-                                      </>
-                                    )}
-                                  </CommentActions>
-                                </CommentText>
-                              )}
-                            </CommentContent>
-                          </CommentItem>
-                        );
-                      })}
-                    </CommentGroup>
-                  ))}
-                </CommentsList>
-              ) : (
-                <div style={{ textAlign: 'center', padding: '20px 0', color: '#666' }}>
-                  No hay comentarios aún
-                </div>
-              )}
-
-              <CommentForm onSubmit={handleSubmitComentario}>
-                <div style={{ position: 'relative' }}>
-                  <CommentInput
-                    ref={commentInputRef}
-                    placeholder="Escribe un comentario... (usa @ para mencionar usuarios)"
-                    value={comentario}
-                    onChange={handleCommentChange}
-                    onKeyDown={handleCommentKeyDown}
-                    disabled={sendingComment}
-                  />
-                  <UserMentionSuggestions
-                    users={mentionUsers.map(user => ({
-                      id: user.id,
-                      username: user.username,
-                      name: user.fullName || `${user.firstName} ${user.lastName}`.trim()
-                    }))}
-                    isVisible={showMentionSuggestions && mentionUsers.length > 0}
-                    position={mentionPosition}
-                    onSelectUser={handleSelectMention}
-                    activeIndex={activeMentionIndex}
-                    query={mentionQuery}
-                  />
-                </div>
-                <ButtonGroup>
-                  <AttachButton type="button" disabled={sendingComment}>
-                    <FiPaperclip size={16} />
-                    Adjuntar archivo
-                  </AttachButton>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <Tooltip title="Mencionar usuario">
-                      <AttachButton
-                        type="button"
-                        disabled={sendingComment}
-                        onClick={() => {
-                          if (commentInputRef.current) {
-                            const textarea = commentInputRef.current;
-                            const cursorPos = textarea.selectionStart;
-                            const textBefore = comentario.substring(0, cursorPos);
-                            const textAfter = comentario.substring(cursorPos);
-                            setComentario(`${textBefore}@${textAfter}`);
-
-                            // Colocar el cursor después del @
-                            setTimeout(() => {
-                              textarea.focus();
-                              const newCursorPos = cursorPos + 1;
-                              textarea.setSelectionRange(newCursorPos, newCursorPos);
-                            }, 0);
-                          }
-                        }}
-                      >
-                        <FiAtSign size={16} />
-                      </AttachButton>
-                    </Tooltip>
-                    <SendButton type="submit" disabled={!comentario.trim() || sendingComment}>
-                      {sendingComment ? (
-                        <>
-                          <SpinningLoader size={16} />
-                          Enviando...
-                        </>
-                      ) : (
-                        <>
-                          <FiSend size={16} />
-                          Enviar
-                        </>
-                      )}
-                    </SendButton>
-                  </div>
-                </ButtonGroup>
-              </CommentForm>
+              {/* Componente de comentarios con datos reales de la base de datos */}
+              <CommentSection
+                comments={comentarios.map(comment => ({
+                  id: comment.id,
+                  userId: comment.userId,
+                  userName: comment.usuario,
+                  content: comment.mensaje,
+                  createdAt: comment.fecha,
+                  readBy: comment.readBy || [],
+                  readByCurrentUser: comment.readByCurrentUser || false,
+                  attachments: comment.attachments || []
+                }))}
+                isLoading={loadingComments}
+                onAddComment={async (content, files) => {
+                  if (!id) return;
+                  try {
+                    await solicitudesService.addComment(Number(id), content, files);
+                    // Recargar los comentarios después de agregar uno nuevo
+                    await fetchComments(Number(id));
+                    toast.success('Comentario enviado correctamente');
+                  } catch (error) {
+                    console.error('Error al enviar comentario:', error);
+                    toast.error('Error al enviar el comentario. Por favor, intente nuevamente.');
+                  }
+                }}
+                onEditComment={async (commentId, content) => {
+                  // Implementar cuando el backend soporte edición de comentarios
+                  console.log('Editar comentario:', commentId, content);
+                  toast.info('La edición de comentarios estará disponible próximamente');
+                }}
+                onDeleteComment={async (commentId) => {
+                  // Implementar cuando el backend soporte eliminación de comentarios
+                  console.log('Eliminar comentario:', commentId);
+                  toast.info('La eliminación de comentarios estará disponible próximamente');
+                }}
+                onMarkAsRead={async (commentId) => {
+                  try {
+                    await solicitudesService.markCommentAsRead(commentId);
+                    // Actualizar el estado local
+                    const updatedComments = comentarios.map(comment =>
+                      comment.id === commentId
+                        ? { ...comment, readByCurrentUser: true }
+                        : comment
+                    );
+                    setComentarios(updatedComments);
+                  } catch (error) {
+                    console.error('Error al marcar comentario como leído:', error);
+                    toast.error('Error al marcar el comentario como leído');
+                  }
+                }}
+                onDownloadAttachment={async (attachmentId, fileName) => {
+                  try {
+                    await solicitudesService.downloadAttachment(attachmentId, fileName);
+                    toast.success(`Archivo ${fileName} descargado correctamente`);
+                  } catch (error) {
+                    console.error('Error al descargar archivo:', error);
+                    toast.error('Error al descargar el archivo');
+                  }
+                }}
+                currentUserId={currentUser?.id}
+                placeholder="Escribe un comentario... (puedes adjuntar archivos)"
+                allowAttachments={true}
+              />
             </CardContent>
           </Card>
         </MainContent>

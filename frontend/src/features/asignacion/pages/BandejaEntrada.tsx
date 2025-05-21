@@ -14,7 +14,8 @@ import {
   FiUser,
   FiUsers,
   FiLoader,
-  FiInfo
+  FiInfo,
+  FiFileText
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
@@ -24,6 +25,7 @@ import { es } from 'date-fns/locale';
 import { useAsignacion } from '../hooks/useAsignacion';
 import { TaskRequest } from '@/features/solicitudes/services/solicitudesService';
 import { Ejecutor } from '../services/asignacionService';
+import RechazarSolicitudModal from '../components/RechazarSolicitudModal';
 
 // Animación para el spinner
 const SpinAnimation = keyframes`
@@ -617,7 +619,7 @@ const BandejaEntrada: React.FC = () => {
     isLoadingExecutors,
     isAssigningTask,
     isRejectingTask,
-    assignTaskRequest,
+    assignTask,
     rejectTaskRequest,
     filterExecutorsBySpecialty
   } = useAsignacion();
@@ -637,7 +639,8 @@ const BandejaEntrada: React.FC = () => {
       estado: tr.status,
       solicitante: tr.requesterName || (tr.requesterId ? `Usuario #${tr.requesterId}` : 'Desconocido'),
       asignador: tr.assignerName,
-      ejecutor: tr.executorName
+      ejecutor: tr.executorName,
+      attachments: tr.attachments || [] // Incluir los archivos adjuntos
     }));
   };
 
@@ -671,7 +674,7 @@ const BandejaEntrada: React.FC = () => {
     }
 
     // Asignar la solicitud al ejecutor seleccionado
-    assignTaskRequest({
+    assignTask({
       taskRequestId: solicitudId,
       executorId: selectedEjecutor,
       notes: asignacionNotas
@@ -683,49 +686,42 @@ const BandejaEntrada: React.FC = () => {
     setAsignacionNotas('');
   };
 
-  const [rechazoReason, setRechazoReason] = useState('');
-  const [rechazoNotes, setRechazoNotes] = useState('');
   const [showRechazoModal, setShowRechazoModal] = useState(false);
   const [solicitudIdToReject, setSolicitudIdToReject] = useState<number | null>(null);
+  const [selectedTaskRequest, setSelectedTaskRequest] = useState<TaskRequest | null>(null);
 
   const handleRechazar = (solicitudId: number) => {
+    // Buscar la solicitud en los datos originales
+    const taskRequest = pendingRequests?.taskRequests.find(tr => tr.id === solicitudId) || null;
+
     // Mostrar modal de rechazo
     setSolicitudIdToReject(solicitudId);
+    setSelectedTaskRequest(taskRequest);
     setShowRechazoModal(true);
   };
 
-  const confirmRechazar = () => {
+  const handleConfirmRechazar = (rechazo: { reason: string, notes?: string }) => {
     if (!solicitudIdToReject) return;
-
-    if (!rechazoReason.trim()) {
-      toast.error('Debe proporcionar un motivo de rechazo');
-      return;
-    }
 
     // Rechazar la solicitud
     rejectTaskRequest({
       taskRequestId: solicitudIdToReject,
-      rechazo: {
-        reason: rechazoReason,
-        notes: rechazoNotes
-      }
+      rechazo: rechazo
     });
 
-    // Limpiar el estado
-    setRechazoReason('');
-    setRechazoNotes('');
+    // Cerrar el modal y limpiar el estado
     setShowRechazoModal(false);
     setSolicitudIdToReject(null);
+    setSelectedTaskRequest(null);
 
     // Cerrar el panel expandido
     setExpandedId(null);
   };
 
-  const cancelRechazar = () => {
-    setRechazoReason('');
-    setRechazoNotes('');
+  const handleCancelRechazar = () => {
     setShowRechazoModal(false);
     setSolicitudIdToReject(null);
+    setSelectedTaskRequest(null);
   };
 
   // Filtrar ejecutores por especialidad según la categoría de la solicitud seleccionada
@@ -801,95 +797,13 @@ const BandejaEntrada: React.FC = () => {
       </FiltersContainer>
 
       {/* Modal de rechazo */}
-      {showRechazoModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'var(--background-secondary, #2d2d3a)',
-            borderRadius: '8px',
-            padding: '24px',
-            width: '500px',
-            maxWidth: '90%',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
-          }}>
-            <h3 style={{ margin: '0 0 16px', color: 'var(--text-color, #e1e1e6)' }}>Rechazar Solicitud</h3>
-
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-color, #e1e1e6)', fontWeight: 'bold' }}>
-                Motivo de rechazo: *
-              </label>
-              <input
-                type="text"
-                value={rechazoReason}
-                onChange={(e) => setRechazoReason(e.target.value)}
-                placeholder="Ej: No cumple con los requisitos"
-                style={{
-                  width: '100%',
-                  padding: '10px',
-                  borderRadius: '4px',
-                  border: '1px solid var(--border-color, #3f3f4e)',
-                  backgroundColor: 'var(--background-dark, #1e1e2a)',
-                  color: 'var(--text-color, #e1e1e6)'
-                }}
-              />
-            </div>
-
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-color, #e1e1e6)', fontWeight: 'bold' }}>
-                Notas adicionales:
-              </label>
-              <textarea
-                value={rechazoNotes}
-                onChange={(e) => setRechazoNotes(e.target.value)}
-                placeholder="Detalles adicionales sobre el rechazo..."
-                style={{
-                  width: '100%',
-                  padding: '10px',
-                  borderRadius: '4px',
-                  border: '1px solid var(--border-color, #3f3f4e)',
-                  backgroundColor: 'var(--background-dark, #1e1e2a)',
-                  color: 'var(--text-color, #e1e1e6)',
-                  minHeight: '100px',
-                  resize: 'vertical'
-                }}
-              />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <Button onClick={cancelRechazar}>
-                Cancelar
-              </Button>
-              <Button
-                $primary
-                onClick={confirmRechazar}
-                disabled={isRejectingTask}
-              >
-                {isRejectingTask ? (
-                  <>
-                    <Spinner size={16} />
-                    Rechazando...
-                  </>
-                ) : (
-                  <>
-                    <FiXCircle size={16} />
-                    Confirmar Rechazo
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <RechazarSolicitudModal
+        isOpen={showRechazoModal}
+        onClose={handleCancelRechazar}
+        onReject={handleConfirmRechazar}
+        taskRequest={selectedTaskRequest}
+        isRejecting={isRejectingTask}
+      />
 
       {isLoadingPendingRequests ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
@@ -957,6 +871,54 @@ const BandejaEntrada: React.FC = () => {
                   <DetailRow>
                     <DetailLabel>Fecha límite:</DetailLabel>
                     <DetailValue>{formatDate(solicitud.fechaLimite)}</DetailValue>
+                  </DetailRow>
+                )}
+
+                {/* Sección de archivos adjuntos */}
+                {solicitud.attachments && solicitud.attachments.length > 0 && (
+                  <DetailRow>
+                    <DetailLabel>Archivos adjuntos:</DetailLabel>
+                    <DetailValue>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {solicitud.attachments.map((attachment, index) => (
+                          <div
+                            key={index}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '8px 12px',
+                              backgroundColor: 'var(--background-dark, #2d2d3a)',
+                              borderRadius: '4px',
+                              border: '1px solid var(--border-color-dark, #3f3f4e)',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              // Crear un enlace temporal para forzar la descarga
+                              const link = document.createElement('a');
+                              link.href = attachment.downloadUrl;
+                              link.setAttribute('download', attachment.fileName);
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                              toast.success(`Descargando ${attachment.fileName}...`);
+                            }}
+                          >
+                            <FiFileText size={16} style={{ color: 'var(--primary-color, #6C5CE7)' }} />
+                            <span>{attachment.fileName}</span>
+                            <span style={{
+                              fontSize: '12px',
+                              color: 'var(--text-secondary, #a0a0a0)',
+                              marginLeft: 'auto'
+                            }}>
+                              ({(attachment.fileSize / 1024).toFixed(1)} KB)
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </DetailValue>
                   </DetailRow>
                 )}
 

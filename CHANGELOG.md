@@ -2,6 +2,600 @@
 
 ## [Unreleased]
 
+### Próximas Mejoras (Sprint 25)
+- Implementación de nuevas funcionalidades
+
+### Cambios Recientes
+- Corrección de error de importación en componentes que usan ConfirmDialog
+  - Creado archivo de exportación para el componente ConfirmDialog en `components/ui/Dialog/index.ts`
+  - Corregida la importación en `UserList.tsx` y `CategoriasList.tsx`
+  - Implementada solución para evitar el error "Failed to resolve import @/components/ui/Dialog"
+- Configuración unificada de repositorios JPA
+  - Modificada la configuración de `@EnableJpaRepositories` para escanear todos los paquetes relevantes de una vez
+  - Creado documento de buenas prácticas para repositorios JPA en `docs/jpa-repositories-best-practices.md`
+  - Implementadas convenciones de nombres para evitar dependencias circulares
+  - Mejorada la documentación sobre prevención de dependencias circulares en repositorios
+- Refactorización y mejora de código para corregir errores y advertencias en el sistema
+  - Corrección de errores en el sistema de auditoría
+  - Resolución de advertencias en TaskRequestCreatedEventListener con anotaciones @JsonProperty
+  - Eliminación de importaciones no utilizadas en UserAuditLogEntity
+  - Eliminación de variables no utilizadas en TaskRequestWorkflowService
+  - Adición de anotaciones @NonNull en SecurityFilterHandler
+  - Corrección de importaciones y campos no utilizados en TaskRequestCommentAttachmentController
+  - Mejora de parámetros @RequestParam para eliminar advertencias
+  - Configuración de lifecycle mapping en pom.xml para resolver problemas de plugins Maven
+- Implementación de sistema de alertas y notificaciones de seguridad para auditoría
+- Desarrollo de componente `SecurityAlertsList` para visualizar alertas de seguridad
+- Implementación de componente `SecurityAlertCard` para mostrar detalles de alertas
+- Creación de componente `SecurityAlertStatistics` para análisis de alertas
+- Desarrollo de componente `SecurityAlertRules` para configurar reglas de detección
+- Implementación de notificaciones en tiempo real para alertas de seguridad
+- Implementación de sistema de reportes personalizables y programados
+- Desarrollo de componente `ReportBuilder` para creación de reportes ad-hoc
+- Implementación de selección de campos, filtros, agrupación y ordenamiento
+- Creación de componente `SavedReportsList` para gestionar reportes guardados
+- Desarrollo de componente `ScheduledReportsList` para programar reportes
+- Implementación de exportación de reportes en múltiples formatos
+- Implementación de herramientas de diagnóstico y mantenimiento del sistema
+- Desarrollo de componente `SystemMonitor` para monitoreo en tiempo real
+- Creación de herramientas para verificación de integridad de datos
+- Implementación de funcionalidades para tareas de mantenimiento programadas
+- Desarrollo de gestión de backups y restauración
+- Implementación de dashboard administrativo avanzado con métricas en tiempo real
+- Desarrollo de gráficos interactivos con filtros para análisis de datos
+- Creación de visualizaciones para distribución de tareas por categoría y prioridad
+- Implementación de sistema de auditoría de usuarios con registro detallado de actividades
+- Desarrollo de componente `UserAuditLog` para visualizar y filtrar registros de auditoría
+- Implementación de exportación de registros de auditoría a CSV
+- Creación de funcionalidad para marcar actividades sospechosas
+
+### Added
+- Integración de la librería `driver.js` para implementar tours interactivos.
+  - Hook `useTourGuide` en `src/components/ui/TourGuide.tsx` para gestionar tours.
+  - Hook `useDashboardTour` en `src/features/auth/hooks/useDashboardTour.ts` para tours específicos del dashboard según el rol del usuario.
+  - Ejemplo de pasos para SOLICITANTE, ASIGNADOR y EJECUTOR.
+
+### Updated
+- Documentación actualizada para reflejar la nueva funcionalidad de tours interactivos.
+
+## [v1.5.0] - 2023-11-30 - Sprint 23: Mejora del Rol de Administrador
+
+### Añadido
+
+- Implementación de Gestión de Usuarios y Roles para Administradores
+  - Creación de componente `UserList` con filtros avanzados, paginación y ordenamiento
+  - Implementación de componente `UserForm` para crear y editar usuarios con validación avanzada
+  - Desarrollo de componente `UserDetail` para visualizar información completa de usuarios
+  - Implementación de componente `PermissionsManager` para gestionar permisos por rol
+  - Creación de servicios y hooks para interactuar con la API de usuarios
+  - Implementación de rutas protegidas para la gestión de usuarios
+  - Integración con el menú lateral y dashboard de administrador
+
+- Implementación de Configuración del Sistema para Administradores
+  - Mejora del componente `ConfiguracionTareas` para gestionar categorías y prioridades
+  - Implementación de CRUD completo para categorías de tareas
+  - Desarrollo de componente `CategoriasList` para visualizar y editar categorías
+  - Implementación de componente `PrioridadesList` para visualizar prioridades del sistema
+  - Mejora del componente `ConfiguracionNotificaciones` con preferencias personalizables
+  - Implementación de componente `NotificationTemplates` para gestionar plantillas de notificaciones
+  - Mejora del componente `ConfiguracionIntegraciones` con integraciones reales
+  - Implementación de servicios para integración con Google Calendar y Google Drive
+  - Desarrollo de componentes `ConnectionTest` y `SyncHistory` para pruebas de conexión e historial
+  - Creación de componente `ConfiguracionGeneral` con múltiples secciones:
+    - Implementación de `PerformanceConfig` para ajustes de rendimiento y caché
+    - Desarrollo de `SecurityConfig` para políticas de seguridad y contraseñas
+    - Creación de `EmailConfig` para configuración de correo electrónico
+    - Implementación de `MaintenanceConfig` para modo de mantenimiento
+    - Desarrollo de `FeaturesConfig` para habilitar/deshabilitar características
+  - Creación de servicios y hooks para interactuar con la API de configuración
+  - Integración con el menú lateral y dashboard de administrador
+
+- Implementación del Patrón Observer para Eventos de Autenticación en el Frontend
+  - Creación de clase `AuthEventEmitter` que implementa el patrón Observer para centralizar eventos de autenticación
+  - Definición de tipos de eventos específicos: `login`, `logout`, `tokenExpired`, `tokenRefreshed`, `authError`, etc.
+  - Implementación de métodos para suscribirse, desuscribirse y emitir eventos
+  - Refactorización de servicios de autenticación para utilizar el nuevo sistema de eventos
+  - Creación de hook personalizado `useAuthEvents` para facilitar la suscripción a eventos
+  - Implementación de componente `AuthEventsListener` para reaccionar a eventos de autenticación
+  - Integración del sistema de eventos con el flujo de autenticación existente
+  - Mejora de la experiencia de usuario con notificaciones contextuales basadas en eventos
+
+- Mejora del sistema de autenticación y seguridad
+  - Unificación de controladores de autenticación (`AuthController.java` y `RootAuthController.java`) en un único controlador
+  - Implementación de un servicio de tokens mejorado (`tokenService.ts`) para gestión segura de tokens JWT
+  - Creación de un servicio de manejo de errores centralizado (`errorHandlingService.ts`)
+  - Implementación de un cliente HTTP con interceptores para renovación automática de tokens (`apiClient.ts`)
+  - Mejora del manejo de errores de autenticación con mensajes descriptivos
+  - Actualización del servicio de autenticación para utilizar los nuevos servicios
+  - Mejora del proceso de cierre de sesión con invalidación de tokens en el servidor
+  - Aplicación de patrones de diseño para mejorar la arquitectura:
+    - Patrón Strategy para diferentes mecanismos de autenticación
+    - Patrón Factory para la creación de tokens
+    - Patrón Chain of Responsibility para filtros de seguridad
+      - Implementación de manejadores especializados: `BlacklistCheckHandler`, `JwtValidationHandler`, `PermissionsHandler`
+      - Configuración de la cadena de filtros en `SecurityConfig`
+      - Mejora de la modularidad y extensibilidad del sistema de seguridad
+  - Corrección de errores en el sistema de autenticación:
+    - Añadido método `getExpirationDateFromToken` en `JwtTokenProvider`
+    - Añadido método `getUserIdFromToken` en `JwtTokenProvider`
+    - Añadido método `findSessionByRefreshToken` en `UserSessionService`
+    - Añadido método `getExpirationDate` en la interfaz `TokenFactory` y su implementación
+
+- Implementación de funcionalidad para editar y reenviar solicitudes rechazadas
+  - Creada ruta `/app/solicitudes/editar/:id` para editar solicitudes rechazadas
+  - Modificado el componente `SolicitudForm` para soportar la edición de solicitudes existentes
+  - Añadida funcionalidad para cargar los datos de la solicitud rechazada en el formulario
+  - Implementada visualización de archivos adjuntos existentes y capacidad para añadir nuevos
+  - Añadido botón "Guardar y reenviar" para actualizar y reenviar la solicitud en un solo paso
+  - Añadido botón "Guardar cambios" para actualizar la solicitud sin reenviarla
+  - Añadido botón de edición en la vista de seguimiento de solicitudes rechazadas
+  - Añadido botón de edición en la lista de solicitudes para solicitudes rechazadas
+  - Actualizado el hook `useSolicitudes` para soportar la actualización y reenvío de solicitudes
+  - Actualizado el servicio `solicitudesService` para incluir métodos de actualización
+  - Mejorada la experiencia de usuario con mensajes claros sobre el motivo del rechazo
+  - Implementada validación para asegurar que solo se puedan editar solicitudes en estado REJECTED
+
+- Planificación de implementación de Apache Kafka
+  - Diseñado plan detallado para implementación incremental en tres sprints
+  - Definidas historias de usuario y tareas técnicas para cada fase
+  - Establecidos criterios de aceptación y planes de mitigación de riesgos
+  - Planificada capacitación del equipo en conceptos fundamentales de Kafka
+  - Estructurada implementación comenzando por sistema de notificaciones
+  - Diseñada arquitectura para Event Sourcing y seguimiento de cambios
+  - Planificada implementación de CQRS para optimización de consultas
+  - Actualizado archivo TASKS.md con el plan completo de implementación
+
+- Implementación de componentes UI personalizados para reemplazar Material UI
+  - Creado componente Dialog personalizado para reemplazar el Dialog de Material UI
+  - Creado componente TextField personalizado para reemplazar el TextField de Material UI
+  - Creado componente FormHelperText personalizado para reemplazar el FormHelperText de Material UI
+  - Actualizado el componente ReenviarSolicitudModal para usar los componentes personalizados
+  - Añadidas dependencias de Material UI al package.json para mantener compatibilidad con componentes existentes
+  - Mejorada la consistencia visual de los componentes personalizados con el diseño de la aplicación
+
+- Mejora de la consistencia visual de botones y filtros en la interfaz
+  - Creados componentes reutilizables RefreshButton y FilterBadge para mantener coherencia visual
+  - Implementado estilo de botones de actualización con fondos oscuros y efectos visuales mejorados
+  - Rediseñados filtros para seguir la estética de los badges (StatusBadge, PriorityBadge, CategoryBadge)
+  - Añadida animación de rotación para el icono durante la actualización
+  - Mejorado el contraste y legibilidad del texto en todos los componentes
+  - Implementadas transiciones suaves entre estados normal y hover
+  - Optimizada la experiencia visual con efectos sutiles que mejoran la usabilidad
+  - Mantenida la coherencia visual con el tema general de la aplicación
+  - Extendida la implementación a la sección "En Progreso" para mantener consistencia en toda la aplicación
+  - Añadidos filtros de búsqueda, categoría y prioridad a la sección "En Progreso"
+  - Implementado mensaje informativo cuando no hay resultados que coincidan con los filtros
+  - Añadido botón para limpiar filtros cuando no se encuentran resultados
+
+- Mejoras en la sección de Historial de tareas para el rol EJECUTOR
+  - Implementado informe detallado de tareas al hacer clic en "Ver informe completo"
+  - Creado componente modal TaskReportModal para mostrar información detallada de la tarea
+  - Añadida visualización de historial completo de cambios de estado
+  - Implementada visualización de comentarios asociados a la tarea
+  - Añadida sección para mostrar archivos adjuntos con opción de descarga
+  - Incluidas métricas de tiempo dedicado y fechas relevantes
+  - Mejorada la presentación de información del solicitante y asignador
+  - Rediseñado el mensaje de aprobación para mayor coherencia visual con el sistema de badges
+  - Mejorado el contraste y legibilidad del texto en los mensajes de aprobación/rechazo
+  - Añadidos iconos para mejorar la experiencia visual
+
+- Intercambio de colores entre badges de estado "APROBADA" y prioridad "BAJA"
+  - Modificados los colores del badge de estado APPROVED para usar los colores originales de la prioridad LOW
+  - Modificados los colores del badge de prioridad LOW para usar los colores originales del estado APPROVED
+  - Mantenida la consistencia visual con el sistema unificado de badges con fondos oscuros
+
+- Sistema unificado de badges con fondos oscuros para toda la aplicación
+  - Modificados los componentes StatusBadge, PriorityBadge y CategoryBadge para utilizar fondos oscuros manteniendo los colores originales de bordes, sombras y texto
+  - Implementada consistencia visual entre todos los tipos de badges (estado, prioridad y categoría)
+  - Mejorado el contraste entre el texto y el fondo para garantizar la legibilidad en todos los badges
+  - Implementadas transiciones suaves entre estados normal y hover en todos los componentes
+  - Mantenida la identidad visual distintiva de cada tipo de badge mientras se conserva la coherencia del diseño
+  - Optimizada la experiencia visual con efectos sutiles que mejoran la usabilidad
+
+- Mejora del sistema de badges/pills en la sección de Historial de tareas para el rol EJECUTOR
+  - Implementado sistema unificado de badges para estado, prioridad y categoría de tareas
+  - Mejorado el contraste visual entre las tarjetas y el fondo
+  - Añadidos efectos visuales sutiles (sombras, bordes, gradientes) para mejorar la jerarquía visual
+  - Implementada consistencia visual en toda la aplicación con el mismo estilo de badges
+  - Mejorada la experiencia visual con animaciones y efectos hover en las tarjetas
+  - Añadido badge de categoría para facilitar la identificación rápida del tipo de tarea
+  - Optimizada la organización visual de los badges para mejor legibilidad
+  - Mejorado el diseño de los filtros y controles de búsqueda para mayor usabilidad
+
+- Mejora de la experiencia de usuario para el rol EJECUTOR
+  - Implementación de interfaz dinámica que responde al estado actual de las tareas
+  - Deshabilitación o no visualización del botón "Iniciar Tarea" cuando no hay tareas pendientes
+  - Mejora de los mensajes informativos cuando no hay tareas asignadas o en progreso
+  - Actualización automática de los componentes del dashboard para reflejar el estado real
+  - Retroalimentación visual clara sobre las acciones disponibles según el contexto
+  - Mejora de los mensajes de estado vacío en las listas de tareas y gráficos
+  - Implementación de alerta informativa cuando no hay tareas asignadas
+  - Optimización de la experiencia visual con mensajes contextuales
+  - Corrección de la tarjeta "Tiempo Promedio de Completado" para mostrar datos reales o "N/A" cuando no hay datos suficientes
+
+- Eliminación de datos simulados en el sistema de notificaciones
+  - Eliminados los datos simulados (mock data) del contexto RealTimeNotificationContext
+  - Implementada la persistencia de notificaciones en localStorage para mantener su estado entre sesiones
+  - Mejorado el componente NotificacionesButton para usar notificaciones reales del contexto
+  - Actualizado el componente NotificacionesPanel para mostrar notificaciones reales
+  - Implementado manejo de errores y experiencia de usuario mejorada cuando no hay notificaciones
+  - Mejorado el formateo de fechas en las notificaciones usando date-fns
+
+- Eliminación de datos simulados en el sistema de asignación
+  - Creada migración V23__Remove_Test_Task_Requests.sql para eliminar solicitudes de prueba de la base de datos
+  - Eliminados los datos simulados del componente DashboardAsignador
+  - Eliminados los datos simulados del servicio asignacionService
+  - Mejorado el manejo de errores para devolver arrays vacíos en lugar de datos simulados
+
+- Implementación del endpoint `/api/activities/stats/workload` para distribución de carga de trabajo
+  - Creado servicio ActivityWorkloadService para obtener datos reales de distribución de carga
+  - Implementada lógica para obtener usuarios con rol EJECUTOR y sus tareas asignadas
+  - Añadido cálculo de estadísticas por estado de tareas (asignadas, en progreso, completadas)
+  - Actualizado el controlador para usar el nuevo servicio
+  - Añadido manejo de errores para el endpoint
+  - Corregidas importaciones y acceso a métodos en ActivityWorkloadService
+
+- Corrección de error en BandejaEntrada.tsx con assignTaskRequest
+  - Corregido el uso de assignTaskRequest por assignTask en BandejaEntrada.tsx
+  - Actualizada la referencia a la función correcta del hook useAsignacion
+
+- Implementación de adjuntos en comentarios para solicitudes
+  - Creado componente CommentSection mejorado con soporte para archivos adjuntos
+  - Implementada funcionalidad para adjuntar archivos a comentarios en el chat de solicitudes
+  - Añadida visualización de archivos adjuntos en los comentarios con opciones de descarga
+  - Implementado endpoint en el backend para subir archivos adjuntos a comentarios
+  - Actualizado el modelo de datos para soportar archivos adjuntos en comentarios
+  - Mejorada la experiencia de usuario con indicadores visuales para archivos adjuntos
+  - Implementada descarga directa de archivos adjuntos desde los comentarios
+
+- Corrección del dashboard del solicitante para mostrar correctamente la cantidad de solicitudes
+  - Modificado el hook `useSmartDashboardData` para usar la estructura correcta de datos (`taskRequests` en lugar de `content`)
+  - Corregido el problema de actualización de datos con `staleTime: 0` para forzar la actualización inmediata
+  - Añadido botón de actualización manual para refrescar los datos del dashboard
+  - Implementada animación de carga para el botón de actualización
+  - Mejorados los logs para facilitar la depuración de problemas con los datos
+  - Corregido el procesamiento de datos para calcular correctamente los contadores de solicitudes
+  - Añadida compatibilidad con diferentes estructuras de datos para mayor robustez
+
+- Implementación de funcionalidad para editar y reasignar tareas para usuario asignador
+  - Creado componente EditarTarea.tsx para permitir la edición de solicitudes y tareas
+  - Creado componente ReasignarTarea.tsx para permitir la reasignación de tareas a otros ejecutores
+  - Actualizado el hook useAsignacion para incluir la funcionalidad de reasignación
+  - Implementado método reassignTask en asignacionService para comunicarse con la API
+  - Actualizadas las rutas en App.tsx para incluir las nuevas páginas
+  - Mejorada la experiencia de usuario con formularios intuitivos y validación de datos
+  - Implementada navegación fluida entre las páginas de detalle, edición y reasignación
+  - Mejorada la visualización de nombres de solicitante y ejecutor cuando no están disponibles en la API
+
+- Mejora del dashboard de solicitante para mostrar valores reales
+  - Corregido el problema de actualización de datos en el dashboard
+  - Implementada actualización automática de datos al cargar el dashboard
+  - Añadido botón de recarga manual para actualizar los datos
+  - Mejorada la visualización de estadísticas con datos reales
+  - Optimizada la obtención de datos para evitar problemas de caché
+  - Implementada carga forzada de estadísticas al iniciar el dashboard
+  - Mejorado el manejo de errores en las peticiones a la API
+  - Implementada actualización periódica de datos cada 30 segundos
+  - Reemplazado el cliente ky por fetch nativo para evitar problemas de caché
+
+- Mejora de la experiencia de usuario en la visualización del progreso de tareas
+  - Implementada visualización mejorada del porcentaje de progreso con colores según el avance
+  - Añadida información sobre tiempo restante hasta la fecha límite con indicadores visuales
+  - Implementado cálculo de fecha estimada de finalización basado en el progreso actual
+  - Mejorada la visualización de fechas de inicio y límite con formato más claro
+  - Añadidos indicadores visuales para tareas vencidas o próximas a vencer
+  - Implementada barra de progreso con colores dinámicos según el porcentaje completado
+  - Mejorada la organización visual de la información para facilitar su comprensión
+
+- Mejora de la consistencia visual de los badges en la aplicación
+  - Actualizado el estilo de los badges de estado y prioridad para mantener una apariencia uniforme
+  - Implementado diseño con bordes redondeados, sombras y efectos de transición
+  - Mejorado el contraste visual para facilitar la identificación de estados
+  - Eliminado el componente de depuración para añadir permisos que aparecía en la parte inferior de la pantalla
+
+- Mejora de los mensajes de error en la interfaz de usuario
+  - Creado componente ErrorAlert con estilo glassmorphism para mostrar errores de forma consistente
+  - Implementado componente ErrorSolicitud especializado para errores al cargar solicitudes
+  - Mejorada la experiencia visual con animaciones y efectos de transición
+  - Añadida información contextual sobre posibles causas y soluciones
+  - Implementado botón de reintento con animación al hacer hover
+  - Mantenida la consistencia visual con el tema general de la aplicación
+- Implementación de descarga directa de archivos adjuntos para usuarios solicitantes
+  - Modificada la funcionalidad de descarga en AsignarTarea.tsx y DetalleTarea.tsx para descargar directamente los archivos
+  - Mejorada la iconografía con el icono FiDownload para indicar claramente que los archivos son descargables
+  - Implementado feedback visual con notificaciones toast al descargar archivos
+  - Mejorado el estilo de los elementos de archivos adjuntos con efectos hover y transiciones
+- Mejora de la interacción con archivos adjuntos para usuarios
+  - Mejorado el componente de visualización de archivos adjuntos en `DetalleTarea.tsx` y `ActualizarProgreso.tsx`
+  - Implementada funcionalidad de descarga directa de archivos adjuntos (sin abrir en nueva pestaña)
+  - Implementada capacidad para que los ejecutores puedan adjuntar nuevos archivos a las tareas asignadas
+  - Añadida visualización de archivos adjuntos en la página de seguimiento de solicitud para usuarios solicitantes
+  - Implementada funcionalidad de descarga de archivos adjuntos para usuarios solicitantes
+  - Añadidos efectos visuales para indicar que los archivos son interactivos (hover, sombras, animaciones)
+  - Mejorada la experiencia de usuario con notificaciones toast al descargar archivos
+  - Añadido título descriptivo a los elementos de archivos adjuntos para mejorar la usabilidad
+
+### Corregido
+- Corrección de error en MisSolicitudes.tsx por falta de importación del icono FiEdit2
+  - Añadido FiEdit2 a la lista de importaciones para resolver el error "FiEdit2 is not defined"
+  - Solucionado el error que impedía editar solicitudes rechazadas desde la vista de Mis Solicitudes
+
+- Mejora de la gestión de errores de WebSocket en RealTimeNotificationContext
+  - Implementada mejor gestión de errores para evitar mensajes repetitivos en la consola
+  - Mejorado el manejo de conexiones WebSocket en entorno de desarrollo
+  - Implementada carga de notificaciones desde localStorage cuando el WebSocket no está disponible
+  - Reducido el spam de mensajes de error en la consola durante el desarrollo
+  - Asegurado el funcionamiento correcto de la aplicación incluso cuando el WebSocket no está disponible
+
+- Corrección del bucle infinito al editar solicitudes rechazadas
+  - Implementado sistema de caché para evitar llamadas repetitivas al endpoint de detalles de solicitud
+  - Creado nuevo hook useTaskRequestDetails que utiliza React Query para gestionar el estado y la caché
+  - Mejorado el componente SolicitudForm para usar el nuevo hook y evitar efectos secundarios innecesarios
+  - Optimizado el servicio solicitudesService para reducir logs duplicados y mejorar la depuración
+  - Implementada validación adicional para evitar llamadas con IDs inválidos
+
+- Corrección del error 500 al actualizar solicitudes rechazadas
+  - Modificado el flujo de edición de solicitudes rechazadas para usar el endpoint de reenvío en lugar de actualización directa
+  - Eliminada la llamada PUT a /api/task-requests/{id} que estaba generando el error 500
+  - Mejorado el manejo de archivos adjuntos en solicitudes rechazadas
+  - Implementada una solución que mantiene todos los datos del formulario al reenviar la solicitud
+  - Añadida información detallada en las notas de reenvío para mantener un registro de los cambios realizados
+
+- Corrección del error 400 al reenviar solicitudes desde la vista de MisSolicitudes
+  - Corregida la definición de la mutación resubmitTaskRequestMutation en useSolicitudes.ts
+  - Modificado el tipo de parámetro para aceptar un objeto con taskRequestId y notes
+  - Solucionado el error "[object Object]" en la URL de reenvío de solicitudes
+  - Mejorada la tipificación para evitar errores similares en el futuro
+
+- Corrección del error "undefined" al reenviar solicitudes desde el formulario de edición
+  - Actualizada la forma de llamar a resubmitTaskRequest en SolicitudForm.tsx para usar el formato de objeto
+  - Corregidas las llamadas en onSubmit y handleResubmit para pasar los parámetros correctamente
+  - Añadida validación adicional en el servicio solicitudesService.ts para verificar IDs inválidos
+  - Mejorados los mensajes de error para facilitar la depuración
+
+- Implementación de visualización de archivos adjuntos para rol ASIGNADOR
+  - Añadida sección de archivos adjuntos en la vista de BandejaEntrada.tsx
+  - Modificada la función adaptarSolicitudes para incluir los archivos adjuntos
+  - Implementada la funcionalidad de descarga de archivos adjuntos
+  - Mantenido el estilo visual consistente con el resto de la aplicación
+
+- Implementación de restricciones de edición para el rol ASIGNADOR
+  - Modificado el componente DetalleTarea.tsx para deshabilitar el botón de edición cuando la tarea está en estado ASSIGNED
+  - Actualizado el componente EditarTarea.tsx para verificar el estado de la tarea antes de permitir la edición
+  - Implementada validación en el backend para verificar permisos según el rol y estado de la tarea
+  - Añadidos mensajes informativos para explicar por qué no se puede editar una tarea
+
+- Implementación de funcionalidad de reasignación de tareas para rol ASIGNADOR
+  - Añadido método reassignExecutor en TaskRequestWorkflowService.java para permitir la reasignación de ejecutores
+  - Creado nuevo endpoint /api/task-requests/{id}/reassign en TaskRequestController.java
+  - Modificado el componente DetalleTarea.tsx para mostrar el botón de reasignación solo cuando la tarea está en estado ASSIGNED
+  - Actualizado el componente ReasignarTarea.tsx para validar el estado de la tarea antes de permitir la reasignación
+  - Implementado registro en el historial de la tarea para documentar quién era el ejecutor anterior y quién es el nuevo
+- Corrección de error 500 al rechazar solicitudes de tareas como usuario asignador
+  - Corregido el error "La columna NEW_STATUS no permite valores nulos (NULL)" al rechazar solicitudes
+  - Actualizado el método `mapStatusToEntity` en `TaskRequestHistoryMapper` para incluir el estado `REJECTED`
+  - Mejorado el método `recordStatusChange` en `TaskRequestHistoryService` para validar que `newStatus` no sea nulo
+  - Creada nueva migración `V25__Fix_Rejected_Status_In_Task_Requests.sql` para corregir inconsistencias en la base de datos
+  - Corregido el problema de desajuste entre los estados esperados y reales en las solicitudes rechazadas
+  - Mejorado el servicio `TaskRequestWorkflowService.reject` para validar el estado de la solicitud antes de intentar rechazarla
+  - Mejorado el componente `RechazarSolicitudModal` para mostrar alertas cuando la solicitud no está en estado SUBMITTED
+  - Corregido error de importación en `RechazarSolicitudModal.tsx` utilizando `ErrorAlert` en lugar de `Alert`
+  - Implementada validación previa en el frontend para verificar el estado de la solicitud antes de enviar la petición
+  - Mejorado el servicio `asignacionService.rejectTaskRequest` para asegurar que los datos enviados coincidan con lo que espera el backend
+  - Implementado manejo de errores más detallado en `useAsignacion` para proporcionar mensajes específicos según el tipo de error
+  - Añadida actualización automática de datos después de un error para asegurar que la interfaz muestra el estado actual
+  - Mejorada la invalidación de consultas para actualizar correctamente todos los datos relacionados
+
+- Corrección de error en la visualización de fechas en las tarjetas de seguimiento
+  - Mejorada la función `formatDate` en `SeguimientoGeneral.tsx` para manejar correctamente fechas inválidas o nulas
+  - Implementada validación robusta para prevenir errores al formatear fechas
+  - Añadido manejo de errores con mensajes descriptivos cuando una fecha no es válida
+  - Mejorada la experiencia de usuario al mostrar mensajes claros cuando hay problemas con las fechas
+
+- Corrección de error al crear comentarios con archivos adjuntos (múltiples representaciones de la misma entidad)
+  - Modificado el flujo de creación de comentarios para evitar guardar la misma entidad dos veces
+  - Optimizado el servicio TaskRequestCommentService para usar una única operación de guardado
+  - Eliminada la operación redundante de guardar el comentario antes de añadirlo a la solicitud
+  - Mejorado el manejo de errores con mensajes más descriptivos
+
+- Corrección de error en la configuración de WebSockets
+  - Añadido endpoint adicional `/api/ws` para compatibilidad con el context-path de la aplicación
+  - Mantenido el endpoint original `/ws` para compatibilidad con código existente
+  - Solucionado el error "No endpoint GET /api/ws/" que impedía la conexión de WebSockets
+  - Mejorada la configuración para soportar tanto acceso directo como a través del context-path
+
+- Corrección de error 400 (Bad Request) al enviar comentarios con archivos adjuntos
+  - Añadida configuración de Spring para multipart con límites adecuados de tamaño de archivos
+  - Implementada validación de tamaño de archivos en el backend y frontend
+  - Creado manejador de excepciones para errores de carga de archivos
+  - Mejorados los mensajes de error para proporcionar información clara al usuario
+  - Implementada validación previa en el frontend para evitar enviar archivos demasiado grandes
+  - Limitado el número máximo de archivos adjuntos por comentario
+  - Mejorada la experiencia de usuario con mensajes de error específicos
+
+- Corrección de error 500 al rechazar solicitudes de tareas
+  - Actualizado el componente RechazarSolicitudModal para usar componentes personalizados en lugar de Material UI
+  - Reemplazadas las importaciones de @mui/material por componentes propios
+  - Simplificada la estructura del componente para mejorar la compatibilidad
+  - Corregido el error que impedía rechazar solicitudes de tareas
+
+- Corrección de error de migración Flyway con versiones duplicadas
+  - Renumerado el archivo `V19__Add_Rejected_Status_To_Task_Requests.sql` a `V24__Add_Rejected_Status_To_Task_Requests.sql`
+  - Solucionado el error "Found more than one migration with version 19" que impedía iniciar la aplicación
+  - Limpiado el directorio target para eliminar archivos compilados con la versión antigua
+
+- Corrección de error "React is not defined" en el dashboard del solicitante
+  - Añadida importación de React en el hook useSmartDashboardData
+  - Reemplazado React.useCallback por useCallback importado directamente
+  - Mejorada la estructura de importaciones para evitar errores similares en el futuro
+
+- Corrección de error en la implementación de adjuntos en comentarios
+  - Creadas clases faltantes: TaskRequestCommentService, TaskRequestCommentMapper, TaskRequestCommentRepository
+  - Implementados adaptadores y repositorios JPA para comentarios
+  - Corregidas importaciones en TaskRequestCommentAttachmentController
+  - Añadido campo userName a la clase TaskRequestComment para corregir error en el mapper
+  - Añadido campo userName a la entidad TaskRequestCommentEntity para mantener consistencia
+  - Creadas migraciones V21 y V22 para añadir las columnas necesarias a las tablas
+  - Corregidos múltiples conflictos de versiones en las migraciones de Flyway
+  - Corregido nombre de tabla en migración (task_request_attachments en lugar de task_request_attachment)
+  - Corregido error de sintaxis JSX en CommentSection.tsx envolviendo elementos adyacentes en un fragmento
+  - Añadido ícono FiLoader faltante en las importaciones de CommentSection.tsx
+
+- Corrección de error en ProgresoTareas.tsx por referencia a componente eliminado
+  - Eliminada referencia a `AddExecutePermission` que causaba error "AddExecutePermission is not defined"
+  - Mejorada la estabilidad de la página de tareas en progreso para usuarios ejecutores
+  - Solucionado error que impedía a los usuarios ejecutores ver sus tareas en progreso
+
+- Solucionado error `RangeError: Invalid time value` en la página de actualización de progreso
+  - Mejorada la función `formatDate` para manejar correctamente fechas nulas, indefinidas o inválidas
+  - Implementada validación robusta para prevenir errores al formatear fechas
+
+- Corregido problema con tareas iniciadas que no aparecían en la sección "En Progreso"
+  - Modificado el controlador `TaskRequestController` para permitir que los usuarios con rol EJECUTOR accedan al endpoint `/api/task-requests/by-status/IN_PROGRESS`
+  - Implementada lógica de filtrado para que los ejecutores solo vean sus propias tareas en progreso
+  - Añadidos nuevos métodos en el repositorio y servicios para filtrar tareas por estado y ejecutor
+  - Simplificado el código frontend para usar directamente el endpoint corregido
+  - Mejorada la documentación de la API para reflejar los cambios de permisos
+
+- Unificación de servicios para obtener tareas asignadas al ejecutor
+  - Modificado el servicio `tareasService.getAssignedTasks()` para combinar datos de los endpoints `activities/assigned` y `task-requests/assigned-to-executor`
+  - Eliminada la llamada redundante a `taskRequestService.getTasksAssignedToExecutor()` en el hook `useTareas`
+  - Actualizado el componente `MisTareas.tsx` para utilizar solo los datos unificados
+  - Mejorado el manejo de errores para garantizar que siempre se muestren datos, incluso si uno de los endpoints falla
+  - Eliminadas referencias redundantes a `tasksAssignedToExecutor` en todo el código
+- Implementación de endpoint para descargar archivos adjuntos
+  - Creado nuevo endpoint `GET /api/task-requests/attachments/{attachmentId}/download` para descargar archivos adjuntos
+  - Modificado el DTO `TaskRequestAttachmentDto` para incluir la URL de descarga
+  - Actualizado el mapper `TaskRequestAttachmentMapper` para generar la URL de descarga utilizando `ServletUriComponentsBuilder`
+  - Añadido método `getAttachmentById` en `TaskRequestAttachmentService` para obtener un archivo adjunto por su ID
+- Implementación de dashboard con valores reales para usuario solicitante
+  - Creado nuevo endpoint `/api/task-requests/stats/requester` que proporciona estadísticas detalladas para el solicitante
+  - Implementado DTO `TaskRequestRequesterStatsDto` con información completa de estadísticas
+  - Creado hook personalizado `useRequesterStats` para consumir los datos de estadísticas
+  - Actualizado el dashboard del solicitante para mostrar datos reales de la API
+  - Añadido gráfico de barras para visualizar la distribución de solicitudes por categoría
+  - Mejorada la visualización de tiempos promedio de asignación y completado
+  - Implementado indicador de porcentaje de solicitudes completadas a tiempo
+- Implementación de dashboard con valores reales para usuario asignador
+  - Mejorado el hook `useAsignacion` para obtener datos reales de tareas asignadas y distribución de carga
+  - Implementada integración con notificaciones en tiempo real para actualizar el dashboard cuando un ejecutor completa una tarea
+  - Mejorado el servicio `asignacionService` para calcular distribución de carga a partir de datos reales
+  - Actualizado el componente `AsignadorDashboardContent` para mostrar datos reales de la API
+  - Añadida tarjeta de estadísticas para mostrar tareas completadas recientemente
+  - Implementado gráfico de distribución de tareas por estado con datos reales
+  - Mejorada la visualización de la distribución de carga de trabajo entre ejecutores
+- Implementación de seguimiento visual de solicitudes
+  - Creado nuevo componente `SeguimientoVisual` que muestra el progreso de la solicitud en una línea de tiempo interactiva
+  - Rediseñada la página de seguimiento para mostrar claramente el estado actual y el historial de la solicitud
+  - Añadidos tooltips informativos para mejorar la experiencia de usuario
+  - Cambiado el texto del botón "Ver detalles" a "Ver seguimiento" para mayor claridad
+- Mejora de la experiencia de usuario en las vistas de seguimiento
+  - Corregido problema en SeguimientoGeneral.tsx para mostrar correctamente las solicitudes en seguimiento
+  - Mejorada la descripción de la página de seguimiento para clarificar su propósito
+  - Añadido botón para navegar entre "Mis Solicitudes" y "Seguimiento" para facilitar el acceso
+  - Mejorada la página de "Mis Solicitudes" con descripción clara de su propósito
+  - Diferenciación visual entre la vista completa de solicitudes y la vista de seguimiento
+- Implementación de notificaciones visuales para solicitudes urgentes
+  - Añadido indicador visual para solicitudes con prioridad alta o crítica
+  - Implementado destacado visual para solicitudes con fecha límite vencida
+  - Añadida etiqueta "Urgente" o "Vencida" en las tarjetas de solicitudes
+  - Mejora del contraste visual con bordes de color según la urgencia
+  - Visualización de la fecha límite con formato destacado cuando está vencida
+- Mejora de la visualización del progreso de solicitudes
+  - Añadida información detallada sobre el tiempo transcurrido en cada etapa
+  - Implementada barra de progreso visual para mostrar el avance en cada fase
+  - Añadidos indicadores de tiempo de inicio y fin para cada etapa
+  - Mejora visual de los tooltips con información detallada
+  - Implementado indicador de estado "Vencida" cuando se supera la fecha límite
+
+### Corregido
+- Corrección de problemas de autenticación en peticiones fetch después de actualizar el dashboard
+  - Corregida la forma en que se obtiene y envía el token JWT en las peticiones fetch
+  - Implementada validación para verificar la disponibilidad del token antes de realizar peticiones
+  - Mejorado el manejo de errores para proporcionar mensajes más descriptivos sobre problemas de autenticación
+  - Reemplazado el cliente ky por fetch nativo para evitar problemas con el token JWT
+
+- Corrección del resaltado múltiple en el menú lateral
+  - Modificado el componente `NavItem` para usar la propiedad `end` de React Router
+  - Ahora solo se resalta la opción activa actual, evitando confusión visual
+  - Mejorada la experiencia de usuario al navegar por la aplicación
+- Implementación de página de seguimiento general para usuarios SOLICITANTE
+  - Creado componente `SeguimientoGeneral` para mostrar mensaje informativo cuando no hay solicitudes en seguimiento
+  - Añadida ruta `/app/solicitudes/seguimiento` para acceder a la página general
+  - Mejorada la experiencia de usuario al proporcionar información clara sobre el estado de las solicitudes
+  - Implementadas funciones de formateo locales para evitar dependencias innecesarias
+- Eliminación de iconos duplicados en la interfaz
+  - Removidos los iconos de notificaciones y configuración del componente `DashboardHeader`
+  - Mantenidos únicamente los iconos en el encabezado principal de la aplicación
+  - Mejorada la consistencia visual y evitada la confusión para el usuario
+- Corrección de error en el formulario de solicitudes
+  - Eliminada referencia a variable `isSavingDraft` que causaba error al cargar el formulario
+  - Simplificada la lógica de estado de carga del formulario
+- Corrección de error en SeguimientoGeneral.tsx por falta de importación del icono FiEye
+  - Añadido FiEye a la lista de importaciones para resolver el error "FiEye is not defined"
+  - Mejorada la estabilidad del componente al evitar errores de referencia
+- Mejora del mensaje de error cuando el servidor no está disponible
+  - Actualizado el componente `Login.tsx` para mostrar un mensaje más descriptivo y en español
+  - Mejorado el manejo de errores en `useAuth.ts` para detectar específicamente errores de conexión
+  - Implementado un estilo más visible para los mensajes de error con borde lateral y mejor contraste
+  - Personalización de mensajes según el tipo de error para mejorar la experiencia de usuario
+- Corrección de error "Maximum update depth exceeded" en el autoguardado de formularios
+  - Corregido el hook `useFormDraft.ts` para evitar actualizaciones infinitas del estado
+  - Actualizado el componente `SolicitudForm.tsx` para usar correctamente las dependencias en useEffect
+  - Eliminada referencia a variable inexistente `isSavingDraft`
+  - Mejorado el rendimiento del autoguardado al evitar renderizados innecesarios
+- Mejora del componente de seguimiento visual de solicitudes
+  - Corregido problema de visualización en la línea de tiempo que mostraba fechas idénticas para todos los estados
+  - Implementada lógica para generar fechas progresivas cuando no hay historial completo
+  - Mejorado el diseño visual de la línea de progreso con colores consistentes entre estados
+  - Optimizada la visualización de los círculos de estado con mejor contraste y efectos visuales
+  - Añadido efecto hover a los elementos de la línea de tiempo para mejorar la interactividad
+  - Mejorada la presentación de las fechas con fondo para mayor legibilidad
+
+### Agregado
+- Implementación de funcionalidad para adjuntar archivos a solicitudes
+  - Creado servicio TaskRequestAttachmentService para gestionar archivos adjuntos
+  - Implementado controlador REST para subir, listar y eliminar archivos adjuntos
+  - Configurado almacenamiento de archivos en el servidor
+  - Corregido error 500 al intentar adjuntar archivos a solicitudes
+- Sprint 17: Refactorización de Dashboards y Mejora de Interfaces por Rol
+  - Análisis y planificación de la refactorización de dashboards
+- Implementación de autoguardado periódico en formularios de solicitudes
+  - Reemplazo del sistema manual de borradores por un autoguardado inteligente
+  - Guardado automático de cambios después de 3 segundos de inactividad
+  - Indicador visual sutil que muestra cuando se ha guardado automáticamente
+  - Recuperación automática de borradores al volver al formulario
+  - Mejora de la experiencia de usuario al prevenir pérdida de datos
+  - Corrección del comportamiento de autoguardado para evitar que se borren los campos ingresados
+    - Documentación detallada de la estructura actual y sus problemas
+    - Identificación de componentes duplicados y funcionalidades redundantes
+    - Análisis de las necesidades específicas de cada rol
+    - Creación de diagramas de la estructura actual y la propuesta
+    - Diseño de la arquitectura del nuevo Smart Dashboard
+    - Creación de mockups detallados de la nueva interfaz
+    - Documentación de la estrategia de migración
+  - Implementación del Dashboard Unificado (Smart Dashboard)
+    - Creación del componente base `SmartDashboard` que adapta su contenido según el rol del usuario
+    - Implementación de componentes compartidos: `DashboardHeader`, `QuickActionsBar`, `DashboardFooter`
+    - Creación de componentes reutilizables: `StatisticsCard`, `TaskList`, `MetricsChart`, `CalendarView`
+    - Implementación de contenido específico para cada rol: `SolicitanteDashboardContent`, `AsignadorDashboardContent`, `EjecutorDashboardContent`, `AdminDashboardContent`
+    - Creación de hook personalizado `useSmartDashboardData` para obtener datos según el rol
+    - Actualización de rutas en `App.tsx` para usar el nuevo dashboard unificado
+    - Mantenimiento de compatibilidad con rutas antiguas durante la transición
+  - Actualización de la navegación lateral
+    - Simplificación del menú lateral en `RoleBasedSidebar.tsx`
+    - Eliminación de enlaces redundantes a dashboards específicos por rol
+    - Mantenimiento del dashboard principal como punto de entrada único
+    - Mejora de la organización de opciones por rol
+    - Actualización de la sección de reportes con enlaces más específicos
+    - Mantenimiento de compatibilidad con rutas existentes
+  - Mejoras visuales y de experiencia de usuario
+    - Implementación de componentes de gráficos reutilizables: `BarChart`, `DoughnutChart`, `LineChart`
+    - Integración de gráficos interactivos en los dashboards de cada rol
+    - Mejora del diseño visual con tarjetas más atractivas y visualizaciones interactivas
+    - Implementación de animaciones y transiciones suaves
+    - Optimización de la responsividad para diferentes tamaños de pantalla
+
 ### Agregado
 - Implementación de sistema de comentarios para asignadores
   - Creación de componente CommentSection reutilizable para mostrar y gestionar comentarios
@@ -11,6 +605,10 @@
   - Actualización de rutas para incluir la página de detalle de tarea
   - Mejora de la navegación en DashboardAsignador y DistribucionCarga para acceder a los detalles de tareas
   - Implementación de funcionalidad para que los asignadores puedan interactuar con los solicitantes mediante comentarios
+
+### Corregido
+- Error en MisTareas.tsx por falta de importación del icono FiEdit de react-icons/fi
+  - Añadido FiEdit a la lista de importaciones para resolver el error "FiEdit is not defined"
 - Creación de tabla task_request_comment_mentions para almacenar menciones en comentarios
   - Implementación de migración V19__add_comment_mentions_table.sql para crear la tabla faltante
   - Corrección del error "Table TASK_REQUEST_COMMENT_MENTIONS not found" al marcar comentarios como leídos

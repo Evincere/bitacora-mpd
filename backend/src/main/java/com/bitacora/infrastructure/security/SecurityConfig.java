@@ -1,9 +1,15 @@
 package com.bitacora.infrastructure.security;
 
+import com.bitacora.infrastructure.security.filter.BlacklistCheckHandler;
+import com.bitacora.infrastructure.security.filter.JwtValidationHandler;
+import com.bitacora.infrastructure.security.filter.PermissionsHandler;
+import com.bitacora.infrastructure.security.filter.SecurityFilterHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -22,7 +28,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 
 /**
- * Configuración de seguridad para la aplicación.
+ * Configuración de seguridad unificada para la aplicación.
+ * Combina la configuración de Spring Security y la cadena de filtros
+ * personalizada.
  */
 @Configuration
 @EnableWebSecurity
@@ -30,8 +38,9 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomPermissionsFilter customPermissionsFilter;
+    private final BlacklistCheckHandler blacklistCheckHandler;
+    private final JwtValidationHandler jwtValidationHandler;
+    private final PermissionsHandler permissionsHandler;
 
     /**
      * Configura la cadena de filtros de seguridad.
@@ -48,8 +57,16 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                        // Rutas de autenticación unificadas
                         .requestMatchers("/api/auth/**", "/auth/**").permitAll()
+                        // Rutas específicas de autenticación para mayor claridad
+                        .requestMatchers("/api/auth/login", "/auth/login").permitAll()
+                        .requestMatchers("/api/auth/refresh", "/auth/refresh").permitAll()
+                        .requestMatchers("/api/auth/logout", "/auth/logout").permitAll()
+                        .requestMatchers("/api/auth/test", "/auth/test").permitAll()
+                        // Documentación API
                         .requestMatchers("/api/api-docs/**", "/api/swagger-ui/**", "/api/swagger-ui.html").permitAll()
+                        // Monitoreo y administración
                         .requestMatchers("/api/actuator/**").permitAll()
                         .requestMatchers("/api/h2-console/**", "/h2-console/**").permitAll()
                         // Permitir acceso a endpoints de WebSocket
@@ -57,8 +74,8 @@ public class SecurityConfig {
                         // Permitir acceso a endpoints de actividades para pruebas
                         .requestMatchers("/api/activities/**", "/activities/**").permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(customPermissionsFilter, JwtAuthenticationFilter.class)
+                // Configurar la cadena de filtros usando el patrón Chain of Responsibility
+                .addFilterBefore(configureFilterChain(), UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .build();
     }
@@ -68,23 +85,41 @@ public class SecurityConfig {
      *
      * @return El origen de configuración CORS
      */
-    @Value("${cors.allowed-origins:http://localhost:3000,http://localhost:8090,https://metres-dispatch-takes-reserve.trycloudflare.com}")
+    @Value("${bitacora.cors.allowed-origins:http://localhost:3000,http://localhost:8090,https://metres-dispatch-takes-reserve.trycloudflare.com}")
     private String[] allowedOrigins;
 
-    @Value("${cors.allowed-methods:GET,POST,PUT,PATCH,DELETE,OPTIONS}")
+    @Value("${bitacora.cors.allowed-methods:GET,POST,PUT,PATCH,DELETE,OPTIONS}")
     private String[] allowedMethods;
 
-    @Value("${cors.allowed-headers:authorization,content-type,x-auth-token,*}")
+    @Value("${bitacora.cors.allowed-headers:authorization,content-type,x-auth-token,*}")
     private String[] allowedHeaders;
 
-    @Value("${cors.exposed-headers:x-auth-token,authorization}")
+    @Value("${bitacora.cors.exposed-headers:x-auth-token,authorization}")
     private String[] exposedHeaders;
 
-    @Value("${cors.allow-credentials:true}")
+    @Value("${bitacora.cors.allow-credentials:true}")
     private boolean allowCredentials;
 
-    @Value("${cors.max-age:3600}")
+    @Value("${bitacora.cors.max-age:3600}")
     private long maxAge;
+
+    /**
+     * Configura la cadena de filtros usando el patrón Chain of Responsibility.
+     * El orden de los filtros es importante:
+     * 1. Primero se verifica si el token está en la lista negra
+     * 2. Luego se valida el token JWT
+     * 3. Finalmente se verifican los permisos
+     *
+     * @return El primer filtro de la cadena
+     */
+    private BlacklistCheckHandler configureFilterChain() {
+        // Configurar la cadena de filtros
+        blacklistCheckHandler.setNext(jwtValidationHandler);
+        jwtValidationHandler.setNext(permissionsHandler);
+
+        // Devolver el primer filtro de la cadena
+        return blacklistCheckHandler;
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -125,5 +160,29 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
             throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    /**
+     * Registra los filtros de seguridad personalizados como un
+     * FilterRegistrationBean.
+     * Este bean reemplaza al anterior 'securityFilterChain' en
+     * SecurityFilterChainConfig.
+     *
+     * @return El bean de registro de filtros
+     */
+    @Bean
+    public FilterRegistrationBean<SecurityFilterHandler> customSecurityFilterRegistration() {
+        // Configurar la cadena de filtros (esto ya se hace en configureFilterChain,
+        // pero lo mantenemos aquí por claridad)
+        blacklistCheckHandler.setNext(jwtValidationHandler);
+        jwtValidationHandler.setNext(permissionsHandler);
+
+        // Registrar el primer filtro de la cadena
+        FilterRegistrationBean<SecurityFilterHandler> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(blacklistCheckHandler);
+        registrationBean.addUrlPatterns("/api/*");
+        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 10);
+
+        return registrationBean;
     }
 }

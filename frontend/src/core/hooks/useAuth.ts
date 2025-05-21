@@ -202,8 +202,14 @@ export const useAuth = () => {
       console.error('Error de autenticación:', error);
       let message = 'Error al iniciar sesión';
 
+      // Detectar específicamente errores de conexión
+      if (error?.message?.includes('Failed to fetch') ||
+        error?.message?.includes('ERR_CONNECTION_REFUSED') ||
+        error?.message?.includes('NetworkError')) {
+        message = 'No se pudo conectar con el servidor. Verifique que el servidor esté en funcionamiento o contacte al administrador del sistema.';
+      }
       // Intentar extraer el mensaje de error de diferentes formatos de respuesta
-      if (error?.response?.data?.message) {
+      else if (error?.response?.data?.message) {
         message = error.response.data.message;
       } else if (error?.message) {
         message = error.message;

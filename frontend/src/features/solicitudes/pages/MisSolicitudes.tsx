@@ -12,10 +12,15 @@ import {
   FiChevronDown,
   FiChevronUp,
   FiEye,
-  FiLoader
+  FiLoader,
+  FiRefreshCw,
+  FiEdit2
 } from 'react-icons/fi';
 import useSolicitudes from '../hooks/useSolicitudes';
 import { Activity } from '@/types/models';
+import { Tooltip } from '@/shared/components/ui';
+import ReenviarSolicitudModal from '../components/ReenviarSolicitudModal';
+import { TaskRequest } from '../services/solicitudesService';
 
 // Datos de respaldo para mostrar en la interfaz si no hay datos reales
 const MOCK_SOLICITUDES = [
@@ -574,12 +579,16 @@ const MisSolicitudes: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setpriorityFilter] = useState('');
   const [solicitudes, setSolicitudes] = useState<any[]>([]);
+  const [showReenviarModal, setShowReenviarModal] = useState(false);
+  const [selectedTaskRequest, setSelectedTaskRequest] = useState<TaskRequest | null>(null);
 
   // Obtener solicitudes del usuario actual
   const {
     mySolicitudes,
     isLoadingMySolicitudes,
     mySolicitudesError,
+    isResubmittingTaskRequest,
+    resubmitTaskRequest,
     refetchMySolicitudes
   } = useSolicitudes();
 
@@ -634,11 +643,51 @@ const MisSolicitudes: React.FC = () => {
     setExpandedId(expandedId === id ? null : id);
   };
 
+  const handleReenviar = (solicitudId: number) => {
+    // Buscar la solicitud en los datos originales
+    const taskRequest = mySolicitudes?.taskRequests.find(tr => tr.id === solicitudId) || null;
+
+    // Mostrar modal de reenvío
+    setSelectedTaskRequest(taskRequest);
+    setShowReenviarModal(true);
+  };
+
+  const handleConfirmReenviar = (notes?: string) => {
+    if (!selectedTaskRequest) return;
+
+    // Reenviar la solicitud
+    resubmitTaskRequest({
+      taskRequestId: selectedTaskRequest.id,
+      notes
+    });
+
+    // Cerrar el modal y limpiar el estado
+    setShowReenviarModal(false);
+    setSelectedTaskRequest(null);
+
+    // Cerrar el panel expandido
+    setExpandedId(null);
+  };
+
+  const handleCancelReenviar = () => {
+    setShowReenviarModal(false);
+    setSelectedTaskRequest(null);
+  };
+
   return (
     <PageContainer>
       <PageHeader>
-        <PageTitle>Mis Solicitudes</PageTitle>
+        <div>
+          <PageTitle>Mis Solicitudes</PageTitle>
+          <p style={{ margin: '5px 0 0', color: 'var(--text-secondary)' }}>
+            Historial completo de todas tus solicitudes
+          </p>
+        </div>
         <ButtonGroup>
+          <Button onClick={() => navigate('/app/solicitudes/seguimiento')}>
+            <FiClock size={16} />
+            Ver seguimiento
+          </Button>
           <Button onClick={() => refetchMySolicitudes()}>
             <FiLoader size={16} />
             Recargar
@@ -688,6 +737,15 @@ const MisSolicitudes: React.FC = () => {
           Más filtros
         </Button>
       </FiltersContainer>
+
+      {/* Modal de reenvío de solicitud rechazada */}
+      <ReenviarSolicitudModal
+        isOpen={showReenviarModal}
+        onClose={handleCancelReenviar}
+        onResubmit={handleConfirmReenviar}
+        taskRequest={selectedTaskRequest}
+        isResubmitting={isResubmittingTaskRequest}
+      />
 
       {isLoadingMySolicitudes ? (
         <EmptyState>
@@ -755,11 +813,44 @@ const MisSolicitudes: React.FC = () => {
                     <DetailValue>{solicitud.motivoRechazo}</DetailValue>
                   </DetailRow>
                 )}
-                <DetailRow style={{ marginTop: '16px', justifyContent: 'flex-end' }}>
-                  <ActionButton onClick={() => navigate(`/app/solicitudes/seguimiento/${solicitud.id}`)}>
-                    <FiEye size={14} />
-                    Ver detalles
-                  </ActionButton>
+                <DetailRow style={{ marginTop: '16px', justifyContent: 'flex-end', gap: '12px' }}>
+                  {solicitud.estado === 'REJECTED' && (
+                    <>
+                      <Tooltip
+                        title="Edita esta solicitud rechazada para corregir los problemas señalados"
+                        arrow
+                      >
+                        <ActionButton
+                          onClick={() => navigate(`/app/solicitudes/editar/${solicitud.id}`)}
+                          style={{ backgroundColor: '#2196F3' }}
+                        >
+                          <FiEdit2 size={14} />
+                          Editar solicitud
+                        </ActionButton>
+                      </Tooltip>
+                      <Tooltip
+                        title="Reenvía esta solicitud rechazada con las correcciones necesarias"
+                        arrow
+                      >
+                        <ActionButton
+                          onClick={() => handleReenviar(solicitud.id)}
+                          style={{ backgroundColor: '#f44336' }}
+                        >
+                          <FiRefreshCw size={14} />
+                          Reenviar solicitud
+                        </ActionButton>
+                      </Tooltip>
+                    </>
+                  )}
+                  <Tooltip
+                    title="Accede al seguimiento detallado de esta solicitud para ver su progreso, historial y comentarios"
+                    arrow
+                  >
+                    <ActionButton onClick={() => navigate(`/app/solicitudes/seguimiento/${solicitud.id}`)}>
+                      <FiEye size={14} />
+                      Ver seguimiento
+                    </ActionButton>
+                  </Tooltip>
                 </DetailRow>
               </SolicitudDetails>
             </SolicitudCard>

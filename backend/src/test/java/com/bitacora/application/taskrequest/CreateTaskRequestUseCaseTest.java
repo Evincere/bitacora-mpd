@@ -1,6 +1,5 @@
 package com.bitacora.application.taskrequest;
 
-import com.bitacora.domain.event.taskrequest.TaskRequestCreatedEvent;
 import com.bitacora.domain.model.taskrequest.TaskRequest;
 import com.bitacora.domain.model.taskrequest.TaskRequestCategory;
 import com.bitacora.domain.model.taskrequest.TaskRequestPriority;

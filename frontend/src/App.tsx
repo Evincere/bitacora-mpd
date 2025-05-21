@@ -14,6 +14,7 @@ import GlobalStyle from './styles/GlobalStyle';
 import PlaceholderDashboard from '@/shared/components/ui/PlaceholderDashboard';
 import RoleProtectedRoute from './routes/RoleProtectedRoute';
 import { UserRole } from '@/core/types/models';
+import AuthEventsListener from './components/auth/AuthEventsListener';
 // Ya no necesitamos estas importaciones porque verificamos directamente en localStorage
 
 // Componentes de carga
@@ -32,12 +33,15 @@ import DashboardSolicitante from '@/features/solicitudes/pages/DashboardSolicita
 import SolicitudForm from '@/features/solicitudes/pages/SolicitudForm';
 import MisSolicitudes from '@/features/solicitudes/pages/MisSolicitudes';
 import SeguimientoSolicitud from '@/features/solicitudes/pages/SeguimientoSolicitud';
+import SeguimientoGeneral from '@/features/solicitudes/pages/SeguimientoGeneral';
 import SolicitudesRoute from './routes/SolicitudesRoute';
 
 // Componentes para ASIGNADOR
 import DashboardAsignador from '@/features/asignacion/pages/DashboardAsignador';
 import AsignarTarea from '@/features/asignacion/pages/AsignarTarea';
 import DetalleTarea from '@/features/asignacion/pages/DetalleTarea';
+import EditarTarea from '@/features/asignacion/pages/EditarTarea';
+import ReasignarTarea from '@/features/asignacion/pages/ReasignarTarea';
 import BandejaEntrada from '@/features/asignacion/pages/BandejaEntrada';
 import DistribucionCarga from '@/features/asignacion/pages/DistribucionCarga';
 import MetricasAsignacion from '@/features/asignacion/pages/MetricasAsignacion';
@@ -51,14 +55,20 @@ import ProgresoTareas from '@/features/tareas/pages/ProgresoTareas';
 import HistorialTareas from '@/features/tareas/pages/HistorialTareas';
 
 // Componentes de configuración
-import ConfiguracionTareas from '@/features/configuracion/pages/ConfiguracionTareas';
+import { ConfiguracionTareas, ConfiguracionGeneral } from '@/features/configuracion/pages';
 import ConfiguracionNotificaciones from '@/features/notificaciones/pages/ConfiguracionNotificaciones';
 import ConfiguracionIntegraciones from '@/features/integraciones/pages/ConfiguracionIntegraciones';
-import DashboardReportes from '@/features/reportes/pages/DashboardReportes';
+import { DashboardReportes, AdminDashboardPage, CustomReportsPage } from '@/features/reportes/pages';
+import { SystemMonitorPage } from '@/features/diagnostico/pages';
+import { UserAuditPage, SecurityAlertsPage } from '@/features/auditoria/pages';
+
+// Componentes de gestión de usuarios
+import { UsersPage, CreateUserPage, EditUserPage, UserDetailPage } from '@/features/usuarios/pages';
 
 // Páginas - Carga diferida
 const Login = lazy(() => import('./features/auth/Login.tsx'));
-const Dashboard = lazy(() => import('./features/dashboard/Dashboard.jsx'));
+const Dashboard = lazy(() => import('./features/dashboard/Dashboard.jsx')); // Dashboard antiguo
+const SmartDashboard = lazy(() => import('./features/dashboard/SmartDashboard')); // Nuevo dashboard unificado
 const Activities = lazy(() => import('./features/activities/Activities'));
 const ActivityDetailPage = lazy(() => import('./features/activities/pages/ActivityDetailPage'));
 const ActivityFormPage = lazy(() => import('./features/activities/pages/ActivityFormPage'));
@@ -66,6 +76,7 @@ const ActivityCalendarPage = lazy(() => import('./features/activities/pages/Acti
 const Profile = lazy(() => import('./features/profile/Profile'));
 const NotFound = lazy(() => import('./shared/components/ui/NotFound'));
 const PermissionsDebugPage = lazy(() => import('./pages/debug/PermissionsDebugPage'));
+const DebugPage = lazy(() => import('./pages/DebugPage'));
 
 // Componente de carga para Suspense
 const LoadingFallback = () => (
@@ -212,6 +223,7 @@ function App() {
         theme={theme}
       />
       <ToastProvider position="top-right" defaultDuration={5000}>
+        <AuthEventsListener />
         <Suspense fallback={<LoadingFallback />}>
           <AnimatedRoutes transitionType="fade" duration={300}>
           {/* Rutas públicas */}
@@ -228,7 +240,10 @@ function App() {
               </RealTimeNotificationProvider>
             </ProtectedRoute>
           }>
-            <Route index element={<Dashboard />} />
+            {/* Usar SmartDashboard como dashboard principal */}
+            <Route index element={<SmartDashboard />} />
+            {/* Mantener el dashboard antiguo temporalmente para compatibilidad */}
+            <Route path="dashboard/legacy" element={<Dashboard />} />
             <Route path="activities" element={<Activities />} />
             <Route path="activities/calendar" element={<ActivityCalendarPage />} />
             <Route path="activities/new" element={<ActivityFormPage />} />
@@ -251,7 +266,9 @@ function App() {
               <Route element={<SolicitudesRoute />}>
                 <Route path="dashboard" element={<DashboardSolicitante />} />
                 <Route path="nueva" element={<SolicitudForm />} />
+                <Route path="editar/:id" element={<SolicitudForm />} />
                 <Route path="" element={<MisSolicitudes />} />
+                <Route path="seguimiento" element={<SeguimientoGeneral />} />
                 <Route path="seguimiento/:id" element={<SeguimientoSolicitud />} />
               </Route>
             </Route>
@@ -261,6 +278,8 @@ function App() {
               <Route path="dashboard" element={<DashboardAsignador />} />
               <Route path="asignar/:id" element={<AsignarTarea />} />
               <Route path="detalle/:id" element={<DetalleTarea />} />
+              <Route path="editar/:id" element={<EditarTarea />} />
+              <Route path="reasignar/:id" element={<ReasignarTarea />} />
               <Route path="bandeja" element={<BandejaEntrada />} />
               <Route path="distribucion" element={<DistribucionCarga />} />
               <Route path="metricas" element={<MetricasAsignacion />} />
@@ -286,9 +305,13 @@ function App() {
             </ProtectedRoute>
           }>
             <Route element={<RoleProtectedRoute allowedRoles={[UserRole.ADMIN]} redirectTo="/app" />}>
+              <Route path="general" element={<ConfiguracionGeneral />} />
               <Route path="tareas" element={<ConfiguracionTareas />} />
               <Route path="notificaciones" element={<ConfiguracionNotificaciones />} />
               <Route path="integraciones" element={<ConfiguracionIntegraciones />} />
+              <Route path="auditoria" element={<UserAuditPage />} />
+              <Route path="alertas" element={<SecurityAlertsPage />} />
+              <Route path="diagnostico" element={<SystemMonitorPage />} />
             </Route>
           </Route>
 
@@ -302,18 +325,37 @@ function App() {
           }>
             <Route element={<RoleProtectedRoute allowedRoles={[UserRole.ADMIN]} redirectTo="/app" />}>
               <Route index element={<DashboardReportes />} />
+              <Route path="dashboard" element={<AdminDashboardPage />} />
+              <Route path="personalizados" element={<CustomReportsPage />} />
             </Route>
           </Route>
 
-          {/* Ruta para depuración de permisos */}
-          <Route path="/app/debug/permissions" element={
+          {/* Rutas para ADMIN - Gestión de Usuarios */}
+          <Route path="/app/admin/usuarios" element={
             <ProtectedRoute>
               <RealTimeNotificationProvider>
                 <RoleBasedLayout />
               </RealTimeNotificationProvider>
             </ProtectedRoute>
           }>
-            <Route index element={<PermissionsDebugPage />} />
+            <Route element={<RoleProtectedRoute allowedRoles={[UserRole.ADMIN]} redirectTo="/app" />}>
+              <Route index element={<UsersPage />} />
+              <Route path="nuevo" element={<CreateUserPage />} />
+              <Route path="editar/:id" element={<EditUserPage />} />
+              <Route path=":id" element={<UserDetailPage />} />
+            </Route>
+          </Route>
+
+          {/* Rutas para depuración */}
+          <Route path="/app/debug" element={
+            <ProtectedRoute>
+              <RealTimeNotificationProvider>
+                <RoleBasedLayout />
+              </RealTimeNotificationProvider>
+            </ProtectedRoute>
+          }>
+            <Route path="permissions" element={<PermissionsDebugPage />} />
+            <Route path="auth" element={<DebugPage />} />
           </Route>
 
           {/* Redirección para rutas de dashboard antiguas */}

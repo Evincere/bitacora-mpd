@@ -385,7 +385,7 @@ class TaskRequestWorkflowServiceTest {
                 .description("Descripción de prueba")
                 .category(TaskRequestCategory.builder().id(1L).name("General").build())
                 .priority(TaskRequestPriority.MEDIUM)
-                .status(TaskRequestStatus.CANCELLED)
+                .status(TaskRequestStatus.REJECTED)
                 .requesterId(requesterId)
                 .assignerId(assignerId)
                 .requestDate(LocalDateTime.now())
@@ -404,7 +404,8 @@ class TaskRequestWorkflowServiceTest {
         String rejectionReason = "No cumple con los requisitos";
 
         TaskRequest submittedTaskRequest = createSubmittedTaskRequest(taskRequestId, requesterId);
-        TaskRequest rejectedTaskRequest = createRejectedTaskRequest(taskRequestId, requesterId, assignerId, rejectionReason);
+        TaskRequest rejectedTaskRequest = createRejectedTaskRequest(taskRequestId, requesterId, assignerId,
+                rejectionReason);
 
         when(taskRequestRepository.findById(taskRequestId)).thenReturn(Optional.of(submittedTaskRequest));
         when(taskRequestRepository.save(any(TaskRequest.class))).thenReturn(rejectedTaskRequest);
@@ -414,7 +415,7 @@ class TaskRequestWorkflowServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(TaskRequestStatus.CANCELLED, result.getStatus());
+        assertEquals(TaskRequestStatus.REJECTED, result.getStatus());
         assertEquals(rejectionReason, result.getNotes());
         assertEquals(assignerId, result.getAssignerId());
 
@@ -425,9 +426,8 @@ class TaskRequestWorkflowServiceTest {
                 eq(assignerId),
                 isNull(),
                 eq(TaskRequestStatus.SUBMITTED),
-                eq(TaskRequestStatus.CANCELLED),
-                contains(rejectionReason)
-        );
+                eq(TaskRequestStatus.REJECTED),
+                contains(rejectionReason));
     }
 
     @Test
@@ -500,11 +500,11 @@ class TaskRequestWorkflowServiceTest {
                 isNull(),
                 eq(TaskRequestStatus.ASSIGNED),
                 eq(TaskRequestStatus.IN_PROGRESS),
-                contains(notes)
-        );
+                contains(notes));
 
         // Verificar que se publicó el evento de cambio de estado
-        ArgumentCaptor<TaskRequestStatusChangedEvent> eventCaptor = ArgumentCaptor.forClass(TaskRequestStatusChangedEvent.class);
+        ArgumentCaptor<TaskRequestStatusChangedEvent> eventCaptor = ArgumentCaptor
+                .forClass(TaskRequestStatusChangedEvent.class);
         verify(eventPublisher).publishEvent(eventCaptor.capture());
 
         TaskRequestStatusChangedEvent capturedEvent = eventCaptor.getValue();

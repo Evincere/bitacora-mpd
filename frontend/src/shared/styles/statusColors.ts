@@ -192,6 +192,22 @@ export const statusColors: StatusColorMap = {
     hover: "rgba(85, 85, 255, 0.3)",
     shadow: "rgba(85, 85, 255, 0.4)",
   },
+  // Estado: Aprobada (Verde - Ahora con colores de LOW)
+  APPROVED: {
+    background: "rgba(16, 185, 129, 0.25)",
+    border: "rgba(16, 185, 129, 0.7)",
+    text: "#065f46",
+    hover: "rgba(16, 185, 129, 0.35)",
+    shadow: "rgba(16, 185, 129, 0.5)",
+  },
+  // Estado: Rechazada (Rojo)
+  REJECTED: {
+    background: "rgba(239, 68, 68, 0.25)",
+    border: "rgba(239, 68, 68, 0.7)",
+    text: "#991b1b",
+    hover: "rgba(239, 68, 68, 0.35)",
+    shadow: "rgba(239, 68, 68, 0.5)",
+  },
 };
 
 // Colores para los tipos de actividades

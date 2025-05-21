@@ -1,6 +1,6 @@
 import { api } from '@/core/api/api';
 import { Activity, User } from '@/types/models';
-import { TaskRequest, TaskRequestPageDto } from '@/features/solicitudes/services/solicitudesService';
+import solicitudesService, { TaskRequest, TaskRequestPageDto } from '@/features/solicitudes/services/solicitudesService';
 
 export interface AsignacionRequest {
   taskRequestId: number;
@@ -124,15 +124,15 @@ const asignacionService = {
           email: user.email,
           role: user.role,
           department: user.department,
-          cargaActual: Math.floor(Math.random() * 5), // Simulamos carga de trabajo
-          especialidad: ['LEGAL', 'ADMINISTRATIVA', 'TECNICA', 'FINANCIERA', 'GENERAL'][Math.floor(Math.random() * 5)] // Simulamos especialidad
+          cargaActual: 0, // Se calculará con datos reales
+          especialidad: user.department || 'GENERAL' // Usar el departamento como especialidad
         }));
       } catch (apiError) {
         console.warn('Error al obtener ejecutores por rol, intentando obtener todos los usuarios:', apiError);
 
         try {
           // Si falla, intentar obtener todos los usuarios y filtrar por rol
-          const allUsers = await api.get('users').json<{users: User[], totalCount: number}>();
+          const allUsers = await api.get('users').json<{ users: User[], totalCount: number }>();
           console.log('Respuesta de todos los usuarios:', allUsers);
 
           // Filtrar usuarios con rol EJECUTOR
@@ -146,19 +146,14 @@ const asignacionService = {
             email: user.email,
             role: user.role,
             department: user.department,
-            cargaActual: Math.floor(Math.random() * 5), // Simulamos carga de trabajo
-            especialidad: ['LEGAL', 'ADMINISTRATIVA', 'TECNICA', 'FINANCIERA', 'GENERAL'][Math.floor(Math.random() * 5)] // Simulamos especialidad
+            cargaActual: 0, // Se calculará con datos reales
+            especialidad: user.department || 'GENERAL' // Usar el departamento como especialidad
           }));
         } catch (allUsersError) {
           console.error('Error al obtener todos los usuarios:', allUsersError);
 
-          // Si ambos métodos fallan, usar datos de ejemplo
-          ejecutores = [
-            { id: 1, username: 'ejecutor1', fullName: 'Ana Martínez', email: 'ana@example.com', role: 'EJECUTOR', cargaActual: 2, especialidad: 'LEGAL' },
-            { id: 2, username: 'ejecutor2', fullName: 'Luis Sánchez', email: 'luis@example.com', role: 'EJECUTOR', cargaActual: 3, especialidad: 'TECNICA' },
-            { id: 3, username: 'ejecutor3', fullName: 'María López', email: 'maria@example.com', role: 'EJECUTOR', cargaActual: 1, especialidad: 'ADMINISTRATIVA' },
-            { id: 4, username: 'ejecutor4', fullName: 'Pedro Gómez', email: 'pedro@example.com', role: 'EJECUTOR', cargaActual: 4, especialidad: 'FINANCIERA' }
-          ];
+          // Si ambos métodos fallan, devolver un array vacío
+          ejecutores = [];
         }
       }
 
@@ -225,11 +220,44 @@ const asignacionService = {
    */
   async getWorkloadDistribution(): Promise<any> {
     try {
-      const response = await api.get('activities/stats/workload').json();
-      return response;
+      console.log('Obteniendo distribución de carga de trabajo...');
+
+      // Intentar obtener datos reales de la API
+      try {
+        const response = await api.get('activities/stats/workload').json();
+        console.log('Respuesta de distribución de carga:', response);
+
+        if (response && Array.isArray(response) && response.length > 0) {
+          return response;
+        }
+      } catch (apiError) {
+        console.warn('Error al obtener distribución de carga desde la API:', apiError);
+      }
+
+      // Si no se pudieron obtener datos de la API, calcular a partir de las tareas asignadas
+      console.log('Calculando distribución de carga a partir de tareas asignadas...');
+      const ejecutoresConTareas = await this.getAssignedTasksByExecutor();
+
+      // Mapear a formato de distribución de carga
+      const workloadDistribution = ejecutoresConTareas.map(ejecutor => ({
+        executorId: ejecutor.id,
+        executorName: ejecutor.fullName,
+        assignedTasks: ejecutor.tareas.length,
+        pendingTasks: ejecutor.tareas.filter(t =>
+          t.estado === 'ASSIGNED' || t.estado === 'IN_PROGRESS'
+        ).length,
+        completedTasks: ejecutor.tareas.filter(t =>
+          t.estado === 'COMPLETED' || t.estado === 'APPROVED'
+        ).length
+      }));
+
+      console.log('Distribución de carga calculada:', workloadDistribution);
+      return workloadDistribution;
     } catch (error) {
       console.error('Error al obtener distribución de carga:', error);
-      throw error;
+
+      // En caso de error, devolver un array vacío
+      return [];
     }
   },
 
@@ -254,14 +282,14 @@ const asignacionService = {
           email: user.email,
           role: user.role,
           department: user.department,
-          cargaActual: Math.floor(Math.random() * 5), // Simulamos carga de trabajo
-          especialidad: ['LEGAL', 'ADMINISTRATIVA', 'TECNICA', 'FINANCIERA', 'GENERAL'][Math.floor(Math.random() * 5)] // Simulamos especialidad
+          cargaActual: 0, // Se calculará con datos reales
+          especialidad: user.department || 'GENERAL' // Usar el departamento como especialidad
         }));
       } catch (apiError) {
         console.warn('Error al obtener ejecutores por rol, intentando obtener todos los usuarios:', apiError);
 
         // Si falla, intentar obtener todos los usuarios y filtrar por rol
-        const allUsers = await api.get('users').json<{users: User[], totalCount: number}>();
+        const allUsers = await api.get('users').json<{ users: User[], totalCount: number }>();
         console.log('Respuesta de todos los usuarios:', allUsers);
 
         // Filtrar usuarios con rol EJECUTOR
@@ -275,19 +303,14 @@ const asignacionService = {
           email: user.email,
           role: user.role,
           department: user.department,
-          cargaActual: Math.floor(Math.random() * 5), // Simulamos carga de trabajo
-          especialidad: ['LEGAL', 'ADMINISTRATIVA', 'TECNICA', 'FINANCIERA', 'GENERAL'][Math.floor(Math.random() * 5)] // Simulamos especialidad
+          cargaActual: 0, // Se calculará con datos reales
+          especialidad: user.department || 'GENERAL' // Usar el departamento como especialidad
         }));
       }
     } catch (error) {
       console.error('Error al obtener ejecutores disponibles:', error);
-      // Devolver datos de ejemplo en caso de error
-      return [
-        { id: 1, username: 'ejecutor1', fullName: 'Ana Martínez', email: 'ana@example.com', role: 'EJECUTOR', cargaActual: 2, especialidad: 'LEGAL' },
-        { id: 2, username: 'ejecutor2', fullName: 'Luis Sánchez', email: 'luis@example.com', role: 'EJECUTOR', cargaActual: 3, especialidad: 'TECNICA' },
-        { id: 3, username: 'ejecutor3', fullName: 'María López', email: 'maria@example.com', role: 'EJECUTOR', cargaActual: 1, especialidad: 'ADMINISTRATIVA' },
-        { id: 4, username: 'ejecutor4', fullName: 'Pedro Gómez', email: 'pedro@example.com', role: 'EJECUTOR', cargaActual: 4, especialidad: 'FINANCIERA' }
-      ];
+      // Devolver un array vacío en caso de error
+      return [];
     }
   },
 
@@ -332,14 +355,93 @@ const asignacionService = {
     try {
       console.log('Rechazando solicitud de tarea:', taskRequestId, rechazo);
 
-      const response = await api.post(`task-requests/${taskRequestId}/reject`, {
-        json: rechazo
-      }).json();
+      // Verificar que los datos sean válidos
+      if (!rechazo.reason || rechazo.reason.trim() === '') {
+        throw new Error('El motivo de rechazo no puede estar vacío');
+      }
 
-      console.log('Respuesta de rechazo de solicitud:', response);
-      return response;
+      // Asegurarse de que los datos enviados coincidan con lo que espera el backend
+      const dataToSend = {
+        reason: rechazo.reason.trim(),
+        notes: rechazo.notes ? rechazo.notes.trim() : ''
+      };
+
+      // Primero verificar el estado actual de la solicitud
+      const taskRequest = await solicitudesService.getTaskRequestById(taskRequestId);
+
+      // Verificar si la solicitud está en estado SUBMITTED
+      if (taskRequest && taskRequest.status !== 'SUBMITTED') {
+        throw new Error(`Solo se pueden rechazar solicitudes en estado SUBMITTED. Estado actual: ${taskRequest.status}`);
+      }
+
+      console.log('Enviando solicitud de rechazo al backend:', {
+        url: `task-requests/${taskRequestId}/reject`,
+        data: dataToSend
+      });
+
+      // Usar fetch directamente para tener más control sobre la solicitud
+      const token = localStorage.getItem('bitacora_token');
+      if (!token) {
+        throw new Error('No se encontró token de autenticación');
+      }
+
+      const response = await fetch(`/api/task-requests/${taskRequestId}/reject`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(dataToSend)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Error ${response.status} al rechazar solicitud:`, errorText);
+
+        let errorMessage = `Error ${response.status}`;
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.message || errorJson.error || errorText;
+        } catch (e) {
+          errorMessage = errorText || `Error ${response.status} al rechazar la solicitud`;
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      console.log('Respuesta de rechazo de solicitud:', data);
+      return data;
     } catch (error) {
       console.error('Error al rechazar solicitud de tarea:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Reasigna una tarea a otro ejecutor
+   * @param taskId ID de la tarea
+   * @param executorId ID del nuevo ejecutor
+   * @param notes Notas opcionales para la reasignación
+   * @returns La tarea actualizada
+   */
+  async reassignTask(taskId: number, executorId: number, notes?: string): Promise<TaskRequest> {
+    try {
+      console.log('Reasignando tarea:', taskId, 'al ejecutor:', executorId);
+
+      const reassignData = {
+        executorId,
+        notes: notes || ''
+      };
+
+      const response = await api.post(`task-requests/${taskId}/reassign`, {
+        json: reassignData
+      }).json();
+
+      console.log('Respuesta de reasignación de tarea:', response);
+      return response;
+    } catch (error) {
+      console.error('Error al reasignar tarea:', error);
       throw error;
     }
   }

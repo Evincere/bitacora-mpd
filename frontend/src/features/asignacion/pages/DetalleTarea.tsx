@@ -247,19 +247,33 @@ const AttachmentItem = styled.li`
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 0;
-  border-bottom: 1px solid ${({ theme }) => theme.border};
+  padding: 8px 12px;
+  background-color: ${({ theme }) => theme.backgroundAlt};
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  margin-bottom: 8px;
 
   &:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    background-color: ${({ theme }) => theme.backgroundHover};
+    border-color: ${({ theme }) => theme.border};
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 
   a {
-    color: ${({ theme }) => theme.primary};
-    text-decoration: none;
     display: flex;
     align-items: center;
     gap: 8px;
+    color: ${({ theme }) => theme.primary};
+    text-decoration: none;
+    width: 100%;
+    padding: 4px;
 
     &:hover {
       text-decoration: underline;
@@ -586,11 +600,11 @@ const DetalleTarea: React.FC = () => {
             <TareaMeta>
               <MetaItem>
                 <FiUser size={16} />
-                Solicitante: {tarea.requesterName || 'No especificado'}
+                Solicitante: {tarea.requesterName || (tarea.requesterId ? `Usuario #${tarea.requesterId}` : 'No especificado')}
               </MetaItem>
               <MetaItem>
                 <FiUser size={16} />
-                Ejecutor: {tarea.executorName || 'No asignado'}
+                Ejecutor: {tarea.executorName || (tarea.executorId ? `Usuario #${tarea.executorId}` : 'No asignado')}
               </MetaItem>
               <MetaItem>
                 <FiCalendar size={16} />
@@ -632,8 +646,22 @@ const DetalleTarea: React.FC = () => {
                 </SectionTitle>
                 <AttachmentsList>
                   {tarea.attachments.map((attachment, index) => (
-                    <AttachmentItem key={index}>
-                      <a href={attachment.downloadUrl} target="_blank" rel="noopener noreferrer">
+                    <AttachmentItem key={index} title="Haz clic para descargar el archivo">
+                      <a
+                        href={attachment.downloadUrl}
+                        download={attachment.fileName}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          // Crear un enlace temporal para forzar la descarga
+                          const link = document.createElement('a');
+                          link.href = attachment.downloadUrl;
+                          link.setAttribute('download', attachment.fileName);
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                          toast.success(`Descargando ${attachment.fileName}...`);
+                        }}
+                      >
                         <FiDownload size={16} />
                         {attachment.fileName} ({(attachment.fileSize / 1024).toFixed(1)} KB)
                       </a>
@@ -644,14 +672,52 @@ const DetalleTarea: React.FC = () => {
             )}
 
             <ActionButtonsContainer>
-              <ActionButtonSecondary onClick={handleEditarTarea}>
-                <FiEdit size={16} />
-                Editar {isTaskRequest ? 'solicitud' : 'tarea'}
-              </ActionButtonSecondary>
-              <ActionButton onClick={handleReasignarTarea}>
-                <FiUser size={16} />
-                Reasignar
-              </ActionButton>
+              {/* Solo mostrar el botón de editar si la tarea no está asignada (SUBMITTED) */}
+              {tarea.status === 'SUBMITTED' && (
+                <ActionButtonSecondary onClick={handleEditarTarea}>
+                  <FiEdit size={16} />
+                  Editar {isTaskRequest ? 'solicitud' : 'tarea'}
+                </ActionButtonSecondary>
+              )}
+              {/* Si la tarea está asignada, mostrar el botón deshabilitado con un tooltip */}
+              {tarea.status !== 'SUBMITTED' && (
+                <ActionButtonSecondary
+                  style={{
+                    opacity: 0.5,
+                    cursor: 'not-allowed',
+                    position: 'relative'
+                  }}
+                  title="No se puede editar una solicitud que ya ha sido asignada"
+                >
+                  <FiEdit size={16} />
+                  Editar {isTaskRequest ? 'solicitud' : 'tarea'}
+                </ActionButtonSecondary>
+              )}
+              {/* Solo mostrar el botón de reasignar si la tarea está en estado ASSIGNED */}
+              {tarea.status === 'ASSIGNED' && (
+                <ActionButton onClick={handleReasignarTarea}>
+                  <FiUser size={16} />
+                  Reasignar
+                </ActionButton>
+              )}
+              {/* Si la tarea no está en estado ASSIGNED, mostrar el botón deshabilitado con un tooltip */}
+              {tarea.status !== 'ASSIGNED' && (
+                <ActionButton
+                  style={{
+                    opacity: 0.5,
+                    cursor: 'not-allowed',
+                    position: 'relative'
+                  }}
+                  title="Solo se pueden reasignar tareas en estado ASSIGNED"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toast.info('Solo se pueden reasignar tareas en estado ASSIGNED');
+                  }}
+                >
+                  <FiUser size={16} />
+                  Reasignar
+                </ActionButton>
+              )}
             </ActionButtonsContainer>
           </TareaDetails>
         </ContentSection>

@@ -19,16 +19,92 @@ export interface CompletarTareaRequest {
  */
 const tareasService = {
   /**
+   * Sube archivos adjuntos para una tarea
+   * @param taskId ID de la tarea
+   * @param files Archivos a subir
+   * @returns Información de los archivos subidos
+   */
+  async uploadAttachments(taskId: number, files: File[]): Promise<any[]> {
+    try {
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('files', file);
+      });
+
+      console.log(`Subiendo archivos adjuntos para la tarea ${taskId}...`);
+      const response = await api.post(`task-requests/${taskId}/attachments`, {
+        body: formData,
+      }).json();
+      console.log('Respuesta de subida de archivos:', response);
+
+      return response;
+    } catch (error) {
+      console.error('Error al subir archivos:', error);
+      throw error;
+    }
+  },
+  /**
    * Obtiene las tareas asignadas al ejecutor actual
    * @returns Lista de tareas asignadas
    */
   async getAssignedTasks(): Promise<Activity[]> {
     try {
-      const response = await api.get('activities/assigned').json<Activity[]>();
-      return response;
+      // Obtener tareas asignadas desde el endpoint de actividades
+      const activitiesResponse = await api.get('activities/assigned').json<Activity[]>();
+
+      // Obtener tareas asignadas desde el endpoint de task-requests
+      const taskRequestsResponse = await api.get('task-requests/assigned-to-executor').json();
+
+      // Convertir las tareas de task-requests al formato de Activity
+      const taskRequestActivities: Activity[] = (taskRequestsResponse?.taskRequests || []).map(task => ({
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        category: task.category?.name || '',
+        priority: task.priority || 'MEDIUM',
+        status: 'ASSIGNED', // Las tareas de task-requests asignadas a un ejecutor siempre están en estado ASSIGNED
+        dueDate: task.dueDate,
+        requestDate: task.requestDate,
+        requesterName: task.requesterName || '',
+        assignerName: task.assignerName || '',
+        executorId: task.executorId,
+        requesterId: task.requesterId,
+        assignerId: task.assignerId,
+        comments: task.notes || '',
+        attachments: task.attachments || [],
+        // Agregar un campo para identificar la fuente de la tarea
+        source: 'task-request'
+      }));
+
+      // Agregar un campo para identificar la fuente de las tareas de actividades
+      const activitiesWithSource = activitiesResponse.map(activity => ({
+        ...activity,
+        source: 'activity'
+      }));
+
+      // Combinar ambas listas de tareas
+      const allTasks = [...activitiesWithSource, ...taskRequestActivities];
+
+      // Eliminar duplicados (si una tarea aparece en ambos endpoints)
+      const uniqueTasks = allTasks.filter((task, index, self) =>
+        index === self.findIndex(t => t.id === task.id)
+      );
+
+      console.log('Tareas asignadas unificadas:', uniqueTasks);
+      return uniqueTasks;
     } catch (error) {
       console.error('Error al obtener tareas asignadas:', error);
-      throw error;
+      // Si hay un error, intentar obtener al menos las tareas de actividades
+      try {
+        const activitiesResponse = await api.get('activities/assigned').json<Activity[]>();
+        return activitiesResponse.map(activity => ({
+          ...activity,
+          source: 'activity'
+        }));
+      } catch (fallbackError) {
+        console.error('Error en fallback de tareas asignadas:', fallbackError);
+        return [];
+      }
     }
   },
 
@@ -38,11 +114,62 @@ const tareasService = {
    */
   async getInProgressTasks(): Promise<Activity[]> {
     try {
-      const response = await api.get('activities/in-progress').json<Activity[]>();
-      return response;
+      console.log('Obteniendo tareas en progreso...');
+
+      // Obtener tareas en progreso desde el endpoint de actividades
+      const activitiesResponse = await api.get('activities/in-progress').json<Activity[]>();
+      console.log('Tareas en progreso desde actividades:', activitiesResponse);
+
+      // Obtener tareas en progreso desde el endpoint de task-requests
+      const taskRequestsResponse = await api.get('task-requests/by-status/IN_PROGRESS').json();
+      console.log('Tareas en progreso desde solicitudes:', taskRequestsResponse.taskRequests || []);
+
+      // Convertir las solicitudes a formato de actividad
+      const taskRequestActivities = (taskRequestsResponse.taskRequests || []).map((taskRequest: any) => ({
+        id: taskRequest.id,
+        title: taskRequest.title,
+        description: taskRequest.description,
+        status: taskRequest.status,
+        priority: taskRequest.priority,
+        category: taskRequest.category?.name || 'General',
+        requestDate: taskRequest.requestDate,
+        dueDate: taskRequest.dueDate,
+        requesterName: taskRequest.requesterName,
+        assignerName: taskRequest.assignerName,
+        executorId: taskRequest.executorId,
+        progress: taskRequest.progress || 0,
+        source: 'task-request'
+      }));
+
+      // Agregar un campo para identificar la fuente de las tareas de actividades
+      const activitiesWithSource = activitiesResponse.map(activity => ({
+        ...activity,
+        source: 'activity'
+      }));
+
+      // Combinar ambas listas de tareas
+      const allTasks = [...activitiesWithSource, ...taskRequestActivities];
+
+      // Eliminar duplicados (si una tarea aparece en ambos endpoints)
+      const uniqueTasks = allTasks.filter((task, index, self) =>
+        index === self.findIndex(t => t.id === task.id)
+      );
+
+      console.log('Tareas en progreso unificadas:', uniqueTasks);
+      return uniqueTasks;
     } catch (error) {
       console.error('Error al obtener tareas en progreso:', error);
-      throw error;
+      // Si hay un error, intentar obtener al menos las tareas de actividades
+      try {
+        const activitiesResponse = await api.get('activities/in-progress').json<Activity[]>();
+        return activitiesResponse.map(activity => ({
+          ...activity,
+          source: 'activity'
+        }));
+      } catch (fallbackError) {
+        console.error('Error en fallback de tareas en progreso:', fallbackError);
+        return [];
+      }
     }
   },
 
@@ -106,6 +233,25 @@ const tareasService = {
         if (!response.status || response.status === 'UNKNOWN') {
           console.warn('La respuesta no contiene un estado válido:', response);
           throw new Error('La respuesta no contiene un estado válido');
+        }
+
+        // Actualizar manualmente el estado de la tarea en la caché local
+        try {
+          // Obtener todas las tareas asignadas
+          const assignedTasksResponse = await api.get('task-requests/assigned-to-executor').json();
+          const assignedTasks = assignedTasksResponse.taskRequests || [];
+
+          // Encontrar la tarea que acabamos de iniciar
+          const taskIndex = assignedTasks.findIndex((task: any) => task.id === id);
+
+          if (taskIndex !== -1) {
+            // Actualizar el estado de la tarea a IN_PROGRESS
+            assignedTasks[taskIndex].status = 'IN_PROGRESS';
+            console.log(`Estado de la tarea ${id} actualizado manualmente a IN_PROGRESS en la caché local`);
+          }
+        } catch (cacheError) {
+          console.warn('Error al actualizar la caché local:', cacheError);
+          // No interrumpimos el flujo si hay un error al actualizar la caché
         }
 
         // Si la tarea se inició correctamente como solicitud, no intentamos iniciarla como actividad

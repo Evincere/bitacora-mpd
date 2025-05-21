@@ -38,6 +38,9 @@ public class TaskRequestCommentEntity {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(name = "user_name")
+    private String userName;
+
     @Column(name = "content", nullable = false, length = 1000)
     private String content;
 
@@ -68,6 +71,7 @@ public class TaskRequestCommentEntity {
         this.id = builder.id;
         this.taskRequest = builder.taskRequest;
         this.userId = builder.userId;
+        this.userName = builder.userName;
         this.content = builder.content;
         this.createdAt = builder.createdAt != null ? builder.createdAt : LocalDateTime.now();
         if (builder.readBy != null) {
@@ -102,6 +106,14 @@ public class TaskRequestCommentEntity {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getContent() {
@@ -189,6 +201,7 @@ public class TaskRequestCommentEntity {
                 "id=" + id +
                 ", taskRequestId=" + (taskRequest != null ? taskRequest.getId() : null) +
                 ", userId=" + userId +
+                ", userName='" + userName + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }
@@ -200,6 +213,7 @@ public class TaskRequestCommentEntity {
         private Long id;
         private TaskRequestEntity taskRequest;
         private Long userId;
+        private String userName;
         private String content;
         private LocalDateTime createdAt;
         private Set<Long> readBy;
@@ -224,6 +238,11 @@ public class TaskRequestCommentEntity {
 
         public Builder userId(Long userId) {
             this.userId = userId;
+            return this;
+        }
+
+        public Builder userName(String userName) {
+            this.userName = userName;
             return this;
         }
 

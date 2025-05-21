@@ -60,6 +60,26 @@ public interface TaskRequestJpaRepository
     Page<TaskRequestEntity> findByStatus(TaskRequestStatusEntity status, Pageable pageable);
 
     /**
+     * Busca solicitudes por estado y ejecutor.
+     *
+     * @param status     Estado de las solicitudes
+     * @param executorId ID del ejecutor
+     * @param pageable   Información de paginación
+     * @return Página de solicitudes
+     */
+    Page<TaskRequestEntity> findByStatusAndExecutorId(TaskRequestStatusEntity status, Long executorId,
+            Pageable pageable);
+
+    /**
+     * Cuenta el número de solicitudes con un estado y ejecutor específicos.
+     *
+     * @param status     Estado de las solicitudes
+     * @param executorId ID del ejecutor
+     * @return El número de solicitudes
+     */
+    long countByStatusAndExecutorId(TaskRequestStatusEntity status, Long executorId);
+
+    /**
      * Cuenta el número de solicitudes con un estado específico.
      *
      * @param status Estado de las solicitudes

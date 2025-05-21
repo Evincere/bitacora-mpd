@@ -8,6 +8,22 @@
 
 Bitácora es una plataforma moderna para la gestión de actividades y tareas del Ministerio Público de la Defensa que reemplaza el sistema actual basado en CSV. Permite a los equipos registrar, dar seguimiento y analizar las actividades realizadas de manera eficiente y colaborativa.
 
+### Estado Actual del Proyecto
+
+Hemos completado el Sprint 23 enfocado en mejorar las funcionalidades administrativas:
+- ✅ Implementación completa de gestión de usuarios y roles
+- ✅ Desarrollo de herramientas de configuración del sistema
+- ✅ Integración con servicios externos (Google Calendar, Google Drive)
+- ✅ Creación de panel de configuración general con múltiples secciones
+- ✅ Implementación del sistema de auditoría de usuarios
+- ✅ Desarrollo de dashboard administrativo avanzado con métricas en tiempo real
+- ✅ Implementación de herramientas de diagnóstico y mantenimiento del sistema
+- ✅ Implementación de sistema de reportes personalizables y programados
+- ✅ Implementación de alertas y notificaciones de seguridad para auditoría
+
+Próximamente en el Sprint 25:
+- 🔄 Implementación de nuevas funcionalidades
+
 ## Características principales
 
 - **Registro estructurado de actividades**: Formularios inteligentes adaptados a diferentes tipos de actividades
@@ -15,10 +31,10 @@ Bitácora es una plataforma moderna para la gestión de actividades y tareas del
   - Sugerencias contextuales que se adaptan según las relaciones entre campos
   - Validación en tiempo real con mensajes específicos
   - Sistema de plantillas para agilizar la creación de actividades recurrentes
-- **Dashboard personalizable**: Visualización de métricas y actividades relevantes
-  - Dashboard específico para SOLICITANTE con resumen de solicitudes y tiempos de respuesta
-  - Dashboard específico para ASIGNADOR con bandeja de entrada, distribución de carga y métricas
-  - Dashboard específico para EJECUTOR con tareas asignadas y progreso
+- **Dashboard inteligente**: Visualización de métricas y actividades relevantes según el rol del usuario
+  - Contenido personalizado automáticamente para cada rol (SOLICITANTE, ASIGNADOR, EJECUTOR, ADMIN)
+  - Interfaz unificada que elimina la redundancia y mejora la experiencia de usuario
+  - Secciones modulares que se muestran u ocultan según el rol y las preferencias
 - **Flujo de trabajo optimizado**: Interfaces específicas para cada rol
   - SOLICITANTE: Creación de solicitudes, seguimiento de estado y visualización de tiempos de respuesta
   - ASIGNADOR: Bandeja de entrada de solicitudes, asignación a ejecutores y monitoreo de carga de trabajo
@@ -35,6 +51,17 @@ Bitácora es una plataforma moderna para la gestión de actividades y tareas del
   - Diseño glassmorphism para una apariencia moderna
 - **Alta disponibilidad**: Arquitectura robusta con monitoreo en tiempo real
 - **Seguridad integrada**: Autenticación JWT, roles y permisos granulares
+  - Gestión avanzada de usuarios y roles para administradores
+  - Sistema de permisos granular con matriz de permisos por rol
+  - Interfaz intuitiva para asignar permisos específicos a usuarios
+- **Configuración del sistema**: Herramientas avanzadas para administradores
+  - Panel de configuración general con ajustes de rendimiento, seguridad y mantenimiento
+  - Gestión de categorías y prioridades de tareas
+  - Configuración de plantillas de notificaciones personalizables
+  - Preferencias de notificación por canal y tipo de evento
+  - Integraciones con servicios externos (Google Calendar, Google Drive)
+  - Sistema de prueba de conexión y monitoreo de sincronización
+  - Configuración de correo electrónico y plantillas de mensajes
 - **Experiencia offline**: Caché local para funcionamiento sin conexión
 
 ## Arquitectura
@@ -53,6 +80,7 @@ La aplicación sigue una arquitectura moderna y modular, diseñada para facilita
 - Generación automática de tipos TypeScript desde OpenAPI
 - Spring Data JPA Specifications para filtros dinámicos
 - Projections para optimizar consultas
+- Configuración unificada de repositorios JPA
 - Monitoreo con Prometheus y Grafana
 - Tracing distribuido con Zipkin
 
@@ -579,6 +607,33 @@ La aplicación utiliza **JWT (JSON Web Tokens)** para la autenticación, con las
    - `DELETE_USERS` - Eliminar usuarios
    - `GENERATE_REPORTS` - Generar reportes
 
+## Mejora del Sistema de Autenticación y Seguridad
+
+El sistema de autenticación ha sido mejorado para proporcionar una experiencia más segura y robusta:
+
+1. **Unificación de Controladores de Autenticación**:
+   - Consolidación de `AuthController.java` y `RootAuthController.java` en un único controlador
+   - Soporte para rutas con y sin prefijo `/api` para mayor compatibilidad
+   - Documentación mejorada con anotaciones OpenAPI
+
+2. **Gestión Avanzada de Tokens**:
+   - Implementación de servicio dedicado `tokenService.ts` para gestión de tokens JWT
+   - Decodificación y validación de tokens en el cliente
+   - Detección automática de tokens expirados
+   - Renovación automática de tokens antes de su expiración
+
+3. **Manejo Centralizado de Errores**:
+   - Servicio `errorHandlingService.ts` para procesamiento consistente de errores
+   - Categorización de errores por tipo (autenticación, autorización, validación, etc.)
+   - Mensajes de error personalizados y amigables para el usuario
+   - Redirección automática al login cuando sea necesario
+
+4. **Cliente HTTP Mejorado**:
+   - Implementación de `apiClient.ts` con interceptores para tokens y errores
+   - Renovación automática de tokens expirados
+   - Cola de peticiones durante la renovación de tokens
+   - Manejo consistente de errores HTTP
+
 ## Seguridad y Manejo de Credenciales
 
 ### Archivos Sensibles
@@ -798,6 +853,42 @@ El sistema incluye un mecanismo de notificaciones en tiempo real basado en WebSo
 - **Cuenta Regresiva para Eventos**: Visualización de tiempo restante para eventos programados.
 
 ## Próximos Pasos
+
+### Refactorización de Dashboards y Mejora de Interfaces por Rol (En Progreso - Sprint 17)
+
+- ⏳ Análisis y Planificación
+  - ✅ Documentar la estructura actual de dashboards y sus componentes
+  - ✅ Identificar componentes duplicados y funcionalidades redundantes
+  - ✅ Analizar las necesidades específicas de cada rol (SOLICITANTE, ASIGNADOR, EJECUTOR, ADMIN)
+  - ✅ Crear diagramas de la estructura actual y la propuesta
+  - ✅ Diseñar la estructura del nuevo dashboard unificado
+  - ✅ Definir qué componentes se mostrarán para cada rol
+  - ✅ Crear mockups de la nueva interfaz
+  - ✅ Documentar la estrategia de migración
+- ⏳ Implementación del Dashboard Unificado
+  - ⏳ Implementar componente `SmartDashboard` que cargue contenido según el rol
+  - ⏳ Crear lógica para detectar el rol del usuario actual
+  - ⏳ Implementar sistema de secciones condicionales basadas en rol
+  - ⏳ Extraer lógica específica de cada rol en componentes reutilizables
+  - ⏳ Eliminar duplicación de código entre dashboards
+  - ⏳ Crear componentes de sección modulares (estadísticas, tareas pendientes, etc.)
+  - ⏳ Implementar secciones específicas para cada rol (SOLICITANTE, ASIGNADOR, EJECUTOR, ADMIN)
+- ⏳ Actualización de Rutas y Navegación
+  - ⏳ Actualizar `App.tsx` para usar el nuevo dashboard unificado
+  - ⏳ Eliminar rutas a dashboards específicos por rol
+  - ⏳ Mantener rutas específicas para otras funcionalidades
+  - ⏳ Actualizar `RoleBasedSidebar.tsx` para simplificar opciones de menú
+- ⏳ Mejoras Visuales y de Experiencia de Usuario
+  - ⏳ Implementar tarjetas más grandes y visualmente atractivas para estadísticas
+  - ⏳ Crear sistema de colores coherente para indicadores
+  - ⏳ Añadir visualizaciones interactivas (gráficos, calendarios)
+  - ⏳ Mejorar la responsividad para diferentes tamaños de pantalla
+  - ⏳ Añadir transiciones suaves entre secciones
+- ⏳ Pruebas y Optimización
+  - ⏳ Crear pruebas unitarias para el nuevo dashboard
+  - ⏳ Implementar pruebas de integración para verificar funcionalidad
+  - ⏳ Implementar carga diferida de secciones
+  - ⏳ Optimizar consultas de datos para cada sección
 
 ### Mejoras de Rendimiento y Correcciones de Errores (En Progreso - Sprint 14)
 

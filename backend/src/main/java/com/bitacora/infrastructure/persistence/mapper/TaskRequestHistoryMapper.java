@@ -13,7 +13,8 @@ import org.springframework.stereotype.Component;
 public class TaskRequestHistoryMapper {
 
     /**
-     * Convierte una entidad TaskRequestHistoryEntity a un modelo de dominio TaskRequestHistory.
+     * Convierte una entidad TaskRequestHistoryEntity a un modelo de dominio
+     * TaskRequestHistory.
      *
      * @param entity La entidad TaskRequestHistoryEntity
      * @return El modelo de dominio TaskRequestHistory
@@ -36,7 +37,8 @@ public class TaskRequestHistoryMapper {
     }
 
     /**
-     * Convierte un modelo de dominio TaskRequestHistory a una entidad TaskRequestHistoryEntity.
+     * Convierte un modelo de dominio TaskRequestHistory a una entidad
+     * TaskRequestHistoryEntity.
      *
      * @param history El modelo de dominio TaskRequestHistory
      * @return La entidad TaskRequestHistoryEntity
@@ -96,6 +98,8 @@ public class TaskRequestHistoryMapper {
                 return TaskRequestStatusEntity.COMPLETED;
             case CANCELLED:
                 return TaskRequestStatusEntity.CANCELLED;
+            case REJECTED:
+                return TaskRequestStatusEntity.REJECTED;
             default:
                 return null;
         }

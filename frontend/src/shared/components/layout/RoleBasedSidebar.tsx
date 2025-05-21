@@ -19,7 +19,11 @@ import {
   FiFile,
   FiSettings,
   FiLink,
-  FiPieChart
+  FiPieChart,
+  FiAlertTriangle,
+  FiActivity,
+  FiBell,
+  FiServer
 } from 'react-icons/fi';
 import { toggleSidebar } from '@/core/store/uiSlice';
 import { useAppSelector, useAppDispatch } from '@/core/store';
@@ -267,8 +271,8 @@ const RoleBasedSidebar: React.FC<RoleBasedSidebarProps> = ({ user }) => {
       </RoleIndicator>
 
       <NavMenu>
-        {/* Elementos comunes para todos los roles */}
-        <NavItem to="/app" $isOpen={sidebarOpen}>
+        {/* Dashboard unificado para todos los roles */}
+        <NavItem to="/app" $isOpen={sidebarOpen} end>
           <div className="icon"><FiHome size={20} /></div>
           <span>Dashboard</span>
         </NavItem>
@@ -277,19 +281,15 @@ const RoleBasedSidebar: React.FC<RoleBasedSidebarProps> = ({ user }) => {
         {(userRole === 'ADMIN' || userRole === 'SOLICITANTE') && (
           <NavSection>
             <SectionTitle $isOpen={sidebarOpen}>SOLICITUDES</SectionTitle>
-            <NavItem to="/app/solicitudes/dashboard" $isOpen={sidebarOpen}>
-              <div className="icon"><FiBarChart2 size={20} /></div>
-              <span>Dashboard</span>
-            </NavItem>
-            <NavItem to="/app/solicitudes/nueva" $isOpen={sidebarOpen}>
+            <NavItem to="/app/solicitudes/nueva" $isOpen={sidebarOpen} end>
               <div className="icon"><FiSend size={20} /></div>
               <span>Nueva Solicitud</span>
             </NavItem>
-            <NavItem to="/app/solicitudes" $isOpen={sidebarOpen}>
+            <NavItem to="/app/solicitudes" $isOpen={sidebarOpen} end>
               <div className="icon"><FiClipboard size={20} /></div>
               <span>Mis Solicitudes</span>
             </NavItem>
-            <NavItem to="/app/solicitudes/seguimiento" $isOpen={sidebarOpen}>
+            <NavItem to="/app/solicitudes/seguimiento" $isOpen={sidebarOpen} end>
               <div className="icon"><FiClock size={20} /></div>
               <span>Seguimiento</span>
             </NavItem>
@@ -300,19 +300,15 @@ const RoleBasedSidebar: React.FC<RoleBasedSidebarProps> = ({ user }) => {
         {(userRole === 'ADMIN' || userRole === 'ASIGNADOR') && (
           <NavSection>
             <SectionTitle $isOpen={sidebarOpen}>ASIGNACIÓN</SectionTitle>
-            <NavItem to="/app/asignacion/dashboard" $isOpen={sidebarOpen}>
-              <div className="icon"><FiBarChart2 size={20} /></div>
-              <span>Dashboard</span>
-            </NavItem>
-            <NavItem to="/app/asignacion/bandeja" $isOpen={sidebarOpen}>
+            <NavItem to="/app/asignacion/bandeja" $isOpen={sidebarOpen} end>
               <div className="icon"><FiInbox size={20} /></div>
               <span>Bandeja de Entrada</span>
             </NavItem>
-            <NavItem to="/app/asignacion/distribucion" $isOpen={sidebarOpen}>
+            <NavItem to="/app/asignacion/distribucion" $isOpen={sidebarOpen} end>
               <div className="icon"><FiUsers size={20} /></div>
               <span>Distribución</span>
             </NavItem>
-            <NavItem to="/app/asignacion/metricas" $isOpen={sidebarOpen}>
+            <NavItem to="/app/asignacion/metricas" $isOpen={sidebarOpen} end>
               <div className="icon"><FiPieChart size={20} /></div>
               <span>Métricas</span>
             </NavItem>
@@ -323,19 +319,15 @@ const RoleBasedSidebar: React.FC<RoleBasedSidebarProps> = ({ user }) => {
         {(userRole === 'ADMIN' || userRole === 'EJECUTOR') && (
           <NavSection>
             <SectionTitle $isOpen={sidebarOpen}>TAREAS</SectionTitle>
-            <NavItem to="/app/tareas/dashboard" $isOpen={sidebarOpen}>
-              <div className="icon"><FiBarChart2 size={20} /></div>
-              <span>Dashboard</span>
-            </NavItem>
-            <NavItem to="/app/tareas/asignadas" $isOpen={sidebarOpen}>
+            <NavItem to="/app/tareas/asignadas" $isOpen={sidebarOpen} end>
               <div className="icon"><FiCheckSquare size={20} /></div>
               <span>Mis Tareas</span>
             </NavItem>
-            <NavItem to="/app/tareas/progreso" $isOpen={sidebarOpen}>
+            <NavItem to="/app/tareas/progreso" $isOpen={sidebarOpen} end>
               <div className="icon"><FiClock size={20} /></div>
               <span>En Progreso</span>
             </NavItem>
-            <NavItem to="/app/tareas/historial" $isOpen={sidebarOpen}>
+            <NavItem to="/app/tareas/historial" $isOpen={sidebarOpen} end>
               <div className="icon"><FiFileText size={20} /></div>
               <span>Historial</span>
             </NavItem>
@@ -343,11 +335,11 @@ const RoleBasedSidebar: React.FC<RoleBasedSidebarProps> = ({ user }) => {
         )}
 
         {/* Elementos comunes para todos los roles */}
-        <NavItem to="/app/activities" $isOpen={sidebarOpen}>
+        <NavItem to="/app/activities" $isOpen={sidebarOpen} end>
           <div className="icon"><FiList size={20} /></div>
           <span>Actividades</span>
         </NavItem>
-        <NavItem to="/app/activities/calendar" $isOpen={sidebarOpen}>
+        <NavItem to="/app/activities/calendar" $isOpen={sidebarOpen} end>
           <div className="icon"><FiCalendar size={20} /></div>
           <span>Calendario</span>
         </NavItem>
@@ -357,27 +349,70 @@ const RoleBasedSidebar: React.FC<RoleBasedSidebarProps> = ({ user }) => {
           <>
             <NavSection>
               <SectionTitle $isOpen={sidebarOpen}>REPORTES</SectionTitle>
-              <NavItem to="/app/reportes" $isOpen={sidebarOpen}>
+              <NavItem to="/app/reportes/metricas" $isOpen={sidebarOpen} end>
                 <div className="icon"><FiBarChart2 size={20} /></div>
-                <span>Dashboard</span>
+                <span>Métricas</span>
+              </NavItem>
+              <NavItem to="/app/reportes/estadisticas" $isOpen={sidebarOpen} end>
+                <div className="icon"><FiPieChart size={20} /></div>
+                <span>Estadísticas</span>
+              </NavItem>
+              <NavItem to="/app/reportes/dashboard" $isOpen={sidebarOpen} end>
+                <div className="icon"><FiActivity size={20} /></div>
+                <span>Dashboard Avanzado</span>
+              </NavItem>
+              <NavItem to="/app/reportes/personalizados" $isOpen={sidebarOpen} end>
+                <div className="icon"><FiFileText size={20} /></div>
+                <span>Reportes Personalizados</span>
               </NavItem>
             </NavSection>
 
             <NavSection>
               <SectionTitle $isOpen={sidebarOpen}>CONFIGURACIÓN</SectionTitle>
-              <NavItem to="/app/configuracion/tareas" $isOpen={sidebarOpen}>
+              <NavItem to="/app/configuracion/general" $isOpen={sidebarOpen} end>
                 <div className="icon"><FiSettings size={20} /></div>
+                <span>Configuración General</span>
+              </NavItem>
+              <NavItem to="/app/configuracion/tareas" $isOpen={sidebarOpen} end>
+                <div className="icon"><FiCheckSquare size={20} /></div>
                 <span>Configurar Tareas</span>
               </NavItem>
-              <NavItem to="/app/configuracion/integraciones" $isOpen={sidebarOpen}>
+              <NavItem to="/app/configuracion/notificaciones" $isOpen={sidebarOpen} end>
+                <div className="icon"><FiBell size={20} /></div>
+                <span>Notificaciones</span>
+              </NavItem>
+              <NavItem to="/app/configuracion/integraciones" $isOpen={sidebarOpen} end>
                 <div className="icon"><FiLink size={20} /></div>
                 <span>Integraciones</span>
+              </NavItem>
+              <NavItem to="/app/configuracion/auditoria" $isOpen={sidebarOpen} end>
+                <div className="icon"><FiActivity size={20} /></div>
+                <span>Auditoría de Usuarios</span>
+              </NavItem>
+              <NavItem to="/app/configuracion/alertas" $isOpen={sidebarOpen} end>
+                <div className="icon"><FiAlertTriangle size={20} /></div>
+                <span>Alertas de Seguridad</span>
+              </NavItem>
+              <NavItem to="/app/configuracion/diagnostico" $isOpen={sidebarOpen} end>
+                <div className="icon"><FiServer size={20} /></div>
+                <span>Diagnóstico y Mantenimiento</span>
               </NavItem>
             </NavSection>
           </>
         )}
 
-        <NavItem to="/app/profile" $isOpen={sidebarOpen}>
+        {/* Elementos exclusivos para administradores */}
+        {userRole === 'ADMIN' && (
+          <NavSection>
+            <SectionTitle $isOpen={sidebarOpen}>ADMINISTRACIÓN</SectionTitle>
+            <NavItem to="/app/admin/usuarios" $isOpen={sidebarOpen} end>
+              <div className="icon"><FiUsers size={20} /></div>
+              <span>Gestión de Usuarios</span>
+            </NavItem>
+          </NavSection>
+        )}
+
+        <NavItem to="/app/profile" $isOpen={sidebarOpen} end>
           <div className="icon"><FiUser size={20} /></div>
           <span>Perfil</span>
         </NavItem>

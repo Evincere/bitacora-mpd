@@ -28,56 +28,10 @@ import useAsignacion from '../hooks/useAsignacion';
 // Tipos
 import { Activity, ActivityStatus } from '@/types/models';
 
-// Datos de ejemplo (se reemplazarán por datos reales del backend)
-const MOCK_SOLICITUDES = [
-  {
-    id: 1,
-    title: 'Solicitud de informe técnico',
-    description: 'Necesito un informe técnico sobre el caso #12345 para presentar en la audiencia del próximo mes.',
-    category: 'LEGAL',
-    priority: 'HIGH',
-    requestDate: '2025-05-01T10:30:00',
-    dueDate: '2025-05-15',
-    status: 'REQUESTED',
-    requesterName: 'Juan Pérez',
-    assignerName: null,
-    executorName: null
-  },
-  {
-    id: 2,
-    title: 'Análisis de documentación',
-    description: 'Requiero un análisis detallado de la documentación presentada por la contraparte en el caso #54321.',
-    category: 'LEGAL',
-    priority: 'MEDIUM',
-    requestDate: '2025-04-28T14:15:00',
-    dueDate: '2025-05-10',
-    status: 'REQUESTED',
-    requesterName: 'María López',
-    assignerName: null,
-    executorName: null
-  },
-  {
-    id: 3,
-    title: 'Revisión de contrato',
-    description: 'Necesito una revisión del contrato de arrendamiento para el local comercial.',
-    category: 'LEGAL',
-    priority: 'LOW',
-    requestDate: '2025-04-25T09:45:00',
-    dueDate: '2025-05-05',
-    status: 'REQUESTED',
-    requesterName: 'Pedro Gómez',
-    assignerName: null,
-    executorName: null
-  }
-];
+// No usamos datos de ejemplo, solo datos reales del backend
+// No hay datos de ejemplo
 
-// Datos de ejemplo para distribución de carga
-const MOCK_DISTRIBUCION_CARGA = [
-  { executorName: 'Ana Martínez', assignedTasks: 5, completedTasks: 3, pendingTasks: 2 },
-  { executorName: 'Luis Sánchez', assignedTasks: 8, completedTasks: 4, pendingTasks: 4 },
-  { executorName: 'María López', assignedTasks: 3, completedTasks: 2, pendingTasks: 1 },
-  { executorName: 'Pedro Gómez', assignedTasks: 6, completedTasks: 5, pendingTasks: 1 }
-];
+// No usamos datos de ejemplo para distribución de carga
 
 // Estilos
 const PageContainer = styled.div`
@@ -389,9 +343,9 @@ const DashboardAsignador: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [priorityFilter, setPriorityFilter] = useState<string>('');
 
-  // Usar datos reales o de ejemplo
-  const solicitudes = pendingRequests?.taskRequests || MOCK_SOLICITUDES;
-  const distribucionCarga = workloadDistribution || MOCK_DISTRIBUCION_CARGA;
+  // Usar solo datos reales
+  const solicitudes = pendingRequests?.taskRequests || [];
+  const distribucionCarga = workloadDistribution || [];
 
   // Filtrar solicitudes
   const filteredSolicitudes = solicitudes.filter(solicitud => {

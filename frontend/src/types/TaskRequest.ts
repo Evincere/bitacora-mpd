@@ -8,7 +8,8 @@ export enum TaskRequestStatus {
   ASSIGNED = 'ASSIGNED',
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
+  REJECTED = 'REJECTED'
 }
 
 export enum TaskRequestPriority {
@@ -101,4 +102,13 @@ export interface TaskRequestCommentCreateDto {
 
 export interface TaskRequestStats {
   [key: string]: number;
+}
+
+export interface RejectTaskRequestDto {
+  reason: string;
+  notes?: string;
+}
+
+export interface ResubmitTaskRequestDto {
+  notes?: string;
 }

@@ -11,6 +11,15 @@ export interface SolicitudRequest {
   fechaLimite?: string;
 }
 
+export interface UpdateSolicitudRequest {
+  titulo?: string;
+  descripcion?: string;
+  categoria?: string;
+  prioridad?: string;
+  fechaLimite?: string;
+  submit: boolean;
+}
+
 export interface SolicitudResponse {
   id: number;
   titulo: string;
@@ -42,6 +51,7 @@ export interface TaskRequest {
   notes?: string;
   assignerId?: number;
   assignerName?: string;
+  assignmentDate?: string;
   executorId?: number;
   executorName?: string;
   completionDate?: string;
@@ -66,6 +76,23 @@ export interface TaskRequestHistory {
   notes: string;
 }
 
+export interface TaskRequestRequesterStats {
+  totalRequests: number;
+  pendingRequests: number;
+  assignedRequests: number;
+  inProgressRequests: number;
+  completedRequests: number;
+  rejectedRequests: number;
+  cancelledRequests: number;
+  averageAssignmentTime: number;
+  averageCompletionTime: number;
+  onTimeCompletionPercentage: number;
+  lateCompletionPercentage: number;
+  requestsByCategory: Record<string, number>;
+  requestsByPriority: Record<string, number>;
+  requestsByMonth: Record<string, number>;
+}
+
 /**
  * Servicio para gestionar las solicitudes
  */
@@ -79,10 +106,37 @@ const solicitudesService = {
   async getMySolicitudes(page = 0, size = 10): Promise<TaskRequestPageDto> {
     try {
       console.log('Solicitando mis solicitudes a la API...');
-      // Usar la URL correcta para el nuevo endpoint de TaskRequest
-      const response = await api.get(`task-requests/my-requests?page=${page}&size=${size}`).json();
-      console.log('Respuesta de mis solicitudes:', response);
-      return response;
+
+      // Añadir un timestamp para evitar caché del navegador
+      const timestamp = new Date().getTime();
+
+      // Usar fetch directamente para evitar problemas con ky
+      const token = localStorage.getItem('bitacora_token');
+      console.log('Token para mis solicitudes:', token ? `${token.substring(0, 10)}...` : 'null');
+
+      const response = await fetch(`/api/task-requests/my-requests?page=${page}&size=${size}&_t=${timestamp}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        }
+      });
+
+      if (!response.ok) {
+        console.warn(`Error al obtener solicitudes: ${response.status} ${response.statusText}`);
+        throw new Error(`Error al obtener solicitudes: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Respuesta de mis solicitudes:', data);
+
+      // Verificar si la respuesta contiene datos
+      if (!data || !data.taskRequests) {
+        console.warn('La respuesta no contiene datos de solicitudes');
+        throw new Error('La respuesta no contiene datos de solicitudes');
+      }
+
+      return data;
     } catch (error) {
       console.error('Error al obtener mis solicitudes:', error);
       // Devolver un objeto vacío en caso de error
@@ -96,15 +150,91 @@ const solicitudesService = {
   },
 
   /**
+   * Obtiene estadísticas detalladas para el usuario solicitante actual
+   * @returns Estadísticas detalladas del solicitante
+   */
+  async getRequesterStats(): Promise<TaskRequestRequesterStats> {
+    try {
+      console.log('Solicitando estadísticas de solicitante a la API...');
+
+      // Añadir un timestamp para evitar caché del navegador
+      const timestamp = new Date().getTime();
+
+      // Usar fetch directamente para evitar problemas con ky
+      const token = localStorage.getItem('bitacora_token');
+      console.log('Token para estadísticas:', token ? `${token.substring(0, 10)}...` : 'null');
+
+      const response = await fetch(`/api/task-requests/stats/requester?_t=${timestamp}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        }
+      });
+
+      if (!response.ok) {
+        console.warn(`Error al obtener estadísticas: ${response.status} ${response.statusText}`);
+        throw new Error(`Error al obtener estadísticas: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Respuesta de estadísticas de solicitante:', data);
+
+      // Verificar si la respuesta es válida
+      if (!data) {
+        console.warn('La respuesta de estadísticas no contiene datos');
+        throw new Error('La respuesta de estadísticas no contiene datos');
+      }
+
+      // Verificar si hay datos reales o son valores por defecto/hardcodeados
+      // Si no hay solicitudes, asegurarse de que los tiempos promedio sean 0
+      if (data.totalRequests === 0) {
+        data.averageAssignmentTime = 0;
+        data.averageCompletionTime = 0;
+        data.onTimeCompletionPercentage = 0;
+        data.lateCompletionPercentage = 0;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error al obtener estadísticas de solicitante:', error);
+      // Devolver un objeto con valores por defecto en caso de error
+      return {
+        totalRequests: 0,
+        pendingRequests: 0,
+        assignedRequests: 0,
+        inProgressRequests: 0,
+        completedRequests: 0,
+        rejectedRequests: 0,
+        cancelledRequests: 0,
+        averageAssignmentTime: 0,
+        averageCompletionTime: 0,
+        onTimeCompletionPercentage: 0,
+        lateCompletionPercentage: 0,
+        requestsByCategory: {},
+        requestsByPriority: {},
+        requestsByMonth: {}
+      };
+    }
+  },
+
+  /**
    * Obtiene los detalles de una solicitud específica
    * @param id ID de la solicitud
    * @returns Detalles de la solicitud
    */
   async getTaskRequestById(id: number): Promise<TaskRequest> {
+    if (!id) {
+      throw new Error('ID de solicitud no válido');
+    }
+
     try {
-      console.log(`Solicitando detalles de la solicitud ${id}...`);
+      // Usar un identificador único para esta solicitud para evitar logs duplicados
+      const requestId = `req_${id}_${Date.now()}`;
+      console.log(`[${requestId}] Solicitando detalles de la solicitud ${id}...`);
+
       const response = await api.get(`task-requests/${id}`).json();
-      console.log('Respuesta de detalles de solicitud:', response);
+      console.log(`[${requestId}] Respuesta de detalles de solicitud recibida`);
       return response;
     } catch (error) {
       console.error(`Error al obtener detalles de la solicitud ${id}:`, error);
@@ -239,56 +369,111 @@ const solicitudesService = {
   },
 
   /**
-   * Agrega un comentario a una solicitud
+   * Agrega un comentario a una solicitud, opcionalmente con archivos adjuntos
    * @param taskRequestId ID de la solicitud
    * @param comment Texto del comentario
+   * @param files Archivos adjuntos (opcional)
    * @returns El comentario creado
    */
-  async addComment(taskRequestId: number, comment: string): Promise<any> {
-    const commentData = {
-      taskRequestId: taskRequestId,
-      content: comment
-    };
+  async addComment(taskRequestId: number, comment: string, files?: File[]): Promise<any> {
     const commentKey = `comment_${taskRequestId}_${Date.now()}`;
+
+    // Si hay archivos adjuntos, usamos FormData para enviar el comentario y los archivos
+    const hasAttachments = files && files.length > 0;
 
     try {
       console.log(`Enviando comentario para la solicitud ${taskRequestId}...`);
 
       // Intentar enviar el comentario con reintentos automáticos
-      const response = await retryService.retry(
-        async () => {
-          return await api.post(`task-requests/comments`, {
-            json: commentData
-          }).json();
-        },
-        {
-          maxRetries: 3,
-          initialDelay: 1000,
-          backoffFactor: 2,
-          onError: (error, attempt) => {
-            console.error(`Error al enviar comentario (intento ${attempt}):`, error);
+      let response;
 
-            // Si es el último intento, guardar el comentario para reintentarlo más tarde
-            if (attempt === 3) {
-              retryService.saveForRetry(commentKey, {
-                taskRequestId,
-                comment
-              });
+      if (hasAttachments) {
+        // Si hay archivos adjuntos, usamos FormData
+        console.log(`Enviando comentario con ${files!.length} archivos adjuntos...`);
+
+        // Validar el tamaño de los archivos antes de enviarlos
+        const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB en bytes
+        const oversizedFiles = files!.filter(file => file.size > MAX_FILE_SIZE);
+
+        if (oversizedFiles.length > 0) {
+          const fileNames = oversizedFiles.map(file => file.name).join(', ');
+          const errorMsg = `Los siguientes archivos exceden el tamaño máximo permitido (15MB): ${fileNames}`;
+          console.error(errorMsg);
+          throw new Error(errorMsg);
+        }
+
+        const formData = new FormData();
+        formData.append('taskRequestId', taskRequestId.toString());
+        formData.append('content', comment);
+
+        // Añadir los archivos al FormData
+        files!.forEach(file => {
+          formData.append('files', file);
+        });
+
+        try {
+          // No usamos retry para archivos adjuntos debido a la complejidad
+          response = await api.post(`task-requests/comments/with-attachments`, {
+            body: formData,
+            timeout: 60000 // Aumentar el timeout para archivos grandes
+          }).json();
+        } catch (error: any) {
+          console.error('Error al enviar comentario con archivos adjuntos:', error);
+
+          // Mejorar el mensaje de error para problemas de tamaño de archivo
+          if (error.response && error.response.status === 400) {
+            if (error.message && error.message.includes('tamaño')) {
+              throw new Error('El tamaño de los archivos adjuntos excede el límite permitido (15MB)');
             }
           }
+
+          throw error;
         }
-      );
+      } else {
+        // Si no hay archivos adjuntos, usamos JSON
+        const commentData = {
+          taskRequestId: taskRequestId,
+          content: comment
+        };
+
+        response = await retryService.retry(
+          async () => {
+            return await api.post(`task-requests/comments`, {
+              json: commentData
+            }).json();
+          },
+          {
+            maxRetries: 3,
+            initialDelay: 1000,
+            backoffFactor: 2,
+            onError: (error, attempt) => {
+              console.error(`Error al enviar comentario (intento ${attempt}):`, error);
+
+              // Si es el último intento, guardar el comentario para reintentarlo más tarde
+              if (attempt === 3) {
+                retryService.saveForRetry(commentKey, {
+                  taskRequestId,
+                  comment
+                });
+              }
+            }
+          }
+        );
+      }
 
       console.log('Respuesta de envío de comentario:', response);
       return response;
     } catch (error) {
       console.error(`Error al enviar comentario para la solicitud ${taskRequestId}:`, error);
 
-      // Guardar el comentario para reintentarlo más tarde
-      retryService.saveForRetry(commentKey, {
-        taskRequestId,
-        comment
-      });
+      // Solo guardamos para reintentar si no hay archivos adjuntos
+      if (!hasAttachments) {
+        // Guardar el comentario para reintentarlo más tarde
+        retryService.saveForRetry(commentKey, {
+          taskRequestId,
+          comment
+        });
+      }
 
       throw error;
     }
@@ -307,6 +492,23 @@ const solicitudesService = {
       return response;
     } catch (error) {
       console.error(`Error al obtener comentarios de la solicitud ${taskRequestId}:`, error);
+      return [];
+    }
+  },
+
+  /**
+   * Obtiene los archivos adjuntos de una solicitud
+   * @param taskRequestId ID de la solicitud
+   * @returns Lista de archivos adjuntos
+   */
+  async getAttachments(taskRequestId: number): Promise<any[]> {
+    try {
+      console.log(`Obteniendo archivos adjuntos de la solicitud ${taskRequestId}...`);
+      const response = await api.get(`task-requests/${taskRequestId}/attachments`).json();
+      console.log('Respuesta de archivos adjuntos:', response);
+      return response;
+    } catch (error) {
+      console.error(`Error al obtener archivos adjuntos de la solicitud ${taskRequestId}:`, error);
       return [];
     }
   },
@@ -380,6 +582,109 @@ const solicitudesService = {
     } catch (error) {
       console.error(`Error al obtener historial de la solicitud ${taskRequestId}:`, error);
       return [];
+    }
+  },
+
+  /**
+   * Descarga un archivo adjunto
+   * @param attachmentId ID del archivo adjunto
+   * @param fileName Nombre del archivo para la descarga
+   */
+  async downloadAttachment(attachmentId: number, fileName: string): Promise<void> {
+    try {
+      console.log(`Descargando archivo adjunto ${attachmentId}...`);
+
+      // Realizar la solicitud para obtener el archivo como blob
+      const response = await api.get(`task-requests/attachments/${attachmentId}/download`, {
+        responseType: 'blob'
+      });
+
+      // Crear un objeto URL para el blob
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // Crear un enlace temporal para la descarga
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+
+      // Añadir el enlace al documento, hacer clic y luego eliminarlo
+      document.body.appendChild(link);
+      link.click();
+
+      // Limpiar después de la descarga
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+
+      console.log(`Archivo ${fileName} descargado correctamente`);
+    } catch (error) {
+      console.error(`Error al descargar archivo adjunto ${attachmentId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Actualiza una solicitud existente
+   * @param id ID de la solicitud
+   * @param solicitud Datos actualizados de la solicitud
+   * @returns La solicitud actualizada
+   */
+  async updateSolicitud(id: number, solicitud: UpdateSolicitudRequest): Promise<TaskRequest> {
+    try {
+      console.log(`Actualizando solicitud ${id}...`, solicitud);
+
+      // Mapear los datos del formulario al formato esperado por el backend
+      const requestData = {
+        title: solicitud.titulo,
+        description: solicitud.descripcion,
+        categoryId: null, // Se usará la categoría por defecto si no se especifica
+        priority: solicitud.prioridad,
+        dueDate: solicitud.fechaLimite ? formatDateForBackend(solicitud.fechaLimite) : null,
+        notes: `Solicitud actualizada: ${solicitud.titulo}`,
+        submit: solicitud.submit // Indica si se debe enviar inmediatamente
+      };
+
+      const response = await api.put(`task-requests/${id}`, {
+        json: requestData
+      }).json();
+
+      console.log('Respuesta de actualización de solicitud:', response);
+      return response;
+    } catch (error) {
+      console.error(`Error al actualizar solicitud ${id}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Reenvía una solicitud rechazada
+   * @param taskRequestId ID de la solicitud
+   * @param notes Notas adicionales (opcional)
+   * @returns La solicitud actualizada
+   */
+  async resubmitTaskRequest(taskRequestId: number, notes?: string): Promise<TaskRequest> {
+    // Validar que el ID sea válido
+    if (!taskRequestId || isNaN(taskRequestId)) {
+      console.error(`ID de solicitud inválido: ${taskRequestId}`);
+      throw new Error(`ID de solicitud inválido: ${taskRequestId}`);
+    }
+
+    try {
+      console.log(`Reenviando solicitud rechazada ${taskRequestId}...`);
+
+      const resubmitData = notes ? { notes } : {};
+
+      const response = await api.post(`task-requests/${taskRequestId}/resubmit`, {
+        json: resubmitData
+      }).json();
+
+      console.log('Respuesta de reenvío de solicitud:', response);
+      return response;
+    } catch (error) {
+      console.error(`Error al reenviar solicitud ${taskRequestId}:`, error);
+      throw error;
     }
   },
 

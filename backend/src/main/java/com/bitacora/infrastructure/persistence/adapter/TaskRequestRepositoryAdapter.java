@@ -158,6 +158,37 @@ public class TaskRequestRepositoryAdapter implements TaskRequestRepository {
     }
 
     /**
+     * Busca solicitudes por estado y ejecutor.
+     *
+     * @param status     Estado de las solicitudes
+     * @param executorId ID del ejecutor
+     * @param page       Número de página (0-indexed)
+     * @param size       Tamaño de la página
+     * @return Lista de solicitudes con el estado y ejecutor especificados
+     */
+    @Override
+    public List<TaskRequest> findByStatusAndExecutorId(TaskRequestStatus status, Long executorId, int page, int size) {
+        TaskRequestStatusEntity statusEntity = mapToStatusEntity(status);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "assignmentDate"));
+        Page<TaskRequest> taskRequestPage = jpaRepository.findByStatusAndExecutorId(statusEntity, executorId, pageable)
+                .map(mapper::toDomain);
+        return taskRequestPage.getContent();
+    }
+
+    /**
+     * Cuenta el número de solicitudes con un estado y ejecutor específicos.
+     *
+     * @param status     Estado de las solicitudes
+     * @param executorId ID del ejecutor
+     * @return El número de solicitudes
+     */
+    @Override
+    public long countByStatusAndExecutorId(TaskRequestStatus status, Long executorId) {
+        TaskRequestStatusEntity statusEntity = mapToStatusEntity(status);
+        return jpaRepository.countByStatusAndExecutorId(statusEntity, executorId);
+    }
+
+    /**
      * Cuenta el número de solicitudes con un estado específico.
      *
      * @param status Estado de las solicitudes

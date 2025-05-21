@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -23,6 +24,8 @@ public class TaskRequestCommentDto {
 
     private Set<Long> mentions;
 
+    private List<TaskRequestAttachmentDto> attachments;
+
     // Constructor por defecto
     public TaskRequestCommentDto() {
     }
@@ -36,6 +39,7 @@ public class TaskRequestCommentDto {
         this.content = builder.content;
         this.createdAt = builder.createdAt;
         this.mentions = builder.mentions;
+        this.attachments = builder.attachments;
     }
 
     // Getters
@@ -67,6 +71,14 @@ public class TaskRequestCommentDto {
         return mentions;
     }
 
+    public List<TaskRequestAttachmentDto> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<TaskRequestAttachmentDto> attachments) {
+        this.attachments = attachments;
+    }
+
     // Builder
     public static Builder builder() {
         return new Builder();
@@ -80,6 +92,7 @@ public class TaskRequestCommentDto {
         private String content;
         private LocalDateTime createdAt;
         private Set<Long> mentions;
+        private List<TaskRequestAttachmentDto> attachments;
 
         private Builder() {
         }
@@ -116,6 +129,11 @@ public class TaskRequestCommentDto {
 
         public Builder mentions(Set<Long> mentions) {
             this.mentions = mentions;
+            return this;
+        }
+
+        public Builder attachments(List<TaskRequestAttachmentDto> attachments) {
+            this.attachments = attachments;
             return this;
         }
 
