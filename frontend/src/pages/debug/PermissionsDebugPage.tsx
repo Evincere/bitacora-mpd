@@ -4,6 +4,13 @@ import { useAppSelector } from '@/core/store';
 import { FiArrowLeft, FiRefreshCw, FiShield, FiUser } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui';
+import PermissionDebugger from '@/features/auth/components/PermissionDebugger';
+import permissionChecker from '@/utils/permissionChecker';
+import tokenDebugger from '@/utils/tokenDebugger';
+import ApiTester from '@/components/debug/ApiTester';
+import ApiConfigTester from '@/components/debug/ApiConfigTester';
+import MultiEndpointTester from '@/components/debug/MultiEndpointTester';
+import AuthTester from '@/components/debug/AuthTester';
 
 const PageContainer = styled.div`
   padding: 24px;
@@ -35,7 +42,7 @@ const BackButton = styled.button`
   font-size: 14px;
   padding: 8px;
   border-radius: 4px;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.colors.background.hover};
   }
@@ -77,7 +84,7 @@ const PermissionItem = styled.li`
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   &:nth-child(odd) {
     background-color: ${({ theme }) => theme.colors.background.alternate};
   }
@@ -127,20 +134,27 @@ const PermissionsDebugPage: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [token, setToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
-  
+
   useEffect(() => {
     // Obtener tokens del localStorage
     const storedToken = localStorage.getItem('bitacora_token');
     const storedRefreshToken = localStorage.getItem('bitacora_refresh_token');
-    
+
     setToken(storedToken);
     setRefreshToken(storedRefreshToken);
+
+    // Verificar permisos
+    if (storedToken) {
+      console.log('Depurando token en PermissionsDebugPage:');
+      tokenDebugger.debugToken(storedToken);
+      permissionChecker.logUserPermissions();
+    }
   }, []);
-  
+
   const handleRefresh = () => {
     window.location.reload();
   };
-  
+
   const handleAddExecutePermission = () => {
     if (user) {
       // Crear una copia del usuario con el permiso EXECUTE_ACTIVITIES
@@ -148,15 +162,15 @@ const PermissionsDebugPage: React.FC = () => {
         ...user,
         permissions: [...(user.permissions || []), 'EXECUTE_ACTIVITIES']
       };
-      
+
       // Actualizar en localStorage
       localStorage.setItem('bitacora_user', JSON.stringify(updatedUser));
-      
+
       // Recargar la página
       window.location.reload();
     }
   };
-  
+
   if (!user) {
     return (
       <PageContainer>
@@ -168,7 +182,7 @@ const PermissionsDebugPage: React.FC = () => {
           <PageTitle>Depurador de Permisos</PageTitle>
           <div></div>
         </PageHeader>
-        
+
         <DebugContainer>
           <h3>Usuario no autenticado</h3>
           <p>Debe iniciar sesión para ver esta información.</p>
@@ -190,38 +204,38 @@ const PermissionsDebugPage: React.FC = () => {
           Actualizar
         </Button>
       </PageHeader>
-      
+
       <DebugContainer>
         <DebugSection>
           <SectionTitle>
             <FiUser size={20} />
             Información de Usuario
           </SectionTitle>
-          
+
           <UserInfo>
             <Label>ID:</Label>
             <Value>{user.id}</Value>
-            
+
             <Label>Username:</Label>
             <Value>{user.username}</Value>
-            
+
             <Label>Nombre:</Label>
             <Value>{user.firstName} {user.lastName}</Value>
-            
+
             <Label>Email:</Label>
             <Value>{user.email}</Value>
-            
+
             <Label>Rol:</Label>
             <Value>{user.role}</Value>
           </UserInfo>
         </DebugSection>
-        
+
         <DebugSection>
           <SectionTitle>
             <FiShield size={20} />
             Permisos ({user.permissions?.length || 0})
           </SectionTitle>
-          
+
           <PermissionsList>
             {user.permissions?.length > 0 ? (
               user.permissions.map((permission, index) => (
@@ -237,20 +251,67 @@ const PermissionsDebugPage: React.FC = () => {
               </PermissionItem>
             )}
           </PermissionsList>
-          
+
           {!user.permissions?.includes('EXECUTE_ACTIVITIES') && (
             <ActionButton onClick={handleAddExecutePermission}>
               Añadir permiso EXECUTE_ACTIVITIES
             </ActionButton>
           )}
         </DebugSection>
-        
+
+        <DebugSection>
+          <SectionTitle>
+            <FiShield size={20} />
+            Depurador de Permisos Avanzado
+          </SectionTitle>
+          <PermissionDebugger />
+          <ActionButton onClick={() => permissionChecker.logUserPermissions()}>
+            Verificar Permisos en Consola
+          </ActionButton>
+        </DebugSection>
+
+        <DebugSection>
+          <SectionTitle>
+            <FiShield size={20} />
+            Probador de API
+          </SectionTitle>
+          <p>Usa esta herramienta para probar diferentes endpoints de la API y verificar si el problema es específico de la ruta /api/users.</p>
+          <ApiTester />
+        </DebugSection>
+
+        <DebugSection>
+          <SectionTitle>
+            <FiShield size={20} />
+            Probador de Configuraciones de API
+          </SectionTitle>
+          <p>Esta herramienta prueba diferentes configuraciones de autenticación para un endpoint para identificar cuál funciona.</p>
+          <ApiConfigTester />
+        </DebugSection>
+
+        <DebugSection>
+          <SectionTitle>
+            <FiShield size={20} />
+            Probador de Múltiples Endpoints
+          </SectionTitle>
+          <p>Esta herramienta prueba múltiples endpoints de la API y analiza los resultados para identificar patrones.</p>
+          <MultiEndpointTester />
+        </DebugSection>
+
+        <DebugSection>
+          <SectionTitle>
+            <FiShield size={20} />
+            Probador de Autenticación
+          </SectionTitle>
+          <p>Esta herramienta prueba diferentes endpoints de autenticación para verificar el funcionamiento del token.</p>
+          <AuthTester />
+        </DebugSection>
+
         <TokenSection>
           <SectionTitle>Token JWT</SectionTitle>
           <TokenDisplay>
             {token ? token : 'No hay token almacenado'}
           </TokenDisplay>
-          
+
           <SectionTitle>Refresh Token</SectionTitle>
           <TokenDisplay>
             {refreshToken ? refreshToken : 'No hay refresh token almacenado'}

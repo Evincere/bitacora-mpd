@@ -14,7 +14,8 @@ import {
   FiX,
   FiChevronLeft,
   FiChevronRight,
-  FiUser
+  FiUser,
+  FiShield
 } from 'react-icons/fi';
 import { useUsers, useDeleteUser } from '../hooks/useUsers';
 import { User } from '@/core/types/models';
@@ -26,6 +27,9 @@ import {
 } from '@/components/ui';
 import VirtualList from '@/components/common/VirtualList';
 import { ConfirmDialog } from '@/components/ui/Dialog';
+import PermissionDebugger from '@/features/auth/components/PermissionDebugger';
+import permissionChecker from '@/utils/permissionChecker';
+import { addReadUsersPermission } from '@/utils/addReadUsersPermission';
 
 // Estilos
 const Container = styled.div`
@@ -447,6 +451,12 @@ const UserList: React.FC<UserListProps> = ({ onEdit, onView, onAdd }) => {
     );
   };
 
+  // Verificar permisos al cargar el componente
+  useEffect(() => {
+    console.log('Verificando permisos para acceder a usuarios:');
+    permissionChecker.logUserPermissions();
+  }, []);
+
   return (
     <Container>
       <Header>
@@ -460,8 +470,38 @@ const UserList: React.FC<UserListProps> = ({ onEdit, onView, onAdd }) => {
             <FiPlus size={16} />
             Nuevo Usuario
           </Button>
+          <Button onClick={() => permissionChecker.logUserPermissions()}>
+            <FiShield size={16} />
+            Verificar Permisos
+          </Button>
+          <Button onClick={() => navigate('/app/debug/permissions')}>
+            <FiShield size={16} />
+            Depurador Avanzado
+          </Button>
         </ActionButtons>
       </Header>
+
+      {/* Depurador de permisos */}
+      <PermissionDebugger />
+
+      {/* Botón para añadir permiso READ_USERS */}
+      {!permissionChecker.hasPermission('READ_USERS') && (
+        <div style={{ marginTop: '16px', marginBottom: '16px', padding: '16px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6' }}>
+          <h3 style={{ marginTop: 0 }}>Problema de permisos detectado</h3>
+          <p>No tienes el permiso <strong>READ_USERS</strong> necesario para ver la lista de usuarios.</p>
+          <Button onClick={() => {
+            if (addReadUsersPermission()) {
+              showSuccess('Permiso READ_USERS añadido correctamente. Recargando página...');
+              setTimeout(() => window.location.reload(), 1500);
+            } else {
+              showError('No se pudo añadir el permiso READ_USERS');
+            }
+          }}>
+            <FiShield size={16} />
+            Añadir permiso READ_USERS
+          </Button>
+        </div>
+      )}
 
       <SearchContainer>
         <SearchWrapper>

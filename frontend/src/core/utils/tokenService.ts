@@ -74,7 +74,9 @@ const isTokenExpired = (token: string): boolean => {
  * @returns Token JWT o null si no existe
  */
 const getToken = (): string | null => {
-  return localStorage.getItem(TOKEN_KEY);
+  const token = localStorage.getItem(TOKEN_KEY);
+  console.log('tokenService.getToken:', token ? `${token.substring(0, 20)}...` : 'null');
+  return token;
 };
 
 /**
@@ -131,7 +133,9 @@ const clearTokens = (): void => {
  */
 const isAuthenticated = (): boolean => {
   const token = getToken();
-  return !!token && !isTokenExpired(token);
+  const authenticated = !!token && !isTokenExpired(token);
+  console.log('tokenService.isAuthenticated:', authenticated);
+  return authenticated;
 };
 
 /**

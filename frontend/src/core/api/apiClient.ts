@@ -35,11 +35,12 @@ const processQueue = (error: Error | null) => {
 const refreshAccessToken = async (): Promise<string | null> => {
   try {
     const refreshToken = tokenService.getRefreshToken();
-    
+
     if (!refreshToken) {
       throw new Error('No hay token de refresco disponible');
     }
-    
+
+    console.log('Renovando token en:', `${API_BASE_URL}/auth/refresh`);
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: 'POST',
       headers: {
@@ -47,19 +48,19 @@ const refreshAccessToken = async (): Promise<string | null> => {
       },
       body: JSON.stringify({ refreshToken })
     });
-    
+
     if (!response.ok) {
       throw new Error('Error al renovar el token');
     }
-    
+
     const data = await response.json();
-    
+
     // Guardar los nuevos tokens
     tokenService.setToken(data.token);
     if (data.refreshToken) {
       tokenService.setRefreshToken(data.refreshToken);
     }
-    
+
     return data.token;
   } catch (error) {
     console.error('Error al renovar el token:', error);
@@ -83,7 +84,7 @@ export const apiRequest = async <T>(url: string, options: RequestOptions = {}): 
       'Content-Type': 'application/json'
     }
   };
-  
+
   // Combinar opciones
   const requestOptions: RequestOptions = {
     ...defaultOptions,
@@ -93,29 +94,38 @@ export const apiRequest = async <T>(url: string, options: RequestOptions = {}): 
       ...options.headers
     }
   };
-  
+
   // Añadir token de autenticación si es necesario
   if (!requestOptions.skipAuth) {
     const token = tokenService.getToken();
-    
+
     if (token) {
+      console.log('apiClient.ts: Añadiendo token a la petición:', token.substring(0, 20) + '...');
       requestOptions.headers = {
         ...requestOptions.headers,
         'Authorization': `Bearer ${token}`
       };
+    } else {
+      console.warn('apiClient.ts: No se encontró token para la petición');
     }
   }
-  
+
   // Realizar la petición
   try {
-    let response = await fetch(url.startsWith('http') ? url : `${API_BASE_URL}${url}`, requestOptions);
-    
+    // Asegurarse de que la URL tenga el formato correcto
+    const apiUrl = url.startsWith('http')
+      ? url
+      : `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+
+    console.log('Realizando petición a:', apiUrl);
+    let response = await fetch(apiUrl, requestOptions);
+
     // Si la respuesta es 401 (Unauthorized) y no estamos saltando la renovación de token
     if (response.status === 401 && !requestOptions.skipRefresh) {
       // Si el token ha expirado, intentar renovarlo
       if (tokenService.isTokenExpired(tokenService.getToken() || '')) {
         let newToken: string | null = null;
-        
+
         // Si ya hay una renovación en curso, esperar a que termine
         if (isRefreshing) {
           return new Promise((resolve, reject) => {
@@ -130,10 +140,10 @@ export const apiRequest = async <T>(url: string, options: RequestOptions = {}): 
             });
           });
         }
-        
+
         // Iniciar proceso de renovación
         isRefreshing = true;
-        
+
         try {
           newToken = await refreshAccessToken();
           isRefreshing = false;
@@ -143,24 +153,30 @@ export const apiRequest = async <T>(url: string, options: RequestOptions = {}): 
           processQueue(error as Error);
           throw error;
         }
-        
+
         // Si se obtuvo un nuevo token, reintentar la petición
         if (newToken) {
           requestOptions.headers = {
             ...requestOptions.headers,
             'Authorization': `Bearer ${newToken}`
           };
-          
-          response = await fetch(url.startsWith('http') ? url : `${API_BASE_URL}${url}`, requestOptions);
+
+          // Asegurarse de que la URL tenga el formato correcto
+          const apiUrl = url.startsWith('http')
+            ? url
+            : `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+
+          console.log('Reintentando petición a:', apiUrl);
+          response = await fetch(apiUrl, requestOptions);
         }
       }
     }
-    
+
     // Verificar si la respuesta es exitosa
     if (!response.ok) {
       // Obtener detalles del error
       const errorData = await response.json().catch(() => ({}));
-      
+
       // Crear objeto de error con detalles
       const apiError: ApiError = {
         status: response.status,
@@ -169,16 +185,16 @@ export const apiRequest = async <T>(url: string, options: RequestOptions = {}): 
         path: errorData.path || url,
         timestamp: errorData.timestamp
       };
-      
+
       // Procesar el error
       throw errorHandlingService.processApiError(apiError);
     }
-    
+
     // Si la respuesta es exitosa pero no tiene contenido
     if (response.status === 204) {
       return {} as T;
     }
-    
+
     // Parsear la respuesta como JSON
     return await response.json();
   } catch (error) {
@@ -186,7 +202,7 @@ export const apiRequest = async <T>(url: string, options: RequestOptions = {}): 
     if ((error as ApiError).type) {
       throw error;
     }
-    
+
     // Procesar otros errores
     throw errorHandlingService.processApiError(error);
   }

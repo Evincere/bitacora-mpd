@@ -30,7 +30,7 @@ const Button = styled.button`
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  
+
   &:hover {
     background-color: #3a80d2;
   }
@@ -78,16 +78,16 @@ const AuthTester: React.FC = () => {
     setLoading(true);
     setResult(null);
     setError(null);
-    
+
     try {
       let response;
-      
+
       if (client === 'apiClient') {
         response = await apiClient.get(endpoint);
       } else {
         response = await api.get(endpoint).json();
       }
-      
+
       setResult(response);
     } catch (err: any) {
       console.error(`Error testing ${client} with endpoint ${endpoint}:`, err);
@@ -100,8 +100,8 @@ const AuthTester: React.FC = () => {
 
   const testUsers = () => testEndpoints('apiClient', 'users?page=0&size=10');
   const testUsersWithApi = () => testEndpoints('api', 'users?page=0&size=10');
-  const testMe = () => testEndpoints('apiClient', 'auth/me');
-  const testMeWithApi = () => testEndpoints('api', 'auth/me');
+  const testMe = () => testEndpoints('apiClient', 'users/me');
+  const testMeWithApi = () => testEndpoints('api', 'users/me');
 
   const showTokenInfo = () => {
     const token = tokenService.getToken();
@@ -121,19 +121,19 @@ const AuthTester: React.FC = () => {
   return (
     <Container>
       <Title>Authentication Tester</Title>
-      
+
       <ButtonGroup>
         <Button onClick={testUsers}>Test Users (apiClient)</Button>
         <Button onClick={testUsersWithApi}>Test Users (api)</Button>
-        <Button onClick={testMe}>Test /auth/me (apiClient)</Button>
-        <Button onClick={testMeWithApi}>Test /auth/me (api)</Button>
+        <Button onClick={testMe}>Test /users/me (apiClient)</Button>
+        <Button onClick={testMeWithApi}>Test /users/me (api)</Button>
         <Button onClick={showTokenInfo}>Show Token Info</Button>
       </ButtonGroup>
-      
+
       {loading && <div>Loading...</div>}
-      
+
       {error && <ErrorMessage>{error}</ErrorMessage>}
-      
+
       {result && (
         <ResultContainer>
           <ResultTitle>Result</ResultTitle>

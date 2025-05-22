@@ -80,8 +80,12 @@ export const apiRequest = async <T>(
     }
 
     const fullUrl = API_BASE_URL ? `${API_BASE_URL}/${cleanEndpoint}` : `/${cleanEndpoint}`;
-    console.log(`Realizando petición a: ${fullUrl}`);
-    console.log(`Nota: Si hay problemas, verifica que la ruta '${cleanEndpoint}' exista en el backend`);
+    console.log(`api-ky.ts: Realizando petición a: ${fullUrl}`);
+    console.log(`api-ky.ts: Nota: Si hay problemas, verifica que la ruta '${cleanEndpoint}' exista en el backend`);
+
+    // Mostrar información del token para depuración
+    const token = localStorage.getItem('bitacora_token');
+    console.log(`api-ky.ts: Token actual: ${token ? 'presente' : 'ausente'}`);
 
     // Intentar realizar la petición
     return await api(cleanEndpoint, options).json<T>();

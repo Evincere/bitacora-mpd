@@ -1,5 +1,7 @@
 import apiClient from '@/core/api/apiClient';
 import { User, UserRole } from '@/core/types/models';
+import tokenService from '@/core/utils/tokenService';
+import tokenDebugger from '@/utils/tokenDebugger';
 
 export interface UserCreateDto {
   username: string;
@@ -67,11 +69,68 @@ const userService = {
         url += `&search=${encodeURIComponent(search)}`;
       }
 
+      // Obtener el token de autenticación usando el servicio de tokens
+      const token = tokenService.getToken();
       console.log('Realizando petición a:', url);
-      console.log('Token actual:', localStorage.getItem('bitacora_token'));
+      console.log('Token actual:', token ? token.substring(0, 20) + '...' : 'null');
 
-      const response = await apiClient.get<UserListResponse>(url);
-      return response;
+      // Depurar el token para verificar permisos
+      if (token) {
+        console.log('Depurando token antes de la petición:');
+        tokenDebugger.debugToken(token);
+      } else {
+        console.warn('No hay token disponible para la petición');
+      }
+
+      // Usar fetch directo con más control sobre los headers
+      console.log('Intentando con fetch directo con headers explícitos');
+
+      // Construir la URL completa
+      const baseUrl = import.meta.env.VITE_API_URL || '/api';
+      const fullUrl = `${baseUrl}/${url}`;
+      console.log('URL completa:', fullUrl);
+
+      // Construir headers con el token
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      if (token) {
+        // Asegurarse de que el token no tenga espacios adicionales o caracteres extraños
+        const cleanToken = token.trim();
+        console.log('Token limpio:', cleanToken.substring(0, 20) + '...');
+        headers['Authorization'] = `Bearer ${cleanToken}`;
+
+        // Añadir header de permisos explícito para depuración
+        headers['X-User-Permissions'] = 'READ_USERS';
+      }
+
+      console.log('Headers completos:', headers);
+
+      // Realizar la petición
+      const response = await fetch(fullUrl, {
+        method: 'GET',
+        headers,
+        credentials: 'include'
+      });
+
+      console.log('Respuesta recibida:', response.status, response.statusText);
+
+      // Intentar leer el cuerpo de la respuesta incluso si hay error
+      let responseBody;
+      try {
+        const textResponse = await response.text();
+        console.log('Cuerpo de la respuesta:', textResponse);
+        responseBody = textResponse ? JSON.parse(textResponse) : null;
+      } catch (parseError) {
+        console.error('Error al parsear la respuesta:', parseError);
+      }
+
+      if (!response.ok) {
+        throw new Error(`Error en petición: ${response.status} ${response.statusText}`);
+      }
+
+      return responseBody as UserListResponse;
     } catch (error) {
       console.error('Error al obtener usuarios:', error);
       throw error;
