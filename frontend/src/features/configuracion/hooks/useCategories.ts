@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import categoryService, { 
-  TaskCategory, 
-  CreateCategoryDto, 
-  UpdateCategoryDto 
+import categoryService, {
+  TaskCategory,
+  CreateCategoryDto,
+  UpdateCategoryDto
 } from '../services/categoryService';
-import { useToastContext } from '@/components/ui';
+import { useToast } from '@/shared/components/ui/Toast/ToastProvider';
 
 /**
  * Hook para obtener todas las categorías
@@ -46,17 +46,17 @@ export const useSearchCategories = (name: string) => {
  */
 export const useCreateCategory = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (categoryData: CreateCategoryDto) => categoryService.createCategory(categoryData),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-      showSuccess('Categoría creada correctamente');
+      toast.success('Categoría creada correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al crear categoría: ${error.message}`);
+      toast.error(`Error al crear categoría: ${error.message}`);
       throw error;
     },
   });
@@ -67,19 +67,19 @@ export const useCreateCategory = () => {
  */
 export const useUpdateCategory = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
-    mutationFn: ({ id, categoryData }: { id: number; categoryData: UpdateCategoryDto }) => 
+    mutationFn: ({ id, categoryData }: { id: number; categoryData: UpdateCategoryDto }) =>
       categoryService.updateCategory(id, categoryData),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.invalidateQueries({ queryKey: ['category', data.id] });
-      showSuccess('Categoría actualizada correctamente');
+      toast.success('Categoría actualizada correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al actualizar categoría: ${error.message}`);
+      toast.error(`Error al actualizar categoría: ${error.message}`);
       throw error;
     },
   });
@@ -90,16 +90,16 @@ export const useUpdateCategory = () => {
  */
 export const useDeleteCategory = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (id: number) => categoryService.deleteCategory(id),
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-      showSuccess('Categoría eliminada correctamente');
+      toast.success('Categoría eliminada correctamente');
     },
     onError: (error: Error) => {
-      showError(`Error al eliminar categoría: ${error.message}`);
+      toast.error(`Error al eliminar categoría: ${error.message}`);
       throw error;
     },
   });

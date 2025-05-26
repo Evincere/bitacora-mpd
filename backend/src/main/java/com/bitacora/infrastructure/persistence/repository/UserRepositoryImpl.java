@@ -106,4 +106,67 @@ public class UserRepositoryImpl implements UserRepository {
                 .map(userMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<User> findWithFilters(UserRole role, Boolean active, String search, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Aplicar filtros según los parámetros proporcionados
+        if (role != null && active != null) {
+            // Filtrar por rol y estado activo
+            return userJpaRepository.findByRoleAndActive(role.name(), active, pageable)
+                    .stream()
+                    .map(userMapper::toDomain)
+                    .collect(Collectors.toList());
+        } else if (role != null) {
+            // Filtrar solo por rol
+            return userJpaRepository.findByRole(role.name(), pageable)
+                    .stream()
+                    .map(userMapper::toDomain)
+                    .collect(Collectors.toList());
+        } else if (active != null) {
+            // Filtrar solo por estado activo
+            return userJpaRepository.findByActive(active, pageable)
+                    .stream()
+                    .map(userMapper::toDomain)
+                    .collect(Collectors.toList());
+        } else if (search != null && !search.isEmpty()) {
+            // Filtrar por búsqueda de texto
+            return userJpaRepository
+                    .findByUsernameContainingIgnoreCaseOrFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
+                            search, search, search, pageable)
+                    .stream()
+                    .map(userMapper::toDomain)
+                    .collect(Collectors.toList());
+        } else {
+            // Sin filtros, devolver todos los usuarios
+            return findAll(page, size);
+        }
+    }
+
+    @Override
+    public long countWithFilters(UserRole role, Boolean active, String search) {
+        // Aplicar filtros según los parámetros proporcionados
+        if (role != null && active != null) {
+            // Contar por rol y estado activo
+            return userJpaRepository.countByRoleAndActive(role.name(), active);
+        } else if (role != null) {
+            // Contar solo por rol
+            return userJpaRepository.countByRole(role.name());
+        } else if (active != null) {
+            // Contar solo por estado activo
+            return userJpaRepository.countByActive(active);
+        } else if (search != null && !search.isEmpty()) {
+            // Contar por búsqueda de texto (aproximado)
+            // Nota: Esto es una aproximación, ya que no tenemos un método específico para
+            // contar
+            return userJpaRepository
+                    .findByUsernameContainingIgnoreCaseOrFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
+                            search, search, search, PageRequest.of(0, Integer.MAX_VALUE))
+                    .getTotalElements();
+        } else {
+            // Sin filtros, contar todos los usuarios
+            return count();
+        }
+    }
 }

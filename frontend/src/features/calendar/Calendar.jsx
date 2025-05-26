@@ -35,7 +35,7 @@ import CalendarLegend from '../../components/ui/CalendarLegend';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../../hooks/useToast';
-import ConfirmDialog from '../../components/common/ConfirmDialog';
+import ConfirmDialog from '@/shared/components/common/ConfirmDialog';
 import activitiesService from '../../services/activitiesService';
 
 const CalendarContainer = styled.div`

@@ -1,10 +1,10 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
-import { 
-  FiBell, 
-  FiCheckCircle, 
-  FiAlertCircle, 
-  FiInfo, 
+import {
+  FiBell,
+  FiCheckCircle,
+  FiAlertCircle,
+  FiInfo,
   FiAlertTriangle,
   FiClock,
   FiUser,
@@ -13,8 +13,8 @@ import {
   FiMessageSquare,
   FiUsers
 } from 'react-icons/fi';
-import { 
-  RealTimeNotification, 
+import {
+  RealTimeNotification,
   NotificationType,
   isNotificationType,
   TaskAssignmentNotification,
@@ -25,7 +25,7 @@ import {
   ReminderType,
   AnnouncementType,
   CollaborationAction
-} from '../../../types/notifications';
+} from '@/core/types/notifications';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -323,7 +323,7 @@ const NotificationItemWrapper = styled.div<{ $read?: boolean; $type: string }>`
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 8px;
-  background-color: ${({ theme, $read }) => 
+  background-color: ${({ theme, $read }) =>
     $read ? theme.colors.background : theme.colors.backgroundAlt};
   border-left: 3px solid ${({ theme, $type }) => {
     switch ($type) {
@@ -455,11 +455,11 @@ const DetailItem = styled.div<{ $urgent?: boolean }>`
   align-items: center;
   font-size: 12px;
   color: ${({ theme, $urgent }) => $urgent ? theme.colors.error : theme.colors.textSecondary};
-  
+
   svg {
     margin-right: 4px;
   }
-  
+
   ${({ $urgent }) => $urgent && css`
     font-weight: 600;
   `}
@@ -471,7 +471,7 @@ const NotificationTime = styled.div`
   font-size: 11px;
   color: ${({ theme }) => theme.colors.textTertiary};
   margin-top: 4px;
-  
+
   svg {
     margin-right: 4px;
   }
@@ -492,13 +492,13 @@ const ActionButton = styled.button`
   color: ${({ theme }) => theme.colors.textSecondary};
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.colors.backgroundHover};
     color: ${({ theme }) => theme.colors.primary};
     border-color: ${({ theme }) => theme.colors.primary};
   }
-  
+
   &:focus {
     outline: none;
     box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primaryLight};

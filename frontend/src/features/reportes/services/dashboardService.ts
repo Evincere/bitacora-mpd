@@ -1,7 +1,7 @@
 import api from '@/utils/api-ky';
-import { 
-  DashboardMetrics, 
-  TaskStatusMetrics, 
+import {
+  DashboardMetrics,
+  TaskStatusMetrics,
   UserActivityMetrics,
   CategoryDistribution,
   PriorityDistribution,
@@ -11,6 +11,7 @@ import {
 
 /**
  * Servicio para obtener métricas y datos para el dashboard administrativo
+ * Conectado con los endpoints reales del backend
  */
 const dashboardService = {
   /**
@@ -19,291 +20,254 @@ const dashboardService = {
    */
   async getDashboardMetrics(): Promise<DashboardMetrics> {
     try {
-      const response = await api.get('dashboard/metrics').json<DashboardMetrics>();
-      return response;
+      const response = await api.get('admin/dashboard/metrics/overview').json<any>();
+
+      // Mapear la respuesta del backend al formato esperado por el frontend
+      return {
+        totalTasks: response.totalTasks,
+        completedTasks: response.completedTasks,
+        pendingTasks: response.activeTasks, // activeTasks en backend = pendingTasks en frontend
+        overdueTasksCount: response.overdueTasks,
+        averageCompletionTime: response.averageResolutionTimeHours,
+        activeUsers: response.activeUsers,
+        taskCompletionRate: response.onTimeCompletionRate,
+        taskCreationRate: response.tasksCreatedToday // Aproximación para tasa de creación
+      };
     } catch (error) {
       console.error('Error al obtener métricas del dashboard:', error);
-      
-      // Datos de ejemplo como fallback
-      return {
-        totalTasks: 245,
-        completedTasks: 187,
-        pendingTasks: 58,
-        overdueTasksCount: 12,
-        averageCompletionTime: 3.5,
-        activeUsers: 28,
-        taskCompletionRate: 76.3,
-        taskCreationRate: 8.2
-      };
+      throw error; // Propagar el error en lugar de usar fallback
     }
   },
-  
+
   /**
    * Obtiene métricas de estado de tareas
+   * @param startDate Fecha de inicio (opcional)
+   * @param endDate Fecha de fin (opcional)
    * @returns Métricas de estado de tareas
    */
-  async getTaskStatusMetrics(): Promise<TaskStatusMetrics> {
+  async getTaskStatusMetrics(startDate?: string, endDate?: string): Promise<TaskStatusMetrics> {
     try {
-      const response = await api.get('dashboard/metrics/task-status').json<TaskStatusMetrics>();
-      return response;
+      let url = 'admin/dashboard/metrics/task-status';
+      const params = new URLSearchParams();
+
+      if (startDate) {
+        params.append('startDate', startDate);
+      }
+      if (endDate) {
+        params.append('endDate', endDate);
+      }
+
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+
+      const response = await api.get(url).json<any>();
+
+      // Mapear la respuesta del backend al formato esperado por el frontend
+      return {
+        statusDistribution: response.statusDistribution.map((item: any) => ({
+          status: item.status,
+          statusName: item.statusName,
+          count: item.count,
+          percentage: item.percentage,
+          color: item.color
+        })),
+        // Mantener compatibilidad con el formato anterior agregando campos adicionales
+        statusByCategory: [], // Se puede implementar más tarde si es necesario
+        statusByPriority: [], // Se puede implementar más tarde si es necesario
+        totalTasks: response.totalTasks,
+        periodStart: response.periodStart,
+        periodEnd: response.periodEnd,
+        generatedAt: response.generatedAt
+      };
     } catch (error) {
       console.error('Error al obtener métricas de estado de tareas:', error);
-      
-      // Datos de ejemplo como fallback
-      return {
-        statusDistribution: [
-          { status: 'PENDING', count: 15, percentage: 6.1 },
-          { status: 'ASSIGNED', count: 43, percentage: 17.6 },
-          { status: 'IN_PROGRESS', count: 67, percentage: 27.3 },
-          { status: 'COMPLETED', count: 120, percentage: 49.0 }
-        ],
-        statusByCategory: [
-          { 
-            category: 'Administrativa', 
-            counts: {
-              PENDING: 5,
-              ASSIGNED: 12,
-              IN_PROGRESS: 18,
-              COMPLETED: 45
-            }
-          },
-          { 
-            category: 'Judicial', 
-            counts: {
-              PENDING: 7,
-              ASSIGNED: 20,
-              IN_PROGRESS: 35,
-              COMPLETED: 60
-            }
-          },
-          { 
-            category: 'Consulta', 
-            counts: {
-              PENDING: 3,
-              ASSIGNED: 11,
-              IN_PROGRESS: 14,
-              COMPLETED: 15
-            }
-          }
-        ],
-        statusByPriority: [
-          { 
-            priority: 'ALTA', 
-            counts: {
-              PENDING: 8,
-              ASSIGNED: 15,
-              IN_PROGRESS: 22,
-              COMPLETED: 30
-            }
-          },
-          { 
-            priority: 'MEDIA', 
-            counts: {
-              PENDING: 5,
-              ASSIGNED: 20,
-              IN_PROGRESS: 30,
-              COMPLETED: 50
-            }
-          },
-          { 
-            priority: 'BAJA', 
-            counts: {
-              PENDING: 2,
-              ASSIGNED: 8,
-              IN_PROGRESS: 15,
-              COMPLETED: 40
-            }
-          }
-        ]
-      };
+      throw error;
     }
   },
-  
+
   /**
    * Obtiene métricas de actividad de usuarios
+   * @param startDate Fecha de inicio (opcional)
+   * @param endDate Fecha de fin (opcional)
    * @returns Métricas de actividad de usuarios
    */
-  async getUserActivityMetrics(): Promise<UserActivityMetrics> {
+  async getUserActivityMetrics(startDate?: string, endDate?: string): Promise<UserActivityMetrics> {
     try {
-      const response = await api.get('dashboard/metrics/user-activity').json<UserActivityMetrics>();
-      return response;
+      let url = 'admin/dashboard/metrics/user-activity';
+      const params = new URLSearchParams();
+
+      if (startDate) {
+        params.append('startDate', startDate);
+      }
+      if (endDate) {
+        params.append('endDate', endDate);
+      }
+
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+
+      const response = await api.get(url).json<any>();
+
+      // Mapear la respuesta del backend al formato esperado por el frontend
+      return {
+        topActiveUsers: response.topActiveUsers.map((user: any) => ({
+          userId: user.userId,
+          username: user.userEmail?.split('@')[0] || `user${user.userId}`, // Extraer username del email
+          fullName: user.userName,
+          tasksCompleted: user.tasksCompleted,
+          tasksAssigned: user.tasksAssigned,
+          completionRate: user.completionRate,
+          averageResolutionTimeHours: user.averageResolutionTimeHours,
+          lastActivity: user.lastActivity
+        })),
+        // Mantener compatibilidad con campos adicionales
+        userActivityTimeline: [], // Se puede implementar más tarde si es necesario
+        userRoleDistribution: [], // Se puede implementar más tarde si es necesario
+        totalActiveUsers: response.totalActiveUsers,
+        averageTasksPerUser: response.averageTasksPerUser,
+        averageCompletionRate: response.averageCompletionRate,
+        periodStart: response.periodStart,
+        periodEnd: response.periodEnd,
+        generatedAt: response.generatedAt
+      };
     } catch (error) {
       console.error('Error al obtener métricas de actividad de usuarios:', error);
-      
-      // Datos de ejemplo como fallback
-      return {
-        topActiveUsers: [
-          { userId: 1, username: 'jperez', fullName: 'Juan Pérez', tasksCompleted: 45, tasksAssigned: 50 },
-          { userId: 2, username: 'mlopez', fullName: 'María López', tasksCompleted: 38, tasksAssigned: 40 },
-          { userId: 3, username: 'cgomez', fullName: 'Carlos Gómez', tasksCompleted: 32, tasksAssigned: 35 },
-          { userId: 4, username: 'lrodriguez', fullName: 'Laura Rodríguez', tasksCompleted: 28, tasksAssigned: 30 },
-          { userId: 5, username: 'agarcia', fullName: 'Ana García', tasksCompleted: 25, tasksAssigned: 28 }
-        ],
-        userActivityTimeline: [
-          { date: '2023-11-01', activeUsers: 18, tasksCreated: 12, tasksCompleted: 10 },
-          { date: '2023-11-02', activeUsers: 20, tasksCreated: 15, tasksCompleted: 13 },
-          { date: '2023-11-03', activeUsers: 22, tasksCreated: 18, tasksCompleted: 14 },
-          { date: '2023-11-04', activeUsers: 19, tasksCreated: 14, tasksCompleted: 16 },
-          { date: '2023-11-05', activeUsers: 21, tasksCreated: 16, tasksCompleted: 15 },
-          { date: '2023-11-06', activeUsers: 23, tasksCreated: 20, tasksCompleted: 18 },
-          { date: '2023-11-07', activeUsers: 25, tasksCreated: 22, tasksCompleted: 20 }
-        ],
-        userRoleDistribution: [
-          { role: 'ADMIN', count: 2, percentage: 7.1 },
-          { role: 'ASIGNADOR', count: 3, percentage: 10.7 },
-          { role: 'EJECUTOR', count: 15, percentage: 53.6 },
-          { role: 'SOLICITANTE', count: 8, percentage: 28.6 }
-        ]
-      };
+      throw error;
     }
   },
-  
+
   /**
    * Obtiene distribución de categorías
+   * @param startDate Fecha de inicio (opcional)
+   * @param endDate Fecha de fin (opcional)
    * @returns Distribución de categorías
    */
-  async getCategoryDistribution(): Promise<CategoryDistribution> {
+  async getCategoryDistribution(startDate?: string, endDate?: string): Promise<CategoryDistribution> {
     try {
-      const response = await api.get('dashboard/metrics/categories').json<CategoryDistribution>();
-      return response;
+      let url = 'admin/dashboard/metrics/category-distribution';
+      const params = new URLSearchParams();
+
+      if (startDate) {
+        params.append('startDate', startDate);
+      }
+      if (endDate) {
+        params.append('endDate', endDate);
+      }
+
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+
+      const response = await api.get(url).json<any>();
+
+      // Mapear la respuesta del backend al formato esperado por el frontend
+      return {
+        categories: response.categoryDistribution.map((category: any) => ({
+          id: category.categoryId,
+          name: category.categoryName,
+          description: category.categoryDescription,
+          count: category.count,
+          percentage: category.percentage,
+          completedCount: category.completedCount,
+          completionRate: category.completionRate,
+          averageResolutionTimeHours: category.averageResolutionTimeHours,
+          color: category.color
+        })),
+        // Mantener compatibilidad con campos adicionales
+        categoryTrends: [], // Se puede implementar más tarde si es necesario
+        totalTasks: response.totalTasks,
+        periodStart: response.periodStart,
+        periodEnd: response.periodEnd,
+        generatedAt: response.generatedAt
+      };
     } catch (error) {
       console.error('Error al obtener distribución de categorías:', error);
-      
-      // Datos de ejemplo como fallback
-      return {
-        categories: [
-          { name: 'Administrativa', count: 80, percentage: 32.7 },
-          { name: 'Judicial', count: 122, percentage: 49.8 },
-          { name: 'Consulta', count: 43, percentage: 17.5 }
-        ],
-        categoryTrends: [
-          { 
-            category: 'Administrativa', 
-            data: [15, 18, 20, 17, 22, 25, 28] 
-          },
-          { 
-            category: 'Judicial', 
-            data: [25, 28, 30, 32, 35, 38, 40] 
-          },
-          { 
-            category: 'Consulta', 
-            data: [10, 12, 15, 13, 14, 16, 18] 
-          }
-        ]
-      };
+      throw error;
     }
   },
-  
+
   /**
    * Obtiene distribución de prioridades
+   * @param startDate Fecha de inicio (opcional)
+   * @param endDate Fecha de fin (opcional)
    * @returns Distribución de prioridades
    */
-  async getPriorityDistribution(): Promise<PriorityDistribution> {
+  async getPriorityDistribution(startDate?: string, endDate?: string): Promise<PriorityDistribution> {
     try {
-      const response = await api.get('dashboard/metrics/priorities').json<PriorityDistribution>();
-      return response;
+      let url = 'admin/dashboard/metrics/priority-distribution';
+      const params = new URLSearchParams();
+
+      if (startDate) {
+        params.append('startDate', startDate);
+      }
+      if (endDate) {
+        params.append('endDate', endDate);
+      }
+
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+
+      const response = await api.get(url).json<any>();
+
+      // Mapear la respuesta del backend al formato esperado por el frontend
+      return {
+        priorities: response.priorityDistribution.map((priority: any) => ({
+          name: priority.priority,
+          displayName: priority.priorityName,
+          priorityOrder: priority.priorityOrder,
+          count: priority.count,
+          percentage: priority.percentage,
+          completedCount: priority.completedCount,
+          completionRate: priority.completionRate,
+          averageResolutionTimeHours: priority.averageResolutionTimeHours,
+          overdueCount: priority.overdueCount,
+          color: priority.color
+        })),
+        // Mantener compatibilidad con campos adicionales
+        priorityTrends: [], // Se puede implementar más tarde si es necesario
+        totalTasks: response.totalTasks,
+        periodStart: response.periodStart,
+        periodEnd: response.periodEnd,
+        generatedAt: response.generatedAt
+      };
     } catch (error) {
       console.error('Error al obtener distribución de prioridades:', error);
-      
-      // Datos de ejemplo como fallback
-      return {
-        priorities: [
-          { name: 'ALTA', count: 75, percentage: 30.6 },
-          { name: 'MEDIA', count: 105, percentage: 42.9 },
-          { name: 'BAJA', count: 65, percentage: 26.5 }
-        ],
-        priorityTrends: [
-          { 
-            priority: 'ALTA', 
-            data: [18, 20, 22, 25, 28, 30, 32] 
-          },
-          { 
-            priority: 'MEDIA', 
-            data: [30, 32, 35, 38, 40, 42, 45] 
-          },
-          { 
-            priority: 'BAJA', 
-            data: [15, 18, 20, 22, 25, 28, 30] 
-          }
-        ]
-      };
+      throw error;
     }
   },
-  
+
   /**
    * Obtiene métricas de línea de tiempo
    * @param startDate Fecha de inicio
    * @param endDate Fecha de fin
    * @returns Métricas de línea de tiempo
+   * @note Este endpoint aún no está implementado en el backend
    */
   async getTimelineMetrics(startDate: string, endDate: string): Promise<TimelineMetrics> {
     try {
-      const params = new URLSearchParams();
-      params.append('startDate', startDate);
-      params.append('endDate', endDate);
-      
-      const response = await api.get(`dashboard/metrics/timeline?${params.toString()}`).json<TimelineMetrics>();
+      const response = await api.get(`admin/dashboard/metrics/timeline?startDate=${startDate}&endDate=${endDate}`).json<TimelineMetrics>();
       return response;
     } catch (error) {
       console.error('Error al obtener métricas de línea de tiempo:', error);
-      
-      // Datos de ejemplo como fallback
-      return {
-        taskCreationTimeline: [
-          { date: '2023-11-01', count: 12 },
-          { date: '2023-11-02', count: 15 },
-          { date: '2023-11-03', count: 18 },
-          { date: '2023-11-04', count: 14 },
-          { date: '2023-11-05', count: 16 },
-          { date: '2023-11-06', count: 20 },
-          { date: '2023-11-07', count: 22 }
-        ],
-        taskCompletionTimeline: [
-          { date: '2023-11-01', count: 10 },
-          { date: '2023-11-02', count: 13 },
-          { date: '2023-11-03', count: 14 },
-          { date: '2023-11-04', count: 16 },
-          { date: '2023-11-05', count: 15 },
-          { date: '2023-11-06', count: 18 },
-          { date: '2023-11-07', count: 20 }
-        ]
-      };
+      throw error;
     }
   },
-  
+
   /**
    * Obtiene métricas de rendimiento
    * @returns Métricas de rendimiento
+   * @note Este endpoint aún no está implementado en el backend
    */
   async getPerformanceMetrics(): Promise<PerformanceMetrics> {
     try {
-      const response = await api.get('dashboard/metrics/performance').json<PerformanceMetrics>();
+      const response = await api.get('admin/dashboard/metrics/performance').json<PerformanceMetrics>();
       return response;
     } catch (error) {
       console.error('Error al obtener métricas de rendimiento:', error);
-      
-      // Datos de ejemplo como fallback
-      return {
-        averageResponseTime: 2.3,
-        averageResolutionTime: 3.5,
-        completionRateByUser: [
-          { userId: 1, username: 'jperez', fullName: 'Juan Pérez', completionRate: 90.0 },
-          { userId: 2, username: 'mlopez', fullName: 'María López', completionRate: 95.0 },
-          { userId: 3, username: 'cgomez', fullName: 'Carlos Gómez', completionRate: 91.4 },
-          { userId: 4, username: 'lrodriguez', fullName: 'Laura Rodríguez', completionRate: 93.3 },
-          { userId: 5, username: 'agarcia', fullName: 'Ana García', completionRate: 89.3 }
-        ],
-        completionRateByCategory: [
-          { category: 'Administrativa', completionRate: 92.5 },
-          { category: 'Judicial', completionRate: 88.7 },
-          { category: 'Consulta', completionRate: 95.3 }
-        ],
-        completionRateByPriority: [
-          { priority: 'ALTA', completionRate: 96.0 },
-          { priority: 'MEDIA', completionRate: 90.5 },
-          { priority: 'BAJA', completionRate: 85.2 }
-        ]
-      };
+      throw error;
     }
   }
 };

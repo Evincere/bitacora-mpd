@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FiBell, FiSave, FiX, FiCheck, FiAlertCircle, FiInfo, FiClock, FiUser, FiMessageSquare, FiUsers } from 'react-icons/fi';
-import { NotificationType } from '../../../types/notifications';
+import { NotificationType } from '@/core/types/notifications';
 
 // Interfaz para las preferencias de notificaciones
 interface NotificationPreference {
@@ -303,12 +303,12 @@ const CloseButton = styled.button`
   justify-content: center;
   padding: 4px;
   border-radius: 4px;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.colors.backgroundHover};
     color: ${({ theme }) => theme.colors.textPrimary};
   }
-  
+
   &:focus {
     outline: none;
     box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primaryLight};
@@ -319,16 +319,16 @@ const PreferencesContent = styled.div`
   padding: 24px;
   max-height: 500px;
   overflow-y: auto;
-  
+
   /* Estilizar la barra de desplazamiento */
   &::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: ${({ theme }) => theme.colors.background};
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background-color: ${({ theme }) => theme.colors.border};
     border-radius: 3px;
@@ -429,12 +429,12 @@ const ToggleSwitch = styled.div<{ $checked: boolean }>`
   position: relative;
   width: 40px;
   height: 20px;
-  background-color: ${({ $checked, theme }) => 
+  background-color: ${({ $checked, theme }) =>
     $checked ? theme.colors.primary : theme.colors.border};
   border-radius: 10px;
   cursor: pointer;
   transition: background-color 0.2s;
-  
+
   &:focus {
     outline: none;
     box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primaryLight};
@@ -455,21 +455,21 @@ const ToggleSlider = styled.div<{ $checked: boolean }>`
 const Checkbox = styled.div<{ $checked: boolean; disabled?: boolean }>`
   width: 20px;
   height: 20px;
-  border: 2px solid ${({ $checked, disabled, theme }) => 
-    disabled ? theme.colors.borderLight : 
+  border: 2px solid ${({ $checked, disabled, theme }) =>
+    disabled ? theme.colors.borderLight :
     $checked ? theme.colors.primary : theme.colors.border};
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-  background-color: ${({ $checked, disabled, theme }) => 
-    disabled ? theme.colors.backgroundDisabled : 
+  background-color: ${({ $checked, disabled, theme }) =>
+    disabled ? theme.colors.backgroundDisabled :
     $checked ? theme.colors.primaryLight : 'transparent'};
   color: ${({ theme }) => theme.colors.primary};
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
   transition: all 0.2s;
-  
+
   &:focus {
     outline: none;
     box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primaryLight};
@@ -498,11 +498,11 @@ const SaveButton = styled.button`
   align-items: center;
   gap: 8px;
   transition: background-color 0.2s;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.colors.primaryDark};
   }
-  
+
   &:focus {
     outline: none;
     box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primaryLight};

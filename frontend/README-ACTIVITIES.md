@@ -15,16 +15,6 @@ El módulo está configurado para funcionar tanto con el backend real como con u
 El comportamiento del módulo se puede configurar mediante las siguientes variables de entorno:
 
 - `VITE_API_URL`: URL base de la API. Si se deja vacío, se utilizará el proxy de Vite configurado en `vite.config.js`.
-- `VITE_USE_MOCK_DATA`: Si se establece en `true`, se utilizará el servicio simulado para las actividades.
-
-## Servicio simulado
-
-El servicio simulado (`mockService.js`) proporciona datos de prueba para el desarrollo y pruebas cuando el backend no está disponible. Incluye las siguientes funcionalidades:
-
-- Generación de datos aleatorios para actividades
-- Implementación de todas las operaciones CRUD (Crear, Leer, Actualizar, Eliminar)
-- Simulación de latencia de red para una experiencia más realista
-- Filtrado y paginación de actividades
 
 ## Componentes principales
 
@@ -37,9 +27,8 @@ El servicio simulado (`mockService.js`) proporciona datos de prueba para el desa
 
 1. El componente `Activities.tsx` utiliza el hook `useActivities` para obtener los datos
 2. El hook `useActivities` utiliza el servicio `activitiesService.ts` para hacer las peticiones
-3. El servicio `activitiesService.ts` decide si usar el backend real o el servicio simulado según la configuración
-4. Si se usa el backend real, se hacen peticiones a la API mediante `api-ky.ts`
-5. Si se usa el servicio simulado, se utilizan los datos generados en `mockService.js`
+3. El servicio `activitiesService.ts` hace peticiones a la API real mediante `api-ky.ts`
+4. Los datos se procesan y adaptan según el formato de respuesta del backend
 
 ## Manejo de errores
 
@@ -135,9 +124,9 @@ Esto puede deberse a varias razones:
    - Limpiar los filtros y volver a intentar
    - Verificar que los filtros estén correctamente implementados
 
-3. El servicio simulado no está generando datos correctamente
-   - Revisar el archivo `mockService.js` y verificar que esté generando datos
-   - Verificar que la variable `USE_MOCK_SERVICE` esté configurada correctamente
+3. Problemas de conectividad con el backend
+   - Verificar que el backend esté ejecutándose en el puerto correcto
+   - Revisar la configuración del proxy en `vite.config.js`
 
 4. El componente no está renderizando correctamente los datos
    - Verificar que el componente `Activities.tsx` esté correctamente implementado
@@ -156,12 +145,9 @@ VITE_API_URL=
 # Puerto para el servidor de desarrollo
 PORT=3000
 
-# Habilitar el uso de datos simulados cuando el backend no está disponible
-VITE_USE_MOCK_DATA=false
 ```
 
 - `VITE_API_URL`: URL base de la API. Si se deja vacío, se utilizará el proxy de Vite configurado en `vite.config.js`.
-- `VITE_USE_MOCK_DATA`: Si se establece en `true`, se utilizará el servicio simulado para las actividades, incluso si el backend está disponible.
 
 ### Proxy de Vite
 

@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import notificationConfigService, { 
+import notificationConfigService, {
   NotificationPreferences,
   UpdateTemplateDto
 } from '../services/notificationConfigService';
-import { useToastContext } from '@/components/ui';
+import { toast } from 'react-toastify';
 
 /**
  * Hook para obtener los canales de notificación
@@ -43,17 +43,16 @@ export const useUserNotificationPreferences = () => {
  */
 export const useUpdateUserNotificationPreferences = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
-    mutationFn: (preferences: NotificationPreferences) => 
+    mutationFn: (preferences: NotificationPreferences) =>
       notificationConfigService.updateUserNotificationPreferences(preferences),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userNotificationPreferences'] });
-      showSuccess('Preferencias de notificación actualizadas correctamente');
+      toast.success('Preferencias de notificación actualizadas correctamente');
     },
     onError: (error: Error) => {
-      showError(`Error al actualizar preferencias: ${error.message}`);
+      toast.error(`Error al actualizar preferencias: ${error.message}`);
       throw error;
     },
   });
@@ -87,19 +86,18 @@ export const useNotificationTemplate = (id: string) => {
  */
 export const useUpdateNotificationTemplate = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
-    mutationFn: ({ id, templateData }: { id: string; templateData: UpdateTemplateDto }) => 
+    mutationFn: ({ id, templateData }: { id: string; templateData: UpdateTemplateDto }) =>
       notificationConfigService.updateNotificationTemplate(id, templateData),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['notificationTemplates'] });
       queryClient.invalidateQueries({ queryKey: ['notificationTemplate', data.id] });
-      showSuccess('Plantilla de notificación actualizada correctamente');
+      toast.success('Plantilla de notificación actualizada correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al actualizar plantilla: ${error.message}`);
+      toast.error(`Error al actualizar plantilla: ${error.message}`);
       throw error;
     },
   });

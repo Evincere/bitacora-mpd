@@ -1,6 +1,6 @@
 import React from 'react';
 import { toast, ToastOptions } from 'react-toastify';
-import { ToastType } from '@/core/types/models';
+import { ToastType } from '@/shared/components/ui/Toast/Toast.types';
 
 interface ToastHook {
   success: (message: string, title?: string, options?: ToastOptions) => void;

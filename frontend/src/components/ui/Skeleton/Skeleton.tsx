@@ -65,7 +65,7 @@ const SkeletonBase = styled.div<SkeletonBaseProps & { $animation?: 'shimmer' | '
 export interface SkeletonProps extends SkeletonBaseProps {
   count?: number;
   animation?: 'shimmer' | 'pulse';
-  variant?: 'text' | 'circular' | 'rectangular';
+  variant?: 'text' | 'circular' | 'rectangular' | 'circle' | 'rect';
 }
 
 /**
@@ -86,11 +86,13 @@ const Skeleton: React.FC<SkeletonProps> = ({
   const getVariantProps = () => {
     switch (variant) {
       case 'circular':
+      case 'circle':
         return {
           style: { ...style, borderRadius: '50%' },
           height: height || width, // Circular skeletons should have equal width and height
         };
       case 'rectangular':
+      case 'rect':
         return {
           style: { ...style, borderRadius: '4px' },
         };
@@ -122,3 +124,29 @@ const Skeleton: React.FC<SkeletonProps> = ({
 };
 
 export default Skeleton;
+
+// Componentes específicos exportados para compatibilidad
+export const TextSkeleton = styled(SkeletonBase)<{ width?: string; height?: string; margin?: string }>`
+  width: ${props => props.width || '100%'};
+  height: ${props => props.height || '1rem'};
+  margin: ${props => props.margin || '0.5rem 0'};
+`;
+
+export const CircleSkeleton = styled(SkeletonBase)<{ size?: string; margin?: string }>`
+  width: ${props => props.size || '40px'};
+  height: ${props => props.size || '40px'};
+  border-radius: 50%;
+  margin: ${props => props.margin || '0'};
+`;
+
+export const RectSkeleton = styled(SkeletonBase)<{
+  width?: string;
+  height?: string;
+  margin?: string;
+  borderRadius?: string;
+}>`
+  width: ${props => props.width || '100%'};
+  height: ${props => props.height || '200px'};
+  margin: ${props => props.margin || '0'};
+  border-radius: ${props => props.borderRadius || '4px'};
+`;

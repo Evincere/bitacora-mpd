@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { 
-  FiBarChart2, 
-  FiFilter, 
-  FiDownload, 
+import {
+  FiBarChart2,
+  FiFilter,
+  FiDownload,
   FiCalendar,
   FiPieChart,
   FiTrendingUp,
@@ -13,51 +13,18 @@ import {
   FiAlertCircle
 } from 'react-icons/fi';
 
-// Datos de ejemplo para las métricas
-const MOCK_METRICAS = {
-  totalSolicitudes: 120,
-  solicitudesAsignadas: 95,
-  solicitudesPendientes: 25,
-  tiempoPromedioAsignacion: 1.2, // días
-  tiempoPromedioCompletado: 4.5, // días
-  tasaCompletado: 85, // porcentaje
-  
-  // Distribución por categoría
-  distribucionCategoria: [
-    { categoria: 'LEGAL', cantidad: 45, porcentaje: 37.5 },
-    { categoria: 'ADMINISTRATIVA', cantidad: 30, porcentaje: 25 },
-    { categoria: 'TECNICA', cantidad: 25, porcentaje: 20.8 },
-    { categoria: 'FINANCIERA', cantidad: 15, porcentaje: 12.5 },
-    { categoria: 'RECURSOS_HUMANOS', cantidad: 5, porcentaje: 4.2 }
-  ],
-  
-  // Distribución por prioridad
-  distribucionPrioridad: [
-    { prioridad: 'CRITICAL', cantidad: 10, porcentaje: 8.3 },
-    { prioridad: 'HIGH', cantidad: 35, porcentaje: 29.2 },
-    { prioridad: 'MEDIUM', cantidad: 50, porcentaje: 41.7 },
-    { prioridad: 'LOW', cantidad: 20, porcentaje: 16.7 },
-    { prioridad: 'TRIVIAL', cantidad: 5, porcentaje: 4.1 }
-  ],
-  
-  // Distribución por estado
-  distribucionEstado: [
-    { estado: 'REQUESTED', cantidad: 25, porcentaje: 20.8 },
-    { estado: 'ASSIGNED', cantidad: 30, porcentaje: 25 },
-    { estado: 'IN_PROGRESS', cantidad: 40, porcentaje: 33.3 },
-    { estado: 'COMPLETED', cantidad: 15, porcentaje: 12.5 },
-    { estado: 'APPROVED', cantidad: 5, porcentaje: 4.2 },
-    { estado: 'REJECTED', cantidad: 5, porcentaje: 4.2 }
-  ],
-  
-  // Rendimiento por ejecutor
-  rendimientoEjecutores: [
-    { nombre: 'Ana Martínez', tareasAsignadas: 25, tareasCompletadas: 20, tiempoPromedio: 3.8 },
-    { nombre: 'Luis Sánchez', tareasAsignadas: 22, tareasCompletadas: 18, tiempoPromedio: 4.2 },
-    { nombre: 'María López', tareasAsignadas: 15, tareasCompletadas: 15, tiempoPromedio: 3.5 },
-    { nombre: 'Pedro Gómez', tareasAsignadas: 30, tareasCompletadas: 25, tiempoPromedio: 5.1 },
-    { nombre: 'Sofía Rodríguez', tareasAsignadas: 18, tareasCompletadas: 15, tiempoPromedio: 4.0 }
-  ]
+// Datos por defecto para métricas vacías
+const DEFAULT_METRICS = {
+  totalSolicitudes: 0,
+  solicitudesAsignadas: 0,
+  solicitudesPendientes: 0,
+  tiempoPromedioAsignacion: 0,
+  tiempoPromedioCompletado: 0,
+  tasaCompletado: 0,
+  distribucionCategoria: [],
+  distribucionPrioridad: [],
+  distribucionEstado: [],
+  rendimientoEjecutores: []
 };
 
 const PageContainer = styled.div`
@@ -496,9 +463,45 @@ const getEfficiencyColor = (ratio: number) => {
   return '#ef4444'; // error
 };
 
+// Componente de estado vacío
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background-color: ${({ theme }) => theme.backgroundSecondary};
+  border-radius: 8px;
+  margin: 20px 0;
+
+  svg {
+    color: ${({ theme }) => theme.textSecondary};
+    margin-bottom: 16px;
+    opacity: 0.6;
+  }
+
+  h3 {
+    margin: 0 0 8px;
+    color: ${({ theme }) => theme.text};
+    font-size: 18px;
+  }
+
+  p {
+    margin: 0 0 20px;
+    color: ${({ theme }) => theme.textSecondary};
+    max-width: 400px;
+    line-height: 1.5;
+  }
+`;
+
 const MetricasAsignacion: React.FC = () => {
   const [periodoFilter, setPeriodoFilter] = useState('30');
   const [categoriaFilter, setCategoriaFilter] = useState('');
+
+  // Usar datos por defecto (vacíos) hasta que se implemente la API real
+  const metricas = DEFAULT_METRICS;
+  const hasData = metricas.totalSolicitudes > 0;
 
   return (
     <PageContainer>
@@ -546,149 +549,198 @@ const MetricasAsignacion: React.FC = () => {
         </Button>
       </FiltersContainer>
 
-      <StatsGrid>
-        <StatCard>
-          <StatTitle>
-            <FiBarChart2 size={16} />
-            Total de Solicitudes
-          </StatTitle>
-          <StatValue>{MOCK_METRICAS.totalSolicitudes}</StatValue>
-          <StatFooter>
-            {MOCK_METRICAS.solicitudesAsignadas} asignadas, {MOCK_METRICAS.solicitudesPendientes} pendientes
-          </StatFooter>
-        </StatCard>
-        <StatCard>
-          <StatTitle>
-            <FiClock size={16} />
-            Tiempo Promedio de Asignación
-          </StatTitle>
-          <StatValue>{MOCK_METRICAS.tiempoPromedioAsignacion.toFixed(1)}</StatValue>
-          <StatFooter>días</StatFooter>
-        </StatCard>
-        <StatCard>
-          <StatTitle>
-            <FiClock size={16} />
-            Tiempo Promedio de Completado
-          </StatTitle>
-          <StatValue>{MOCK_METRICAS.tiempoPromedioCompletado.toFixed(1)}</StatValue>
-          <StatFooter>días</StatFooter>
-        </StatCard>
-        <StatCard>
-          <StatTitle>
-            <FiCheckCircle size={16} />
-            Tasa de Completado
-          </StatTitle>
-          <StatValue>{MOCK_METRICAS.tasaCompletado}%</StatValue>
-          <StatFooter>de solicitudes completadas</StatFooter>
-        </StatCard>
-      </StatsGrid>
+      {hasData ? (
+        <StatsGrid>
+          <StatCard>
+            <StatTitle>
+              <FiBarChart2 size={16} />
+              Total de Solicitudes
+            </StatTitle>
+            <StatValue>{metricas.totalSolicitudes}</StatValue>
+            <StatFooter>
+              {metricas.solicitudesAsignadas} asignadas, {metricas.solicitudesPendientes} pendientes
+            </StatFooter>
+          </StatCard>
+          <StatCard>
+            <StatTitle>
+              <FiClock size={16} />
+              Tiempo Promedio de Asignación
+            </StatTitle>
+            <StatValue>{metricas.tiempoPromedioAsignacion.toFixed(1)}</StatValue>
+            <StatFooter>días</StatFooter>
+          </StatCard>
+          <StatCard>
+            <StatTitle>
+              <FiClock size={16} />
+              Tiempo Promedio de Completado
+            </StatTitle>
+            <StatValue>{metricas.tiempoPromedioCompletado.toFixed(1)}</StatValue>
+            <StatFooter>días</StatFooter>
+          </StatCard>
+          <StatCard>
+            <StatTitle>
+              <FiCheckCircle size={16} />
+              Tasa de Completado
+            </StatTitle>
+            <StatValue>{metricas.tasaCompletado}%</StatValue>
+            <StatFooter>de solicitudes completadas</StatFooter>
+          </StatCard>
+        </StatsGrid>
+      ) : (
+        <EmptyState>
+          <FiBarChart2 size={64} />
+          <h3>No hay datos de métricas disponibles</h3>
+          <p>
+            Las métricas de asignación se mostrarán aquí una vez que haya solicitudes procesadas en el sistema.
+            Comience creando y asignando solicitudes para ver estadísticas detalladas.
+          </p>
+        </EmptyState>
+      )}
 
-      <ChartsGrid>
-        <ChartCard>
-          <ChartTitle>
-            <FiPieChart size={18} />
-            Distribución por Categoría
-          </ChartTitle>
-          <ChartContent>
-            <BarChartContainer>
-              {MOCK_METRICAS.distribucionCategoria.map((item) => (
-                <BarGroup key={item.categoria}>
-                  <BarValue>{item.cantidad}</BarValue>
-                  <Bar 
-                    $height={item.porcentaje * 2} 
-                    $color="#3b82f6"
-                  />
-                  <BarLabel>{getCategoryText(item.categoria)}</BarLabel>
-                </BarGroup>
-              ))}
-            </BarChartContainer>
-          </ChartContent>
-        </ChartCard>
+      {hasData && (
+        <ChartsGrid>
+          <ChartCard>
+            <ChartTitle>
+              <FiPieChart size={18} />
+              Distribución por Categoría
+            </ChartTitle>
+            <ChartContent>
+              {metricas.distribucionCategoria.length > 0 ? (
+                <BarChartContainer>
+                  {metricas.distribucionCategoria.map((item) => (
+                    <BarGroup key={item.categoria}>
+                      <BarValue>{item.cantidad}</BarValue>
+                      <Bar
+                        $height={item.porcentaje * 2}
+                        $color="#3b82f6"
+                      />
+                      <BarLabel>{getCategoryText(item.categoria)}</BarLabel>
+                    </BarGroup>
+                  ))}
+                </BarChartContainer>
+              ) : (
+                <EmptyState>
+                  <FiPieChart size={48} />
+                  <h3>Sin datos de categorías</h3>
+                  <p>No hay datos suficientes para mostrar la distribución por categorías.</p>
+                </EmptyState>
+              )}
+            </ChartContent>
+          </ChartCard>
 
-        <ChartCard>
-          <ChartTitle>
-            <FiPieChart size={18} />
-            Distribución por Prioridad
-          </ChartTitle>
-          <ChartContent style={{ display: 'flex', flexDirection: 'row' }}>
-            <PieChartContainer>
-              <PieChart />
-            </PieChartContainer>
-            <PieLegend>
-              {MOCK_METRICAS.distribucionPrioridad.map((item) => (
-                <LegendItem key={item.prioridad}>
-                  <LegendColor $color={getPriorityColor(item.prioridad)} />
-                  <LegendLabel>{getPriorityText(item.prioridad)}</LegendLabel>
-                  <LegendValue>{item.cantidad} ({item.porcentaje}%)</LegendValue>
-                </LegendItem>
-              ))}
-            </PieLegend>
-          </ChartContent>
-        </ChartCard>
+          <ChartCard>
+            <ChartTitle>
+              <FiPieChart size={18} />
+              Distribución por Prioridad
+            </ChartTitle>
+            <ChartContent>
+              {metricas.distribucionPrioridad.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                  <PieChartContainer>
+                    <PieChart />
+                  </PieChartContainer>
+                  <PieLegend>
+                    {metricas.distribucionPrioridad.map((item) => (
+                      <LegendItem key={item.prioridad}>
+                        <LegendColor $color={getPriorityColor(item.prioridad)} />
+                        <LegendLabel>{getPriorityText(item.prioridad)}</LegendLabel>
+                        <LegendValue>{item.cantidad} ({item.porcentaje}%)</LegendValue>
+                      </LegendItem>
+                    ))}
+                  </PieLegend>
+                </div>
+              ) : (
+                <EmptyState>
+                  <FiPieChart size={48} />
+                  <h3>Sin datos de prioridades</h3>
+                  <p>No hay datos suficientes para mostrar la distribución por prioridades.</p>
+                </EmptyState>
+              )}
+            </ChartContent>
+          </ChartCard>
 
-        <ChartCard>
-          <ChartTitle>
-            <FiPieChart size={18} />
-            Distribución por Estado
-          </ChartTitle>
-          <ChartContent>
-            <BarChartContainer>
-              {MOCK_METRICAS.distribucionEstado.map((item) => (
-                <BarGroup key={item.estado}>
-                  <BarValue>{item.cantidad}</BarValue>
-                  <Bar 
-                    $height={item.porcentaje * 2} 
-                    $color={getStatusColor(item.estado)}
-                  />
-                  <BarLabel>{getStatusText(item.estado)}</BarLabel>
-                </BarGroup>
-              ))}
-            </BarChartContainer>
-          </ChartContent>
-        </ChartCard>
-      </ChartsGrid>
+          <ChartCard>
+            <ChartTitle>
+              <FiPieChart size={18} />
+              Distribución por Estado
+            </ChartTitle>
+            <ChartContent>
+              {metricas.distribucionEstado.length > 0 ? (
+                <BarChartContainer>
+                  {metricas.distribucionEstado.map((item) => (
+                    <BarGroup key={item.estado}>
+                      <BarValue>{item.cantidad}</BarValue>
+                      <Bar
+                        $height={item.porcentaje * 2}
+                        $color={getStatusColor(item.estado)}
+                      />
+                      <BarLabel>{getStatusText(item.estado)}</BarLabel>
+                    </BarGroup>
+                  ))}
+                </BarChartContainer>
+              ) : (
+                <EmptyState>
+                  <FiPieChart size={48} />
+                  <h3>Sin datos de estados</h3>
+                  <p>No hay datos suficientes para mostrar la distribución por estados.</p>
+                </EmptyState>
+              )}
+            </ChartContent>
+          </ChartCard>
+        </ChartsGrid>
+      )}
 
-      <TableContainer>
-        <TableTitle>
-          <FiTrendingUp size={18} />
-          Rendimiento por Ejecutor
-        </TableTitle>
-        <Table>
-          <TableHead>
-            <tr>
-              <TableHeadCell>Ejecutor</TableHeadCell>
-              <TableHeadCell>Tareas Asignadas</TableHeadCell>
-              <TableHeadCell>Tareas Completadas</TableHeadCell>
-              <TableHeadCell>Eficiencia</TableHeadCell>
-              <TableHeadCell>Tiempo Promedio</TableHeadCell>
-            </tr>
-          </TableHead>
-          <TableBody>
-            {MOCK_METRICAS.rendimientoEjecutores.map((ejecutor) => {
-              const eficiencia = ejecutor.tareasCompletadas / ejecutor.tareasAsignadas;
-              return (
-                <TableRow key={ejecutor.nombre}>
-                  <TableCell>{ejecutor.nombre}</TableCell>
-                  <TableCell>{ejecutor.tareasAsignadas}</TableCell>
-                  <TableCell>{ejecutor.tareasCompletadas}</TableCell>
-                  <TableCell>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <div>{(eficiencia * 100).toFixed(0)}%</div>
-                      <ProgressBar>
-                        <ProgressFill 
-                          $percentage={eficiencia * 100} 
-                          $color={getEfficiencyColor(eficiencia)} 
-                        />
-                      </ProgressBar>
-                    </div>
-                  </TableCell>
-                  <TableCell>{ejecutor.tiempoPromedio.toFixed(1)} días</TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {hasData && (
+        <TableContainer>
+          <TableTitle>
+            <FiTrendingUp size={18} />
+            Rendimiento por Ejecutor
+          </TableTitle>
+          {metricas.rendimientoEjecutores.length > 0 ? (
+            <Table>
+              <TableHead>
+                <tr>
+                  <TableHeadCell>Ejecutor</TableHeadCell>
+                  <TableHeadCell>Tareas Asignadas</TableHeadCell>
+                  <TableHeadCell>Tareas Completadas</TableHeadCell>
+                  <TableHeadCell>Eficiencia</TableHeadCell>
+                  <TableHeadCell>Tiempo Promedio</TableHeadCell>
+                </tr>
+              </TableHead>
+              <TableBody>
+                {metricas.rendimientoEjecutores.map((ejecutor) => {
+                  const eficiencia = ejecutor.tareasCompletadas / ejecutor.tareasAsignadas;
+                  return (
+                    <TableRow key={ejecutor.nombre}>
+                      <TableCell>{ejecutor.nombre}</TableCell>
+                      <TableCell>{ejecutor.tareasAsignadas}</TableCell>
+                      <TableCell>{ejecutor.tareasCompletadas}</TableCell>
+                      <TableCell>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <div>{(eficiencia * 100).toFixed(0)}%</div>
+                          <ProgressBar>
+                            <ProgressFill
+                              $percentage={eficiencia * 100}
+                              $color={getEfficiencyColor(eficiencia)}
+                            />
+                          </ProgressBar>
+                        </div>
+                      </TableCell>
+                      <TableCell>{ejecutor.tiempoPromedio.toFixed(1)} días</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          ) : (
+            <EmptyState>
+              <FiTrendingUp size={48} />
+              <h3>Sin datos de rendimiento</h3>
+              <p>No hay datos suficientes para mostrar el rendimiento de los ejecutores.</p>
+            </EmptyState>
+          )}
+        </TableContainer>
+      )}
     </PageContainer>
   );
 };

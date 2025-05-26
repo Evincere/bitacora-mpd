@@ -131,10 +131,10 @@ public final class ActivitySpecifications {
      */
     @SafeVarargs
     public static Specification<ActivityEntity> where(Specification<ActivityEntity>... specs) {
-        Specification<ActivityEntity> result = Specification.where(null);
+        Specification<ActivityEntity> result = null;
         for (final Specification<ActivityEntity> spec : specs) {
-            result = result.and(spec);
+            result = result == null ? spec : result.and(spec);
         }
-        return result;
+        return result != null ? result : (root, query, cb) -> cb.conjunction();
     }
 }

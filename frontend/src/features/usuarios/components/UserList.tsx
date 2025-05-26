@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -19,17 +19,17 @@ import {
 } from 'react-icons/fi';
 import { useUsers, useDeleteUser } from '../hooks/useUsers';
 import { User } from '@/core/types/models';
+import { UserListResponse } from '../services/userService';
 import {
   Badge,
   Pagination,
   EmptyState,
-  useToastContext
+  useToast
 } from '@/components/ui';
 import VirtualList from '@/components/common/VirtualList';
 import { ConfirmDialog } from '@/components/ui/Dialog';
-import PermissionDebugger from '@/features/auth/components/PermissionDebugger';
+import ActionMenu from '@/components/common/ActionMenu';
 import permissionChecker from '@/utils/permissionChecker';
-import { addReadUsersPermission } from '@/utils/addReadUsersPermission';
 
 // Estilos
 const Container = styled.div`
@@ -182,6 +182,7 @@ const VirtualTableContainer = styled.div`
   border-radius: 8px;
   border: 1px solid ${({ theme }) => theme.border};
   background-color: ${({ theme }) => theme.cardBackground};
+  position: relative;
 `;
 
 const VirtualTableStyles = styled.div`
@@ -190,9 +191,15 @@ const VirtualTableStyles = styled.div`
     align-items: center;
     border-bottom: 1px solid ${({ theme }) => theme.border};
     transition: background-color 0.2s ease;
+    position: relative;
+    min-height: 60px;
 
     &:hover {
       background-color: ${({ theme }) => theme.hoverBackground};
+    }
+
+    &:last-child {
+      border-bottom: none;
     }
   }
 
@@ -203,11 +210,14 @@ const VirtualTableStyles = styled.div`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-`;
+    display: flex;
+    align-items: center;
 
-const ActionsContainer = styled.div`
-  position: relative;
+    &:last-child {
+      justify-content: center;
+      position: relative;
+    }
+  }
 `;
 
 const ActionButton = styled.button`
@@ -216,8 +226,11 @@ const ActionButton = styled.button`
   cursor: pointer;
   color: ${({ theme }) => theme.textSecondary};
   transition: color 0.2s ease;
-  padding: 4px;
+  padding: 8px;
   border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     color: ${({ theme }) => theme.text};
@@ -225,34 +238,37 @@ const ActionButton = styled.button`
   }
 `;
 
-const ActionsMenu = styled.div<{ $show: boolean }>`
-  position: absolute;
-  right: 0;
-  top: 100%;
-  width: 160px;
-  background-color: ${({ theme }) => theme.cardBackground};
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  display: ${({ $show }) => ($show ? 'block' : 'none')};
-  overflow: hidden;
-`;
-
 const MenuItem = styled.button<{ $danger?: boolean }>`
   display: flex;
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 10px 16px;
+  padding: 12px 16px;
   background: none;
   border: none;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
   color: ${({ theme, $danger }) => ($danger ? theme.danger : theme.text)};
+  font-size: 14px;
+  font-weight: 500;
 
   &:hover {
     background-color: ${({ theme }) => theme.hoverBackground};
+  }
+
+  &:active {
+    background-color: ${({ theme, $danger }) =>
+      $danger ? theme.danger + '20' : theme.primary + '20'};
+  }
+
+  &:not(:last-child) {
+    border-bottom: 1px solid ${({ theme }) => theme.border + '40'};
+  }
+
+  /* Asegurar que los iconos estén alineados */
+  svg {
+    min-width: 16px;
   }
 `;
 
@@ -332,21 +348,21 @@ const UserList: React.FC<UserListProps> = ({ onEdit, onView, onAdd }) => {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Referencias para los botones de acciones
+  const actionButtonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
+
   const navigate = useNavigate();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   const { data, isLoading, isError, refetch } = useUsers(page, size, role, active, search);
   const deleteUserMutation = useDeleteUser();
 
-  // Cerrar menú al hacer clic fuera
-  useEffect(() => {
-    const handleClickOutside = () => setOpenMenuId(null);
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
+  // Aserción de tipo para data
+  const userData = data as UserListResponse | undefined;
 
   const handleMenuToggle = (userId: number, e?: React.MouseEvent) => {
     e?.stopPropagation();
+    e?.preventDefault();
     setOpenMenuId(openMenuId === userId ? null : userId);
   };
 
@@ -427,11 +443,19 @@ const UserList: React.FC<UserListProps> = ({ onEdit, onView, onAdd }) => {
           </StatusBadge>
         </div>
         <div className="virtual-table-cell" style={{ width: '10%' }}>
-          <ActionsContainer>
-            <ActionButton onClick={(e) => handleMenuToggle(user.id, e)}>
-              <FiMoreVertical size={18} />
-            </ActionButton>
-            <ActionsMenu $show={openMenuId === user.id}>
+          <ActionButton
+            ref={el => actionButtonRefs.current[user.id] = el}
+            onClick={(e) => handleMenuToggle(user.id, e)}
+          >
+            <FiMoreVertical size={18} />
+          </ActionButton>
+
+          {openMenuId === user.id && (
+            <ActionMenu
+              isOpen={true}
+              onClose={() => setOpenMenuId(null)}
+              triggerRef={{ current: actionButtonRefs.current[user.id] }}
+            >
               <MenuItem onClick={(e) => handleView(user, e)}>
                 <FiEye size={16} />
                 Ver detalle
@@ -444,18 +468,14 @@ const UserList: React.FC<UserListProps> = ({ onEdit, onView, onAdd }) => {
                 <FiTrash2 size={16} />
                 Eliminar
               </MenuItem>
-            </ActionsMenu>
-          </ActionsContainer>
+            </ActionMenu>
+          )}
         </div>
       </div>
     );
   };
 
-  // Verificar permisos al cargar el componente
-  useEffect(() => {
-    console.log('Verificando permisos para acceder a usuarios:');
-    permissionChecker.logUserPermissions();
-  }, []);
+
 
   return (
     <Container>
@@ -470,38 +490,11 @@ const UserList: React.FC<UserListProps> = ({ onEdit, onView, onAdd }) => {
             <FiPlus size={16} />
             Nuevo Usuario
           </Button>
-          <Button onClick={() => permissionChecker.logUserPermissions()}>
-            <FiShield size={16} />
-            Verificar Permisos
-          </Button>
-          <Button onClick={() => navigate('/app/debug/permissions')}>
-            <FiShield size={16} />
-            Depurador Avanzado
-          </Button>
+
         </ActionButtons>
       </Header>
 
-      {/* Depurador de permisos */}
-      <PermissionDebugger />
 
-      {/* Botón para añadir permiso READ_USERS */}
-      {!permissionChecker.hasPermission('READ_USERS') && (
-        <div style={{ marginTop: '16px', marginBottom: '16px', padding: '16px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6' }}>
-          <h3 style={{ marginTop: 0 }}>Problema de permisos detectado</h3>
-          <p>No tienes el permiso <strong>READ_USERS</strong> necesario para ver la lista de usuarios.</p>
-          <Button onClick={() => {
-            if (addReadUsersPermission()) {
-              showSuccess('Permiso READ_USERS añadido correctamente. Recargando página...');
-              setTimeout(() => window.location.reload(), 1500);
-            } else {
-              showError('No se pudo añadir el permiso READ_USERS');
-            }
-          }}>
-            <FiShield size={16} />
-            Añadir permiso READ_USERS
-          </Button>
-        </div>
-      )}
 
       <SearchContainer>
         <SearchWrapper>
@@ -537,7 +530,7 @@ const UserList: React.FC<UserListProps> = ({ onEdit, onView, onAdd }) => {
         <div>Cargando usuarios...</div>
       ) : isError ? (
         <div>Error al cargar usuarios</div>
-      ) : data?.users && data.users.length > 0 ? (
+      ) : userData && userData.users && userData.users.length > 0 ? (
         <>
           <Table>
             <TableHead>
@@ -556,19 +549,19 @@ const UserList: React.FC<UserListProps> = ({ onEdit, onView, onAdd }) => {
           <VirtualTableContainer>
             <VirtualTableStyles>
               <VirtualList
-                items={data.users}
+                items={userData.users}
                 height={500}
                 estimateSize={60}
                 renderItem={renderUserRow}
                 overscan={5}
-                itemKey={(index) => data.users[index]?.id || index}
+                itemKey={(index) => userData.users[index]?.id || index}
               />
             </VirtualTableStyles>
           </VirtualTableContainer>
 
           <Pagination
-            currentPage={data.currentPage}
-            totalPages={data.totalPages}
+            currentPage={userData.currentPage}
+            totalPages={userData.totalPages}
             onPageChange={handlePageChange}
           />
         </>
@@ -593,7 +586,7 @@ const UserList: React.FC<UserListProps> = ({ onEdit, onView, onAdd }) => {
           setShowDeleteConfirm(false);
           setUserToDelete(null);
         }}
-        isDanger
+        type="danger"
       />
     </Container>
   );

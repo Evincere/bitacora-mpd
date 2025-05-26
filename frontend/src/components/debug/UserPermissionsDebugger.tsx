@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import tokenService from '@/core/utils/tokenService';
 import { getUser } from '@/core/utils/auth';
 import apiClient from '@/core/api/apiClient';
+import permissionChecker from '@/utils/permissionChecker';
+import tokenDebugger from '@/utils/tokenDebugger';
+import { addReadUsersPermission } from '@/utils/addReadUsersPermission';
 
 const Container = styled.div`
   padding: 20px;
@@ -119,13 +122,75 @@ const UserPermissionsDebugger: React.FC = () => {
     }
   };
 
+  const testUsersList = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      console.log('Probando acceso a /api/users?page=0&size=10');
+      const response = await apiClient.get('users?page=0&size=10');
+      console.log('Respuesta de /api/users:', response);
+      setAuthMeResponse(response);
+      alert('Acceso exitoso a la lista de usuarios');
+    } catch (err: any) {
+      console.error('Error al acceder a la lista de usuarios:', err);
+      setError(err.message || 'Error al acceder a la lista de usuarios');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addPermission = () => {
+    if (addReadUsersPermission()) {
+      alert('Permiso READ_USERS añadido correctamente');
+      // Recargar la información del token
+      const token = tokenService.getToken();
+      if (token) {
+        try {
+          const decoded = tokenService.decodeToken(token);
+          setDecodedToken(decoded);
+        } catch (err) {
+          console.error('Error al decodificar token:', err);
+          setError('Error al decodificar token');
+        }
+      }
+    } else {
+      alert('No se pudo añadir el permiso READ_USERS');
+    }
+  };
+
+  const logPermissions = () => {
+    console.group('Depuración de permisos');
+    console.log('Token actual:', tokenService.getToken());
+    console.log('Permisos del usuario:');
+    permissionChecker.logUserPermissions();
+    console.log('Tiene permiso READ_USERS:', permissionChecker.hasPermission('READ_USERS'));
+    console.log('Tiene rol ADMIN:', permissionChecker.hasRole('ADMIN'));
+    console.groupEnd();
+    alert('Permisos registrados en la consola');
+  };
+
   return (
     <Container>
       <Title>Depurador de Permisos de Usuario</Title>
 
-      <Button onClick={fetchAuthMe} disabled={loading}>
-        {loading ? 'Cargando...' : 'Obtener información del usuario (/users/me)'}
-      </Button>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <Button onClick={fetchAuthMe} disabled={loading}>
+          {loading ? 'Cargando...' : 'Obtener información del usuario (/users/me)'}
+        </Button>
+
+        <Button onClick={testUsersList} disabled={loading}>
+          {loading ? 'Cargando...' : 'Probar acceso a lista de usuarios'}
+        </Button>
+
+        <Button onClick={addPermission} disabled={loading} style={{ backgroundColor: '#4caf50' }}>
+          Añadir permiso READ_USERS
+        </Button>
+
+        <Button onClick={logPermissions} disabled={loading} style={{ backgroundColor: '#ff9800' }}>
+          Depurar permisos en consola
+        </Button>
+      </div>
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
 
@@ -196,10 +261,56 @@ const UserPermissionsDebugger: React.FC = () => {
 
       {authMeResponse && (
         <Section>
-          <SectionTitle>Respuesta de /users/me</SectionTitle>
+          <SectionTitle>Respuesta del Servidor</SectionTitle>
           <pre>{JSON.stringify(authMeResponse, null, 2)}</pre>
         </Section>
       )}
+
+      <Section>
+        <SectionTitle>Verificación de Permisos Críticos</SectionTitle>
+        <InfoItem>
+          <Label>READ_USERS:</Label>
+          <Value style={{ color: permissionChecker.hasPermission('READ_USERS') ? 'green' : 'red' }}>
+            {permissionChecker.hasPermission('READ_USERS') ? '✅ SÍ' : '❌ NO'}
+          </Value>
+        </InfoItem>
+        <InfoItem>
+          <Label>ROLE_ADMIN:</Label>
+          <Value style={{ color: permissionChecker.hasPermission('ROLE_ADMIN') ? 'green' : 'red' }}>
+            {permissionChecker.hasPermission('ROLE_ADMIN') ? '✅ SÍ' : '❌ NO'}
+          </Value>
+        </InfoItem>
+        <InfoItem>
+          <Label>ROLE_ASIGNADOR:</Label>
+          <Value style={{ color: permissionChecker.hasPermission('ROLE_ASIGNADOR') ? 'green' : 'red' }}>
+            {permissionChecker.hasPermission('ROLE_ASIGNADOR') ? '✅ SÍ' : '❌ NO'}
+          </Value>
+        </InfoItem>
+        <InfoItem>
+          <Label>ROLE_SUPERVISOR:</Label>
+          <Value style={{ color: permissionChecker.hasPermission('ROLE_SUPERVISOR') ? 'green' : 'red' }}>
+            {permissionChecker.hasPermission('ROLE_SUPERVISOR') ? '✅ SÍ' : '❌ NO'}
+          </Value>
+        </InfoItem>
+      </Section>
+
+      <Section>
+        <SectionTitle>Información de Depuración</SectionTitle>
+        <InfoItem>
+          <Label>Token en localStorage:</Label>
+          <Value>{localStorage.getItem('bitacora_token') ? '✅ Presente' : '❌ No encontrado'}</Value>
+        </InfoItem>
+        <InfoItem>
+          <Label>Usuario en localStorage:</Label>
+          <Value>{localStorage.getItem('bitacora_user') ? '✅ Presente' : '❌ No encontrado'}</Value>
+        </InfoItem>
+        <InfoItem>
+          <Label>Autenticado según tokenService:</Label>
+          <Value style={{ color: tokenService.isAuthenticated() ? 'green' : 'red' }}>
+            {tokenService.isAuthenticated() ? '✅ SÍ' : '❌ NO'}
+          </Value>
+        </InfoItem>
+      </Section>
     </Container>
   );
 };

@@ -8,7 +8,7 @@ interface RootState {
   };
   ui: any;
 }
-import { useToast } from '../components/ui/Toast';
+import { useToast } from '@/shared/components/ui/Toast/ToastProvider';
 import { websocketService, useWebSocket } from '../services/websocketService';
 import {
   RealTimeNotification,
@@ -19,7 +19,7 @@ import {
   AnnouncementNotification,
   CollaborationNotification,
   isNotificationType
-} from '../types/notifications';
+} from '@/core/types/notifications';
 import { UserStatusEvent, SessionActivityEvent, SystemAlertEvent } from '../services/websocketService';
 
 // Interfaz para el contexto

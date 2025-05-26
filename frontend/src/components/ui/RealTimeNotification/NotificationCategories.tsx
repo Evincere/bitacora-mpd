@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FiInbox, FiClock, FiAlertCircle, FiMessageSquare, FiUsers, FiFilter } from 'react-icons/fi';
-import { RealTimeNotification, NotificationType, isNotificationType } from '../../../types/notifications';
+import { RealTimeNotification, NotificationType, isNotificationType } from '@/core/types/notifications';
 
 // Categorías de notificaciones
 enum NotificationCategory {

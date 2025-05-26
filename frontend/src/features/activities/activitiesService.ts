@@ -5,24 +5,12 @@ import {
   ActivityUpdateRequest,
   ApiError
 } from '@/types/api';
-import { Activity } from '@/types/models';
+import { Activity } from '@/core/types/models';
 import { apiRequest } from '@/utils/api-ky';
-import { formatDateForBackend } from '@/utils/dateUtils';
+import { formatDateForBackend } from '@/core/utils/dateUtils';
 
-// Asegurarse de que la URL no incluya el prefijo /app
+// URL base para el API de actividades
 const API_URL = 'activities';
-
-// Nota: No incluimos '/api/' porque ya está en la configuración base de la API
-
-// Mostrar información sobre el modo de servicio
-console.log(`Servicio de actividades configurado en modo real`);
-console.log(`API URL: ${API_URL}`);
-
-// Verificar si estamos en modo de desarrollo
-const isDevelopment = import.meta.env.DEV;
-if (isDevelopment) {
-  console.log('Modo de desarrollo activo - Proxy configurado para redirigir /api a http://localhost:8080');
-}
 
 // Caché para evitar peticiones duplicadas
 const requestCache = new Map();
@@ -154,11 +142,8 @@ const getActivities = async (params?: ActivityQueryParams): Promise<ActivitiesRe
       console.error('Error de conexión con el servidor');
     }
 
-    // Crear una respuesta vacía en caso de error
-    return {
-      activities: [],
-      totalCount: 0
-    };
+    // Propagar el error para que se maneje en el componente
+    throw error;
   }
 };
 

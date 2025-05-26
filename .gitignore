@@ -122,6 +122,15 @@ logs/
 # Archivos específicos del proyecto
 /data/
 /uploads/
+backend/uploads/
+
+# Archivos de configuración sensibles
+.env
+.env.local
+.env.production
+.env.staging
+**/.env
+**/.env.*
 
 # Credenciales de servicios en la nube
 # Google Cloud Platform

@@ -22,7 +22,6 @@ import {
 } from 'react-icons/fi';
 
 import ConnectedUsers from '@/components/ui/Collaboration/ConnectedUsers';
-import ActivityNotifications from '@/components/ui/Notifications/ActivityNotifications';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -35,7 +34,7 @@ import useTareas from '../hooks/useTareas';
 
 // Componentes
 import CommentSection from '@/features/comentarios/components/CommentSection';
-import { Activity } from '@/types/models';
+import { Activity } from '@/core/types/models';
 
 // Estilos
 const PageContainer = styled.div`
@@ -924,9 +923,6 @@ const DetalleTarea: React.FC = () => {
       <SidePanel>
         {/* Componente para mostrar los usuarios conectados */}
         <ConnectedUsers refreshInterval={30000} />
-
-        {/* Componente para mostrar las notificaciones de actividad */}
-        <ActivityNotifications maxItems={5} />
       </SidePanel>
 
 

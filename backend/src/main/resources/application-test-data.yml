@@ -1,0 +1,148 @@
+# Configuración de datos iniciales para testing
+# Datos específicos para pruebas automatizadas
+bitacora:
+  initial-data:
+    enabled: true
+    profile: test
+    
+    users:
+      password-defaults:
+        admin: TestAdmin@123
+        user: TestUser@123
+        test: test123
+      
+      list:
+        # Usuario administrador para tests
+        - username: test-admin
+          password: TestAdmin@123
+          email: test-admin@test.com
+          firstName: Test
+          lastName: Admin
+          role: ADMIN
+          position: Test Administrator
+          department: Testing
+          active: true
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            - DELETE_ACTIVITIES
+            - READ_USERS
+            - WRITE_USERS
+            - DELETE_USERS
+            - GENERATE_REPORTS
+
+        # Usuario regular para tests
+        - username: test-user
+          password: TestUser@123
+          email: test-user@test.com
+          firstName: Test
+          lastName: User
+          role: USUARIO
+          position: Test User
+          department: Testing
+          active: true
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+
+        # Usuario asignador para tests
+        - username: test-asignador
+          password: TestUser@123
+          email: test-asignador@test.com
+          firstName: Test
+          lastName: Asignador
+          role: ASIGNADOR
+          position: Test Coordinator
+          department: Testing
+          active: true
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            - READ_USERS
+
+        # Usuario ejecutor para tests
+        - username: test-ejecutor
+          password: TestUser@123
+          email: test-ejecutor@test.com
+          firstName: Test
+          lastName: Ejecutor
+          role: EJECUTOR
+          position: Test Executor
+          department: Testing
+          active: true
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+
+        # Usuario solicitante para tests
+        - username: test-solicitante
+          password: TestUser@123
+          email: test-solicitante@test.com
+          firstName: Test
+          lastName: Solicitante
+          role: SOLICITANTE
+          position: Test Requester
+          department: Testing
+          active: true
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+
+        # Usuario inactivo para tests
+        - username: test-inactive
+          password: TestUser@123
+          email: test-inactive@test.com
+          firstName: Test
+          lastName: Inactive
+          role: USUARIO
+          position: Inactive User
+          department: Testing
+          active: false
+          permissions:
+            - READ_ACTIVITIES
+
+    activities:
+      enabled: true
+      count: 3
+      list:
+        # Actividad completada para tests
+        - type: TEST_COMPLETED
+          description: Actividad de prueba completada
+          person: Test Person 1
+          role: Test Role
+          dependency: Test Department
+          situation: Test situation completed
+          result: Test result successful
+          status: COMPLETADA
+          comments: Test activity completed successfully
+          agent: Test Agent 1
+          assignedUsername: test-user
+          daysOffset: -1
+
+        # Actividad en progreso para tests
+        - type: TEST_IN_PROGRESS
+          description: Actividad de prueba en progreso
+          person: Test Person 2
+          role: Test Role
+          dependency: Test Department
+          situation: Test situation in progress
+          result: null
+          status: EN_PROGRESO
+          comments: Test activity in progress
+          agent: Test Agent 2
+          assignedUsername: test-ejecutor
+          daysOffset: 0
+
+        # Actividad pendiente para tests
+        - type: TEST_PENDING
+          description: Actividad de prueba pendiente
+          person: Test Person 3
+          role: Test Role
+          dependency: Test Department
+          situation: Test situation pending
+          result: null
+          status: PENDIENTE
+          comments: Test activity pending
+          agent: Test Agent 3
+          assignedUsername: test-asignador
+          daysOffset: 1

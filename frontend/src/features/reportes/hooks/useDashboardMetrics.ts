@@ -15,44 +15,52 @@ export const useDashboardMetrics = () => {
 
 /**
  * Hook para obtener métricas de estado de tareas
+ * @param startDate Fecha de inicio (opcional)
+ * @param endDate Fecha de fin (opcional)
  */
-export const useTaskStatusMetrics = () => {
+export const useTaskStatusMetrics = (startDate?: string, endDate?: string) => {
   return useQuery({
-    queryKey: ['taskStatusMetrics'],
-    queryFn: () => dashboardService.getTaskStatusMetrics(),
+    queryKey: ['taskStatusMetrics', startDate, endDate],
+    queryFn: () => dashboardService.getTaskStatusMetrics(startDate, endDate),
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 };
 
 /**
  * Hook para obtener métricas de actividad de usuarios
+ * @param startDate Fecha de inicio (opcional)
+ * @param endDate Fecha de fin (opcional)
  */
-export const useUserActivityMetrics = () => {
+export const useUserActivityMetrics = (startDate?: string, endDate?: string) => {
   return useQuery({
-    queryKey: ['userActivityMetrics'],
-    queryFn: () => dashboardService.getUserActivityMetrics(),
+    queryKey: ['userActivityMetrics', startDate, endDate],
+    queryFn: () => dashboardService.getUserActivityMetrics(startDate, endDate),
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 };
 
 /**
  * Hook para obtener distribución de categorías
+ * @param startDate Fecha de inicio (opcional)
+ * @param endDate Fecha de fin (opcional)
  */
-export const useCategoryDistribution = () => {
+export const useCategoryDistribution = (startDate?: string, endDate?: string) => {
   return useQuery({
-    queryKey: ['categoryDistribution'],
-    queryFn: () => dashboardService.getCategoryDistribution(),
+    queryKey: ['categoryDistribution', startDate, endDate],
+    queryFn: () => dashboardService.getCategoryDistribution(startDate, endDate),
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 };
 
 /**
  * Hook para obtener distribución de prioridades
+ * @param startDate Fecha de inicio (opcional)
+ * @param endDate Fecha de fin (opcional)
  */
-export const usePriorityDistribution = () => {
+export const usePriorityDistribution = (startDate?: string, endDate?: string) => {
   return useQuery({
-    queryKey: ['priorityDistribution'],
-    queryFn: () => dashboardService.getPriorityDistribution(),
+    queryKey: ['priorityDistribution', startDate, endDate],
+    queryFn: () => dashboardService.getPriorityDistribution(startDate, endDate),
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 };

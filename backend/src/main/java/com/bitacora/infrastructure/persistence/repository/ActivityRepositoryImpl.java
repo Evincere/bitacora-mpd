@@ -85,8 +85,7 @@ public class ActivityRepositoryImpl implements ActivityRepository {
         // Crear una especificación para buscar actividades con requesterId específico
         // y con estado REQUESTED (para diferenciar solicitudes de actividades
         // regulares)
-        Specification<ActivityEntity> spec = Specification.where(
-                (root, query, cb) -> cb.equal(root.get("requesterId"), requesterId));
+        Specification<ActivityEntity> spec = (root, query, cb) -> cb.equal(root.get("requesterId"), requesterId);
 
         return activityJpaRepository.findAll(spec, pageable)
                 .stream()
@@ -144,8 +143,7 @@ public class ActivityRepositoryImpl implements ActivityRepository {
         // Crear una especificación para contar actividades con requesterId específico
         // y con estado REQUESTED (para diferenciar solicitudes de actividades
         // regulares)
-        Specification<ActivityEntity> spec = Specification.where(
-                (root, query, cb) -> cb.equal(root.get("requesterId"), requesterId));
+        Specification<ActivityEntity> spec = (root, query, cb) -> cb.equal(root.get("requesterId"), requesterId);
 
         return activityJpaRepository.count(spec);
     }
@@ -199,10 +197,10 @@ public class ActivityRepositoryImpl implements ActivityRepository {
      * @return Una especificación JPA
      */
     private Specification<ActivityEntity> buildSpecificationFromFilters(Map<String, Object> filters) {
-        Specification<ActivityEntity> spec = Specification.where(null);
+        Specification<ActivityEntity> spec = null;
 
         if (filters == null || filters.isEmpty()) {
-            return spec;
+            return (root, query, cb) -> cb.conjunction();
         }
 
         // Log para depuración
@@ -210,25 +208,29 @@ public class ActivityRepositoryImpl implements ActivityRepository {
 
         if (filters.containsKey("type")) {
             String type = (String) filters.get("type");
-            spec = spec.and(ActivitySpecifications.hasType(type));
+            Specification<ActivityEntity> typeSpec = ActivitySpecifications.hasType(type);
+            spec = spec == null ? typeSpec : spec.and(typeSpec);
             System.out.println("Aplicando filtro por tipo: " + type);
         }
 
         if (filters.containsKey("status")) {
             String status = (String) filters.get("status");
-            spec = spec.and(ActivitySpecifications.hasStatus(status));
+            Specification<ActivityEntity> statusSpec = ActivitySpecifications.hasStatus(status);
+            spec = spec == null ? statusSpec : spec.and(statusSpec);
             System.out.println("Aplicando filtro por estado: " + status);
         }
 
         if (filters.containsKey("userId")) {
             Long userId = Long.valueOf(filters.get("userId").toString());
-            spec = spec.and(ActivitySpecifications.belongsToUser(userId));
+            Specification<ActivityEntity> userSpec = ActivitySpecifications.belongsToUser(userId);
+            spec = spec == null ? userSpec : spec.and(userSpec);
             System.out.println("Aplicando filtro por userId: " + userId);
         }
 
         if (filters.containsKey("executorId")) {
             Long executorId = Long.valueOf(filters.get("executorId").toString());
-            spec = spec.and(ActivitySpecifications.hasExecutor(executorId));
+            Specification<ActivityEntity> executorSpec = ActivitySpecifications.hasExecutor(executorId);
+            spec = spec == null ? executorSpec : spec.and(executorSpec);
             System.out.println("Aplicando filtro por executorId: " + executorId);
         }
 
@@ -236,15 +238,17 @@ public class ActivityRepositoryImpl implements ActivityRepository {
             LocalDateTime startDate = filters.containsKey("startDate") ? (LocalDateTime) filters.get("startDate")
                     : null;
             LocalDateTime endDate = filters.containsKey("endDate") ? (LocalDateTime) filters.get("endDate") : null;
-            spec = spec.and(ActivitySpecifications.dateIsBetween(startDate, endDate));
+            Specification<ActivityEntity> dateSpec = ActivitySpecifications.dateIsBetween(startDate, endDate);
+            spec = spec == null ? dateSpec : spec.and(dateSpec);
         }
 
         if (filters.containsKey("search")) {
             String search = (String) filters.get("search");
-            spec = spec.and(ActivitySpecifications.containsText(search));
+            Specification<ActivityEntity> searchSpec = ActivitySpecifications.containsText(search);
+            spec = spec == null ? searchSpec : spec.and(searchSpec);
         }
 
-        return spec;
+        return spec != null ? spec : (root, query, cb) -> cb.conjunction();
     }
 
     @Override

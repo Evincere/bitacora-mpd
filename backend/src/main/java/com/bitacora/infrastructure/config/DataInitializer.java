@@ -22,17 +22,26 @@ import java.util.Set;
 /**
  * Clase para inicializar datos de prueba en la aplicación.
  *
- * NOTA: Esta clase está deshabilitada por defecto ya que los datos de prueba
- * ahora se inicializan mediante migraciones de Flyway. Se mantiene como
- * mecanismo
- * de respaldo y solo se activa con el perfil "data-init".
+ * ⚠️ OBSOLETO: Esta clase contiene datos hardcodeados y está marcada como
+ * obsoleta.
  *
+ * Se recomienda usar:
+ * 1. ConfigurableDataInitializer con perfil "configurable-data-init" para datos
+ * configurables
+ * 2. Migraciones de Flyway para datos persistentes
+ *
+ * Esta clase se mantiene solo para compatibilidad hacia atrás y se activará
+ * únicamente con el perfil "legacy-data-init".
+ *
+ * @deprecated Usar ConfigurableDataInitializer en su lugar
+ * @see ConfigurableDataInitializer
  * @see backend/README-DATA-INITIALIZATION.md para más información.
  */
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-@Profile("data-init") // Solo se activa con el perfil "data-init"
+@Profile("legacy-data-init") // Cambiado a perfil legacy
+@Deprecated(since = "2024-12", forRemoval = true)
 public class DataInitializer {
 
     private final UserRepository userRepository;
@@ -41,15 +50,17 @@ public class DataInitializer {
     /**
      * Inicializa datos de prueba al arrancar la aplicación.
      *
+     * @deprecated Usar ConfigurableDataInitializer en su lugar
      * @return Un CommandLineRunner que se ejecuta al inicio
      */
     @Bean
+    @Deprecated(since = "2024-12", forRemoval = true)
     public CommandLineRunner initData() {
         return args -> {
-            log.info("Inicializando datos de prueba mediante DataInitializer (perfil 'data-init' activo)...");
-            log.warn(
-                    "NOTA: Este mecanismo está obsoleto. Se recomienda usar las migraciones de Flyway para inicializar datos.");
-            log.warn("Ver backend/README-DATA-INITIALIZATION.md para más información.");
+            log.warn("⚠️ ADVERTENCIA: Usando DataInitializer OBSOLETO (perfil 'legacy-data-init' activo)");
+            log.warn("⚠️ Este mecanismo contiene datos hardcodeados y será eliminado en futuras versiones");
+            log.warn("⚠️ Se recomienda migrar a ConfigurableDataInitializer con perfil 'configurable-data-init'");
+            log.warn("⚠️ Ver documentación en backend/README-DATA-INITIALIZATION.md para más información");
 
             // Crear un usuario de prueba con una contraseña conocida
             // Primero eliminamos el usuario si ya existe

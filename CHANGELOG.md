@@ -2,10 +2,375 @@
 
 ## [Unreleased]
 
+### Eliminación de Sistemas Mock - Sprint 24 (2024-12-06)
+
+#### Fase 1: Sistema de Actividades Mock - Día 1 ✅ COMPLETADO
+- **Eliminados archivos mock del sistema de actividades**
+  - Eliminado `frontend/src/features/activities/mockService.js` (373 líneas de código simulado)
+  - Eliminado `frontend/src/features/activities/mockService.d.ts` (45 líneas de definiciones TypeScript)
+  - Eliminado `frontend/src/features/activities/mockData.js` (208 líneas de datos de ejemplo)
+
+- **Actualizado activitiesService.ts para usar solo API real**
+  - Eliminada lógica de detección de mock data
+  - Simplificado manejo de errores para propagar errores al componente
+  - Removidos fallbacks a datos simulados
+  - Limpiado código de logging innecesario
+
+- **Simplificado Activities.tsx removiendo lógica de mock data**
+  - Eliminada variable de estado `usingMockData`
+  - Removido efecto para detectar datos simulados
+  - Eliminado banner de mock data (`MockDataBanner`)
+  - Limpiadas referencias a localStorage de mock data
+  - Removida importación de `MockDataBanner`
+
+- **Actualizada documentación README-ACTIVITIES.md**
+  - Eliminadas referencias a `VITE_USE_MOCK_DATA`
+  - Removida sección "Servicio simulado"
+  - Actualizado flujo de datos para reflejar solo uso de API real
+  - Corregidas secciones de troubleshooting
+  - Simplificada configuración de variables de entorno
+
+#### Día 2: Datos Hardcodeados en Componentes ✅ COMPLETADO
+- **Eliminado MOCK_SOLICITUDES de MisSolicitudes.tsx**
+  - Eliminadas 76 líneas de datos simulados de solicitudes
+  - Actualizada lógica para usar solo datos reales de la API
+  - Mejorado comentario para clarificar el uso de datos reales
+
+- **Eliminado MOCK_TAREAS de DashboardEjecutor.tsx**
+  - Eliminadas 75 líneas de datos simulados de tareas
+  - Actualizada lógica para usar arrays vacíos como fallback
+  - Removidos fallbacks a datos mock en favor de arrays vacíos
+
+- **Eliminado MOCK_METRICAS de MetricasAsignacion.tsx**
+  - Eliminadas 46 líneas de datos simulados de métricas
+  - Implementado sistema de estados vacíos apropiados
+  - Creado componente EmptyState para mejor UX
+  - Añadida lógica condicional para mostrar contenido solo cuando hay datos
+  - Implementados mensajes informativos específicos para cada sección
+
+- **Implementados estados vacíos apropiados**
+  - Estados vacíos informativos en lugar de datos simulados
+  - Mensajes claros sobre por qué no hay datos disponibles
+  - Guías para el usuario sobre cómo generar datos reales
+  - Mejor experiencia de usuario en aplicaciones sin datos iniciales
+
+#### Día 3: Servicios de Reportes y Dashboard Mock ✅ COMPLETADO
+- **Eliminados datos de ejemplo de customReportService.ts**
+  - Eliminadas 186 líneas de campos disponibles simulados
+  - Eliminadas 27 líneas de datos de ejemplo en executeReport
+  - Eliminadas 44 líneas de reportes guardados simulados
+  - Eliminadas 65 líneas de plantillas de reportes simuladas
+  - Eliminadas 40 líneas de reportes programados simulados
+  - Eliminadas 5 líneas de blob de ejemplo en exportReport
+  - Total: 367 líneas de datos mock eliminadas
+
+- **Eliminadas métricas simuladas de dashboardService.ts**
+  - Eliminadas 18 líneas de timeline metrics simuladas
+  - Eliminadas 20 líneas de performance metrics simuladas
+  - Implementados endpoints reales para métricas de timeline y performance
+  - Total: 38 líneas de datos mock eliminadas
+
+- **Eliminadas plantillas simuladas de notificationConfigService.ts**
+  - Eliminadas 3 líneas de canales predefinidos como fallback
+  - Eliminadas 35 líneas de tipos de notificación predefinidos
+  - Eliminadas 13 líneas de preferencias predefinidas como fallback
+  - Eliminadas 23 líneas de plantillas predefinidas como fallback
+  - Total: 74 líneas de datos mock eliminadas
+
+- **Implementado manejo de errores apropiado**
+  - Todos los servicios ahora propagan errores correctamente
+  - Eliminados fallbacks a datos simulados
+  - Mejor experiencia de error para el usuario final
+
+#### Día 4-5: Google Drive y Calendar Mock ✅ COMPLETADO
+- **Evaluado estado de implementación real de Google APIs**
+  - ✅ Identificados servicios reales existentes: `RealDriveIntegrationService`, `RealCalendarIntegrationService`, `GoogleAuthService`
+  - ✅ Identificados servicios mock: `MockDriveIntegrationService`, `MockCalendarIntegrationService`
+  - ✅ Evaluada arquitectura actual de integraciones
+
+- **Reemplazados mock services con servicios "no implementado"**
+  - ✅ Convertido `MockDriveIntegrationService` a `NotImplementedDriveIntegrationService`
+  - ✅ Convertido `MockCalendarIntegrationService` a `NotImplementedCalendarIntegrationService`
+  - ✅ Eliminadas 95 líneas de datos mock de Google Drive
+  - ✅ Eliminadas 67 líneas de datos mock de Google Calendar
+  - ✅ Implementados mensajes descriptivos de funcionalidad no disponible
+  - ✅ Todos los métodos ahora lanzan errores informativos en lugar de simular datos
+
+- **Actualizada UI para mostrar estado "próximamente"**
+  - ✅ Creado componente `ComingSoonBanner` para indicar funcionalidades futuras
+  - ✅ Agregados banners informativos en `ConfiguracionIntegraciones.tsx`
+  - ✅ Actualizadas funciones de manejo para mostrar mensajes informativos
+  - ✅ Simplificada lógica de carga de estado de autenticación
+  - ✅ Removidas importaciones de servicios reales no utilizados
+
+- **Documentado como funcionalidad futura**
+  - ✅ Creado `frontend/INTEGRACIONES-FUTURAS.md` con documentación completa
+  - ✅ Documentado estado actual y funcionalidades planificadas
+  - ✅ Incluidas instrucciones para migración futura
+  - ✅ Listados archivos relacionados y próximos pasos
+
+#### Día 6: Alertas de Seguridad y Notificaciones ✅ COMPLETADO
+- **Eliminado mockNotifications de SecurityAlertNotifications.tsx**
+  - ✅ Eliminadas 54 líneas de datos mock de notificaciones de seguridad
+  - ✅ Implementada carga real desde API con manejo de errores apropiado
+  - ✅ Mejorado estado vacío con mensaje informativo descriptivo
+  - ✅ Simplificada lógica de carga de notificaciones
+
+- **Eliminado socket simulado de RealTimeNotificationContext.tsx**
+  - ✅ Eliminadas 79 líneas de lógica de socket simulado
+  - ✅ Simplificada lógica de desarrollo vs producción
+  - ✅ Mejorada configuración de WebSocket con reconexión automática
+  - ✅ Implementado manejo robusto de errores de conexión
+  - ✅ Eliminada duplicación de código para cargar notificaciones
+
+- **Eliminados datos mock de securityAlertService.ts**
+  - ✅ Eliminadas 298 líneas de datos mock de alertas de seguridad
+  - ✅ Todos los métodos ahora propagan errores correctamente
+  - ✅ Eliminados fallbacks a datos simulados en todos los métodos
+  - ✅ Mejor manejo de errores en getAlerts, getAlertById, updateAlertStatus
+  - ✅ Limpiados métodos getAlertRules, createAlertRule, updateAlertRule, deleteAlertRule, getAlertStatistics
+
+- **Mejorados estados vacíos de notificaciones**
+  - ✅ Actualizado RealTimeNotificationCenter con mensajes más informativos
+  - ✅ Mejorado EnhancedNotificationList con descripción de funcionalidad
+  - ✅ Actualizado NotificacionesPanel con contexto adicional
+  - ✅ Agregados subtextos explicativos en todos los estados vacíos
+
+#### Día 7: DataInitializer y Datos de Prueba ✅ COMPLETADO
+- **Eliminados datos hardcodeados del DataInitializer**
+  - ✅ Marcado DataInitializer.java como obsoleto con @Deprecated
+  - ✅ Cambiado perfil de activación a 'legacy-data-init'
+  - ✅ Agregadas advertencias sobre obsolescencia en logs
+  - ✅ Mantenido para compatibilidad hacia atrás
+
+- **Implementada carga desde archivos de configuración**
+  - ✅ Creado InitialDataConfig.java para mapear configuraciones YAML
+  - ✅ Implementado ConfigurableDataInitializer.java como reemplazo
+  - ✅ Soporte para variables de entorno en contraseñas
+  - ✅ Configuración flexible por ambiente (dev, test, prod)
+  - ✅ Validación de permisos y roles automática
+
+- **Creado sistema de configuración flexible**
+  - ✅ application-configurable-data.yml - Configuración base
+  - ✅ application-dev-data.yml - Datos completos para desarrollo
+  - ✅ application-test-data.yml - Datos específicos para testing
+  - ✅ application-prod-data.yml - Datos mínimos para producción
+  - ✅ Soporte para usuarios, roles, permisos y actividades configurables
+  - ✅ Resolución automática de variables de entorno
+
+- **Documentado configuraciones disponibles**
+  - ✅ Creado CONFIGURABLE-DATA-INITIALIZATION.md con documentación completa
+  - ✅ Actualizado README-DATA-INITIALIZATION.md con nuevo sistema
+  - ✅ Documentadas variables de entorno soportadas
+  - ✅ Incluidos ejemplos de configuración por ambiente
+  - ✅ Guía de migración desde sistema anterior
+  - ✅ Troubleshooting y buenas prácticas de seguridad
+
+#### Día 8: Limpieza Final y Testing ✅ COMPLETADO
+- **Simplificado Query Provider eliminando fallbacks específicos**
+  - ✅ Eliminadas 99 líneas de lógica compleja de fallbacks en QueryProvider.jsx
+  - ✅ Removido interceptor de fetch con respuestas simuladas
+  - ✅ Simplificada configuración a solo React Query sin lógica mock
+  - ✅ Eliminada duplicación de QueryClient en main.tsx
+  - ✅ Actualizado main.tsx para usar QueryProvider centralizado
+
+- **Eliminadas referencias a VITE_USE_MOCK_DATA**
+  - ✅ Removido componente MockDataBanner.tsx obsoleto
+  - ✅ Eliminado archivo vite.config.js duplicado
+  - ✅ Marcado queryClient.ts como obsoleto con @deprecated
+  - ✅ Simplificada configuración de QueryClient duplicada
+
+- **Actualizada documentación obsoleta**
+  - ✅ Limpiadas configuraciones duplicadas en archivos de configuración
+  - ✅ Removidas referencias obsoletas a sistemas mock
+  - ✅ Actualizada documentación de configuración
+
+- **Testing integral de todos los módulos**
+  - ✅ Creado script test-no-mocks.sh para verificación integral
+  - ✅ Creado script test-no-mocks.bat para Windows
+  - ✅ Verificación automática de ausencia de datos mock
+  - ✅ Testing de frontend y backend sin dependencias simuladas
+  - ✅ Validación de configuraciones de datos iniciales
+  - ✅ Verificación de documentación actualizada
+
+#### Auditoría Final de Seguridad y Producción ✅ COMPLETADO
+- **Corregidas configuraciones críticas de seguridad**
+  - ✅ Eliminado JWT secret hardcodeado de application.yml y JwtTokenFactory.java
+  - ✅ Removidas URLs de desarrollo de configuración CORS
+  - ✅ Deshabilitadas configuraciones peligrosas (bean overriding, circular references)
+  - ✅ Configurados logs apropiados para producción (INFO/WARN)
+  - ✅ Corregida configuración insegura en docker-compose.yml
+
+- **Eliminados archivos y configuraciones problemáticas**
+  - ✅ Removido directorio backend/uploads/ del repositorio
+  - ✅ Eliminado archivo queryClient.ts obsoleto
+  - ✅ Actualizado .gitignore para mayor seguridad
+  - ✅ Agregadas exclusiones para archivos .env y uploads
+
+- **Creada documentación de seguridad**
+  - ✅ Creado SECURITY-PRODUCTION-CHECKLIST.md con configuraciones críticas
+  - ✅ Documentadas variables de entorno obligatorias
+  - ✅ Incluidas verificaciones de seguridad y mejores prácticas
+  - ✅ Creado script security-check.sh para verificación automática
+
+- **Verificaciones de seguridad implementadas**
+  - ✅ Script automatizado para detectar configuraciones inseguras
+  - ✅ Verificación de secrets hardcodeados
+  - ✅ Validación de configuraciones de producción
+  - ✅ Detección de archivos sensibles en el repositorio
+
+#### Beneficios de la eliminación y mejoras
+- ✅ **Código más limpio**: Eliminadas 1,994 líneas de código mock innecesario (626 + 197 + 479 + 162 + 431 + 99)
+- ✅ **Mejor manejo de errores**: Los errores de API se propagan correctamente al componente
+- ✅ **Preparación para producción**: Sin dependencias de datos simulados
+- ✅ **Documentación actualizada**: README refleja el estado real del sistema
+- ✅ **Menor complejidad**: Lógica simplificada sin bifurcaciones mock/real
+- ✅ **Estados vacíos apropiados**: Mejor UX cuando no hay datos disponibles
+- ✅ **Servicios más robustos**: Manejo de errores consistente en todos los servicios
+- ✅ **Transparencia con usuarios**: Mensajes claros sobre funcionalidades futuras
+- ✅ **Arquitectura preparada**: UI y servicios listos para implementación real
+- ✅ **Configuración flexible**: Datos iniciales configurables por ambiente sin recompilación
+- ✅ **Seguridad mejorada**: Contraseñas desde variables de entorno, sin datos hardcodeados
+- ✅ **Mantenimiento simplificado**: Cambios de configuración sin tocar código fuente
+- ✅ **Ambientes específicos**: Configuraciones optimizadas para dev, test y producción
+- ✅ **Seguridad de producción**: Eliminados secrets hardcodeados y configuraciones inseguras
+- ✅ **Verificación automática**: Scripts de seguridad para validar configuraciones
+- ✅ **Documentación de seguridad**: Checklist completo para despliegue seguro
+
+### Added
+- **Dashboard de Métricas y Análisis**: Implementación completa del sistema de dashboard con métricas en tiempo real
+  - Implementado servicio de métricas del dashboard (`DashboardMetricsService`)
+  - Creados DTOs para métricas: `TaskStatusMetricsDto`, `UserActivityMetricsDto`, `SystemPerformanceMetricsDto`
+  - Implementado controlador REST para dashboard (`DashboardController`)
+  - Configurados endpoints de API para métricas:
+    - `GET /api/dashboard/task-status-metrics` - Métricas de estado de tareas
+    - `GET /api/dashboard/user-activity-metrics` - Métricas de actividad de usuarios
+    - `GET /api/dashboard/system-performance-metrics` - Métricas de rendimiento del sistema
+  - Creadas vistas de base de datos para métricas (V26)
+  - Creada tabla `dashboard_metrics` para almacenar métricas (V27, V27.1)
+
+### Fixed
+- **Backend**: Corregido error de compilación en `DashboardMetricsService.getActiveUsers()` - ahora pasa el parámetro `LocalDateTime` requerido
+- **Backend**: Migradas anotaciones de validación de `javax.validation.constraints` a `jakarta.validation.constraints` para compatibilidad con Spring Boot 3.x
+- **Backend**: Eliminado campo `objectMapper` no utilizado en `DashboardControllerTest` y su import correspondiente
+- **Backend**: Corregida sintaxis H2 en migración V27.1 - índices declarados fuera de CREATE TABLE para compatibilidad
+- **Frontend**: Configuración completa de testing con Vitest, jsdom y React Testing Library
+- **Frontend**: Implementadas 48 pruebas unitarias, de integración y E2E para el dashboard administrativo
+
+### Infrastructure
+- **Sistema**: Configuración y inicio exitoso del backend en puerto 8080
+- **Sistema**: Configuración y inicio exitoso del frontend en puerto 3001
+- **Base de datos**: H2 en memoria configurada y funcionando correctamente
+- **Migraciones**: 29 migraciones aplicadas exitosamente
+- **API REST**: 126 endpoints mapeados correctamente
+- **WebSockets**: Configurados y funcionando
+- **Consola H2**: Disponible en `/h2-console`
+
 ### Próximas Mejoras (Sprint 25)
-- Implementación de nuevas funcionalidades
+- Implementación del frontend del dashboard con visualizaciones
+- Integración con librerías de gráficos (Chart.js, D3.js, etc.)
+- Implementación de filtros temporales para métricas
 
 ### Cambios Recientes
+- Consolidación y limpieza de definiciones duplicadas en el frontend
+  - Corregidas importaciones incorrectas que usaban `@/types/models` en lugar de `@/core/types/models`
+  - Consolidado el componente `PresenceIndicator` eliminando la versión duplicada en `shared/components/ui/Collaboration/`
+  - Unificado el sistema de componentes `Skeleton` consolidando las versiones duplicadas
+  - Eliminados sistemas de notificaciones duplicados (`Notification/`, `Notifications/`, `RealTimeNotification/`)
+  - Eliminado el archivo `types/models.ts` obsoleto después de migrar todo a `core/types/models.ts`
+  - Actualizado `types/index.ts` para exportar desde `@/core/types/models`
+  - **CORREGIDO**: Error de sintaxis "The requested module '/src/shared/components/ui/Toast/index.ts' does not provide an export named 'ToastType'"
+    - Eliminada definición duplicada de `ToastType` en `core/types/models.ts`
+    - Actualizada importación en `core/hooks/useToast.tsx` para usar la fuente unificada
+    - Corregida sintaxis de exportación de tipos en `shared/components/ui/Toast/index.ts`
+
+### Auditoría de Duplicaciones Identificadas y Corregidas ✅
+- **TIPOS DUPLICADOS ELIMINADOS**:
+  - ✅ Eliminada definición duplicada de `Notification` en `core/types/models.ts`
+  - ✅ Eliminado archivo `utils/enumTranslations.js` (conflicto JavaScript/TypeScript)
+- **COMPONENTES DUPLICADOS CONSOLIDADOS**:
+  - ✅ `Loader`: Eliminadas 2 versiones duplicadas, mantenida versión en `shared/components/common/`
+  - ✅ `ConfirmDialog`: Eliminadas 2 versiones duplicadas, mantenida versión en `shared/components/common/`
+  - ✅ `NotFound`: Eliminadas 2 versiones duplicadas, mantenida versión en `shared/components/ui/`
+- **UTILIDADES DUPLICADAS CONSOLIDADAS**:
+  - ✅ `dateUtils`: Eliminada versión duplicada, consolidada en `core/utils/dateUtils.ts`
+  - ✅ Agregada función `formatDateForBackend` a la versión principal
+- **SISTEMAS DUPLICADOS ELIMINADOS**:
+  - ✅ Eliminados directorios obsoletos `Notification/` y `Notifications/`
+  - ✅ Mantenidos solo `RealTimeNotification/` y `Toast/` como sistemas unificados
+- **IMPORTACIONES ACTUALIZADAS**: 20+ archivos actualizados para usar rutas consistentes
+  - **CORREGIDO ADICIONAL**: Error de sintaxis "The requested module '/src/shared/components/ui/Toast/Toast.types.ts' does not provide an export named 'ToastType'"
+    - Corregidas importaciones incorrectas de `useToast` en 6+ archivos adicionales
+    - Actualizadas rutas de importación para usar `@/shared/components/ui/Toast/ToastProvider`
+    - Resueltos conflictos de importación en `AuthEventsListener.tsx`, `Header.tsx`, `ActivityForm.tsx`, `SaveTemplateDialog.tsx`, `TemplateManager.tsx`, `TemplateSelector.tsx`, `RealTimeNotificationContext.tsx`
+    - **CORREGIDO FINAL**: Errores de TypeScript con `isolatedModules` en re-exportación de tipos
+      - Cambiada sintaxis de `export { ... }` a `export type { ... }` para tipos en `shared/components/ui/Toast/index.ts`
+      - Resueltos 7 errores de TypeScript relacionados con re-exportación de tipos
+      - Mejorada compatibilidad con configuración `isolatedModules` de TypeScript
+    - **CORREGIDO HOOKS**: Errores de importación de `useToastContext` inexistente
+      - Corregidos hooks `useCategories.ts` y `useGeneralConfig.ts` en features/configuracion
+      - Reemplazadas todas las referencias de `useToastContext` por `useToast`
+      - Actualizadas llamadas de `showSuccess`/`showError` por `toast.success`/`toast.error`
+      - Eliminadas 15+ referencias a hooks inexistentes
+  - Mejorada la estructura de archivos eliminando duplicaciones y manteniendo solo las implementaciones más completas
+  - Corregidos archivos que importaban desde rutas obsoletas: `useActivityTemplates.ts`, `mockService.d.ts`, `activitiesService.ts`, `solicitudesService.ts`, `ActualizarProgreso.tsx`, `DetalleTarea.tsx`
+  - Creado componente `SkeletonComponents.tsx` con componentes específicos para actividades, usuarios, tablas y formularios
+  - Migrado archivo `types/notifications.ts` a `core/types/notifications.ts` para mantener consistencia
+  - Corregidas importaciones de tipos de notificaciones en `RealTimeNotificationContext.tsx`, `NotificationCategories.tsx`, `NotificationItem.tsx`, `NotificationPreferences.tsx`, `RealTimeNotificationCenter.tsx`
+  - Eliminado uso del componente `ActivityNotifications` obsoleto en `DetalleTarea.tsx`
+  - Corregidas importaciones incorrectas de `useToast` en componentes de actividades: `ActivityForm.tsx`, `TemplateManager.tsx`, `SaveTemplateDialog.tsx`, `TemplateSelector.tsx`
+  - Corregidas importaciones incorrectas de `useToast` en componentes de autenticación y layout: `AuthEventsListener.tsx`, `Header.tsx` (ambas versiones)
+  - Unificado el sistema de importaciones de `useToast` para usar `@/shared/components/ui/Toast` como fuente única
+  - Resuelto problema de dependencias circulares en el sistema de Toast definiendo tipos directamente en `Toast.types.ts`
+  - Corregido archivo de redirección `components/ui/Toast/index.ts` para exportar todos los tipos desde la implementación unificada
+  - Corregida sintaxis de exportación de tipos en `shared/components/ui/Toast/index.ts` usando `export { type ... }`
+  - Actualizado el sistema de exportaciones para mantener compatibilidad con el código existente
+
+- Actualización de dependencias
+  - Actualizado Spring Boot de 3.2.3 a 3.5.0
+  - Actualizado springdoc-openapi de 2.3.0 a 2.5.0
+  - Actualizado JJWT de 0.11.5 a 0.12.5
+    - Adaptado el código para usar la nueva API de JJWT
+    - Reemplazado `parserBuilder()` por `parser()`
+    - Reemplazado `setSigningKey()` por `verifyWith()`
+    - Reemplazado `parseClaimsJws()` por `parseSignedClaims()`
+    - Reemplazado `getBody()` por `getPayload()`
+    - Actualizado el método de construcción de tokens con la nueva API
+  - Corregidas advertencias de deprecación:
+    - Reemplazado el uso obsoleto de `Specification.where()` en `ActivityRepositoryImpl`
+    - Reemplazado el uso obsoleto de `Specification.where()` en `CustomUserAuditLogRepository`
+    - Reemplazado el uso obsoleto de `Specification.where()` en `ActivitySpecifications`
+    - Eliminado el uso obsoleto de `MockBean` en `ActivityControllerTest`
+    - Eliminado el uso obsoleto de `MockBean` en `ActivityWorkflowControllerTest`
+    - Eliminado el uso obsoleto de `MockBean` en `TaskRequestControllerIntegrationTest`
+    - Reemplazada la configuración obsoleta de Actuator en `ActuatorConfig`
+    - Eliminado el campo no utilizado `updateTaskRequestUseCase` en `TaskRequestControllerIntegrationTest`
+
+- Reconstrucción completa del mecanismo de seguridad
+  - Creado nuevo filtro `SimpleJwtAuthFilter` para autenticación JWT simplificada
+  - Creado nuevo filtro `SimplePermissionsFilter` para verificación de permisos
+  - Reemplazada la cadena de filtros compleja por una implementación más directa
+  - Configurados los filtros en el orden correcto: primero autenticación, luego autorización
+  - Eliminados los componentes obsoletos de la implementación anterior:
+    - `BlacklistCheckHandler.java`
+    - `JwtValidationHandler.java`
+    - `PermissionsHandler.java`
+    - `SecurityFilterHandler.java`
+    - `SecurityFilterChainConfig.java`
+  - Limpieza de logs de depuración y código auxiliar
+  - Eliminado el depurador de permisos de la interfaz de usuario
+  - Eliminados los botones de depuración de la pantalla de usuarios
+  - Añadidas anotaciones `@NonNull` a los parámetros de los métodos `doFilterInternal` en los filtros de seguridad
+
+- Corrección del problema de permisos en el endpoint `/api/users`
+  - Corregido error lógico en `PermissionsHandler.java` que combinaba incorrectamente la verificación de READ_USERS y WRITE_USERS
+  - Implementada lógica separada para operaciones de lectura y escritura:
+    - GET: Permite acceso con READ_USERS o roles ADMIN/ASIGNADOR/SUPERVISOR
+    - POST/PUT/DELETE: Requiere WRITE_USERS o rol ADMIN
+  - Añadidos logs detallados para facilitar la depuración de problemas de permisos
+  - Corregido el error 403 Forbidden al acceder a la lista de usuarios con el permiso READ_USERS
+  - Añadidos logs de advertencia detallados antes de denegar el acceso
+
 - Corrección de error de importación en componentes que usan ConfirmDialog
   - Creado archivo de exportación para el componente ConfirmDialog en `components/ui/Dialog/index.ts`
   - Corregida la importación en `UserList.tsx` y `CategoriasList.tsx`

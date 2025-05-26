@@ -154,22 +154,9 @@ export interface Pagination {
   totalPages: number;
 }
 
-/**
- * Interfaz para las notificaciones
- */
-export interface Notification {
-  id: string;
-  type: 'success' | 'error' | 'info' | 'warning';
-  title: string;
-  message: string;
-  duration?: number;
-  createdAt: number;
-}
+// La interfaz Notification se ha movido a @/core/types/notifications.ts como RealTimeNotification
 
-/**
- * Tipo para las notificaciones toast
- */
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
+// Los tipos ToastType y ToastNotification ahora se importan desde @/shared/components/ui/Toast/Toast.types
 
 /**
  * Interfaz para las notificaciones en tiempo real

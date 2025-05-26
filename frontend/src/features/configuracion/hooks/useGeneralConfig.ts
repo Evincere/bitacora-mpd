@@ -5,7 +5,7 @@ import generalConfigService, {
   SecurityConfig,
   EmailConfig
 } from '../services/generalConfigService';
-import { useToastContext } from '@/components/ui';
+import { useToast } from '@/shared/components/ui/Toast/ToastProvider';
 
 /**
  * Hook para obtener la configuración general del sistema
@@ -23,17 +23,17 @@ export const useGeneralConfig = () => {
  */
 export const useUpdatePerformanceConfig = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (config: PerformanceConfig) => generalConfigService.updatePerformanceConfig(config),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['generalConfig'] });
-      showSuccess('Configuración de rendimiento actualizada correctamente');
+      toast.success('Configuración de rendimiento actualizada correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al actualizar configuración de rendimiento: ${error.message}`);
+      toast.error(`Error al actualizar configuración de rendimiento: ${error.message}`);
       throw error;
     },
   });
@@ -44,17 +44,17 @@ export const useUpdatePerformanceConfig = () => {
  */
 export const useUpdateSecurityConfig = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (config: SecurityConfig) => generalConfigService.updateSecurityConfig(config),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['generalConfig'] });
-      showSuccess('Configuración de seguridad actualizada correctamente');
+      toast.success('Configuración de seguridad actualizada correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al actualizar configuración de seguridad: ${error.message}`);
+      toast.error(`Error al actualizar configuración de seguridad: ${error.message}`);
       throw error;
     },
   });
@@ -65,17 +65,17 @@ export const useUpdateSecurityConfig = () => {
  */
 export const useUpdateEmailConfig = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (config: EmailConfig) => generalConfigService.updateEmailConfig(config),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['generalConfig'] });
-      showSuccess('Configuración de correo electrónico actualizada correctamente');
+      toast.success('Configuración de correo electrónico actualizada correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al actualizar configuración de correo electrónico: ${error.message}`);
+      toast.error(`Error al actualizar configuración de correo electrónico: ${error.message}`);
       throw error;
     },
   });
@@ -86,18 +86,18 @@ export const useUpdateEmailConfig = () => {
  */
 export const useUpdateMaintenanceConfig = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
-    mutationFn: (config: { enabled: boolean; message: string; plannedEndTime: string | null }) => 
+    mutationFn: (config: { enabled: boolean; message: string; plannedEndTime: string | null }) =>
       generalConfigService.updateMaintenanceConfig(config),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['generalConfig'] });
-      showSuccess('Configuración de mantenimiento actualizada correctamente');
+      toast.success('Configuración de mantenimiento actualizada correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al actualizar configuración de mantenimiento: ${error.message}`);
+      toast.error(`Error al actualizar configuración de mantenimiento: ${error.message}`);
       throw error;
     },
   });
@@ -108,17 +108,17 @@ export const useUpdateMaintenanceConfig = () => {
  */
 export const useUpdateFeaturesConfig = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (features: { [key: string]: boolean }) => generalConfigService.updateFeaturesConfig(features),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['generalConfig'] });
-      showSuccess('Configuración de características actualizada correctamente');
+      toast.success('Configuración de características actualizada correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al actualizar configuración de características: ${error.message}`);
+      toast.error(`Error al actualizar configuración de características: ${error.message}`);
       throw error;
     },
   });
@@ -128,20 +128,20 @@ export const useUpdateFeaturesConfig = () => {
  * Hook para probar la configuración de correo electrónico
  */
 export const useTestEmailConfig = () => {
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (email: string) => generalConfigService.testEmailConfig(email),
     onSuccess: (data) => {
       if (data.success) {
-        showSuccess(`Prueba de correo electrónico exitosa: ${data.message}`);
+        toast.success(`Prueba de correo electrónico exitosa: ${data.message}`);
       } else {
-        showError(`Error en la prueba de correo electrónico: ${data.message}`);
+        toast.error(`Error en la prueba de correo electrónico: ${data.message}`);
       }
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al probar configuración de correo electrónico: ${error.message}`);
+      toast.error(`Error al probar configuración de correo electrónico: ${error.message}`);
       throw error;
     },
   });
@@ -152,7 +152,7 @@ export const useTestEmailConfig = () => {
  */
 export const useClearCache = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: () => generalConfigService.clearCache(),
@@ -160,14 +160,14 @@ export const useClearCache = () => {
       if (data.success) {
         // Invalidar todas las consultas para refrescar los datos
         queryClient.invalidateQueries();
-        showSuccess(`Caché limpiada correctamente: ${data.message}`);
+        toast.success(`Caché limpiada correctamente: ${data.message}`);
       } else {
-        showError(`Error al limpiar la caché: ${data.message}`);
+        toast.error(`Error al limpiar la caché: ${data.message}`);
       }
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al limpiar la caché: ${error.message}`);
+      toast.error(`Error al limpiar la caché: ${error.message}`);
       throw error;
     },
   });

@@ -11,6 +11,7 @@ import ApiTester from '@/components/debug/ApiTester';
 import ApiConfigTester from '@/components/debug/ApiConfigTester';
 import MultiEndpointTester from '@/components/debug/MultiEndpointTester';
 import AuthTester from '@/components/debug/AuthTester';
+import UserPermissionsDebugger from '@/components/debug/UserPermissionsDebugger';
 
 const PageContainer = styled.div`
   padding: 24px;
@@ -257,6 +258,14 @@ const PermissionsDebugPage: React.FC = () => {
               Añadir permiso EXECUTE_ACTIVITIES
             </ActionButton>
           )}
+        </DebugSection>
+
+        <DebugSection>
+          <SectionTitle>
+            <FiShield size={20} />
+            Depurador de Permisos de Usuario Mejorado
+          </SectionTitle>
+          <UserPermissionsDebugger />
         </DebugSection>
 
         <DebugSection>

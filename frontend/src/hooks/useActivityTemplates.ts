@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import { ActivityFormData } from '@/features/activities/schemas/activitySchema';
-import { ActivityType, ActivityStatus } from '@/types/models';
+import { ActivityType, ActivityStatus } from '@/core/types/models';
 
 export interface ActivityTemplate {
   id: string;

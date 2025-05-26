@@ -2,7 +2,6 @@ package com.bitacora.infrastructure.rest.controller;
 
 import com.bitacora.application.taskrequest.CreateTaskRequestUseCase;
 import com.bitacora.application.taskrequest.TaskRequestWorkflowService;
-import com.bitacora.application.taskrequest.UpdateTaskRequestUseCase;
 import com.bitacora.application.taskrequest.dto.CreateTaskRequestDto;
 import com.bitacora.application.taskrequest.dto.TaskRequestDto;
 import com.bitacora.application.taskrequest.mapper.TaskRequestMapper;
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -48,16 +46,13 @@ class TaskRequestControllerIntegrationTest {
         @Autowired
         private ObjectMapper objectMapper;
 
-        @MockBean
+        @Autowired
         private CreateTaskRequestUseCase createTaskRequestUseCase;
 
-        @MockBean
-        private UpdateTaskRequestUseCase updateTaskRequestUseCase;
-
-        @MockBean
+        @Autowired
         private TaskRequestWorkflowService taskRequestWorkflowService;
 
-        @MockBean
+        @Autowired
         private TaskRequestMapper taskRequestMapper;
 
         @Test

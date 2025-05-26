@@ -1,22 +1,23 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserForm } from '../components';
-import { PageTransition, useToastContext } from '@/components/ui';
+import { PageTransition } from '@/components/ui';
 import { useCreateUser } from '../hooks/useUsers';
-import { UserCreateDto } from '../services/userService';
+import { UserCreateDto, UserUpdateDto } from '../services/userService';
+import { toast } from 'react-toastify';
 
 const CreateUserPage: React.FC = () => {
   const navigate = useNavigate();
-  const { showSuccess, showError } = useToastContext();
   const createUser = useCreateUser();
 
-  const handleSubmit = async (data: UserCreateDto) => {
+  const handleSubmit = async (data: UserCreateDto | UserUpdateDto) => {
     try {
-      await createUser.mutateAsync(data);
-      showSuccess('Usuario creado correctamente');
+      // Para la página de creación, siempre esperamos UserCreateDto
+      await createUser.mutateAsync(data as UserCreateDto);
+      toast.success('Usuario creado correctamente');
       navigate('/app/admin/usuarios');
     } catch (error) {
-      showError('Error al crear el usuario');
+      toast.error('Error al crear el usuario');
       console.error('Error al crear usuario:', error);
     }
   };
@@ -27,7 +28,7 @@ const CreateUserPage: React.FC = () => {
 
   return (
     <PageTransition>
-      <UserForm 
+      <UserForm
         onSubmit={handleSubmit}
         onCancel={handleCancel}
       />

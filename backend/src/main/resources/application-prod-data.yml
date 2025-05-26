@@ -1,0 +1,88 @@
+# Configuración de datos iniciales para producción
+# Solo datos esenciales, sin usuarios de prueba ni datos de ejemplo
+bitacora:
+  initial-data:
+    enabled: ${INIT_DATA_ENABLED:true}
+    profile: prod
+    
+    users:
+      password-defaults:
+        admin: ${ADMIN_PASSWORD}  # Requerido en producción
+        user: ${USER_PASSWORD:Usuario@123}
+        test: ${TEST_PASSWORD:test123}
+      
+      list:
+        # Solo usuario administrador principal
+        - username: admin
+          password: ${ADMIN_PASSWORD}  # Variable de entorno requerida
+          email: ${ADMIN_EMAIL:admin@empresa.com}
+          firstName: ${ADMIN_FIRST_NAME:Administrador}
+          lastName: ${ADMIN_LAST_NAME:Sistema}
+          role: ADMIN
+          position: ${ADMIN_POSITION:Administrador de Sistema}
+          department: ${ADMIN_DEPARTMENT:Sistemas}
+          active: true
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            - DELETE_ACTIVITIES
+            - READ_USERS
+            - WRITE_USERS
+            - DELETE_USERS
+            - GENERATE_REPORTS
+
+        # Usuario Semper Evincere solo si se especifica
+        - username: semper.evincere
+          password: ${SEMPER_PASSWORD}  # Variable de entorno requerida
+          email: ${SEMPER_EMAIL:semper.evincere@empresa.com}
+          firstName: Semper
+          lastName: Evincere
+          role: ADMIN
+          position: Administrador Principal
+          department: Dirección
+          active: ${SEMPER_ENABLED:true}
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            - DELETE_ACTIVITIES
+            - READ_USERS
+            - WRITE_USERS
+            - DELETE_USERS
+            - GENERATE_REPORTS
+
+    roles:
+      list:
+        - name: ADMIN
+          description: Administrador del sistema con acceso completo
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            - DELETE_ACTIVITIES
+            - READ_USERS
+            - WRITE_USERS
+            - DELETE_USERS
+            - GENERATE_REPORTS
+            
+        - name: ASIGNADOR
+          description: Usuario que puede asignar tareas a ejecutores
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            - READ_USERS
+            
+        - name: EJECUTOR
+          description: Usuario que ejecuta tareas asignadas
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            
+        - name: SOLICITANTE
+          description: Usuario que puede crear solicitudes
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+
+    activities:
+      enabled: false  # Sin datos de ejemplo en producción
+      count: 0
+      list: []

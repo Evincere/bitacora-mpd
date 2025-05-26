@@ -9,7 +9,7 @@ import AdvancedFilters from '../components/AdvancedFilters';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Activity } from '@/types/models';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from '@/components/ui';
 
 const ActivityCalendarPage: React.FC = () => {
   const [filters, setFilters] = useState<any>({});

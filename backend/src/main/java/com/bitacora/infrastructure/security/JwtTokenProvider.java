@@ -11,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -64,11 +65,11 @@ public class JwtTokenProvider {
         Long userId = getUserId(token);
 
         // Obtener claims del token para extraer autoridades
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(tokenFactory.getSigningKey())
+        Claims claims = Jwts.parser()
+                .verifyWith((SecretKey) tokenFactory.getSigningKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
 
         @SuppressWarnings("unchecked")
         List<String> authorities = claims.get("authorities", List.class);

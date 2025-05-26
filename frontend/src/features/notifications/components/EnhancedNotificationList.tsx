@@ -18,21 +18,21 @@ const NotificationListContainer = styled.div`
   max-height: 500px;
   overflow-y: auto;
   padding: 8px 4px;
-  
+
   &::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: ${({ theme }) => theme.backgroundAlt};
     border-radius: 3px;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: ${({ theme }) => theme.border};
     border-radius: 3px;
   }
-  
+
   &::-webkit-scrollbar-thumb:hover {
     background: ${({ theme }) => theme.textSecondary};
   }
@@ -45,13 +45,13 @@ const EmptyState = styled.div`
   justify-content: center;
   padding: 32px 16px;
   text-align: center;
-  
+
   svg {
     font-size: 32px;
     color: ${({ theme }) => theme.textSecondary};
     margin-bottom: 16px;
   }
-  
+
   p {
     color: ${({ theme }) => theme.textSecondary};
     font-size: 14px;
@@ -114,15 +114,18 @@ const formatDate = (timestamp: number) => {
   });
 };
 
-const EnhancedNotificationList: React.FC<EnhancedNotificationListProps> = ({ 
-  notifications, 
-  onNotificationClick 
+const EnhancedNotificationList: React.FC<EnhancedNotificationListProps> = ({
+  notifications,
+  onNotificationClick
 }) => {
   if (notifications.length === 0) {
     return (
       <EmptyState>
         <FiBell />
         <p>No tienes notificaciones</p>
+        <div style={{ fontSize: '12px', opacity: 0.7, marginTop: '8px' }}>
+          Las notificaciones aparecerán aquí cuando ocurran eventos importantes en el sistema
+        </div>
       </EmptyState>
     );
   }
@@ -140,7 +143,7 @@ const EnhancedNotificationList: React.FC<EnhancedNotificationListProps> = ({
             />
           );
         }
-        
+
         if (notification.notificationClass === 'TaskAssignment') {
           return (
             <TaskAssignmentNotification
@@ -150,7 +153,7 @@ const EnhancedNotificationList: React.FC<EnhancedNotificationListProps> = ({
             />
           );
         }
-        
+
         if (notification.notificationClass === 'DeadlineReminder') {
           return (
             <DeadlineReminderNotification
@@ -160,10 +163,10 @@ const EnhancedNotificationList: React.FC<EnhancedNotificationListProps> = ({
             />
           );
         }
-        
+
         // Notificación genérica para otros tipos
         return (
-          <GenericNotification 
+          <GenericNotification
             key={notification.id}
             $read={notification.read || false}
             onClick={() => onNotificationClick(notification.id)}

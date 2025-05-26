@@ -92,6 +92,32 @@
 - [x] Limitado el número máximo de archivos adjuntos por comentario
 - [x] Mejorada la experiencia de usuario con mensajes de error específicos
 
+### Auditoría Completa y Consolidación de Duplicaciones ✅
+- [x] **AUDITORÍA COMPLETA**: Identificación sistemática de duplicaciones en todo el proyecto frontend
+  - [x] Análisis de tipos, interfaces y enums duplicados
+  - [x] Identificación de componentes duplicados en múltiples ubicaciones
+  - [x] Revisión de utilidades y servicios duplicados
+  - [x] Documentación detallada en `DUPLICATIONS_AUDIT.md`
+- [x] **CONSOLIDACIÓN DE TIPOS DUPLICADOS**:
+  - [x] Eliminada definición duplicada de `Notification` en `core/types/models.ts`
+  - [x] Eliminado archivo `utils/enumTranslations.js` (conflicto JavaScript/TypeScript)
+  - [x] Corregido error de sintaxis con `ToastType` en exportaciones
+- [x] **CONSOLIDACIÓN DE COMPONENTES DUPLICADOS**:
+  - [x] `Loader`: Eliminadas 2 versiones duplicadas, mantenida versión en `shared/components/common/`
+  - [x] `ConfirmDialog`: Eliminadas 2 versiones duplicadas, mantenida versión en `shared/components/common/`
+  - [x] `NotFound`: Eliminadas 2 versiones duplicadas, mantenida versión en `shared/components/ui/`
+- [x] **CONSOLIDACIÓN DE UTILIDADES DUPLICADAS**:
+  - [x] `dateUtils`: Eliminada versión duplicada, consolidada en `core/utils/dateUtils.ts`
+  - [x] Agregada función `formatDateForBackend` a la versión principal
+  - [x] Actualizadas 15+ importaciones para usar rutas consistentes
+- [x] **ELIMINACIÓN DE SISTEMAS DUPLICADOS**:
+  - [x] Eliminados directorios obsoletos `Notification/` y `Notifications/`
+  - [x] Mantenidos solo `RealTimeNotification/` y `Toast/` como sistemas unificados
+- [x] **VERIFICACIÓN Y TESTING**:
+  - [x] Verificado que el servidor de desarrollo funciona correctamente
+  - [x] Confirmado que no hay errores de compilación TypeScript
+  - [x] Validado que todas las importaciones usan rutas consistentes
+
 ## Fase 2: Refactorización y Aplicación de Patrones de Diseño
 
 ### Aplicación de Patrones de Diseño en el Backend
@@ -321,6 +347,59 @@ Este sprint se enfocará en la implementación inicial de Apache Kafka en el pro
 **Riesgos:**
 - Rendimiento subóptimo en producción
 - **Mitigación:** Realizar pruebas de carga realistas y ajustar configuración
+
+## Sprint Completado: Dashboard de Métricas y Análisis ✅
+
+### Descripción del Sprint
+Este sprint se enfocó en la implementación completa de un sistema de dashboard con métricas y análisis para el proyecto Bitácora. Se desarrolló tanto el backend como el frontend necesario para visualizar métricas de rendimiento del sistema.
+
+### Tareas Completadas ✅
+- [x] **Análisis y Diseño**
+  - [x] Análisis de requerimientos del dashboard
+  - [x] Diseño de la arquitectura de métricas
+  - [x] Definición de DTOs para métricas del dashboard
+
+- [x] **Implementación del Backend**
+  - [x] Implementación del servicio de métricas del dashboard (`DashboardMetricsService`)
+  - [x] Creación de DTOs para métricas del dashboard (`TaskStatusMetricsDto`, `UserActivityMetricsDto`, `SystemPerformanceMetricsDto`)
+  - [x] Implementación del controlador REST para dashboard (`DashboardController`)
+  - [x] Configuración de endpoints de API para métricas
+  - [x] Creación de vistas de base de datos para métricas (V26)
+  - [x] Implementación de métricas de estado de tareas
+  - [x] Implementación de métricas de actividad de usuarios
+  - [x] Implementación de métricas de rendimiento del sistema
+
+- [x] **Base de Datos y Migraciones**
+  - [x] Creación de tabla `dashboard_metrics` para almacenar métricas (V27)
+  - [x] Corrección de sintaxis H2 para índices (V27.1)
+  - [x] Aplicación exitosa de 29 migraciones
+
+- [x] **Configuración del Sistema**
+  - [x] Configuración y inicio exitoso del backend en puerto 8080
+  - [x] Configuración y inicio exitoso del frontend en puerto 3001
+  - [x] Configuración de base de datos H2 en memoria
+  - [x] Configuración de Flyway para migraciones automáticas
+
+### Estado Final del Sistema 🚀
+- **Backend**: ✅ Ejecutándose correctamente en puerto 8080
+- **Frontend**: ✅ Ejecutándose correctamente en puerto 3001
+- **Base de datos**: ✅ H2 en memoria configurada y funcionando
+- **Migraciones**: ✅ 29 migraciones aplicadas exitosamente
+- **API REST**: ✅ 126 endpoints mapeados correctamente
+- **WebSockets**: ✅ Configurados y funcionando
+- **Consola H2**: ✅ Disponible en `/h2-console`
+
+### Endpoints Implementados
+- `GET /api/dashboard/task-status-metrics` - Métricas de estado de tareas
+- `GET /api/dashboard/user-activity-metrics` - Métricas de actividad de usuarios
+- `GET /api/dashboard/system-performance-metrics` - Métricas de rendimiento del sistema
+
+### Próximos Pasos Sugeridos
+- [ ] Implementación del frontend del dashboard con visualizaciones
+- [ ] Integración con librerías de gráficos (Chart.js, D3.js, etc.)
+- [ ] Implementación de filtros temporales para métricas
+- [ ] Optimización de consultas para grandes volúmenes de datos
+- [ ] Implementación de caché para métricas frecuentemente consultadas
 
 ## Sprint 21: Implementación de Apache Kafka - Seguimiento de Cambios Basado en Eventos
 
@@ -1006,10 +1085,202 @@ Este sprint se enfocó en mejorar y completar las funcionalidades del rol de adm
 - ✅ Implementar integraciones con servicios externos
 - ✅ Crear panel de configuración general con múltiples secciones
 
-### Próximos Objetivos (Sprint 24)
-- Mejorar los dashboards y reportes administrativos
-- Implementar funcionalidades de auditoría y seguimiento
-- Refactorizar el código existente para seguir principios SOLID y patrones de diseño adecuados
+### Próximos Objetivos (Sprint 25)
+- Implementar nuevas funcionalidades solicitadas por los usuarios
+- Mejorar la experiencia de usuario en módulos existentes
+- Optimizar el rendimiento de la aplicación
+- Continuar preparación para producción
+
+---
+
+## 🎯 Sprint 24: Eliminación de Sistemas Mock para Producción (En Progreso)
+
+**Duración**: 9 días
+**Estado**: 🔄 En Progreso
+**Inicio**: 2024-12-06
+**Fin**: 2024-12-18
+
+### Objetivos
+- Eliminar todos los sistemas de datos simulados (mock data) del proyecto
+- Asegurar que la aplicación funcione completamente con APIs reales
+- Preparar el sistema para despliegue en producción sin dependencias de datos simulados
+- Mejorar el manejo de estados vacíos y errores
+
+### Fase 1: Eliminación de Sistemas Críticos (3 días)
+
+#### Día 1: Sistema de Actividades Mock ✅ COMPLETADO
+- [x] Eliminar archivos mock del sistema de actividades
+  - [x] Eliminado `frontend/src/features/activities/mockService.js` (373 líneas)
+  - [x] Eliminado `frontend/src/features/activities/mockService.d.ts` (45 líneas)
+  - [x] Eliminado `frontend/src/features/activities/mockData.js` (208 líneas)
+- [x] Actualizar activitiesService.ts para usar solo API real
+  - [x] Eliminada lógica de detección de mock data
+  - [x] Simplificado manejo de errores para propagar errores al componente
+  - [x] Removidos fallbacks a datos simulados
+- [x] Simplificar Activities.tsx removiendo lógica de mock data
+  - [x] Eliminada variable de estado `usingMockData`
+  - [x] Removido efecto para detectar datos simulados
+  - [x] Eliminado banner de mock data (`MockDataBanner`)
+  - [x] Limpiadas referencias a localStorage de mock data
+- [x] Actualizar documentación README-ACTIVITIES.md
+  - [x] Eliminadas referencias a `VITE_USE_MOCK_DATA`
+  - [x] Removida sección "Servicio simulado"
+  - [x] Actualizado flujo de datos para reflejar solo uso de API real
+
+#### Día 2: Datos Hardcodeados en Componentes ✅ COMPLETADO
+- [x] Eliminar MOCK_SOLICITUDES de MisSolicitudes.tsx
+  - [x] Eliminadas 76 líneas de datos simulados de solicitudes
+  - [x] Actualizada lógica para usar solo datos reales de la API
+  - [x] Mejorado comentario para clarificar el uso de datos reales
+- [x] Eliminar MOCK_TAREAS de DashboardEjecutor.tsx
+  - [x] Eliminadas 75 líneas de datos simulados de tareas
+  - [x] Actualizada lógica para usar arrays vacíos como fallback
+  - [x] Removidos fallbacks a datos mock en favor de arrays vacíos
+- [x] Eliminar MOCK_METRICAS de MetricasAsignacion.tsx
+  - [x] Eliminadas 46 líneas de datos simulados de métricas
+  - [x] Implementado sistema de estados vacíos apropiados
+  - [x] Creado componente EmptyState para mejor UX
+  - [x] Añadida lógica condicional para mostrar contenido solo cuando hay datos
+- [x] Implementar estados vacíos apropiados en todos los componentes
+  - [x] Estados vacíos informativos en lugar de datos simulados
+  - [x] Mensajes claros sobre por qué no hay datos disponibles
+  - [x] Guías para el usuario sobre cómo generar datos reales
+  - [x] Mejor experiencia de usuario en aplicaciones sin datos iniciales
+
+#### Día 3: Servicios de Reportes y Dashboard Mock ✅ COMPLETADO
+- [x] Eliminar datos de ejemplo de customReportService.ts
+  - [x] Eliminadas 186 líneas de campos disponibles simulados
+  - [x] Eliminadas 27 líneas de datos de ejemplo en executeReport
+  - [x] Eliminadas 44 líneas de reportes guardados simulados
+  - [x] Eliminadas 65 líneas de plantillas de reportes simuladas
+  - [x] Eliminadas 40 líneas de reportes programados simulados
+  - [x] Eliminadas 5 líneas de blob de ejemplo en exportReport
+- [x] Eliminar métricas simuladas de dashboardService.ts
+  - [x] Eliminadas 18 líneas de timeline metrics simuladas
+  - [x] Eliminadas 20 líneas de performance metrics simuladas
+  - [x] Implementados endpoints reales para métricas de timeline y performance
+- [x] Eliminar plantillas simuladas de notificationConfigService.ts
+  - [x] Eliminadas 3 líneas de canales predefinidos como fallback
+  - [x] Eliminadas 35 líneas de tipos de notificación predefinidos
+  - [x] Eliminadas 13 líneas de preferencias predefinidas como fallback
+  - [x] Eliminadas 23 líneas de plantillas predefinidas como fallback
+- [x] Implementar manejo de errores apropiado
+  - [x] Todos los servicios ahora propagan errores correctamente
+  - [x] Eliminados fallbacks a datos simulados
+  - [x] Mejor experiencia de error para el usuario final
+
+### Fase 2: Servicios de Integración (3 días)
+
+#### Día 4-5: Google Drive y Calendar Mock ✅ COMPLETADO
+- [x] Evaluar estado de implementación real de Google APIs
+  - [x] Identificados servicios reales existentes: `RealDriveIntegrationService`, `RealCalendarIntegrationService`, `GoogleAuthService`
+  - [x] Identificados servicios mock: `MockDriveIntegrationService`, `MockCalendarIntegrationService`
+  - [x] Evaluada arquitectura actual de integraciones
+- [x] Reemplazar mock services con servicios "no implementado"
+  - [x] Convertido `MockDriveIntegrationService` a `NotImplementedDriveIntegrationService`
+  - [x] Convertido `MockCalendarIntegrationService` a `NotImplementedCalendarIntegrationService`
+  - [x] Eliminadas 95 líneas de datos mock de Google Drive
+  - [x] Eliminadas 67 líneas de datos mock de Google Calendar
+  - [x] Implementados mensajes descriptivos de funcionalidad no disponible
+  - [x] Todos los métodos ahora lanzan errores informativos en lugar de simular datos
+- [x] Actualizar UI para mostrar estado "próximamente"
+  - [x] Creado componente `ComingSoonBanner` para indicar funcionalidades futuras
+  - [x] Agregados banners informativos en `ConfiguracionIntegraciones.tsx`
+  - [x] Actualizadas funciones de manejo para mostrar mensajes informativos
+  - [x] Simplificada lógica de carga de estado de autenticación
+  - [x] Removidas importaciones de servicios reales no utilizados
+- [x] Documentar como funcionalidad futura
+  - [x] Creado `frontend/INTEGRACIONES-FUTURAS.md` con documentación completa
+  - [x] Documentado estado actual y funcionalidades planificadas
+  - [x] Incluidas instrucciones para migración futura
+  - [x] Listados archivos relacionados y próximos pasos
+
+#### Día 6: Alertas de Seguridad y Notificaciones ✅ COMPLETADO
+- [x] Eliminar mockNotifications de SecurityAlertNotifications.tsx
+  - [x] Eliminadas 54 líneas de datos mock de notificaciones de seguridad
+  - [x] Implementada carga real desde API con manejo de errores apropiado
+  - [x] Mejorado estado vacío con mensaje informativo descriptivo
+  - [x] Simplificada lógica de carga de notificaciones
+- [x] Eliminar socket simulado de RealTimeNotificationContext.tsx
+  - [x] Eliminadas 79 líneas de lógica de socket simulado
+  - [x] Simplificada lógica de desarrollo vs producción
+  - [x] Eliminada duplicación de código para cargar notificaciones
+- [x] Implementar manejo robusto de WebSocket real
+  - [x] Mejorada configuración de WebSocket con reconexión automática
+  - [x] Implementado manejo robusto de errores de conexión
+  - [x] Configurado timeout y reintentos apropiados
+- [x] Mejorar estados vacíos de notificaciones
+  - [x] Actualizado RealTimeNotificationCenter con mensajes más informativos
+  - [x] Mejorado EnhancedNotificationList con descripción de funcionalidad
+  - [x] Actualizado NotificacionesPanel con contexto adicional
+  - [x] Agregados subtextos explicativos en todos los estados vacíos
+- [x] Eliminar datos mock de securityAlertService.ts
+  - [x] Eliminadas 298 líneas de datos mock de alertas de seguridad
+  - [x] Todos los métodos ahora propagan errores correctamente
+  - [x] Eliminados fallbacks a datos simulados en todos los métodos
+
+### Fase 3: Backend y Configuraciones (2 días)
+
+#### Día 7: DataInitializer y Datos de Prueba ✅ COMPLETADO
+- [x] Eliminar datos hardcodeados del DataInitializer
+  - [x] Marcado DataInitializer.java como obsoleto con @Deprecated
+  - [x] Cambiado perfil de activación a 'legacy-data-init'
+  - [x] Agregadas advertencias sobre obsolescencia en logs
+  - [x] Mantenido para compatibilidad hacia atrás
+- [x] Implementar carga desde archivos de configuración
+  - [x] Creado InitialDataConfig.java para mapear configuraciones YAML
+  - [x] Implementado ConfigurableDataInitializer.java como reemplazo
+  - [x] Soporte para variables de entorno en contraseñas
+  - [x] Configuración flexible por ambiente (dev, test, prod)
+  - [x] Validación de permisos y roles automática
+- [x] Crear sistema de configuración flexible
+  - [x] application-configurable-data.yml - Configuración base
+  - [x] application-dev-data.yml - Datos completos para desarrollo
+  - [x] application-test-data.yml - Datos específicos para testing
+  - [x] application-prod-data.yml - Datos mínimos para producción
+  - [x] Soporte para usuarios, roles, permisos y actividades configurables
+  - [x] Resolución automática de variables de entorno
+- [x] Documentar configuraciones disponibles
+  - [x] Creado CONFIGURABLE-DATA-INITIALIZATION.md con documentación completa
+  - [x] Actualizado README-DATA-INITIALIZATION.md con nuevo sistema
+  - [x] Documentadas variables de entorno soportadas
+  - [x] Incluidos ejemplos de configuración por ambiente
+  - [x] Guía de migración desde sistema anterior
+  - [x] Troubleshooting y buenas prácticas de seguridad
+
+#### Día 8: Limpieza Final y Testing ✅ COMPLETADO
+- [x] Simplificar Query Provider eliminando fallbacks específicos
+  - [x] Eliminadas 99 líneas de lógica compleja de fallbacks en QueryProvider.jsx
+  - [x] Removido interceptor de fetch con respuestas simuladas
+  - [x] Simplificada configuración a solo React Query sin lógica mock
+  - [x] Eliminada duplicación de QueryClient en main.tsx
+  - [x] Actualizado main.tsx para usar QueryProvider centralizado
+- [x] Eliminar referencias a VITE_USE_MOCK_DATA
+  - [x] Removido componente MockDataBanner.tsx obsoleto
+  - [x] Eliminado archivo vite.config.js duplicado
+  - [x] Marcado queryClient.ts como obsoleto con @deprecated
+  - [x] Simplificada configuración de QueryClient duplicada
+- [x] Actualizar documentación obsoleta
+  - [x] Limpiadas configuraciones duplicadas en archivos de configuración
+  - [x] Removidas referencias obsoletas a sistemas mock
+  - [x] Actualizada documentación de configuración
+- [x] Testing integral de todos los módulos
+  - [x] Creado script test-no-mocks.sh para verificación integral
+  - [x] Creado script test-no-mocks.bat para Windows
+  - [x] Verificación automática de ausencia de datos mock
+  - [x] Testing de frontend y backend sin dependencias simuladas
+  - [x] Validación de configuraciones de datos iniciales
+  - [x] Verificación de documentación actualizada
+
+### Día 9: Validación Final
+- [ ] Testing exhaustivo sin mock data
+- [ ] Verificar manejo de errores en todos los módulos
+- [ ] Confirmar UX apropiada en estados vacíos
+- [ ] Documentar cambios en CHANGELOG.md
+
+---
+
+## Sprint 23: Mejoras Administrativas y Dashboard Avanzado (COMPLETADO)
 
 ### 1. Gestión de Usuarios y Roles (5 días)
 
@@ -3103,6 +3374,26 @@ Este sprint se enfocó en la refactorización y mejora del código existente, co
   - [x] Añadir el componente a la página de depuración de permisos
   - [x] Documentar los cambios realizados en TASKS.md
 
+### 3. Mejoras en el Sistema de Permisos (0.5 días)
+- [x] Modificar el PermissionsHandler para mejorar la verificación de permisos
+  - [x] Añadir verificación específica para el endpoint /api/users
+  - [x] Implementar método de depuración para rastrear los permisos del usuario
+  - [x] Añadir logs detallados para identificar problemas de permisos
+- [x] Implementar solución permanente para el problema de permisos
+  - [x] Revisar y corregir la configuración de seguridad
+  - [x] Restaurar las anotaciones @PreAuthorize con la configuración correcta
+  - [x] Documentar el enfoque de seguridad en el archivo README.md
+
+### 4. Documentación del Sistema de Seguridad (0.5 días)
+- [x] Documentar el enfoque de seguridad en múltiples capas
+  - [x] Explicar la relación entre filtros de seguridad y anotaciones @PreAuthorize
+  - [x] Documentar las rutas protegidas por filtros
+  - [x] Documentar los controladores con protección por anotaciones
+- [ ] Implementar pruebas para verificar el correcto funcionamiento
+  - [ ] Crear pruebas unitarias para el PermissionsHandler
+  - [ ] Crear pruebas de integración para verificar la seguridad en endpoints
+  - [ ] Implementar pruebas automatizadas para verificar permisos
+
 ### Objetivos
 - Corregir errores de compilación y advertencias
 - Mejorar la estructura de clases y paquetes
@@ -3147,3 +3438,1214 @@ Este sprint se enfocó en la refactorización y mejora del código existente, co
 - ✅ La estructura de clases y paquetes sigue las mejores prácticas
 - ✅ El código sigue los principios SOLID
 - ✅ La aplicación compila y funciona correctamente
+
+---
+
+## 🎯 **FASE CRÍTICA: FUNCIONALIDADES ADMINISTRATIVAS PRODUCTION-READY**
+
+### **Objetivo General**
+Llevar la plataforma administrativa del **72% actual** de completitud a un estado **production-ready del 95%** en 10-12 semanas, implementando las funcionalidades backend críticas identificadas en el análisis exhaustivo de implementación.
+
+### **Estimación Total**: 10-12 semanas
+- **Sprint Crítico 25-26**: Backend de Reportes y Métricas (4 semanas)
+- **Sprint Crítico 27-28**: Backend de Configuración del Sistema (3 semanas)
+- **Sprint Medio 29**: Sistema de Alertas de Seguridad Backend (2 semanas)
+- **Sprint Medio 30**: Backend de Diagnóstico del Sistema (2 semanas)
+- **Sprint Avanzado 31**: Integraciones Externas Backend (2 semanas)
+
+---
+
+## Sprint 25: Backend de Reportes y Métricas - Parte 1 (Infraestructura)
+
+### **Descripción del Sprint**
+Implementar la infraestructura backend completa para el sistema de reportes y métricas administrativas, incluyendo endpoints, servicios, agregaciones de base de datos y APIs para dashboards.
+
+### **Objetivos**
+- Implementar endpoints backend para métricas de dashboard
+- Crear servicios de agregación de datos
+- Implementar vistas y consultas optimizadas en base de datos
+- Establecer APIs para reportes básicos
+- Conectar frontend existente con backend real
+
+### **Duración**: 2 semanas (10 días laborables)
+### **Fecha Estimada**: Semana 1-2 de implementación
+### **Recursos**: 1 Desarrollador Backend + 0.5 Desarrollador Frontend
+
+---
+
+### **1. Historia de Usuario: Dashboard Administrativo con Métricas Reales**
+
+**Como** administrador del sistema
+**Quiero** acceder a métricas reales y actualizadas del sistema
+**Para** tomar decisiones informadas sobre la gestión de recursos y rendimiento
+
+#### **Tareas Backend - Endpoints de Métricas (3 días)**
+
+- [x] **Implementar DashboardController** (1 día) ✅ **COMPLETADO**
+  - [x] Crear `@RestController` `/api/admin/dashboard`
+  - [x] Endpoint `GET /metrics/overview` - métricas generales
+  - [x] Endpoint `GET /metrics/task-status` - distribución por estados
+  - [x] Endpoint `GET /metrics/user-activity` - actividad de usuarios
+  - [x] Endpoint `GET /metrics/category-distribution` - distribución por categorías
+  - [x] Endpoint `GET /metrics/priority-distribution` - distribución por prioridades
+  - [x] Implementar validación de parámetros de fecha y filtros
+  - [x] Añadir documentación OpenAPI/Swagger
+
+- [x] **Implementar DashboardService** (1 día) ✅ **COMPLETADO**
+  - [x] Crear servicio `DashboardMetricsService`
+  - [x] Método `getSystemOverview()` - métricas generales del sistema
+  - [x] Método `getTaskStatusMetrics(DateRange)` - métricas de estados de tareas
+  - [x] Método `getUserActivityMetrics(DateRange)` - métricas de actividad de usuarios
+  - [x] Método `getCategoryDistribution(DateRange)` - distribución por categorías
+  - [x] Método `getPriorityDistribution(DateRange)` - distribución por prioridades
+  - [x] Implementar caché con `@Cacheable` para optimizar rendimiento
+
+- [x] **Implementar DTOs y Mappers** (1 día) ✅ **COMPLETADO**
+  - [x] Crear `DashboardMetricsDto` con todas las métricas
+  - [x] Crear `TaskStatusMetricsDto` para distribución de estados
+  - [x] Crear `UserActivityMetricsDto` para actividad de usuarios
+  - [x] Crear `CategoryDistributionDto` para distribución por categorías
+  - [x] Crear `PriorityDistributionDto` para distribución por prioridades
+  - [x] Implementar mappers con MapStruct
+  - [x] Añadir validaciones con Bean Validation
+
+#### **Tareas Backend - Agregaciones de Base de Datos (2 días)**
+
+- [x] **Crear Vistas de Base de Datos** (1 día) ✅ **COMPLETADO**
+  - [x] Vista `v_dashboard_metrics` - métricas generales agregadas
+  - [x] Vista `v_task_status_summary` - resumen por estados
+  - [x] Vista `v_user_activity_summary` - resumen de actividad por usuario
+  - [x] Vista `v_category_metrics` - métricas por categoría
+  - [x] Vista `v_priority_metrics` - métricas por prioridad
+  - [x] Crear migración Flyway `V26__Create_Dashboard_Views.sql`
+
+- [x] **Implementar Repositorios Especializados** (1 día) ✅ **COMPLETADO**
+  - [x] Crear `DashboardMetricsRepository` con consultas nativas
+  - [x] Método `findSystemOverview()` - métricas generales
+  - [x] Método `findTaskStatusDistribution(LocalDateTime, LocalDateTime)`
+  - [x] Método `findUserActivityMetrics(LocalDateTime, LocalDateTime)`
+  - [x] Método `findCategoryDistribution(LocalDateTime, LocalDateTime)`
+  - [x] Método `findPriorityDistribution(LocalDateTime, LocalDateTime)`
+  - [x] Optimizar consultas con índices apropiados
+
+#### **Tareas Frontend - Integración con Backend Real (2 días)**
+
+- [x] **Actualizar Servicios Frontend** (1 día) ✅ **COMPLETADO**
+  - [x] Modificar `dashboardService.ts` para usar endpoints reales
+  - [x] Eliminar datos mock y fallbacks
+  - [x] Implementar manejo de errores específicos
+  - [x] Añadir tipos TypeScript para respuestas del backend
+  - [x] Implementar caché en frontend con React Query
+
+- [x] **Actualizar Hooks y Componentes** (1 día) ✅ **COMPLETADO**
+  - [x] Modificar `useDashboardMetrics` para usar datos reales
+  - [x] Actualizar `AdminDashboard` para manejar estados de carga
+  - [x] Implementar skeleton loaders para mejor UX
+  - [x] Añadir manejo de errores con retry automático
+  - [x] Actualizar tests unitarios
+
+#### **Tareas de Testing y Documentación (3 días)**
+
+- [x] **Implementar Pruebas Backend** (1.5 días) ✅ **COMPLETADO**
+  - [x] Pruebas unitarias para `DashboardController`
+  - [x] Pruebas unitarias para `DashboardMetricsService`
+  - [x] Pruebas de integración para repositorios
+  - [x] Pruebas de rendimiento para consultas agregadas
+  - [x] Pruebas de caché y optimización
+
+- [x] **Implementar Pruebas Frontend** (1 día) ✅ **COMPLETADO**
+  - [x] Pruebas unitarias para servicios actualizados
+  - [x] Pruebas de integración para hooks
+  - [x] Pruebas E2E para dashboard administrativo
+  - [x] Validar que no hay regresiones
+
+- [x] **Documentación** (0.5 días) ✅ **COMPLETADO**
+  - [x] Documentar APIs en Swagger/OpenAPI
+  - [x] Actualizar documentación de arquitectura
+  - [x] Crear guía de métricas para administradores
+  - [x] Documentar consultas de base de datos
+
+### **Criterios de Aceptación**
+
+#### **Funcionales**
+- [ ] El dashboard administrativo muestra métricas reales del sistema
+- [ ] Las métricas se actualizan en tiempo real o con frecuencia configurable
+- [ ] Los filtros de fecha funcionan correctamente
+- [ ] Las consultas tienen un rendimiento aceptable (< 2 segundos)
+- [ ] Los datos son consistentes entre diferentes vistas
+
+#### **Técnicos**
+- [ ] Todos los endpoints están documentados en Swagger
+- [ ] Las consultas están optimizadas con índices apropiados
+- [ ] El sistema de caché funciona correctamente
+- [ ] Cobertura de pruebas > 80%
+- [ ] No hay regresiones en funcionalidad existente
+
+#### **No Funcionales**
+- [ ] Tiempo de respuesta de APIs < 2 segundos
+- [ ] Soporte para al menos 100 usuarios concurrentes
+- [ ] Logs estructurados para monitoreo
+- [ ] Manejo graceful de errores
+
+### **Definición de "Terminado" (DoD)**
+- [ ] ✅ Código revisado y aprobado por al menos 1 desarrollador senior
+- [ ] ✅ Todas las pruebas unitarias e integración pasan
+- [ ] ✅ Documentación API actualizada y completa
+- [ ] ✅ Funcionalidad probada en entorno de staging
+- [ ] ✅ Performance validado con datos de prueba realistas
+- [ ] ✅ Logs y monitoreo configurados
+- [ ] ✅ Migración de base de datos probada y documentada
+
+### **Riesgos Técnicos Identificados**
+
+#### **Alto Riesgo**
+- **Rendimiento de consultas agregadas**: Consultas complejas pueden ser lentas
+  - **Mitigación**: Implementar índices específicos, usar vistas materializadas si es necesario
+- **Volumen de datos**: Agregaciones pueden ser costosas con muchos registros
+  - **Mitigación**: Implementar paginación, caché agresivo, consultas incrementales
+
+#### **Medio Riesgo**
+- **Consistencia de datos**: Métricas pueden no estar sincronizadas
+  - **Mitigación**: Usar transacciones apropiadas, implementar validaciones cruzadas
+- **Caché invalidation**: Datos obsoletos en caché
+  - **Mitigación**: Estrategia de invalidación basada en eventos, TTL apropiado
+
+### **Dependencias**
+- **Prerequisitos**: Sistema de auditoría funcionando (completado)
+- **Dependencias Externas**: Ninguna
+- **Dependencias Internas**: Base de datos con datos suficientes para testing
+
+### **Criterios de Testing**
+
+#### **Pruebas Unitarias**
+- [ ] Cobertura > 80% en servicios y controladores
+- [ ] Mocking apropiado de dependencias
+- [ ] Validación de edge cases
+
+#### **Pruebas de Integración**
+- [ ] Testing de endpoints completos
+- [ ] Validación de consultas de base de datos
+- [ ] Testing de caché y rendimiento
+
+#### **Pruebas E2E**
+- [ ] Flujo completo de dashboard administrativo
+- [ ] Validación de métricas en diferentes escenarios
+- [ ] Testing de filtros y parámetros
+
+---
+
+## Sprint 26: Backend de Reportes y Métricas - Parte 2 (Reportes Avanzados)
+
+### **Descripción del Sprint**
+Implementar el sistema completo de reportes personalizados, incluyendo generación dinámica de reportes, exportación en múltiples formatos, y programación de reportes automáticos.
+
+### **Objetivos**
+- Implementar sistema de reportes personalizados
+- Crear motor de generación de reportes dinámicos
+- Implementar exportación en múltiples formatos (PDF, Excel, CSV)
+- Desarrollar sistema de reportes programados
+- Conectar ReportBuilder frontend con backend
+
+### **Duración**: 2 semanas (10 días laborables)
+### **Fecha Estimada**: Semana 3-4 de implementación
+### **Recursos**: 1 Desarrollador Backend + 0.5 Desarrollador Frontend
+
+---
+
+### **2. Historia de Usuario: Reportes Personalizados Dinámicos**
+
+**Como** administrador del sistema
+**Quiero** crear reportes personalizados con filtros específicos
+**Para** obtener información detallada según mis necesidades de análisis
+
+#### **Tareas Backend - Motor de Reportes (4 días)**
+
+- [ ] **Implementar ReportsController** (1 día)
+  - [ ] Crear `@RestController` `/api/admin/reports`
+  - [ ] Endpoint `POST /custom` - crear reporte personalizado
+  - [ ] Endpoint `GET /custom/{id}` - obtener reporte por ID
+  - [ ] Endpoint `GET /custom` - listar reportes guardados
+  - [ ] Endpoint `DELETE /custom/{id}` - eliminar reporte
+  - [ ] Endpoint `POST /custom/{id}/execute` - ejecutar reporte
+  - [ ] Endpoint `GET /custom/{id}/export/{format}` - exportar reporte
+  - [ ] Implementar validación de parámetros complejos
+
+- [ ] **Implementar ReportService** (1.5 días)
+  - [ ] Crear servicio `CustomReportService`
+  - [ ] Método `createReport(ReportDefinition)` - crear reporte personalizado
+  - [ ] Método `executeReport(reportId, parameters)` - ejecutar reporte
+  - [ ] Método `exportReport(reportId, format)` - exportar en formato específico
+  - [ ] Método `scheduleReport(reportId, schedule)` - programar ejecución
+  - [ ] Implementar motor de consultas dinámicas
+  - [ ] Añadir validación de seguridad para consultas
+
+- [ ] **Implementar Motor de Consultas Dinámicas** (1.5 días)
+  - [ ] Crear `DynamicQueryBuilder` para construir consultas SQL
+  - [ ] Implementar `FilterProcessor` para procesar filtros complejos
+  - [ ] Crear `AggregationProcessor` para agregaciones dinámicas
+  - [ ] Implementar `SecurityQueryValidator` para validar consultas
+  - [ ] Añadir soporte para joins entre entidades
+  - [ ] Implementar caché de consultas frecuentes
+
+#### **Tareas Backend - Exportación de Reportes (3 días)**
+
+- [ ] **Implementar ExportService** (1.5 días)
+  - [ ] Crear servicio `ReportExportService`
+  - [ ] Implementar `PdfExporter` usando iText o similar
+  - [ ] Implementar `ExcelExporter` usando Apache POI
+  - [ ] Implementar `CsvExporter` para exportación CSV
+  - [ ] Crear templates para diferentes formatos
+  - [ ] Implementar compresión para archivos grandes
+
+- [ ] **Implementar Sistema de Templates** (1 día)
+  - [ ] Crear `ReportTemplateService`
+  - [ ] Implementar templates para PDF con logos y estilos
+  - [ ] Crear templates para Excel con formato profesional
+  - [ ] Implementar personalización de templates por usuario
+  - [ ] Añadir soporte para gráficos en exportaciones
+
+- [ ] **Implementar Gestión de Archivos** (0.5 días)
+  - [ ] Crear `ReportFileService` para gestión de archivos generados
+  - [ ] Implementar almacenamiento temporal de reportes
+  - [ ] Crear limpieza automática de archivos antiguos
+  - [ ] Implementar compresión y optimización de archivos
+
+#### **Tareas Backend - Reportes Programados (2 días)**
+
+- [ ] **Implementar ScheduledReportService** (1 día)
+  - [ ] Crear servicio para programación de reportes
+  - [ ] Implementar `@Scheduled` para ejecución automática
+  - [ ] Crear sistema de colas para reportes programados
+  - [ ] Implementar notificaciones por email de reportes completados
+  - [ ] Añadir gestión de errores en reportes programados
+
+- [ ] **Implementar Entidades de Programación** (1 día)
+  - [ ] Crear entidad `ScheduledReport` con configuración de programación
+  - [ ] Crear entidad `ReportExecution` para historial de ejecuciones
+  - [ ] Implementar repositorios especializados
+  - [ ] Crear migración Flyway `V27__Create_Scheduled_Reports.sql`
+
+#### **Tareas Frontend - ReportBuilder Funcional (1 día)**
+
+- [ ] **Conectar ReportBuilder con Backend** (1 día)
+  - [ ] Actualizar `customReportService.ts` para usar endpoints reales
+  - [ ] Implementar `useCustomReports` hook con React Query
+  - [ ] Conectar `ReportBuilder` component con APIs
+  - [ ] Implementar preview de reportes en tiempo real
+  - [ ] Añadir validación de formularios de reportes
+
+### **Criterios de Aceptación**
+
+#### **Funcionales**
+- [ ] Los usuarios pueden crear reportes personalizados con filtros complejos
+- [ ] Los reportes se pueden exportar en PDF, Excel y CSV
+- [ ] Los reportes se pueden programar para ejecución automática
+- [ ] El sistema valida la seguridad de las consultas dinámicas
+- [ ] Los reportes grandes se procesan de manera eficiente
+
+#### **Técnicos**
+- [ ] El motor de consultas dinámicas es seguro contra SQL injection
+- [ ] Los archivos exportados tienen formato profesional
+- [ ] El sistema de programación es confiable
+- [ ] Las consultas complejas tienen rendimiento aceptable
+- [ ] Los archivos temporales se limpian automáticamente
+
+### **Definición de "Terminado" (DoD)**
+- [ ] ✅ Sistema de reportes completamente funcional
+- [ ] ✅ Exportación en todos los formatos requeridos
+- [ ] ✅ Reportes programados funcionando correctamente
+- [ ] ✅ Validación de seguridad implementada y probada
+- [ ] ✅ Documentación completa de APIs y funcionalidades
+- [ ] ✅ Pruebas de rendimiento con reportes complejos
+- [ ] ✅ Frontend completamente integrado con backend
+
+### **Riesgos Técnicos Identificados**
+
+#### **Alto Riesgo**
+- **Seguridad en consultas dinámicas**: Riesgo de SQL injection
+  - **Mitigación**: Validación estricta, whitelist de campos, prepared statements
+- **Rendimiento con reportes complejos**: Consultas muy lentas
+  - **Mitigación**: Límites de tiempo, paginación, optimización de consultas
+
+#### **Medio Riesgo**
+- **Memoria con archivos grandes**: OutOfMemory en exportaciones
+  - **Mitigación**: Streaming de datos, procesamiento por chunks
+- **Concurrencia en reportes programados**: Conflictos de recursos
+  - **Mitigación**: Sistema de colas, locks distribuidos
+
+### **Dependencias**
+- **Prerequisitos**: Sprint 25 completado (infraestructura de métricas)
+- **Dependencias Externas**: Librerías de exportación (iText, Apache POI)
+- **Dependencias Internas**: Sistema de notificaciones funcionando
+
+---
+
+## Sprint 27: Backend de Configuración del Sistema - Parte 1 (Infraestructura)
+
+### **Descripción del Sprint**
+Implementar la infraestructura backend completa para el sistema de configuración del sistema, incluyendo endpoints, servicios, persistencia y APIs para todas las configuraciones administrativas.
+
+### **Objetivos**
+- Implementar endpoints backend para configuración del sistema
+- Crear servicios de gestión de configuraciones
+- Implementar persistencia de configuraciones en base de datos
+- Establecer APIs para configuración general, tareas, notificaciones
+- Conectar frontend existente con backend real
+
+### **Duración**: 1.5 semanas (7 días laborables)
+### **Fecha Estimada**: Semana 5-6 de implementación
+### **Recursos**: 1 Desarrollador Backend + 0.5 Desarrollador Frontend
+
+---
+
+### **3. Historia de Usuario: Configuración Centralizada del Sistema**
+
+**Como** administrador del sistema
+**Quiero** gestionar todas las configuraciones del sistema desde una interfaz centralizada
+**Para** personalizar el comportamiento del sistema según las necesidades organizacionales
+
+#### **Tareas Backend - Infraestructura de Configuración (3 días)**
+
+- [ ] **Implementar SystemConfigController** (1 día)
+  - [ ] Crear `@RestController` `/api/admin/system/config`
+  - [ ] Endpoint `GET /general` - obtener configuración general
+  - [ ] Endpoint `PUT /general` - actualizar configuración general
+  - [ ] Endpoint `GET /performance` - obtener configuración de rendimiento
+  - [ ] Endpoint `PUT /performance` - actualizar configuración de rendimiento
+  - [ ] Endpoint `GET /security` - obtener configuración de seguridad
+  - [ ] Endpoint `PUT /security` - actualizar configuración de seguridad
+  - [ ] Endpoint `GET /email` - obtener configuración de email
+  - [ ] Endpoint `PUT /email` - actualizar configuración de email
+  - [ ] Implementar validación de configuraciones complejas
+
+- [ ] **Implementar SystemConfigService** (1 día)
+  - [ ] Crear servicio `SystemConfigurationService`
+  - [ ] Método `getGeneralConfig()` - obtener configuración general
+  - [ ] Método `updateGeneralConfig(GeneralConfigDto)` - actualizar configuración
+  - [ ] Método `getPerformanceConfig()` - obtener configuración de rendimiento
+  - [ ] Método `updatePerformanceConfig(PerformanceConfigDto)` - actualizar rendimiento
+  - [ ] Método `getSecurityConfig()` - obtener configuración de seguridad
+  - [ ] Método `updateSecurityConfig(SecurityConfigDto)` - actualizar seguridad
+  - [ ] Método `getEmailConfig()` - obtener configuración de email
+  - [ ] Método `updateEmailConfig(EmailConfigDto)` - actualizar email
+  - [ ] Implementar validación de configuraciones y aplicación en tiempo real
+
+- [ ] **Implementar Entidades y Persistencia** (1 día)
+  - [ ] Crear entidad `SystemConfiguration` con tipos de configuración
+  - [ ] Crear entidad `ConfigurationHistory` para auditoría de cambios
+  - [ ] Implementar repositorio `SystemConfigurationRepository`
+  - [ ] Crear migración Flyway `V28__Create_System_Configuration.sql`
+  - [ ] Implementar caché de configuraciones con `@Cacheable`
+  - [ ] Añadir índices para consultas eficientes
+
+#### **Tareas Backend - Configuración de Tareas (2 días)**
+
+- [ ] **Implementar TaskConfigController** (1 día)
+  - [ ] Crear `@RestController` `/api/admin/config/tasks`
+  - [ ] Endpoint `GET /categories` - obtener categorías de tareas
+  - [ ] Endpoint `POST /categories` - crear nueva categoría
+  - [ ] Endpoint `PUT /categories/{id}` - actualizar categoría
+  - [ ] Endpoint `DELETE /categories/{id}` - eliminar categoría
+  - [ ] Endpoint `GET /priorities` - obtener prioridades de tareas
+  - [ ] Endpoint `POST /priorities` - crear nueva prioridad
+  - [ ] Endpoint `PUT /priorities/{id}` - actualizar prioridad
+  - [ ] Endpoint `DELETE /priorities/{id}` - eliminar prioridad
+  - [ ] Endpoint `GET /statuses` - obtener estados de tareas
+  - [ ] Endpoint `POST /statuses` - crear nuevo estado
+  - [ ] Implementar validación de dependencias antes de eliminar
+
+- [ ] **Implementar TaskConfigService** (1 día)
+  - [ ] Crear servicio `TaskConfigurationService`
+  - [ ] Métodos CRUD para categorías de tareas
+  - [ ] Métodos CRUD para prioridades de tareas
+  - [ ] Métodos CRUD para estados de tareas
+  - [ ] Validación de integridad referencial
+  - [ ] Implementar ordenamiento y jerarquías
+  - [ ] Añadir auditoría de cambios en configuraciones
+
+#### **Tareas Backend - Configuración de Notificaciones (2 días)**
+
+- [ ] **Implementar NotificationConfigController** (1 día)
+  - [ ] Crear `@RestController` `/api/admin/config/notifications`
+  - [ ] Endpoint `GET /preferences` - obtener preferencias globales
+  - [ ] Endpoint `PUT /preferences` - actualizar preferencias globales
+  - [ ] Endpoint `GET /templates` - obtener plantillas de notificaciones
+  - [ ] Endpoint `POST /templates` - crear nueva plantilla
+  - [ ] Endpoint `PUT /templates/{id}` - actualizar plantilla
+  - [ ] Endpoint `DELETE /templates/{id}` - eliminar plantilla
+  - [ ] Endpoint `GET /channels` - obtener canales de notificación
+  - [ ] Endpoint `PUT /channels` - configurar canales
+  - [ ] Implementar preview de plantillas
+
+- [ ] **Implementar NotificationConfigService** (1 día)
+  - [ ] Crear servicio `NotificationConfigurationService`
+  - [ ] Gestión de preferencias globales de notificaciones
+  - [ ] CRUD para plantillas de notificaciones
+  - [ ] Configuración de canales (email, app, push)
+  - [ ] Validación de plantillas con variables dinámicas
+  - [ ] Implementar sistema de fallback para plantillas
+  - [ ] Integración con sistema de notificaciones existente
+
+### **Criterios de Aceptación**
+
+#### **Funcionales**
+- [ ] Los administradores pueden configurar todos los aspectos del sistema
+- [ ] Las configuraciones se persisten correctamente en base de datos
+- [ ] Los cambios de configuración se aplican inmediatamente
+- [ ] Existe auditoría completa de cambios de configuración
+- [ ] Las configuraciones tienen validación robusta
+
+#### **Técnicos**
+- [ ] Todas las configuraciones están centralizadas
+- [ ] El sistema de caché funciona correctamente
+- [ ] Las validaciones previenen configuraciones inválidas
+- [ ] Existe rollback para configuraciones problemáticas
+- [ ] Las APIs están completamente documentadas
+
+### **Definición de "Terminado" (DoD)**
+- [ ] ✅ Todas las configuraciones del frontend tienen backend funcional
+- [ ] ✅ Sistema de persistencia y caché implementado
+- [ ] ✅ Validaciones robustas para todas las configuraciones
+- [ ] ✅ Auditoría completa de cambios implementada
+- [ ] ✅ Documentación API completa en Swagger
+- [ ] ✅ Pruebas unitarias e integración > 85%
+- [ ] ✅ Frontend completamente integrado con backend
+
+### **Riesgos Técnicos Identificados**
+
+#### **Alto Riesgo**
+- **Configuraciones inválidas**: Riesgo de romper el sistema
+  - **Mitigación**: Validación estricta, rollback automático, configuraciones por defecto
+- **Caché inconsistente**: Configuraciones obsoletas en caché
+  - **Mitigación**: Invalidación automática, TTL corto para configuraciones críticas
+
+#### **Medio Riesgo**
+- **Concurrencia en actualizaciones**: Conflictos al actualizar configuraciones
+  - **Mitigación**: Locks optimistas, versionado de configuraciones
+- **Migración de configuraciones**: Pérdida de configuraciones existentes
+  - **Mitigación**: Backup automático, migración gradual
+
+### **Dependencias**
+- **Prerequisitos**: Sistema de auditoría funcionando
+- **Dependencias Externas**: Ninguna
+- **Dependencias Internas**: Sistema de caché configurado
+
+---
+
+## Sprint 28: Backend de Configuración del Sistema - Parte 2 (Integraciones)
+
+### **Descripción del Sprint**
+Completar el sistema de configuración implementando la configuración de integraciones externas, mantenimiento del sistema y funcionalidades avanzadas de configuración.
+
+### **Objetivos**
+- Implementar configuración de integraciones externas
+- Crear sistema de mantenimiento y diagnóstico
+- Implementar configuraciones avanzadas y features flags
+- Desarrollar herramientas de backup y restore de configuraciones
+- Finalizar integración completa frontend-backend
+
+### **Duración**: 1.5 semanas (7 días laborables)
+### **Fecha Estimada**: Semana 7-8 de implementación
+### **Recursos**: 1 Desarrollador Backend + 0.5 Desarrollador Frontend
+
+---
+
+### **4. Historia de Usuario: Configuración Avanzada y Mantenimiento**
+
+**Como** administrador del sistema
+**Quiero** configurar integraciones externas y herramientas de mantenimiento
+**Para** optimizar el sistema y mantenerlo funcionando de manera óptima
+
+#### **Tareas Backend - Configuración de Integraciones (2 días)**
+
+- [ ] **Implementar IntegrationConfigController** (1 día)
+  - [ ] Crear `@RestController` `/api/admin/config/integrations`
+  - [ ] Endpoint `GET /` - listar todas las integraciones disponibles
+  - [ ] Endpoint `GET /{id}` - obtener configuración de integración específica
+  - [ ] Endpoint `PUT /{id}` - actualizar configuración de integración
+  - [ ] Endpoint `POST /{id}/test` - probar conexión de integración
+  - [ ] Endpoint `POST /{id}/sync` - sincronizar integración
+  - [ ] Endpoint `GET /{id}/status` - obtener estado de integración
+  - [ ] Implementar validación de credenciales y configuraciones
+
+- [ ] **Implementar IntegrationConfigService** (1 día)
+  - [ ] Crear servicio `IntegrationConfigurationService`
+  - [ ] Gestión de configuraciones de Google Calendar
+  - [ ] Gestión de configuraciones de Google Drive
+  - [ ] Gestión de configuraciones de email/SMTP
+  - [ ] Sistema de prueba de conexiones
+  - [ ] Validación de credenciales OAuth
+  - [ ] Implementar encriptación de credenciales sensibles
+
+#### **Tareas Backend - Sistema de Mantenimiento (2 días)**
+
+- [ ] **Implementar MaintenanceController** (1 día)
+  - [ ] Crear `@RestController` `/api/admin/maintenance`
+  - [ ] Endpoint `GET /status` - estado del sistema
+  - [ ] Endpoint `POST /backup/config` - backup de configuraciones
+  - [ ] Endpoint `POST /restore/config` - restore de configuraciones
+  - [ ] Endpoint `POST /cleanup/temp` - limpiar archivos temporales
+  - [ ] Endpoint `POST /cleanup/logs` - limpiar logs antiguos
+  - [ ] Endpoint `POST /optimize/db` - optimizar base de datos
+  - [ ] Endpoint `GET /health` - health check completo
+
+- [ ] **Implementar MaintenanceService** (1 día)
+  - [ ] Crear servicio `SystemMaintenanceService`
+  - [ ] Implementar backup automático de configuraciones
+  - [ ] Crear herramientas de limpieza de datos obsoletos
+  - [ ] Implementar optimización de base de datos
+  - [ ] Crear sistema de health checks
+  - [ ] Implementar monitoreo de recursos del sistema
+  - [ ] Añadir programación de tareas de mantenimiento
+
+#### **Tareas Backend - Features Flags y Configuraciones Avanzadas (2 días)**
+
+- [ ] **Implementar FeatureFlagsController** (1 día)
+  - [ ] Crear `@RestController` `/api/admin/config/features`
+  - [ ] Endpoint `GET /` - listar todas las features disponibles
+  - [ ] Endpoint `PUT /{feature}` - habilitar/deshabilitar feature
+  - [ ] Endpoint `GET /environment` - obtener configuración de entorno
+  - [ ] Endpoint `PUT /environment` - actualizar configuración de entorno
+  - [ ] Implementar validación de dependencias entre features
+
+- [ ] **Implementar FeatureFlagsService** (1 día)
+  - [ ] Crear servicio `FeatureFlagService`
+  - [ ] Gestión dinámica de features flags
+  - [ ] Validación de dependencias entre features
+  - [ ] Implementar rollout gradual de features
+  - [ ] Crear sistema de A/B testing básico
+  - [ ] Integración con configuraciones de entorno
+
+#### **Tareas Frontend - Integración Completa (1 día)**
+
+- [ ] **Finalizar Integración Frontend** (1 día)
+  - [ ] Actualizar todos los servicios de configuración
+  - [ ] Conectar ConfiguracionIntegraciones con backend real
+  - [ ] Implementar ConfiguracionMantenimiento funcional
+  - [ ] Añadir gestión de features flags en UI
+  - [ ] Implementar herramientas de backup/restore en frontend
+  - [ ] Añadir validación en tiempo real de configuraciones
+
+### **Criterios de Aceptación**
+
+#### **Funcionales**
+- [ ] Los administradores pueden configurar todas las integraciones externas
+- [ ] El sistema de mantenimiento funciona correctamente
+- [ ] Las features flags se pueden gestionar dinámicamente
+- [ ] Existe backup y restore completo de configuraciones
+- [ ] Las herramientas de diagnóstico proporcionan información útil
+
+#### **Técnicos**
+- [ ] Las credenciales sensibles están encriptadas
+- [ ] El sistema de features flags es robusto
+- [ ] Las herramientas de mantenimiento son seguras
+- [ ] Existe monitoreo completo del sistema
+- [ ] Las configuraciones se pueden migrar entre entornos
+
+### **Definición de "Terminado" (DoD)**
+- [ ] ✅ Sistema de configuración completamente funcional
+- [ ] ✅ Todas las integraciones configurables desde UI
+- [ ] ✅ Herramientas de mantenimiento operativas
+- [ ] ✅ Features flags implementadas y funcionales
+- [ ] ✅ Sistema de backup/restore probado
+- [ ] ✅ Documentación completa de administración
+- [ ] ✅ Frontend 100% integrado con backend
+
+### **Riesgos Técnicos Identificados**
+
+#### **Alto Riesgo**
+- **Seguridad de credenciales**: Exposición de credenciales sensibles
+  - **Mitigación**: Encriptación robusta, acceso restringido, auditoría completa
+- **Operaciones de mantenimiento**: Riesgo de corrupción de datos
+  - **Mitigación**: Backup automático antes de operaciones, validación exhaustiva
+
+#### **Medio Riesgo**
+- **Features flags**: Dependencias complejas entre features
+  - **Mitigación**: Validación de dependencias, rollback automático
+- **Configuraciones de entorno**: Inconsistencias entre entornos
+  - **Mitigación**: Validación de configuraciones, templates por entorno
+
+### **Dependencias**
+- **Prerequisitos**: Sprint 27 completado (infraestructura de configuración)
+- **Dependencias Externas**: APIs de Google (Calendar, Drive)
+- **Dependencias Internas**: Sistema de encriptación configurado
+
+---
+
+## Sprint 29: Sistema de Alertas de Seguridad Backend
+
+### **Descripción del Sprint**
+Implementar el sistema completo de alertas de seguridad backend, incluyendo detección automática de actividades sospechosas, gestión de alertas, y herramientas de análisis de seguridad.
+
+### **Objetivos**
+- Implementar detección automática de actividades sospechosas
+- Crear sistema de gestión de alertas de seguridad
+- Desarrollar herramientas de análisis de patrones de seguridad
+- Implementar notificaciones automáticas de alertas críticas
+- Conectar frontend existente con backend funcional
+
+### **Duración**: 2 semanas (10 días laborables)
+### **Fecha Estimada**: Semana 9-10 de implementación
+### **Recursos**: 1 Desarrollador Backend + 0.5 Desarrollador Frontend
+
+---
+
+### **5. Historia de Usuario: Detección Automática de Amenazas**
+
+**Como** administrador de seguridad
+**Quiero** detectar automáticamente actividades sospechosas en el sistema
+**Para** responder rápidamente a posibles amenazas de seguridad
+
+#### **Tareas Backend - Sistema de Detección (4 días)**
+
+- [ ] **Implementar SecurityAlertController** (1 día)
+  - [ ] Crear `@RestController` `/api/admin/security/alerts`
+  - [ ] Endpoint `GET /` - listar alertas de seguridad con filtros
+  - [ ] Endpoint `GET /{id}` - obtener detalles de alerta específica
+  - [ ] Endpoint `PUT /{id}/status` - actualizar estado de alerta
+  - [ ] Endpoint `POST /{id}/resolve` - resolver alerta con comentarios
+  - [ ] Endpoint `GET /statistics` - estadísticas de alertas
+  - [ ] Endpoint `GET /rules` - obtener reglas de detección
+  - [ ] Endpoint `POST /rules` - crear nueva regla de detección
+  - [ ] Endpoint `PUT /rules/{id}` - actualizar regla de detección
+
+- [ ] **Implementar SecurityAlertService** (1.5 días)
+  - [ ] Crear servicio `SecurityAlertService`
+  - [ ] Método `createAlert(SecurityAlertDto)` - crear nueva alerta
+  - [ ] Método `getAlerts(filters)` - obtener alertas con filtros
+  - [ ] Método `updateAlertStatus(id, status)` - actualizar estado
+  - [ ] Método `resolveAlert(id, resolution)` - resolver alerta
+  - [ ] Método `getAlertStatistics(dateRange)` - estadísticas
+  - [ ] Implementar clasificación automática de severidad
+  - [ ] Añadir correlación de alertas relacionadas
+
+- [ ] **Implementar Motor de Detección** (1.5 días)
+  - [ ] Crear servicio `ThreatDetectionService`
+  - [ ] Implementar `LoginAnomalyDetector` - detección de logins anómalos
+  - [ ] Implementar `BruteForceDetector` - detección de ataques de fuerza bruta
+  - [ ] Implementar `PrivilegeEscalationDetector` - detección de escalación de privilegios
+  - [ ] Implementar `DataAccessAnomalyDetector` - acceso anómalo a datos
+  - [ ] Implementar `SessionAnomalyDetector` - sesiones sospechosas
+  - [ ] Crear sistema de reglas configurables
+  - [ ] Implementar machine learning básico para detección de patrones
+
+#### **Tareas Backend - Gestión de Reglas (2 días)**
+
+- [ ] **Implementar SecurityRuleService** (1 día)
+  - [ ] Crear servicio `SecurityRuleService`
+  - [ ] CRUD para reglas de detección personalizadas
+  - [ ] Validación de sintaxis de reglas
+  - [ ] Sistema de activación/desactivación de reglas
+  - [ ] Implementar testing de reglas con datos históricos
+  - [ ] Crear templates de reglas comunes
+
+- [ ] **Implementar Entidades de Seguridad** (1 día)
+  - [ ] Crear entidad `SecurityAlert` con todos los campos necesarios
+  - [ ] Crear entidad `SecurityRule` para reglas de detección
+  - [ ] Crear entidad `AlertResolution` para resoluciones
+  - [ ] Implementar repositorios especializados
+  - [ ] Crear migración Flyway `V29__Create_Security_Alerts.sql`
+  - [ ] Añadir índices para consultas eficientes
+
+#### **Tareas Backend - Análisis y Estadísticas (2 días)**
+
+- [ ] **Implementar SecurityAnalyticsService** (1 día)
+  - [ ] Crear servicio `SecurityAnalyticsService`
+  - [ ] Análisis de tendencias de seguridad
+  - [ ] Detección de patrones de ataque
+  - [ ] Generación de reportes de seguridad
+  - [ ] Implementar scoring de riesgo por usuario
+  - [ ] Crear dashboard de métricas de seguridad
+
+- [ ] **Implementar Notificaciones de Seguridad** (1 día)
+  - [ ] Integrar con sistema de notificaciones existente
+  - [ ] Implementar notificaciones por email para alertas críticas
+  - [ ] Crear notificaciones en tiempo real para administradores
+  - [ ] Implementar escalación automática de alertas
+  - [ ] Añadir integración con sistemas externos (Slack, Teams)
+
+#### **Tareas Frontend - Integración Completa (2 días)**
+
+- [ ] **Actualizar Servicios Frontend** (1 día)
+  - [ ] Modificar `securityAlertService.ts` para usar endpoints reales
+  - [ ] Eliminar datos mock y simulaciones
+  - [ ] Implementar manejo de errores específicos
+  - [ ] Añadir tipos TypeScript para respuestas del backend
+  - [ ] Implementar caché con React Query
+
+- [ ] **Actualizar Componentes de Seguridad** (1 día)
+  - [ ] Conectar `SecurityAlertsPage` con backend real
+  - [ ] Actualizar `SecurityAlertsList` para datos reales
+  - [ ] Implementar `SecurityAlertRules` funcional
+  - [ ] Añadir `SecurityAnalyticsDashboard` con métricas reales
+  - [ ] Implementar notificaciones en tiempo real
+
+### **Criterios de Aceptación**
+
+#### **Funcionales**
+- [ ] El sistema detecta automáticamente actividades sospechosas
+- [ ] Las alertas se clasifican correctamente por severidad
+- [ ] Los administradores pueden gestionar alertas eficientemente
+- [ ] Existe análisis de tendencias y patrones de seguridad
+- [ ] Las notificaciones críticas se envían inmediatamente
+
+#### **Técnicos**
+- [ ] El motor de detección es eficiente y escalable
+- [ ] Las reglas de detección son configurables
+- [ ] El sistema tiene baja tasa de falsos positivos
+- [ ] Las consultas de análisis son optimizadas
+- [ ] Existe integración con sistemas de monitoreo
+
+### **Definición de "Terminado" (DoD)**
+- [ ] ✅ Sistema de detección automática funcionando
+- [ ] ✅ Gestión completa de alertas implementada
+- [ ] ✅ Análisis y estadísticas operativos
+- [ ] ✅ Notificaciones automáticas configuradas
+- [ ] ✅ Frontend completamente integrado
+- [ ] ✅ Documentación de seguridad completa
+- [ ] ✅ Pruebas de penetración básicas realizadas
+
+### **Riesgos Técnicos Identificados**
+
+#### **Alto Riesgo**
+- **Falsos positivos**: Demasiadas alertas falsas
+  - **Mitigación**: Tuning cuidadoso de reglas, machine learning para mejora continua
+- **Rendimiento**: Detección en tiempo real puede ser costosa
+  - **Mitigación**: Procesamiento asíncrono, optimización de consultas
+
+#### **Medio Riesgo**
+- **Evasión de detección**: Ataques sofisticados pueden evadir detección
+  - **Mitigación**: Múltiples capas de detección, actualización continua de reglas
+- **Volumen de alertas**: Demasiadas alertas pueden saturar administradores
+  - **Mitigación**: Priorización inteligente, agrupación de alertas relacionadas
+
+### **Dependencias**
+- **Prerequisitos**: Sistema de auditoría funcionando (completado)
+- **Dependencias Externas**: Ninguna
+- **Dependencias Internas**: Sistema de notificaciones funcionando
+
+---
+
+## Sprint 30: Backend de Diagnóstico del Sistema
+
+### **Descripción del Sprint**
+Implementar el sistema completo de diagnóstico y monitoreo del sistema, incluyendo health checks, métricas de rendimiento, monitoreo de recursos y herramientas de mantenimiento.
+
+### **Objetivos**
+- Implementar sistema completo de health checks
+- Crear monitoreo de recursos del sistema en tiempo real
+- Desarrollar herramientas de diagnóstico y troubleshooting
+- Implementar alertas de rendimiento y disponibilidad
+- Conectar frontend existente con métricas reales
+
+### **Duración**: 2 semanas (10 días laborables)
+### **Fecha Estimada**: Semana 11-12 de implementación
+### **Recursos**: 1 Desarrollador Backend + 0.5 Desarrollador Frontend
+
+---
+
+### **6. Historia de Usuario: Monitoreo Completo del Sistema**
+
+**Como** administrador del sistema
+**Quiero** monitorear la salud y rendimiento del sistema en tiempo real
+**Para** detectar y resolver problemas antes de que afecten a los usuarios
+
+#### **Tareas Backend - Health Checks y Monitoreo (3 días)**
+
+- [ ] **Implementar SystemHealthController** (1 día)
+  - [ ] Crear `@RestController` `/api/admin/system/health`
+  - [ ] Endpoint `GET /` - health check general del sistema
+  - [ ] Endpoint `GET /database` - estado de la base de datos
+  - [ ] Endpoint `GET /cache` - estado del sistema de caché
+  - [ ] Endpoint `GET /external` - estado de servicios externos
+  - [ ] Endpoint `GET /resources` - uso de recursos del sistema
+  - [ ] Endpoint `GET /metrics` - métricas detalladas de rendimiento
+  - [ ] Endpoint `GET /logs` - logs recientes del sistema
+  - [ ] Implementar health checks personalizados
+
+- [ ] **Implementar SystemHealthService** (1 día)
+  - [ ] Crear servicio `SystemHealthService`
+  - [ ] Health check de conectividad de base de datos
+  - [ ] Health check de sistema de caché (Redis/Hazelcast)
+  - [ ] Health check de servicios externos (APIs, SMTP)
+  - [ ] Monitoreo de uso de memoria y CPU
+  - [ ] Monitoreo de espacio en disco
+  - [ ] Verificación de conectividad de red
+  - [ ] Implementar scoring de salud general
+
+- [ ] **Implementar ResourceMonitoringService** (1 día)
+  - [ ] Crear servicio `ResourceMonitoringService`
+  - [ ] Monitoreo de memoria JVM (heap, non-heap, GC)
+  - [ ] Monitoreo de threads y pools de conexiones
+  - [ ] Monitoreo de I/O de base de datos
+  - [ ] Monitoreo de latencia de red
+  - [ ] Implementar alertas automáticas por umbrales
+  - [ ] Crear historial de métricas para análisis de tendencias
+
+#### **Tareas Backend - Diagnóstico y Troubleshooting (3 días)**
+
+- [ ] **Implementar DiagnosticsController** (1 día)
+  - [ ] Crear `@RestController` `/api/admin/system/diagnostics`
+  - [ ] Endpoint `GET /performance` - análisis de rendimiento
+  - [ ] Endpoint `GET /bottlenecks` - detección de cuellos de botella
+  - [ ] Endpoint `GET /errors` - análisis de errores recientes
+  - [ ] Endpoint `POST /gc` - forzar garbage collection
+  - [ ] Endpoint `GET /threads` - análisis de threads
+  - [ ] Endpoint `GET /connections` - estado de conexiones
+  - [ ] Endpoint `POST /cache/clear` - limpiar caché
+
+- [ ] **Implementar DiagnosticsService** (1 día)
+  - [ ] Crear servicio `SystemDiagnosticsService`
+  - [ ] Análisis automático de rendimiento
+  - [ ] Detección de memory leaks
+  - [ ] Análisis de queries lentas de base de datos
+  - [ ] Detección de deadlocks y contención
+  - [ ] Análisis de patrones de error
+  - [ ] Generación de reportes de diagnóstico
+
+- [ ] **Implementar MaintenanceToolsService** (1 día)
+  - [ ] Crear servicio `MaintenanceToolsService`
+  - [ ] Herramientas de limpieza de datos obsoletos
+  - [ ] Optimización automática de base de datos
+  - [ ] Compactación de logs y archivos temporales
+  - [ ] Backup automático de configuraciones críticas
+  - [ ] Verificación de integridad de datos
+  - [ ] Herramientas de migración y actualización
+
+#### **Tareas Backend - Alertas y Notificaciones (2 días)**
+
+- [ ] **Implementar SystemAlertsService** (1 día)
+  - [ ] Crear servicio `SystemAlertsService`
+  - [ ] Configuración de umbrales de alerta
+  - [ ] Alertas por uso excesivo de recursos
+  - [ ] Alertas por errores críticos
+  - [ ] Alertas por degradación de rendimiento
+  - [ ] Implementar escalación de alertas
+  - [ ] Integración con sistemas de monitoreo externos
+
+- [ ] **Implementar Entidades de Monitoreo** (1 día)
+  - [ ] Crear entidad `SystemMetrics` para métricas históricas
+  - [ ] Crear entidad `SystemAlert` para alertas de sistema
+  - [ ] Crear entidad `DiagnosticReport` para reportes
+  - [ ] Implementar repositorios especializados
+  - [ ] Crear migración Flyway `V30__Create_System_Monitoring.sql`
+  - [ ] Implementar retención automática de datos históricos
+
+#### **Tareas Frontend - Integración y Dashboards (2 días)**
+
+- [ ] **Actualizar Servicios Frontend** (1 día)
+  - [ ] Modificar `diagnosticService.ts` para usar endpoints reales
+  - [ ] Eliminar datos mock y simulaciones
+  - [ ] Implementar polling para métricas en tiempo real
+  - [ ] Añadir tipos TypeScript para métricas del sistema
+  - [ ] Implementar WebSocket para actualizaciones en tiempo real
+
+- [ ] **Actualizar Componentes de Diagnóstico** (1 día)
+  - [ ] Conectar `SystemMonitorPage` con backend real
+  - [ ] Actualizar `SystemHealthCard` con métricas reales
+  - [ ] Implementar `SystemResourcesCard` funcional
+  - [ ] Conectar `DatabaseStatsCard` con estadísticas reales
+  - [ ] Añadir `SystemAlertsCard` con alertas en tiempo real
+  - [ ] Implementar gráficos de tendencias con datos históricos
+
+### **Criterios de Aceptación**
+
+#### **Funcionales**
+- [ ] El sistema proporciona health checks completos y precisos
+- [ ] Las métricas de recursos se actualizan en tiempo real
+- [ ] Las herramientas de diagnóstico identifican problemas correctamente
+- [ ] Las alertas se generan apropiadamente según umbrales
+- [ ] Los administradores pueden realizar mantenimiento desde la UI
+
+#### **Técnicos**
+- [ ] El monitoreo tiene impacto mínimo en el rendimiento
+- [ ] Las métricas históricas se almacenan eficientemente
+- [ ] Las alertas tienen baja tasa de falsos positivos
+- [ ] El sistema es resiliente a fallos de monitoreo
+- [ ] Existe integración con herramientas de monitoreo estándar
+
+### **Definición de "Terminado" (DoD)**
+- [ ] ✅ Sistema de health checks completamente funcional
+- [ ] ✅ Monitoreo de recursos en tiempo real operativo
+- [ ] ✅ Herramientas de diagnóstico implementadas
+- [ ] ✅ Sistema de alertas configurado y probado
+- [ ] ✅ Frontend completamente integrado con métricas reales
+- [ ] ✅ Documentación de operaciones completa
+- [ ] ✅ Runbooks para troubleshooting creados
+
+### **Riesgos Técnicos Identificados**
+
+#### **Alto Riesgo**
+- **Impacto en rendimiento**: Monitoreo excesivo puede degradar rendimiento
+  - **Mitigación**: Monitoreo asíncrono, sampling inteligente, optimización de consultas
+- **Alertas spam**: Demasiadas alertas pueden saturar administradores
+  - **Mitigación**: Umbrales inteligentes, agrupación de alertas, supresión temporal
+
+#### **Medio Riesgo**
+- **Fallos en monitoreo**: El sistema de monitoreo puede fallar
+  - **Mitigación**: Redundancia en monitoreo, health checks del propio sistema de monitoreo
+- **Almacenamiento de métricas**: Crecimiento excesivo de datos históricos
+  - **Mitigación**: Políticas de retención, agregación de datos antiguos
+
+### **Dependencias**
+- **Prerequisitos**: Sistema de alertas de seguridad (Sprint 29)
+- **Dependencias Externas**: Herramientas de monitoreo (opcional)
+- **Dependencias Internas**: Sistema de notificaciones funcionando
+
+---
+
+## Sprint 31: Integraciones Externas Backend (Avanzado)
+
+### **Descripción del Sprint**
+Implementar el sistema completo de integraciones externas backend, incluyendo OAuth con Google, sincronización con Google Calendar y Drive, y herramientas de gestión de integraciones.
+
+### **Objetivos**
+- Implementar OAuth completo con Google (Calendar y Drive)
+- Crear sincronización bidireccional con Google Calendar
+- Desarrollar gestión de archivos con Google Drive
+- Implementar herramientas de monitoreo de integraciones
+- Conectar frontend existente con integraciones reales
+
+### **Duración**: 2 semanas (10 días laborables)
+### **Fecha Estimada**: Semana 13-14 de implementación
+### **Recursos**: 1 Desarrollador Backend + 0.5 Desarrollador Frontend
+
+---
+
+### **7. Historia de Usuario: Integraciones Externas Funcionales**
+
+**Como** administrador del sistema
+**Quiero** integrar el sistema con servicios externos como Google Calendar y Drive
+**Para** mejorar la productividad y sincronización de datos
+
+#### **Tareas Backend - OAuth y Autenticación (3 días)**
+
+- [ ] **Implementar GoogleOAuthController** (1 día)
+  - [ ] Crear `@RestController` `/api/integrations/google/oauth`
+  - [ ] Endpoint `GET /authorize` - iniciar flujo OAuth
+  - [ ] Endpoint `POST /callback` - manejar callback OAuth
+  - [ ] Endpoint `POST /refresh` - renovar tokens
+  - [ ] Endpoint `DELETE /revoke` - revocar tokens
+  - [ ] Endpoint `GET /status` - estado de autenticación
+  - [ ] Implementar validación de scopes y permisos
+
+- [ ] **Implementar GoogleOAuthService** (1 día)
+  - [ ] Crear servicio `GoogleOAuthService`
+  - [ ] Gestión completa del flujo OAuth 2.0
+  - [ ] Almacenamiento seguro de tokens
+  - [ ] Renovación automática de tokens
+  - [ ] Validación de scopes requeridos
+  - [ ] Manejo de errores de autenticación
+  - [ ] Implementar encriptación de tokens
+
+- [ ] **Implementar Entidades OAuth** (1 día)
+  - [ ] Crear entidad `GoogleOAuthToken` para tokens
+  - [ ] Crear entidad `IntegrationConfig` para configuraciones
+  - [ ] Implementar repositorios especializados
+  - [ ] Crear migración Flyway `V31__Create_Google_Integrations.sql`
+  - [ ] Implementar encriptación de datos sensibles
+  - [ ] Añadir auditoría de accesos
+
+#### **Tareas Backend - Google Calendar Integration (3 días)**
+
+- [ ] **Implementar GoogleCalendarController** (1 día)
+  - [ ] Crear `@RestController` `/api/integrations/google/calendar`
+  - [ ] Endpoint `GET /events` - obtener eventos de calendario
+  - [ ] Endpoint `POST /events` - crear evento en calendario
+  - [ ] Endpoint `PUT /events/{id}` - actualizar evento
+  - [ ] Endpoint `DELETE /events/{id}` - eliminar evento
+  - [ ] Endpoint `POST /sync` - sincronizar eventos
+  - [ ] Endpoint `GET /calendars` - listar calendarios disponibles
+
+- [ ] **Implementar GoogleCalendarService** (1.5 días)
+  - [ ] Crear servicio `GoogleCalendarService`
+  - [ ] Integración con Google Calendar API
+  - [ ] Sincronización bidireccional de eventos
+  - [ ] Mapeo entre entidades internas y eventos de Google
+  - [ ] Manejo de conflictos en sincronización
+  - [ ] Implementar webhooks para cambios en tiempo real
+  - [ ] Gestión de múltiples calendarios
+
+- [ ] **Implementar Sincronización Automática** (0.5 días)
+  - [ ] Crear servicio `CalendarSyncService`
+  - [ ] Programación automática de sincronización
+  - [ ] Detección de cambios incrementales
+  - [ ] Resolución de conflictos automática
+  - [ ] Logging detallado de sincronización
+
+#### **Tareas Backend - Google Drive Integration (3 días)**
+
+- [ ] **Implementar GoogleDriveController** (1 día)
+  - [ ] Crear `@RestController` `/api/integrations/google/drive`
+  - [ ] Endpoint `GET /files` - listar archivos
+  - [ ] Endpoint `POST /files/upload` - subir archivo
+  - [ ] Endpoint `GET /files/{id}/download` - descargar archivo
+  - [ ] Endpoint `DELETE /files/{id}` - eliminar archivo
+  - [ ] Endpoint `POST /sync` - sincronizar archivos
+  - [ ] Endpoint `GET /folders` - gestión de carpetas
+
+- [ ] **Implementar GoogleDriveService** (1.5 días)
+  - [ ] Crear servicio `GoogleDriveService`
+  - [ ] Integración con Google Drive API
+  - [ ] Gestión de archivos y carpetas
+  - [ ] Sincronización de archivos adjuntos
+  - [ ] Manejo de permisos y compartición
+  - [ ] Implementar versionado de archivos
+  - [ ] Optimización de transferencias grandes
+
+- [ ] **Implementar Gestión de Archivos** (0.5 días)
+  - [ ] Crear servicio `DriveFileService`
+  - [ ] Mapeo entre archivos locales y Drive
+  - [ ] Sincronización automática de adjuntos
+  - [ ] Backup automático de archivos críticos
+  - [ ] Limpieza de archivos obsoletos
+
+#### **Tareas Frontend - Integración Completa (1 día)**
+
+- [ ] **Finalizar Integraciones Frontend** (1 día)
+  - [ ] Conectar `RealCalendarIntegrationService` con backend
+  - [ ] Conectar `RealDriveIntegrationService` con backend
+  - [ ] Implementar flujo OAuth completo en frontend
+  - [ ] Actualizar `ConfiguracionIntegraciones` con funcionalidad real
+  - [ ] Añadir monitoreo de estado de integraciones
+  - [ ] Implementar notificaciones de sincronización
+
+### **Criterios de Aceptación**
+
+#### **Funcionales**
+- [ ] Los usuarios pueden autenticarse con Google OAuth
+- [ ] La sincronización con Google Calendar funciona bidireccional
+- [ ] Los archivos se sincronizan correctamente con Google Drive
+- [ ] Las integraciones se pueden configurar desde la UI
+- [ ] Existe monitoreo del estado de las integraciones
+
+#### **Técnicos**
+- [ ] Los tokens OAuth se almacenan de forma segura
+- [ ] La sincronización es eficiente y no duplica datos
+- [ ] Las APIs de Google se usan correctamente
+- [ ] Existe manejo robusto de errores de red
+- [ ] Las integraciones son resilientes a fallos temporales
+
+### **Definición de "Terminado" (DoD)**
+- [ ] ✅ OAuth con Google completamente funcional
+- [ ] ✅ Sincronización bidireccional con Calendar operativa
+- [ ] ✅ Gestión de archivos con Drive implementada
+- [ ] ✅ Frontend completamente integrado
+- [ ] ✅ Monitoreo de integraciones funcionando
+- [ ] ✅ Documentación de configuración completa
+- [ ] ✅ Pruebas de integración con APIs reales
+
+### **Riesgos Técnicos Identificados**
+
+#### **Alto Riesgo**
+- **Límites de API de Google**: Exceder quotas de API
+  - **Mitigación**: Implementar rate limiting, caché inteligente, manejo de quotas
+- **Fallos de red**: Problemas de conectividad con APIs externas
+  - **Mitigación**: Retry automático, fallback graceful, queue de operaciones
+
+#### **Medio Riesgo**
+- **Cambios en APIs de Google**: Deprecación o cambios en APIs
+  - **Mitigación**: Versionado de APIs, monitoreo de deprecaciones, abstracción de APIs
+- **Sincronización de datos**: Conflictos en sincronización bidireccional
+  - **Mitigación**: Estrategias de resolución de conflictos, timestamps, versionado
+
+### **Dependencias**
+- **Prerequisitos**: Sistema de configuración completado (Sprint 27-28)
+- **Dependencias Externas**: APIs de Google (Calendar, Drive), credenciales OAuth
+- **Dependencias Internas**: Sistema de encriptación, gestión de archivos
+
+---
+
+## 📊 **RESUMEN EJECUTIVO: ROADMAP DE FUNCIONALIDADES ADMINISTRATIVAS**
+
+### **🎯 Objetivo Alcanzado**
+Al completar estos 5 sprints críticos, la plataforma administrativa habrá evolucionado del **72% actual** de completitud a un estado **production-ready del 95%**.
+
+### **📈 Progreso por Sprint**
+
+| Sprint | Funcionalidad | Duración | Completitud Objetivo | Estado Actual |
+|--------|---------------|----------|---------------------|---------------|
+| **25-26** | Backend Reportes y Métricas | 4 semanas | +15% (87%) | ⚠️ 65% → ✅ 95% |
+| **27-28** | Backend Configuración Sistema | 3 semanas | +5% (92%) | ⚠️ 60% → ✅ 95% |
+| **29** | Sistema Alertas Seguridad | 2 semanas | +2% (94%) | ❌ 0% → ✅ 95% |
+| **30** | Backend Diagnóstico Sistema | 2 semanas | +1% (95%) | ❌ 0% → ✅ 95% |
+| **31** | Integraciones Externas | 2 semanas | +0% (95%) | ⚠️ 45% → ✅ 95% |
+
+### **🏆 Funcionalidades que Pasarán a Production-Ready**
+
+#### **✅ Ya Production-Ready (No requieren desarrollo)**
+1. **Gestión de Usuarios** - 95% completo
+2. **Sistema de Autenticación** - 95% completo
+3. **Flujos de Trabajo de Tareas** - 90% completo
+4. **Auditoría de Usuarios** - 85% completo
+
+#### **🚀 Nuevas Funcionalidades Production-Ready (Post-Sprints)**
+1. **Dashboard Administrativo con Métricas Reales** - 95% completo
+2. **Sistema de Reportes Personalizados** - 95% completo
+3. **Configuración Centralizada del Sistema** - 95% completo
+4. **Alertas de Seguridad Automáticas** - 95% completo
+5. **Diagnóstico y Monitoreo del Sistema** - 95% completo
+6. **Integraciones con Google (Calendar/Drive)** - 95% completo
+
+### **💼 Valor de Negocio Entregado**
+
+#### **Para Administradores del Sistema:**
+- **📊 Visibilidad Completa**: Métricas en tiempo real y reportes personalizados
+- **⚙️ Control Total**: Configuración centralizada de todos los aspectos del sistema
+- **🛡️ Seguridad Avanzada**: Detección automática de amenazas y alertas
+- **🔧 Mantenimiento Proactivo**: Herramientas de diagnóstico y monitoreo
+- **🔗 Integración Empresarial**: Conectividad con herramientas de Google
+
+#### **Para la Organización:**
+- **📈 Productividad**: Integración con calendarios y gestión de archivos
+- **🔒 Seguridad**: Monitoreo continuo y respuesta a amenazas
+- **📋 Compliance**: Auditoría completa y reportes de cumplimiento
+- **⚡ Eficiencia**: Automatización de tareas administrativas
+- **📊 Toma de Decisiones**: Datos en tiempo real para decisiones informadas
+
+### **🎯 Métricas de Éxito**
+
+#### **Técnicas:**
+- **Cobertura de Pruebas**: > 85% en todos los nuevos componentes
+- **Rendimiento**: APIs < 2 segundos, dashboards < 3 segundos
+- **Disponibilidad**: 99.5% uptime con monitoreo automático
+- **Seguridad**: 0 vulnerabilidades críticas, detección automática de amenazas
+
+#### **Funcionales:**
+- **Adopción**: 100% de administradores usando nuevas funcionalidades
+- **Satisfacción**: > 4.5/5 en encuestas de usabilidad
+- **Eficiencia**: 50% reducción en tiempo de tareas administrativas
+- **Incidentes**: 80% reducción en incidentes no detectados
+
+### **🚀 Próximos Pasos Post-Implementación**
+
+#### **Fase de Estabilización (2 semanas)**
+- [ ] Monitoreo intensivo de todas las nuevas funcionalidades
+- [ ] Ajustes de rendimiento basados en uso real
+- [ ] Capacitación de administradores en nuevas herramientas
+- [ ] Documentación de procedimientos operativos
+
+#### **Fase de Optimización (4 semanas)**
+- [ ] Análisis de métricas de uso y rendimiento
+- [ ] Optimizaciones basadas en feedback de usuarios
+- [ ] Implementación de mejoras menores
+- [ ] Preparación para funcionalidades avanzadas futuras
+
+### **💡 Recomendaciones Estratégicas**
+
+1. **Priorizar Sprints 25-26**: El backend de reportes es crítico para el valor inmediato
+2. **Paralelizar cuando sea posible**: Algunos sprints pueden ejecutarse parcialmente en paralelo
+3. **Invertir en testing**: La calidad es crucial para funcionalidades administrativas
+4. **Capacitación temprana**: Comenzar capacitación de administradores durante desarrollo
+5. **Monitoreo continuo**: Implementar observabilidad desde el primer sprint
+
+### **🎉 Resultado Final**
+
+Al completar este roadmap, la plataforma tendrá:
+- **✅ 95% de completitud** en funcionalidades administrativas
+- **✅ Production-ready** para despliegue empresarial
+- **✅ Capacidades avanzadas** de administración y monitoreo
+- **✅ Integración empresarial** con herramientas externas
+- **✅ Base sólida** para futuras expansiones
+
+**La plataforma estará lista para soportar organizaciones de cualquier tamaño con herramientas administrativas de clase empresarial.**

@@ -49,6 +49,9 @@ declare module 'styled-components' {
     inputBackground: string;
     buttonBackground: string;
     buttonHover: string;
+    hoverBackground: string;
+    tableHeaderBackground: string;
+    tableHeaderText: string;
 
     // Bordes y sombras
     border: string;

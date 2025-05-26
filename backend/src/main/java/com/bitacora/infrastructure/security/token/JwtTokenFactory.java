@@ -4,7 +4,6 @@ import com.bitacora.domain.model.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Collection;
 import java.util.Date;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenFactory implements TokenFactory {
 
-    @Value("${spring.jwt.secret:${bitacora.jwt.secret:bitacoraSecretKey2023SecureApplicationWithLongSecretKey}}")
+    @Value("${spring.jwt.secret:${bitacora.jwt.secret}}")
     private String secretKey;
 
     @Value("${spring.jwt.expiration:${bitacora.jwt.expiration:86400000}}")
@@ -97,11 +97,11 @@ public class JwtTokenFactory implements TokenFactory {
 
         // Construir el token
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(user.getUsername())
-                .setIssuedAt(now)
-                .setExpiration(validity)
-                .signWith(key, SignatureAlgorithm.HS256)
+                .claims(claims)
+                .subject(user.getUsername())
+                .issuedAt(now)
+                .expiration(validity)
+                .signWith(key)
                 .compact();
     }
 
@@ -114,10 +114,10 @@ public class JwtTokenFactory implements TokenFactory {
     @Override
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(key)
+            Jwts.parser()
+                    .verifyWith((SecretKey) key)
                     .build()
-                    .parseClaimsJws(token);
+                    .parseSignedClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             log.error("Token JWT inválido: {}", e.getMessage());
@@ -165,11 +165,11 @@ public class JwtTokenFactory implements TokenFactory {
      * @return Los claims
      */
     private Claims getClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
+        return Jwts.parser()
+                .verifyWith((SecretKey) key)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     /**

@@ -524,18 +524,32 @@ La aplicación utiliza **JWT (JSON Web Tokens)** para la autenticación, con las
 
 ##### Backend
 
-1. **Rutas Protegidas por Configuración**:
-   - Todas las rutas excepto las mencionadas como públicas requieren autenticación
+La aplicación implementa un enfoque de seguridad en múltiples capas:
 
-2. **Rutas Protegidas por Anotaciones**:
-   - Utilizan `@PreAuthorize` para verificar permisos específicos
+1. **Filtros de Seguridad** (nivel de ruta):
+   - Implementados mediante una cadena de filtros (Chain of Responsibility)
+   - Ejecutados en orden: `BlacklistCheckHandler` → `JwtValidationHandler` → `PermissionsHandler`
+   - Verifican permisos basados en patrones de URL
 
-3. **Controladores con Protección**:
+2. **Seguridad a Nivel de Método** (nivel de controlador):
+   - Implementada mediante anotaciones `@PreAuthorize`
+   - Verifica permisos específicos para cada método del controlador
+
+3. **Rutas Protegidas por Filtros**:
+   - `/api/admin/` - Requiere `ROLE_ADMIN`
+   - `/api/task-requests/assign` - Requiere `ROLE_ASIGNADOR` o `ROLE_ADMIN`
+   - `/api/task-requests/reject` - Requiere `ROLE_ASIGNADOR` o `ROLE_ADMIN`
+   - `/api/activities/stats` - Requiere `ROLE_ADMIN` o `ROLE_ASIGNADOR`
+   - `/api/users` - Requiere `READ_USERS`, `ROLE_ADMIN`, `ROLE_ASIGNADOR` o `ROLE_SUPERVISOR`
+
+4. **Controladores con Protección por Anotaciones**:
 
    a. **UserController**:
    - `GET /api/users` - `@PreAuthorize("hasAuthority('READ_USERS')")`
    - `GET /api/users/{id}` - `@PreAuthorize("hasAuthority('READ_USERS')")`
-   - Otros endpoints también protegidos con permisos específicos
+   - `POST /api/users` - `@PreAuthorize("hasAuthority('WRITE_USERS')")`
+   - `PUT /api/users/{id}` - `@PreAuthorize("hasAuthority('WRITE_USERS')")`
+   - `DELETE /api/users/{id}` - `@PreAuthorize("hasAuthority('DELETE_USERS')")`
 
    b. **ActivityController**:
    - `POST /activities` - `@PreAuthorize("hasAuthority('WRITE_ACTIVITIES')")`

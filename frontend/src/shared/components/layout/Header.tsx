@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { FiSearch, FiSettings, FiBell, FiUser, FiMenu, FiLogOut, FiMail, FiShield, FiClock, FiSun, FiMoon, FiEye, FiLock, FiAlertCircle, FiActivity, FiChevronDown } from 'react-icons/fi';
 import { toggleSidebar, toggleTheme } from '@/core/store/uiSlice';
 import { useAuth } from '@/core/hooks/useAuth';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '@/shared/components/ui/Toast';
 import NotificacionesButton from '@/features/notificaciones/components/NotificacionesButton';
 import { useAppSelector, useAppDispatch } from '@/core/store';
 

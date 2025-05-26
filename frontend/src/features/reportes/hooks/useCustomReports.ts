@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useToastContext } from '@/components/ui';
+import { toast } from 'react-toastify';
 import customReportService from '../services/customReportService';
-import { 
-  ReportDefinition, 
-  SavedReport, 
-  ReportSchedule, 
-  ReportExportFormat 
+import {
+  ReportDefinition,
+  SavedReport,
+  ReportSchedule,
+  ReportExportFormat
 } from '../types/customReportTypes';
 
 /**
@@ -23,12 +23,10 @@ export const useAvailableFields = () => {
  * Hook para ejecutar un reporte personalizado
  */
 export const useExecuteReport = () => {
-  const { showError } = useToastContext();
-
   return useMutation({
     mutationFn: (definition: ReportDefinition) => customReportService.executeReport(definition),
     onError: (error: Error) => {
-      showError(`Error al ejecutar reporte: ${error.message}`);
+      toast.error(`Error al ejecutar reporte: ${error.message}`);
       throw error;
     },
   });
@@ -39,17 +37,16 @@ export const useExecuteReport = () => {
  */
 export const useSaveReport = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
     mutationFn: (report: SavedReport) => customReportService.saveReport(report),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['savedReports'] });
-      showSuccess('Reporte guardado correctamente');
+      toast.success('Reporte guardado correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al guardar reporte: ${error.message}`);
+      toast.error(`Error al guardar reporte: ${error.message}`);
       throw error;
     },
   });
@@ -81,19 +78,18 @@ export const useSavedReport = (id: string) => {
  */
 export const useUpdateSavedReport = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
-    mutationFn: ({ id, report }: { id: string; report: Partial<SavedReport> }) => 
+    mutationFn: ({ id, report }: { id: string; report: Partial<SavedReport> }) =>
       customReportService.updateSavedReport(id, report),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['savedReports'] });
       queryClient.invalidateQueries({ queryKey: ['savedReport', data.id] });
-      showSuccess('Reporte actualizado correctamente');
+      toast.success('Reporte actualizado correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al actualizar reporte: ${error.message}`);
+      toast.error(`Error al actualizar reporte: ${error.message}`);
       throw error;
     },
   });
@@ -104,17 +100,16 @@ export const useUpdateSavedReport = () => {
  */
 export const useDeleteSavedReport = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
     mutationFn: (id: string) => customReportService.deleteSavedReport(id),
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['savedReports'] });
       queryClient.removeQueries({ queryKey: ['savedReport', id] });
-      showSuccess('Reporte eliminado correctamente');
+      toast.success('Reporte eliminado correctamente');
     },
     onError: (error: Error) => {
-      showError(`Error al eliminar reporte: ${error.message}`);
+      toast.error(`Error al eliminar reporte: ${error.message}`);
       throw error;
     },
   });
@@ -136,17 +131,16 @@ export const useReportTemplates = () => {
  */
 export const useScheduleReport = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
     mutationFn: (schedule: ReportSchedule) => customReportService.scheduleReport(schedule),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['scheduledReports'] });
-      showSuccess('Reporte programado correctamente');
+      toast.success('Reporte programado correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al programar reporte: ${error.message}`);
+      toast.error(`Error al programar reporte: ${error.message}`);
       throw error;
     },
   });
@@ -167,18 +161,17 @@ export const useScheduledReports = () => {
  */
 export const useUpdateScheduledReport = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
-    mutationFn: ({ id, schedule }: { id: string; schedule: Partial<ReportSchedule> }) => 
+    mutationFn: ({ id, schedule }: { id: string; schedule: Partial<ReportSchedule> }) =>
       customReportService.updateScheduledReport(id, schedule),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['scheduledReports'] });
-      showSuccess('Programación actualizada correctamente');
+      toast.success('Programación actualizada correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al actualizar programación: ${error.message}`);
+      toast.error(`Error al actualizar programación: ${error.message}`);
       throw error;
     },
   });
@@ -189,16 +182,15 @@ export const useUpdateScheduledReport = () => {
  */
 export const useDeleteScheduledReport = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
     mutationFn: (id: string) => customReportService.deleteScheduledReport(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scheduledReports'] });
-      showSuccess('Programación eliminada correctamente');
+      toast.success('Programación eliminada correctamente');
     },
     onError: (error: Error) => {
-      showError(`Error al eliminar programación: ${error.message}`);
+      toast.error(`Error al eliminar programación: ${error.message}`);
       throw error;
     },
   });
@@ -208,10 +200,8 @@ export const useDeleteScheduledReport = () => {
  * Hook para exportar un reporte
  */
 export const useExportReport = () => {
-  const { showSuccess, showError } = useToastContext();
-
   return useMutation({
-    mutationFn: ({ reportId, format }: { reportId: string; format: ReportExportFormat }) => 
+    mutationFn: ({ reportId, format }: { reportId: string; format: ReportExportFormat }) =>
       customReportService.exportReport(reportId, format),
     onSuccess: (data, { format }) => {
       // Crear un enlace de descarga
@@ -223,12 +213,12 @@ export const useExportReport = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      
-      showSuccess(`Reporte exportado correctamente en formato ${format}`);
+
+      toast.success(`Reporte exportado correctamente en formato ${format}`);
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al exportar reporte: ${error.message}`);
+      toast.error(`Error al exportar reporte: ${error.message}`);
       throw error;
     },
   });

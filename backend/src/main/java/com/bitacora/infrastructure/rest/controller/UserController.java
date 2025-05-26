@@ -42,24 +42,54 @@ public class UserController {
     private final MentionPermissionService mentionPermissionService;
 
     /**
-     * Obtiene todos los usuarios con paginación.
+     * Obtiene todos los usuarios con paginación y filtros.
      *
-     * @param page El número de página (comenzando desde 0)
-     * @param size El tamaño de la página
+     * @param page   El número de página (comenzando desde 0)
+     * @param size   El tamaño de la página
+     * @param role   Filtrar por rol (opcional)
+     * @param active Filtrar por estado activo (opcional)
+     * @param search Buscar por nombre, apellido o email (opcional)
      * @return Una respuesta con los usuarios y el total
      */
     @GetMapping
-    @Operation(summary = "Obtener usuarios", description = "Obtiene usuarios con paginación")
-    // Comentado temporalmente para permitir acceso sin permisos
-    // @PreAuthorize("hasAuthority('READ_USERS')")
+    @Operation(summary = "Obtener usuarios", description = "Obtiene usuarios con paginación y filtros")
+    @PreAuthorize("hasAuthority('READ_USERS')")
     public ResponseEntity<Map<String, Object>> getAllUsers(
             @Parameter(description = "Número de página (comenzando desde 0)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Tamaño de la página") @RequestParam(defaultValue = "10") int size) {
-        // Log para depuración
-        System.out.println("Accediendo a getAllUsers sin verificación de permisos");
+            @Parameter(description = "Tamaño de la página") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Filtrar por rol (opcional)") @RequestParam(required = false) String role,
+            @Parameter(description = "Filtrar por estado activo (opcional)") @RequestParam(required = false) Boolean active,
+            @Parameter(description = "Buscar por nombre, apellido o email (opcional)") @RequestParam(required = false) String search) {
 
-        List<User> users = userRepository.findAll(page, size);
-        long totalCount = userRepository.count();
+        // Log para depuración
+        System.out.println("Accediendo a getAllUsers con verificación de permisos");
+        System.out.println("Filtros aplicados - Rol: " + role + ", Activo: " + active + ", Búsqueda: " + search);
+
+        // Convertir el rol a enum si se proporciona
+        UserRole userRole = null;
+        if (role != null && !role.isEmpty()) {
+            try {
+                userRole = UserRole.valueOf(role);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Rol no válido: " + role);
+                // Si el rol no es válido, ignorarlo
+            }
+        }
+
+        // Obtener usuarios con filtros
+        List<User> users;
+        long totalCount;
+
+        // Verificar si hay algún filtro aplicado
+        if (userRole != null || active != null || (search != null && !search.isEmpty())) {
+            // Usar el método de filtrado
+            users = userRepository.findWithFilters(userRole, active, search, page, size);
+            totalCount = userRepository.countWithFilters(userRole, active, search);
+        } else {
+            // Sin filtros, obtener todos los usuarios
+            users = userRepository.findAll(page, size);
+            totalCount = userRepository.count();
+        }
 
         List<UserDto> userDtos = users.stream()
                 .map(this::mapToDto)
@@ -68,6 +98,8 @@ public class UserController {
         Map<String, Object> response = new HashMap<>();
         response.put("users", userDtos);
         response.put("totalCount", totalCount);
+        response.put("currentPage", page);
+        response.put("totalPages", Math.ceil((double) totalCount / size));
 
         return ResponseEntity.ok(response);
     }
@@ -80,11 +112,10 @@ public class UserController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "Obtener un usuario por ID", description = "Obtiene un usuario por su ID")
-    // Comentado temporalmente para permitir acceso sin permisos
-    // @PreAuthorize("hasAuthority('READ_USERS')")
+    @PreAuthorize("hasAuthority('READ_USERS')")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         // Log para depuración
-        System.out.println("Accediendo a getUserById sin verificación de permisos, ID: " + id);
+        System.out.println("Accediendo a getUserById con verificación de permisos, ID: " + id);
         return userRepository.findById(id)
                 .map(this::mapToDto)
                 .map(ResponseEntity::ok)
@@ -260,14 +291,13 @@ public class UserController {
      */
     @GetMapping("/by-role/{role}")
     @Operation(summary = "Obtener usuarios por rol", description = "Obtiene usuarios que tienen el rol especificado")
-    // Comentado temporalmente para permitir acceso sin permisos
-    // @PreAuthorize("hasAuthority('READ_USERS')")
+    @PreAuthorize("hasAuthority('READ_USERS')")
     public ResponseEntity<List<UserDto>> getUsersByRole(
             @Parameter(description = "Rol de los usuarios") @PathVariable String role,
             @Parameter(description = "Número de página (comenzando desde 0)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Tamaño de la página") @RequestParam(defaultValue = "100") int size) {
         // Log para depuración
-        System.out.println("Accediendo a getUsersByRole sin verificación de permisos, rol: " + role);
+        System.out.println("Accediendo a getUsersByRole con verificación de permisos, rol: " + role);
 
         try {
             UserRole userRole = UserRole.valueOf(role);

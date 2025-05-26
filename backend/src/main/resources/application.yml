@@ -9,10 +9,10 @@ spring:
         - common
         - prod-db
 
-  # Permitir sobrescritura de beans y dependencias circulares temporalmente durante la migración
+  # Configuración de desarrollo - NO usar en producción
   main:
-    allow-bean-definition-overriding: true
-    allow-circular-references: true
+    allow-bean-definition-overriding: ${ALLOW_BEAN_OVERRIDING:false}
+    allow-circular-references: ${ALLOW_CIRCULAR_REFERENCES:false}
 
   # Configuración de seguridad
   security:
@@ -168,8 +168,8 @@ springdoc:
 logging:
   level:
     root: ${LOG_LEVEL:INFO}
-    "[com.bitacora]": ${APP_LOG_LEVEL:DEBUG}
-    "[org.springframework.web]": ${SPRING_WEB_LOG_LEVEL:INFO}
+    "[com.bitacora]": ${APP_LOG_LEVEL:INFO}
+    "[org.springframework.web]": ${SPRING_WEB_LOG_LEVEL:WARN}
     "[org.hibernate]": ${HIBERNATE_LOG_LEVEL:ERROR}
 
 # Configuraciones personalizadas de la aplicación
@@ -182,12 +182,12 @@ bitacora:
 
   # Configuración de JWT
   jwt:
-    secret: ${JWT_SECRET:bitacoraSecretKey2023SecureApplicationWithLongSecretKey}
+    secret: ${JWT_SECRET} # REQUERIDO: Debe configurarse como variable de entorno
     expiration: ${JWT_EXPIRATION:86400000}
 
   # Configuración de CORS
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3001,https://metres-dispatch-takes-reserve.trycloudflare.com}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
     allowed-methods: GET,POST,PUT,DELETE,OPTIONS
     allowed-headers: "*"
     exposed-headers: Authorization

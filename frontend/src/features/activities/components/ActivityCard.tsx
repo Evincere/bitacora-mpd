@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { FiEdit2, FiEye, FiCalendar, FiUser, FiMapPin, FiTag, FiClock } from 'react-icons/fi';
 import { Activity, ActivityStatus, ActivityType } from '@/core/types/models';
 import { formatDate } from '@/core/utils/dateUtils';
-import PresenceIndicator from '@/shared/components/ui/Collaboration/PresenceIndicator';
+import PresenceIndicator from '@/components/ui/Collaboration/PresenceIndicator';
 import { useActivityPresence } from '@/features/activities/hooks';
 
 interface ActivityCardProps {

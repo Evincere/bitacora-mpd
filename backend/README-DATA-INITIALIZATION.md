@@ -1,6 +1,33 @@
 # Inicialización de Datos en Bitácora
 
-Este documento explica cómo se inicializan los datos de prueba en la aplicación Bitácora.
+Este documento explica los diferentes mecanismos de inicialización de datos en la aplicación Bitácora.
+
+## 🆕 Sistema Recomendado: Configuración YAML
+
+**Nuevo sistema configurable** que permite definir datos iniciales mediante archivos YAML:
+
+- 📁 **Documentación completa**: [CONFIGURABLE-DATA-INITIALIZATION.md](CONFIGURABLE-DATA-INITIALIZATION.md)
+- ✅ **Datos configurables** por ambiente
+- ✅ **Variables de entorno** para contraseñas
+- ✅ **Sin datos hardcodeados** en el código
+- ✅ **Fácil mantenimiento** sin recompilación
+
+```bash
+# Activar sistema configurable
+java -jar bitacora.jar --spring.profiles.active=dev,configurable-data-init,dev-data
+```
+
+## 📋 Sistemas Disponibles
+
+| Sistema | Estado | Uso Recomendado | Activación |
+|---------|--------|-----------------|------------|
+| **ConfigurableDataInitializer** | ✅ Activo | **Recomendado** | `configurable-data-init` |
+| **Migraciones Flyway** | ✅ Activo | Datos persistentes | Automático |
+| **DataInitializer** | ⚠️ Obsoleto | Solo compatibilidad | `legacy-data-init` |
+
+---
+
+## 📚 Documentación Legacy
 
 ## Enfoque de Inicialización
 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { 
-  FiAlertTriangle, 
-  FiClock, 
-  FiCheck, 
+import {
+  FiAlertTriangle,
+  FiClock,
+  FiCheck,
   FiX,
   FiEye,
   FiChevronDown,
@@ -12,10 +12,10 @@ import {
 } from 'react-icons/fi';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { 
-  SecurityAlertNotification, 
-  SecurityAlertType, 
-  SecurityAlertSeverity 
+import {
+  SecurityAlertNotification,
+  SecurityAlertType,
+  SecurityAlertSeverity
 } from '../types/securityAlertTypes';
 
 // Estilos
@@ -36,11 +36,11 @@ const NotificationButton = styled.button<{ $hasUnread: boolean }>`
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.hoverBackground};
   }
-  
+
   ${({ $hasUnread }) => $hasUnread && `
     &::after {
       content: '';
@@ -106,7 +106,7 @@ const ActionButton = styled.button`
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.hoverBackground};
   }
@@ -115,20 +115,20 @@ const ActionButton = styled.button`
 const NotificationsList = styled.div`
   flex: 1;
   overflow-y: auto;
-  
+
   &::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: ${({ theme }) => theme.backgroundSecondary};
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: ${({ theme }) => theme.border};
     border-radius: 3px;
   }
-  
+
   &::-webkit-scrollbar-thumb:hover {
     background: ${({ theme }) => theme.textTertiary};
   }
@@ -139,11 +139,11 @@ const NotificationItem = styled.div<{ $unread: boolean }>`
   gap: 12px;
   padding: 12px 16px;
   border-bottom: 1px solid ${({ theme }) => theme.border};
-  background-color: ${({ theme, $unread }) => 
+  background-color: ${({ theme, $unread }) =>
     $unread ? theme.backgroundSecondary : theme.cardBackground};
   cursor: pointer;
   transition: all 0.2s;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.hoverBackground};
   }
@@ -156,13 +156,13 @@ const NotificationIcon = styled.div<{ $severity: SecurityAlertSeverity }>`
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: ${({ $severity }) => 
+  background-color: ${({ $severity }) =>
     $severity === SecurityAlertSeverity.CRITICAL ? '#ef4444' + '20' :
     $severity === SecurityAlertSeverity.HIGH ? '#f97316' + '20' :
     $severity === SecurityAlertSeverity.MEDIUM ? '#f59e0b' + '20' :
     $severity === SecurityAlertSeverity.LOW ? '#10b981' + '20' :
     '#94a3b8' + '20'};
-  color: ${({ $severity }) => 
+  color: ${({ $severity }) =>
     $severity === SecurityAlertSeverity.CRITICAL ? '#ef4444' :
     $severity === SecurityAlertSeverity.HIGH ? '#f97316' :
     $severity === SecurityAlertSeverity.MEDIUM ? '#f59e0b' :
@@ -206,7 +206,7 @@ const MarkAsReadButton = styled.button`
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.hoverBackground};
   }
@@ -231,7 +231,7 @@ const ViewAllButton = styled.button`
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
-  
+
   &:hover {
     text-decoration: underline;
   }
@@ -250,7 +250,7 @@ const EmptyState = styled.div`
 
 const LoadingSpinner = styled(FiRefreshCw)`
   animation: spin 1s linear infinite;
-  
+
   @keyframes spin {
     from {
       transform: rotate(0deg);
@@ -275,120 +275,80 @@ const SecurityAlertNotifications: React.FC<SecurityAlertNotificationsProps> = ({
 }) => {
   // Estado para mostrar/ocultar el panel
   const [showPanel, setShowPanel] = useState(false);
-  
+
   // Estado para las notificaciones
   const [notifications, setNotifications] = useState<SecurityAlertNotification[]>([]);
-  
+
   // Estado para carga
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Efecto para cargar notificaciones
   useEffect(() => {
     // Simulación de carga de notificaciones
     const loadNotifications = () => {
       setIsLoading(true);
-      
-      // Simulación de delay
-      setTimeout(() => {
-        // Datos de ejemplo
-        const mockNotifications: SecurityAlertNotification[] = [
-          {
-            id: '1',
-            alertId: '1',
-            alertType: SecurityAlertType.FAILED_LOGIN,
-            alertSeverity: SecurityAlertSeverity.HIGH,
-            message: 'Múltiples intentos fallidos de inicio de sesión',
-            timestamp: new Date().toISOString(),
-            read: false
-          },
-          {
-            id: '2',
-            alertId: '2',
-            alertType: SecurityAlertType.UNUSUAL_ACCESS_TIME,
-            alertSeverity: SecurityAlertSeverity.MEDIUM,
-            message: 'Acceso en horario inusual',
-            timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-            read: false
-          },
-          {
-            id: '3',
-            alertId: '3',
-            alertType: SecurityAlertType.UNUSUAL_LOCATION,
-            alertSeverity: SecurityAlertSeverity.HIGH,
-            message: 'Acceso desde ubicación inusual',
-            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-            read: true
-          },
-          {
-            id: '4',
-            alertId: '4',
-            alertType: SecurityAlertType.PERMISSION_CHANGE,
-            alertSeverity: SecurityAlertSeverity.HIGH,
-            message: 'Cambio de permisos críticos',
-            timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-            read: true
-          },
-          {
-            id: '5',
-            alertId: '5',
-            alertType: SecurityAlertType.MASS_DELETION,
-            alertSeverity: SecurityAlertSeverity.CRITICAL,
-            message: 'Eliminación masiva de registros',
-            timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-            read: false
-          }
-        ];
-        
-        setNotifications(mockNotifications);
+
+      // Cargar notificaciones reales desde la API
+      try {
+        // TODO: Implementar llamada real a la API de alertas de seguridad
+        // const response = await securityAlertService.getSecurityAlertNotifications();
+        // setNotifications(response);
+
+        // Por ahora, mostrar estado vacío
+        setNotifications([]);
         setIsLoading(false);
-      }, 1000);
+      } catch (error) {
+        console.error('Error al cargar notificaciones de seguridad:', error);
+        setNotifications([]);
+        setIsLoading(false);
+      }
     };
-    
+
     if (showPanel) {
       loadNotifications();
     }
   }, [showPanel]);
-  
+
   // Función para alternar el panel
   const togglePanel = () => {
     setShowPanel(!showPanel);
   };
-  
+
   // Función para marcar una notificación como leída
   const markAsRead = (id: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === id 
-          ? { ...notification, read: true } 
+
+    setNotifications(prev =>
+      prev.map(notification =>
+        notification.id === id
+          ? { ...notification, read: true }
           : notification
       )
     );
   };
-  
+
   // Función para marcar todas las notificaciones como leídas
   const markAllAsRead = () => {
-    setNotifications(prev => 
+    setNotifications(prev =>
       prev.map(notification => ({ ...notification, read: true }))
     );
   };
-  
+
   // Función para refrescar las notificaciones
   const refreshNotifications = () => {
     setIsLoading(true);
-    
+
     // Simulación de delay
     setTimeout(() => {
       // Actualizar con nuevas notificaciones
       setIsLoading(false);
     }, 1000);
   };
-  
+
   // Función para formatear tiempo relativo
   const formatRelativeTime = (dateString: string) => {
     try {
-      return formatDistanceToNow(new Date(dateString), { 
+      return formatDistanceToNow(new Date(dateString), {
         addSuffix: true,
         locale: es
       });
@@ -396,10 +356,10 @@ const SecurityAlertNotifications: React.FC<SecurityAlertNotificationsProps> = ({
       return 'Fecha no disponible';
     }
   };
-  
+
   // Verificar si hay notificaciones no leídas
   const hasUnreadNotifications = notifications.some(notification => !notification.read);
-  
+
   // Cerrar el panel al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -408,17 +368,17 @@ const SecurityAlertNotifications: React.FC<SecurityAlertNotificationsProps> = ({
         setShowPanel(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-  
+
   return (
     <Container>
-      <NotificationButton 
+      <NotificationButton
         $hasUnread={hasUnreadNotifications}
         onClick={togglePanel}
         className="notifications-button"
@@ -426,16 +386,16 @@ const SecurityAlertNotifications: React.FC<SecurityAlertNotificationsProps> = ({
       >
         <FiAlertTriangle size={20} />
       </NotificationButton>
-      
+
       <NotificationsPanel $show={showPanel} className="notifications-panel">
         <PanelHeader>
           <PanelTitle>
             <FiAlertTriangle size={16} />
             Alertas de Seguridad
           </PanelTitle>
-          
+
           <PanelActions>
-            <ActionButton 
+            <ActionButton
               onClick={refreshNotifications}
               title="Refrescar"
               disabled={isLoading}
@@ -446,14 +406,14 @@ const SecurityAlertNotifications: React.FC<SecurityAlertNotificationsProps> = ({
                 <FiRefreshCw size={16} />
               )}
             </ActionButton>
-            <ActionButton 
+            <ActionButton
               onClick={markAllAsRead}
               title="Marcar todas como leídas"
               disabled={!hasUnreadNotifications}
             >
               <FiCheck size={16} />
             </ActionButton>
-            <ActionButton 
+            <ActionButton
               onClick={() => setShowPanel(false)}
               title="Cerrar"
             >
@@ -461,7 +421,7 @@ const SecurityAlertNotifications: React.FC<SecurityAlertNotificationsProps> = ({
             </ActionButton>
           </PanelActions>
         </PanelHeader>
-        
+
         <NotificationsList>
           {isLoading ? (
             <EmptyState>
@@ -471,23 +431,26 @@ const SecurityAlertNotifications: React.FC<SecurityAlertNotificationsProps> = ({
           ) : notifications.length === 0 ? (
             <EmptyState>
               <FiCheck size={24} style={{ marginBottom: '8px' }} />
-              <div>No hay notificaciones</div>
+              <div>No hay alertas de seguridad</div>
+              <div style={{ fontSize: '12px', opacity: 0.7, marginTop: '4px' }}>
+                Las alertas de seguridad aparecerán aquí cuando se detecten actividades sospechosas
+              </div>
             </EmptyState>
           ) : (
             notifications.map((notification) => (
-              <NotificationItem 
-                key={notification.id} 
+              <NotificationItem
+                key={notification.id}
                 $unread={!notification.read}
                 onClick={() => {
                   onViewAlert(notification.alertId);
                   setShowPanel(false);
-                  
+
                   // Marcar como leída al hacer clic
                   if (!notification.read) {
-                    setNotifications(prev => 
-                      prev.map(n => 
-                        n.id === notification.id 
-                          ? { ...n, read: true } 
+                    setNotifications(prev =>
+                      prev.map(n =>
+                        n.id === notification.id
+                          ? { ...n, read: true }
                           : n
                       )
                     );
@@ -497,15 +460,15 @@ const SecurityAlertNotifications: React.FC<SecurityAlertNotificationsProps> = ({
                 <NotificationIcon $severity={notification.alertSeverity}>
                   <FiAlertTriangle size={20} />
                 </NotificationIcon>
-                
+
                 <NotificationContent>
                   <NotificationTitle>{notification.message}</NotificationTitle>
                   <NotificationTime>{formatRelativeTime(notification.timestamp)}</NotificationTime>
                 </NotificationContent>
-                
+
                 {!notification.read && (
                   <NotificationActions>
-                    <MarkAsReadButton 
+                    <MarkAsReadButton
                       onClick={(e) => markAsRead(notification.id, e)}
                       title="Marcar como leída"
                     >
@@ -517,7 +480,7 @@ const SecurityAlertNotifications: React.FC<SecurityAlertNotificationsProps> = ({
             ))
           )}
         </NotificationsList>
-        
+
         <PanelFooter>
           <ViewAllButton onClick={() => {
             onViewAllAlerts();

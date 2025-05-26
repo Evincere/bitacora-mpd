@@ -1,0 +1,87 @@
+# Configuración base para datos iniciales configurables
+bitacora:
+  initial-data:
+    enabled: true
+    profile: ${INITIAL_DATA_PROFILE:dev}
+    
+    users:
+      password-defaults:
+        admin: ${ADMIN_PASSWORD:Admin@123}
+        user: ${USER_PASSWORD:Usuario@123}
+        test: ${TEST_PASSWORD:test123}
+      
+      list:
+        # Usuario administrador principal
+        - username: admin
+          password: ${ADMIN_PASSWORD:Admin@123}
+          email: admin@bitacora.com
+          firstName: Administrador
+          lastName: Sistema
+          role: ADMIN
+          position: Administrador de Sistema
+          department: Sistemas
+          active: true
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            - DELETE_ACTIVITIES
+            - READ_USERS
+            - WRITE_USERS
+            - DELETE_USERS
+            - GENERATE_REPORTS
+
+        # Usuario Semper Evincere (admin especial)
+        - username: semper.evincere
+          password: ${SEMPER_PASSWORD:SemperPass@123}
+          email: semper.evincere@bitacora.com
+          firstName: Semper
+          lastName: Evincere
+          role: ADMIN
+          position: Administrador Principal
+          department: Dirección
+          active: true
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            - DELETE_ACTIVITIES
+            - READ_USERS
+            - WRITE_USERS
+            - DELETE_USERS
+            - GENERATE_REPORTS
+
+    roles:
+      list:
+        - name: ADMIN
+          description: Administrador del sistema con acceso completo
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            - DELETE_ACTIVITIES
+            - READ_USERS
+            - WRITE_USERS
+            - DELETE_USERS
+            - GENERATE_REPORTS
+            
+        - name: ASIGNADOR
+          description: Usuario que puede asignar tareas a ejecutores
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            - READ_USERS
+            
+        - name: EJECUTOR
+          description: Usuario que ejecuta tareas asignadas
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            
+        - name: SOLICITANTE
+          description: Usuario que puede crear solicitudes
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+
+    activities:
+      enabled: false  # Deshabilitado por defecto, se habilita por perfil
+      count: 0
+      list: []

@@ -6,7 +6,7 @@ import { setTheme } from './core/store/uiSlice';
 import { setUser } from './features/auth/store/authSlice';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ToastProvider } from './components/ui/Toast';
+import { ToastProvider } from './components/ui';
 import AnimatedRoutes from './shared/components/ui/AnimatedRoutes';
 import { RealTimeNotificationProvider } from './features/notifications/contexts/RealTimeNotificationContext';
 import { lightTheme, darkTheme } from '@/shared/styles';

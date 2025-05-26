@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
 import org.springframework.security.test.context.support.WithMockUser;
@@ -49,10 +48,10 @@ class ActivityControllerTest {
         @Autowired
         private ObjectMapper objectMapper;
 
-        @MockBean
+        @Autowired
         private ActivityRepository activityRepository;
 
-        @MockBean
+        @Autowired
         private JwtTokenProvider jwtTokenProvider;
 
         private Activity testActivity;
@@ -87,7 +86,8 @@ class ActivityControllerTest {
                 when(activityRepository.count()).thenReturn(1L);
 
                 // Configurar el mock del proveedor de tokens JWT
-                // Nota: No necesitamos configurar autoridades ya que estamos usando @WithMockUser
+                // Nota: No necesitamos configurar autoridades ya que estamos usando
+                // @WithMockUser
                 when(jwtTokenProvider.getAuthentication(any())).thenReturn(null);
         }
 

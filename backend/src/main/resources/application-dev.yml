@@ -40,3 +40,11 @@ logging:
   level:
     org.springframework.cache: DEBUG
     org.springframework.web: DEBUG
+    com.bitacora.infrastructure.config: DEBUG # Para logs de inicialización de datos
+
+# Configuración para usar el nuevo sistema de datos configurables
+# Para activar: --spring.profiles.active=dev,configurable-data-init,dev-data
+#
+# Ejemplo de variables de entorno para desarrollo:
+# export ADMIN_PASSWORD="tu-password-admin-seguro"
+# export SEMPER_PASSWORD="tu-password-semper-seguro"

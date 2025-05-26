@@ -6,14 +6,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useActivities, useCreateActivity, useUpdateActivity } from '@/features/activities/hooks';
 import { activityCreateSchema, ActivityFormData } from '../schemas/activitySchema';
 import { Activity, ActivityStatus, ActivityType } from '@/core/types/models';
-import PresenceIndicator from '@/shared/components/ui/Collaboration/PresenceIndicator';
+import PresenceIndicator from '@/components/ui/Collaboration/PresenceIndicator';
 import { useActivityPresence, useActivityTemplates, useFrequentData } from '@/features/activities/hooks';
 import type { ActivityTemplate } from '@/features/activities/hooks';
 import AutocompleteInput from '@/shared/components/common/AutocompleteInput';
 import TemplateSelector from './TemplateSelector';
 import TemplateManager from './TemplateManager';
 import SaveTemplateDialog from './SaveTemplateDialog';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '@/shared/components/ui/Toast/ToastProvider';
 import { debugLog, isDebugMode } from '@/core/utils/debug';
 import DebugPanel from './DebugPanel';
 

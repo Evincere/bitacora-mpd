@@ -51,6 +51,9 @@ export const lightTheme: DefaultTheme = {
   inputBackground: '#FFFFFF',
   buttonBackground: '#6C5CE7',
   buttonHover: '#8A7AFF',
+  hoverBackground: '#F0F0F5',
+  tableHeaderBackground: '#F5F5F7',
+  tableHeaderText: '#666666',
 
   // Bordes y sombras
   border: '#E5E5EA',
@@ -157,6 +160,9 @@ export const darkTheme: DefaultTheme = {
   inputBackground: '#3A3A40',
   buttonBackground: '#6C5CE7',
   buttonHover: '#8A7AFF',
+  hoverBackground: '#2F2F35',
+  tableHeaderBackground: '#3A3A40',
+  tableHeaderText: '#AAAAAA',
 
   // Bordes y sombras
   border: '#3A3A40',

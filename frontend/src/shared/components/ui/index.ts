@@ -7,7 +7,7 @@ export { default as AnimatedRoutes } from './AnimatedRoutes';
 export { default as NotFound } from './NotFound';
 export { default as ErrorMessage } from './ErrorMessage';
 export { default as ErrorAlert } from './ErrorAlert';
-export { ToastProvider, useToastContext } from './Toast';
+export { ToastProvider, useToast } from './Toast/index';
 export { default as Tooltip } from './Tooltip';
 export { default as RefreshButton } from './RefreshButton';
 export { default as FilterBadge } from './FilterBadge';

@@ -11,22 +11,21 @@ export {
   AnimatedRoutes,
   NotFound,
   ToastProvider,
-  useToastContext
+  useToast
 } from '@/shared/components/ui';
 
 // Exportar componentes locales
 export { default as Button } from './Button';
 export { default as Card } from './Card';
-export { default as Skeleton } from './Skeleton';
+export { Skeleton, TextSkeleton, CircleSkeleton, RectSkeleton } from './Skeleton';
 export {
-  TextSkeleton,
-  CircleSkeleton,
-  RectSkeleton,
   ActivityCardSkeleton,
   ActivitiesListSkeleton,
   ActivityDetailSkeleton,
   ActivityFormSkeleton,
-  ProfileSkeleton
+  ProfileSkeleton,
+  TableSkeleton,
+  UserListSkeleton
 } from './Skeleton';
 export { default as Badge } from './Badge';
 export { default as Pagination } from './Pagination';

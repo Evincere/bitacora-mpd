@@ -556,6 +556,9 @@ const NotificacionesPanel: React.FC<NotificacionesPanelProps> = ({ isOpen, onClo
             <FiBell size={40} />
             <h3>No hay notificaciones</h3>
             <p>No tienes notificaciones que coincidan con los filtros seleccionados.</p>
+            <div style={{ fontSize: '12px', opacity: 0.7, marginTop: '8px' }}>
+              Las notificaciones aparecerán aquí cuando ocurran eventos importantes
+            </div>
           </EmptyState>
         )}
       </NotificacionesList>

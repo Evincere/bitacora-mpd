@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import Sidebar from './Sidebar'
 import Header from './Header'
-import Loader from '../common/Loader'
+import { Loader } from '@/shared/components/common'
 import { PageTransition } from '../ui/PageTransition'
 
 const LayoutContainer = styled.div`

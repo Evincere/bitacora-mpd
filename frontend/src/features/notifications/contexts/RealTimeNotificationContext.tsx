@@ -14,7 +14,7 @@ import {
   TaskApprovedNotification,
   UserConnectedNotification,
   UserDisconnectedNotification
-} from '@/types/notifications';
+} from '@/core/types/notifications';
 
 interface RealTimeNotificationContextType {
   notifications: RealTimeNotification[];
@@ -90,85 +90,18 @@ export const RealTimeNotificationProvider: React.FC<RealTimeNotificationProvider
       return null;
     }
 
-    // En desarrollo, intentar conectar al WebSocket o usar un socket simulado
-    if (import.meta.env.DEV) {
-      console.log('Modo desarrollo: intentando conectar al WebSocket o usando socket simulado');
+    // Intentar conectar al WebSocket real
+    console.log('Intentando conectar al WebSocket...');
 
-      // Intentar cargar notificaciones guardadas en localStorage
-      const savedNotifications = localStorage.getItem('bitacora_notifications');
-      if (savedNotifications && notifications.length === 0) {
-        try {
-          const parsedNotifications = JSON.parse(savedNotifications);
-          console.log('Cargando notificaciones guardadas del localStorage:', parsedNotifications);
-          setNotifications(parsedNotifications);
-        } catch (error) {
-          console.error('Error al parsear notificaciones guardadas:', error);
-        }
-      }
-
-      // Intentar conectar al WebSocket real, pero si falla, usar un socket simulado
+    // Cargar notificaciones guardadas en localStorage como respaldo
+    const savedNotifications = localStorage.getItem('bitacora_notifications');
+    if (savedNotifications && notifications.length === 0) {
       try {
-        // Intentar conectar al WebSocket real (mismo código que en producción)
-        const socketUrl = import.meta.env.VITE_WEBSOCKET_URL || 'http://localhost:8080';
-        console.log(`Intentando conectar al WebSocket en desarrollo: ${socketUrl}`);
-
-        // Verificar si el backend está disponible antes de intentar conectar
-        // En desarrollo, es común que el backend no esté disponible
-        // Esto evita los mensajes de error repetitivos en la consola
-        const mockSocket = {
-          on: () => {},
-          emit: () => {},
-          disconnect: () => {},
-          connected: false,
-          connect: () => {}
-        } as unknown as Socket;
-
-        // En desarrollo, podemos usar un socket simulado para evitar errores
-        // y permitir que la aplicación funcione sin el backend
-        if (import.meta.env.DEV) {
-          // Cargar notificaciones guardadas en localStorage
-          const savedNotifications = localStorage.getItem('bitacora_notifications');
-          if (savedNotifications) {
-            try {
-              const parsedNotifications = JSON.parse(savedNotifications);
-              console.log('Cargando notificaciones guardadas del localStorage en desarrollo:', parsedNotifications);
-              setTimeout(() => {
-                setNotifications(parsedNotifications);
-              }, 0);
-            } catch (error) {
-              console.error('Error al parsear notificaciones guardadas:', error);
-            }
-          }
-
-          // Devolver un socket simulado en desarrollo
-          return mockSocket;
-        }
-
-        // En producción, intentar conectar al WebSocket real
-        return io(socketUrl, {
-          auth: {
-            token: `Bearer ${token}`
-          },
-          path: '/api/ws',
-          transports: ['websocket'],
-          extraHeaders: {
-            'Authorization': `Bearer ${token}`
-          },
-          reconnection: true,
-          reconnectionAttempts: 5,
-          reconnectionDelay: 1000
-        });
+        const parsedNotifications = JSON.parse(savedNotifications);
+        console.log('Cargando notificaciones guardadas del localStorage:', parsedNotifications);
+        setNotifications(parsedNotifications);
       } catch (error) {
-        console.warn('Error al conectar al WebSocket, usando socket simulado:', error);
-
-        // Devolver un socket simulado para evitar errores
-        return {
-          on: () => {},
-          emit: () => {},
-          disconnect: () => {},
-          connected: false,
-          connect: () => {}
-        } as unknown as Socket;
+        console.error('Error al parsear notificaciones guardadas:', error);
       }
     }
 
@@ -189,17 +122,11 @@ export const RealTimeNotificationProvider: React.FC<RealTimeNotificationProvider
       extraHeaders: {            // Headers adicionales para la autenticación
         'Authorization': `Bearer ${token}`
       },
-      reconnection: false,       // Desactivamos la reconexión automática para manejarla nosotros
-      autoConnect: false         // Desactivamos la conexión automática para manejarla nosotros
+      reconnection: true,        // Habilitar reconexión automática
+      reconnectionAttempts: 5,   // Máximo 5 intentos
+      reconnectionDelay: 1000,   // Delay inicial de 1 segundo
+      timeout: 10000             // Timeout de 10 segundos
     });
-
-    // Intentar conectar manualmente solo si no estamos en desarrollo
-    try {
-      console.log('Intentando conectar manualmente al WebSocket...');
-      newSocket.connect();
-    } catch (error) {
-      console.error('Error al intentar conectar manualmente:', error);
-    }
 
     // Manejar eventos de conexión
     newSocket.on('connect', () => {
@@ -217,35 +144,9 @@ export const RealTimeNotificationProvider: React.FC<RealTimeNotificationProvider
     let errorShown = false;
 
     newSocket.on('connect_error', (error) => {
-      // En modo desarrollo, no mostrar errores de WebSocket
-      if (import.meta.env.DEV) {
-        // Solo mostrar el mensaje una vez para evitar spam en la consola
-        if (!errorShown) {
-          console.log('Modo desarrollo: WebSocket no disponible. La aplicación funcionará con funcionalidades limitadas.');
-          errorShown = true;
-        }
-
-        // Intentar cargar notificaciones guardadas en localStorage
-        const savedNotifications = localStorage.getItem('bitacora_notifications');
-        if (savedNotifications && notifications.length === 0) {
-          try {
-            const parsedNotifications = JSON.parse(savedNotifications);
-            // Solo mostrar el mensaje una vez
-            if (!errorShown) {
-              console.log('Cargando notificaciones guardadas del localStorage después de error de conexión');
-            }
-            setNotifications(parsedNotifications);
-          } catch (error) {
-            console.error('Error al parsear notificaciones guardadas:', error);
-          }
-        }
-
-        return;
-      }
-
-      // Información detallada para depuración (solo en producción)
+      // Mostrar error solo una vez para evitar spam en la consola
       if (!errorShown) {
-        console.error('Error de conexión al servidor de notificaciones:', error.message);
+        console.warn('Error de conexión al servidor de notificaciones:', error.message);
         errorShown = true;
       }
 

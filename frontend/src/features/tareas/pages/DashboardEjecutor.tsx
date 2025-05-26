@@ -31,81 +31,7 @@ import useTareas from '../hooks/useTareas';
 // Tipos
 import { Activity, ActivityStatus } from '@/types/models';
 
-// Datos de ejemplo (se reemplazarán por datos reales del backend)
-const MOCK_TAREAS = [
-  {
-    id: 1,
-    title: 'Informe técnico para caso #12345',
-    description: 'Elaborar informe técnico detallado sobre el caso #12345 para presentar en la audiencia del próximo mes.',
-    category: 'LEGAL',
-    priority: 'HIGH',
-    requestDate: '2025-05-01T10:30:00',
-    dueDate: '2025-05-15',
-    status: 'ASSIGNED',
-    requesterName: 'Juan Pérez',
-    assignerName: 'Carlos Rodríguez',
-    executorName: 'Ana Martínez'
-  },
-  {
-    id: 2,
-    title: 'Análisis de documentación caso #54321',
-    description: 'Realizar análisis detallado de la documentación presentada por la contraparte en el caso #54321.',
-    category: 'LEGAL',
-    priority: 'MEDIUM',
-    requestDate: '2025-04-28T14:15:00',
-    dueDate: '2025-05-10',
-    status: 'ASSIGNED',
-    requesterName: 'María López',
-    assignerName: 'Carlos Rodríguez',
-    executorName: 'Ana Martínez'
-  },
-  {
-    id: 3,
-    title: 'Revisión de contrato de arrendamiento',
-    description: 'Revisar contrato de arrendamiento para el local comercial y elaborar informe de observaciones.',
-    category: 'LEGAL',
-    priority: 'LOW',
-    requestDate: '2025-04-25T09:45:00',
-    dueDate: '2025-05-05',
-    status: 'IN_PROGRESS',
-    requesterName: 'Pedro Gómez',
-    assignerName: 'Carlos Rodríguez',
-    executorName: 'Ana Martínez',
-    progress: 50
-  }
-];
 
-// Datos de ejemplo para tareas en progreso
-const MOCK_TAREAS_PROGRESO = [
-  {
-    id: 3,
-    title: 'Revisión de contrato de arrendamiento',
-    description: 'Revisar contrato de arrendamiento para el local comercial y elaborar informe de observaciones.',
-    category: 'LEGAL',
-    priority: 'LOW',
-    requestDate: '2025-04-25T09:45:00',
-    dueDate: '2025-05-05',
-    status: 'IN_PROGRESS',
-    requesterName: 'Pedro Gómez',
-    assignerName: 'Carlos Rodríguez',
-    executorName: 'Ana Martínez',
-    progress: 50
-  },
-  {
-    id: 4,
-    title: 'Preparación de presentación para cliente',
-    description: 'Preparar presentación para la reunión con el cliente del próximo viernes.',
-    category: 'ADMINISTRATIVA',
-    priority: 'HIGH',
-    requestDate: '2025-04-20T11:00:00',
-    dueDate: '2025-04-30',
-    status: 'IN_PROGRESS',
-    requesterName: 'Juan Pérez',
-    assignerName: 'Carlos Rodríguez',
-    executorName: 'Ana Martínez',
-    progress: 75
-  }
-];
 
 // Estilos
 const PageContainer = styled.div`
@@ -546,9 +472,9 @@ const DashboardEjecutor: React.FC = () => {
   // Estado para el calendario
   const [calendarDays, setCalendarDays] = useState(generateCalendar());
 
-  // Usar datos reales o de ejemplo
-  const tareas = assignedTasks || MOCK_TAREAS;
-  const tareasProgreso = inProgressTasks || MOCK_TAREAS_PROGRESO;
+  // Usar datos reales de la API
+  const tareas = assignedTasks || [];
+  const tareasProgreso = inProgressTasks || [];
 
   // Filtrar tareas
   const filteredTareas = tareas.filter(tarea => {

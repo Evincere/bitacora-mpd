@@ -22,7 +22,6 @@ import ActivityFormSkeleton from './components/ActivityFormSkeleton';
 import ActivityFilters from './components/ActivityFilters';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { ServerErrorState, ConnectionErrorState, NoDataErrorState, AuthErrorState } from '@/components/common/ErrorStates';
-import MockDataBanner from '@/components/common/MockDataBanner';
 import ErrorBanner from '@/components/common/ErrorBanner';
 import useDebounce from '@/hooks/useDebounce';
 import { ActivityQueryParams } from '@/types/api';
@@ -255,11 +254,9 @@ const Activities = () => {
       console.log('Datos recibidos del backend:', data);
       console.log('Estructura JSON:', JSON.stringify(data, null, 2));
 
-      // Verificar si estamos usando datos simulados
+      // Verificar si tenemos datos del backend
       if (data.activities && data.activities.length > 0) {
         console.log('Usando datos reales del backend');
-        localStorage.setItem('using-mock-data', 'false');
-        setUsingMockData(false);
       }
 
       // Tipado seguro para data
@@ -369,8 +366,7 @@ const Activities = () => {
     }
   }, [activities]);
 
-  // Detectar si estamos usando datos simulados y manejar errores
-  const [usingMockData, setUsingMockData] = useState(false);
+  // Manejar errores
   const [errorInfo, setErrorInfo] = useState<{ message: string; type: string } | null>(null);
 
   // Usar una referencia para evitar múltiples ejecuciones del efecto
@@ -423,21 +419,7 @@ const Activities = () => {
     }
   }, [data, isError, error]);
 
-  // Efecto simplificado para detectar datos simulados (se ejecuta solo una vez)
-  useEffect(() => {
-    // Establecer un valor fijo para usingMockData basado en localStorage
-    const mockDataFlag = localStorage.getItem('using-mock-data');
-    if (mockDataFlag === 'true') {
-      setUsingMockData(true);
-    } else if (data) {
-      const typedData = data as ActivityResponse;
-      if (typedData.activities && typedData.activities.length > 0) {
-        // Si tenemos datos reales, no estamos usando datos simulados
-        setUsingMockData(false);
-        localStorage.setItem('using-mock-data', 'false');
-      }
-    }
-  }, [data]);
+
 
   const [showFilters, setShowFilters] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -564,9 +546,7 @@ const Activities = () => {
 
   return (
     <ActivitiesContainer>
-      {usingMockData && (
-        <MockDataBanner message="Estás viendo datos simulados porque el backend no tiene implementado el endpoint de actividades." />
-      )}
+
       {errorInfo && !isLoadingData && !forceShowActivities && (
         <ErrorBanner
           message={errorInfo.message}

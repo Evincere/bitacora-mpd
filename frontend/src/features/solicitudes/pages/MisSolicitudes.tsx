@@ -22,82 +22,7 @@ import { Tooltip } from '@/shared/components/ui';
 import ReenviarSolicitudModal from '../components/ReenviarSolicitudModal';
 import { TaskRequest } from '../services/solicitudesService';
 
-// Datos de respaldo para mostrar en la interfaz si no hay datos reales
-const MOCK_SOLICITUDES = [
-  {
-    id: 1,
-    titulo: 'Solicitud de informe técnico',
-    descripcion: 'Necesito un informe técnico sobre el caso #12345 para presentar en la audiencia del próximo mes.',
-    categoria: 'LEGAL',
-    prioridad: 'HIGH',
-    fechaCreacion: '2025-05-01T10:30:00',
-    fechaLimite: '2025-05-15',
-    estado: 'REQUESTED',
-    asignador: null,
-    ejecutor: null
-  },
-  {
-    id: 2,
-    titulo: 'Revisión de expediente administrativo',
-    descripcion: 'Solicito la revisión del expediente administrativo #54321 para verificar si hay inconsistencias.',
-    categoria: 'ADMINISTRATIVA',
-    prioridad: 'MEDIUM',
-    fechaCreacion: '2025-04-28T14:15:00',
-    fechaLimite: '2025-05-10',
-    estado: 'ASSIGNED',
-    asignador: 'Carlos Rodríguez',
-    ejecutor: 'Ana Martínez'
-  },
-  {
-    id: 3,
-    titulo: 'Preparación de presentación para audiencia',
-    descripcion: 'Necesito una presentación para la audiencia del caso #67890 que resuma los puntos principales.',
-    categoria: 'LEGAL',
-    prioridad: 'CRITICAL',
-    fechaCreacion: '2025-04-25T09:45:00',
-    fechaLimite: '2025-05-05',
-    estado: 'IN_PROGRESS',
-    asignador: 'Carlos Rodríguez',
-    ejecutor: 'Luis Sánchez'
-  },
-  {
-    id: 4,
-    titulo: 'Análisis de documentación financiera',
-    descripcion: 'Solicito un análisis detallado de la documentación financiera del caso #24680 para identificar posibles irregularidades.',
-    categoria: 'FINANCIERA',
-    prioridad: 'HIGH',
-    fechaCreacion: '2025-04-20T11:00:00',
-    fechaLimite: '2025-04-30',
-    estado: 'COMPLETED',
-    asignador: 'Carlos Rodríguez',
-    ejecutor: 'María López'
-  },
-  {
-    id: 5,
-    titulo: 'Solicitud de dictamen pericial',
-    descripcion: 'Necesito un dictamen pericial sobre las evidencias del caso #13579 para presentar como prueba.',
-    categoria: 'TECNICA',
-    prioridad: 'MEDIUM',
-    fechaCreacion: '2025-04-15T16:30:00',
-    fechaLimite: '2025-04-25',
-    estado: 'APPROVED',
-    asignador: 'Carlos Rodríguez',
-    ejecutor: 'Pedro Gómez'
-  },
-  {
-    id: 6,
-    titulo: 'Solicitud de entrevista con testigo',
-    descripcion: 'Solicito coordinar una entrevista con el testigo principal del caso #97531 para recabar información adicional.',
-    categoria: 'LEGAL',
-    prioridad: 'LOW',
-    fechaCreacion: '2025-04-10T13:15:00',
-    fechaLimite: '2025-04-20',
-    estado: 'REJECTED',
-    asignador: 'Carlos Rodríguez',
-    ejecutor: null,
-    motivoRechazo: 'El testigo ya no está disponible para entrevistas.'
-  }
-];
+
 
 const PageContainer = styled.div`
   padding: 0;
@@ -624,7 +549,7 @@ const MisSolicitudes: React.FC = () => {
     }
   }, [mySolicitudes]);
 
-  // Usar solo datos reales, no usar datos de respaldo
+  // Usar datos reales de la API
   const solicitudesData = solicitudes;
 
   // Filtrar solicitudes según los criterios

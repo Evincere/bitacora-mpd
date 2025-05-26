@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { FiX, FiSave, FiFileText } from 'react-icons/fi';
 import { ActivityFormData } from '../schemas/activitySchema';
 import useActivityTemplates from '@/features/activities/hooks/useActivityTemplates';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '@/shared/components/ui/Toast/ToastProvider';
 
 interface SaveTemplateDialogProps {
   formData: ActivityFormData;

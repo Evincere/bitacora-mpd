@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { 
-  FiActivity, 
-  FiCheckCircle, 
-  FiClock, 
+import {
+  FiActivity,
+  FiCheckCircle,
+  FiClock,
   FiAlertTriangle,
   FiUsers,
   FiPercent,
@@ -20,8 +20,9 @@ import LineChart from './LineChart';
 import PieChart from './PieChart';
 import DataTable, { Badge } from './DataTable';
 import DashboardFilters from './DashboardFilters';
+import DashboardSkeleton from './DashboardSkeleton';
 
-import { 
+import {
   useDashboardMetrics,
   useTaskStatusMetrics,
   useUserActivityMetrics,
@@ -68,18 +69,18 @@ const Button = styled.button<{ $primary?: boolean }>`
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  background-color: ${({ theme, $primary }) => 
+  background-color: ${({ theme, $primary }) =>
     $primary ? theme.primary : theme.cardBackground};
-  color: ${({ theme, $primary }) => 
+  color: ${({ theme, $primary }) =>
     $primary ? '#fff' : theme.text};
-  border: 1px solid ${({ theme, $primary }) => 
+  border: 1px solid ${({ theme, $primary }) =>
     $primary ? theme.primary : theme.border};
 
   &:hover {
-    background-color: ${({ theme, $primary }) => 
+    background-color: ${({ theme, $primary }) =>
       $primary ? theme.primaryDark : theme.hoverBackground};
   }
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -98,7 +99,7 @@ const ChartsGrid = styled.div`
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   margin-bottom: 20px;
-  
+
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
   }
@@ -110,7 +111,7 @@ const FullWidthSection = styled.div`
 
 const LoadingSpinner = styled(FiRefreshCw)`
   animation: spin 1s linear infinite;
-  
+
   @keyframes spin {
     from {
       transform: rotate(0deg);
@@ -130,74 +131,97 @@ const AdminDashboard: React.FC = () => {
     startDate: format(subDays(new Date(), 30), 'yyyy-MM-dd'),
     endDate: format(new Date(), 'yyyy-MM-dd')
   });
-  
+
+  // Convertir fechas al formato ISO para el backend
+  const startDateISO = filters.startDate ? `${filters.startDate}T00:00:00` : undefined;
+  const endDateISO = filters.endDate ? `${filters.endDate}T23:59:59` : undefined;
+
   // Consultas para obtener métricas
-  const { 
-    data: dashboardMetrics, 
+  const {
+    data: dashboardMetrics,
     isLoading: isLoadingDashboard,
-    refetch: refetchDashboard
+    refetch: refetchDashboard,
+    error: errorDashboard
   } = useDashboardMetrics();
-  
-  const { 
-    data: taskStatusMetrics, 
-    isLoading: isLoadingTaskStatus 
-  } = useTaskStatusMetrics();
-  
-  const { 
-    data: userActivityMetrics, 
-    isLoading: isLoadingUserActivity 
-  } = useUserActivityMetrics();
-  
-  const { 
-    data: categoryDistribution, 
-    isLoading: isLoadingCategories 
-  } = useCategoryDistribution();
-  
-  const { 
-    data: priorityDistribution, 
-    isLoading: isLoadingPriorities 
-  } = usePriorityDistribution();
-  
-  const { 
-    data: timelineMetrics, 
-    isLoading: isLoadingTimeline 
+
+  const {
+    data: taskStatusMetrics,
+    isLoading: isLoadingTaskStatus,
+    refetch: refetchTaskStatus,
+    error: errorTaskStatus
+  } = useTaskStatusMetrics(startDateISO, endDateISO);
+
+  const {
+    data: userActivityMetrics,
+    isLoading: isLoadingUserActivity,
+    refetch: refetchUserActivity,
+    error: errorUserActivity
+  } = useUserActivityMetrics(startDateISO, endDateISO);
+
+  const {
+    data: categoryDistribution,
+    isLoading: isLoadingCategories,
+    refetch: refetchCategories,
+    error: errorCategories
+  } = useCategoryDistribution(startDateISO, endDateISO);
+
+  const {
+    data: priorityDistribution,
+    isLoading: isLoadingPriorities,
+    refetch: refetchPriorities,
+    error: errorPriorities
+  } = usePriorityDistribution(startDateISO, endDateISO);
+
+  const {
+    data: timelineMetrics,
+    isLoading: isLoadingTimeline,
+    refetch: refetchTimeline,
+    error: errorTimeline
   } = useTimelineMetrics(filters.startDate || '', filters.endDate || '');
-  
-  const { 
-    data: performanceMetrics, 
-    isLoading: isLoadingPerformance 
+
+  const {
+    data: performanceMetrics,
+    isLoading: isLoadingPerformance,
+    refetch: refetchPerformance,
+    error: errorPerformance
   } = usePerformanceMetrics();
-  
+
   // Estado de carga general
-  const isLoading = 
-    isLoadingDashboard || 
-    isLoadingTaskStatus || 
-    isLoadingUserActivity || 
-    isLoadingCategories || 
-    isLoadingPriorities || 
-    isLoadingTimeline || 
+  const isLoading =
+    isLoadingDashboard ||
+    isLoadingTaskStatus ||
+    isLoadingUserActivity ||
+    isLoadingCategories ||
+    isLoadingPriorities ||
+    isLoadingTimeline ||
     isLoadingPerformance;
-  
+
   // Función para aplicar filtros
   const handleApplyFilters = (newFilters: FilterType) => {
     setFilters(newFilters);
   };
-  
+
   // Función para refrescar datos
   const handleRefresh = () => {
     refetchDashboard();
+    refetchTaskStatus();
+    refetchUserActivity();
+    refetchCategories();
+    refetchPriorities();
+    refetchTimeline();
+    refetchPerformance();
   };
-  
+
   // Función para exportar datos
   const handleExport = () => {
     // Implementar exportación de datos
     alert('Funcionalidad de exportación en desarrollo');
   };
-  
+
   // Renderizar tarjetas de métricas
   const renderMetricCards = () => {
     if (!dashboardMetrics) return null;
-    
+
     return (
       <MetricsGrid>
         <MetricCard
@@ -208,7 +232,7 @@ const AdminDashboard: React.FC = () => {
           change={5.2}
           footerText="vs. mes anterior"
         />
-        
+
         <MetricCard
           title="Tareas Completadas"
           value={dashboardMetrics.completedTasks}
@@ -217,7 +241,7 @@ const AdminDashboard: React.FC = () => {
           change={8.7}
           footerText="vs. mes anterior"
         />
-        
+
         <MetricCard
           title="Tareas Pendientes"
           value={dashboardMetrics.pendingTasks}
@@ -226,7 +250,7 @@ const AdminDashboard: React.FC = () => {
           change={-3.5}
           footerText="vs. mes anterior"
         />
-        
+
         <MetricCard
           title="Tareas Vencidas"
           value={dashboardMetrics.overdueTasksCount}
@@ -235,7 +259,7 @@ const AdminDashboard: React.FC = () => {
           change={-2.1}
           footerText="vs. mes anterior"
         />
-        
+
         <MetricCard
           title="Tiempo Promedio de Finalización"
           value={dashboardMetrics.averageCompletionTime}
@@ -245,7 +269,7 @@ const AdminDashboard: React.FC = () => {
           change={-10.3}
           footerText="vs. mes anterior"
         />
-        
+
         <MetricCard
           title="Usuarios Activos"
           value={dashboardMetrics.activeUsers}
@@ -254,7 +278,7 @@ const AdminDashboard: React.FC = () => {
           change={12.5}
           footerText="vs. mes anterior"
         />
-        
+
         <MetricCard
           title="Tasa de Finalización"
           value={dashboardMetrics.taskCompletionRate}
@@ -264,7 +288,7 @@ const AdminDashboard: React.FC = () => {
           change={3.8}
           footerText="vs. mes anterior"
         />
-        
+
         <MetricCard
           title="Tasa de Creación Diaria"
           value={dashboardMetrics.taskCreationRate}
@@ -276,18 +300,18 @@ const AdminDashboard: React.FC = () => {
       </MetricsGrid>
     );
   };
-  
+
   // Renderizar gráficos de estado de tareas
   const renderTaskStatusCharts = () => {
     if (!taskStatusMetrics) return null;
-    
+
     const statusColors = {
       PENDING: '#F59E0B',
       ASSIGNED: '#3B82F6',
       IN_PROGRESS: '#8B5CF6',
       COMPLETED: '#10B981'
     };
-    
+
     return (
       <ChartsGrid>
         <PieChart
@@ -297,7 +321,7 @@ const AdminDashboard: React.FC = () => {
           backgroundColor={taskStatusMetrics.statusDistribution.map(item => statusColors[item.status as keyof typeof statusColors] || '#6B7280')}
           doughnut
         />
-        
+
         <BarChart
           title="Estados por Categoría"
           labels={taskStatusMetrics.statusByCategory.map(item => item.category)}
@@ -328,11 +352,11 @@ const AdminDashboard: React.FC = () => {
       </ChartsGrid>
     );
   };
-  
+
   // Renderizar gráficos de actividad de usuarios
   const renderUserActivityCharts = () => {
     if (!userActivityMetrics) return null;
-    
+
     return (
       <ChartsGrid>
         <LineChart
@@ -362,7 +386,7 @@ const AdminDashboard: React.FC = () => {
             }
           ]}
         />
-        
+
         <PieChart
           title="Distribución de Roles de Usuario"
           labels={userActivityMetrics.userRoleDistribution.map(item => item.role)}
@@ -377,11 +401,11 @@ const AdminDashboard: React.FC = () => {
       </ChartsGrid>
     );
   };
-  
+
   // Renderizar tabla de usuarios más activos
   const renderTopUsersTable = () => {
     if (!userActivityMetrics) return null;
-    
+
     return (
       <FullWidthSection>
         <DataTable
@@ -389,27 +413,27 @@ const AdminDashboard: React.FC = () => {
           columns={[
             { id: 'fullName', label: 'Nombre', sortable: true },
             { id: 'username', label: 'Usuario', sortable: true },
-            { 
-              id: 'tasksCompleted', 
-              label: 'Tareas Completadas', 
+            {
+              id: 'tasksCompleted',
+              label: 'Tareas Completadas',
               sortable: true,
               render: (value) => <strong>{value}</strong>
             },
-            { 
-              id: 'tasksAssigned', 
-              label: 'Tareas Asignadas', 
-              sortable: true 
+            {
+              id: 'tasksAssigned',
+              label: 'Tareas Asignadas',
+              sortable: true
             },
-            { 
-              id: 'completionRate', 
-              label: 'Tasa de Finalización', 
+            {
+              id: 'completionRate',
+              label: 'Tasa de Finalización',
               sortable: true,
               render: (value, row) => {
                 const rate = Math.round((row.tasksCompleted / row.tasksAssigned) * 100);
                 let color = '#10B981';
                 if (rate < 70) color = '#EF4444';
                 else if (rate < 90) color = '#F59E0B';
-                
+
                 return <Badge $color={color}>{rate}%</Badge>;
               }
             }
@@ -424,11 +448,11 @@ const AdminDashboard: React.FC = () => {
       </FullWidthSection>
     );
   };
-  
+
   // Renderizar gráficos de distribución de categorías y prioridades
   const renderDistributionCharts = () => {
     if (!categoryDistribution || !priorityDistribution) return null;
-    
+
     return (
       <ChartsGrid>
         <BarChart
@@ -443,7 +467,7 @@ const AdminDashboard: React.FC = () => {
           ]}
           horizontal
         />
-        
+
         <BarChart
           title="Distribución de Prioridades"
           labels={priorityDistribution.priorities.map(item => item.name)}
@@ -463,11 +487,11 @@ const AdminDashboard: React.FC = () => {
       </ChartsGrid>
     );
   };
-  
+
   // Renderizar gráfico de línea de tiempo
   const renderTimelineChart = () => {
     if (!timelineMetrics) return null;
-    
+
     return (
       <FullWidthSection>
         <LineChart
@@ -493,7 +517,12 @@ const AdminDashboard: React.FC = () => {
       </FullWidthSection>
     );
   };
-  
+
+  // Mostrar skeleton durante la carga inicial
+  if (isLoading && !dashboardMetrics) {
+    return <DashboardSkeleton />;
+  }
+
   return (
     <DashboardContainer>
       <DashboardHeader>
@@ -501,7 +530,7 @@ const AdminDashboard: React.FC = () => {
           <FiActivity size={24} />
           Dashboard Administrativo
         </Title>
-        
+
         <ActionButtons>
           <Button onClick={handleRefresh} disabled={isLoading}>
             {isLoading ? (
@@ -516,14 +545,14 @@ const AdminDashboard: React.FC = () => {
               </>
             )}
           </Button>
-          
+
           <Button onClick={handleExport}>
             <FiDownload size={16} />
             Exportar
           </Button>
         </ActionButtons>
       </DashboardHeader>
-      
+
       <DashboardFilters
         categories={categoryDistribution?.categories || []}
         priorities={priorityDistribution?.priorities || []}
@@ -532,7 +561,7 @@ const AdminDashboard: React.FC = () => {
         initialFilters={filters}
         onApplyFilters={handleApplyFilters}
       />
-      
+
       {renderMetricCards()}
       {renderTaskStatusCharts()}
       {renderUserActivityCharts()}

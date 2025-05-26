@@ -154,3 +154,27 @@ export const extractTime = (dateString?: string): string => {
     return '';
   }
 };
+
+/**
+ * Formatea una fecha para enviarla al backend en el formato esperado (yyyy-MM-dd'T'HH:mm:ss)
+ * @param date Fecha a formatear (puede ser Date, string ISO o null/undefined)
+ * @returns Fecha formateada o null si la entrada es null/undefined
+ */
+export const formatDateForBackend = (date: Date | string | null | undefined): string | null => {
+  if (!date) return null;
+
+  try {
+    // Si es string, convertir a Date
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+    if (!isValid(dateObj)) {
+      return null;
+    }
+
+    // Formatear como ISO y truncar a los primeros 19 caracteres (yyyy-MM-dd'T'HH:mm:ss)
+    return dateObj.toISOString().substring(0, 19);
+  } catch (error) {
+    console.error('Error al formatear fecha para backend:', error);
+    return null;
+  }
+};

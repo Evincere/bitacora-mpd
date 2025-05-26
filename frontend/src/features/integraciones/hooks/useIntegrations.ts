@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import integrationConfigService, { 
-  IntegrationConfig, 
-  ConnectionTestResult 
+import integrationConfigService, {
+  IntegrationConfig,
+  ConnectionTestResult
 } from '../services/IntegrationConfigService';
-import { useToastContext } from '@/components/ui';
+import { toast } from 'react-toastify';
 
 /**
  * Hook para obtener todas las integraciones
@@ -33,19 +33,18 @@ export const useIntegration = (id: string) => {
  */
 export const useUpdateIntegration = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
-    mutationFn: ({ id, config }: { id: string; config: Partial<IntegrationConfig> }) => 
+    mutationFn: ({ id, config }: { id: string; config: Partial<IntegrationConfig> }) =>
       integrationConfigService.updateIntegration(id, config),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['integrations'] });
       queryClient.invalidateQueries({ queryKey: ['integration', data.id] });
-      showSuccess('Integración actualizada correctamente');
+      toast.success('Integración actualizada correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al actualizar integración: ${error.message}`);
+      toast.error(`Error al actualizar integración: ${error.message}`);
       throw error;
     },
   });
@@ -56,19 +55,18 @@ export const useUpdateIntegration = () => {
  */
 export const useToggleIntegration = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
-    mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) => 
+    mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) =>
       integrationConfigService.toggleIntegration(id, enabled),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['integrations'] });
       queryClient.invalidateQueries({ queryKey: ['integration', data.id] });
-      showSuccess(`Integración ${data.enabled ? 'habilitada' : 'deshabilitada'} correctamente`);
+      toast.success(`Integración ${data.enabled ? 'habilitada' : 'deshabilitada'} correctamente`);
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al cambiar estado de integración: ${error.message}`);
+      toast.error(`Error al cambiar estado de integración: ${error.message}`);
       throw error;
     },
   });
@@ -78,20 +76,18 @@ export const useToggleIntegration = () => {
  * Hook para probar la conexión de una integración
  */
 export const useTestConnection = () => {
-  const { showSuccess, showError } = useToastContext();
-
   return useMutation({
     mutationFn: (id: string) => integrationConfigService.testConnection(id),
     onSuccess: (data: ConnectionTestResult) => {
       if (data.success) {
-        showSuccess(`Conexión exitosa: ${data.message}`);
+        toast.success(`Conexión exitosa: ${data.message}`);
       } else {
-        showError(`Error de conexión: ${data.message}`);
+        toast.error(`Error de conexión: ${data.message}`);
       }
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al probar conexión: ${error.message}`);
+      toast.error(`Error al probar conexión: ${error.message}`);
       throw error;
     },
   });
@@ -102,7 +98,6 @@ export const useTestConnection = () => {
  */
 export const useSyncIntegration = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
     mutationFn: (id: string) => integrationConfigService.syncIntegration(id),
@@ -110,17 +105,17 @@ export const useSyncIntegration = () => {
       queryClient.invalidateQueries({ queryKey: ['integrations'] });
       queryClient.invalidateQueries({ queryKey: ['integration', id] });
       queryClient.invalidateQueries({ queryKey: ['integration-sync-history', id] });
-      
+
       if (data.success) {
-        showSuccess(`Sincronización exitosa: ${data.message}`);
+        toast.success(`Sincronización exitosa: ${data.message}`);
       } else {
-        showError(`Error de sincronización: ${data.message}`);
+        toast.error(`Error de sincronización: ${data.message}`);
       }
-      
+
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al sincronizar: ${error.message}`);
+      toast.error(`Error al sincronizar: ${error.message}`);
       throw error;
     },
   });

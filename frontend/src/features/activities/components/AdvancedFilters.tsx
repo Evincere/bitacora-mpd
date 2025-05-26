@@ -6,7 +6,7 @@ import { ActivityType, ActivityStatus } from '@/types/models';
 import DateRangePicker from '@/components/common/DateRangePicker';
 import MultiSelect from '@/components/common/MultiSelect';
 import Button from '@/components/ui/Button';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from '@/components/ui';
 import { useAppSelector } from '@/core/store';
 
 export interface FilterConfig {

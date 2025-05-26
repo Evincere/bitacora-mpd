@@ -238,7 +238,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
   const updateUser = useUpdateUser();
 
   // Configurar React Hook Form con validación Zod
-  const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<UserFormData | UserUpdateFormData>({
+  const { control, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<UserFormData | UserUpdateFormData>({
     resolver: zodResolver(isEditMode ? userUpdateSchema : userCreateSchema) as any,
     defaultValues: isEditMode
       ? {

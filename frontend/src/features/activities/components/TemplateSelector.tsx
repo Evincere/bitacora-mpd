@@ -4,7 +4,7 @@ import { FiFileText, FiChevronDown, FiEdit2, FiTrash2, FiClock, FiPlus, FiInfo, 
 import useActivityTemplates, { ActivityTemplate } from '@/features/activities/hooks/useActivityTemplates';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '@/shared/components/ui/Toast/ToastProvider';
 import ConfirmDialog from '../../../shared/components/common/ConfirmDialog';
 
 interface TemplateSelectorProps {

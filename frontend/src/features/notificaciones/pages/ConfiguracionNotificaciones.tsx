@@ -12,9 +12,38 @@ import {
   FiSmartphone,
   FiSave
 } from 'react-icons/fi';
-import { useToastContext } from '@/components/ui';
+import { toast } from 'react-toastify';
 import { useUserNotificationPreferences, useUpdateUserNotificationPreferences } from '../hooks/useNotificationConfig';
 import NotificationTemplates from '../components/NotificationTemplates';
+
+// Tipo específico para el estado local de preferencias
+type LocalNotificationPreferences = {
+  asignacion: {
+    app: boolean;
+    email: boolean;
+    push: boolean;
+  };
+  cambioEstado: {
+    app: boolean;
+    email: boolean;
+    push: boolean;
+  };
+  fechaLimite: {
+    app: boolean;
+    email: boolean;
+    push: boolean;
+  };
+  comentario: {
+    app: boolean;
+    email: boolean;
+    push: boolean;
+  };
+  sistema: {
+    app: boolean;
+    email: boolean;
+    push: boolean;
+  };
+};
 
 const PageContainer = styled.div`
   padding: 0;
@@ -184,12 +213,11 @@ const SaveButton = styled.button`
 `;
 
 const ConfiguracionNotificaciones: React.FC = () => {
-  const { showSuccess, showError } = useToastContext();
-  const { data: userPreferences, isLoading, isError } = useUserNotificationPreferences();
+  const { data: userPreferences } = useUserNotificationPreferences();
   const updatePreferences = useUpdateUserNotificationPreferences();
 
   // Estado local para las preferencias de notificaciones
-  const [preferencias, setPreferencias] = useState({
+  const [preferencias, setPreferencias] = useState<LocalNotificationPreferences>({
     asignacion: {
       app: true,
       email: true,
@@ -220,7 +248,15 @@ const ConfiguracionNotificaciones: React.FC = () => {
   // Actualizar el estado local cuando se cargan las preferencias del usuario
   useEffect(() => {
     if (userPreferences && userPreferences.types) {
-      setPreferencias(userPreferences.types);
+      // Convertir el Record genérico al tipo específico
+      const typedPreferences: LocalNotificationPreferences = {
+        asignacion: userPreferences.types.asignacion || { app: true, email: true, push: true },
+        cambioEstado: userPreferences.types.cambioEstado || { app: true, email: false, push: true },
+        fechaLimite: userPreferences.types.fechaLimite || { app: true, email: true, push: true },
+        comentario: userPreferences.types.comentario || { app: true, email: false, push: false },
+        sistema: userPreferences.types.sistema || { app: true, email: true, push: false }
+      };
+      setPreferencias(typedPreferences);
     }
   }, [userPreferences]);
 

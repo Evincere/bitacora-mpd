@@ -14,7 +14,7 @@ import {
 import { useDeleteActivity } from '@/hooks/useActivities';
 import ActivityDetail from './ActivityDetail';
 import ActivityForm from './ActivityForm';
-import ConfirmDialog from '@/components/common/ConfirmDialog';
+import ConfirmDialog from '@/shared/components/common/ConfirmDialog';
 import VirtualGrid from '@/components/common/VirtualGrid';
 import { Activity, ActivityStatus, ActivityType } from '@/types/models';
 

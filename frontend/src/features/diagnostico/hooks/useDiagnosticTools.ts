@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useToastContext } from '@/components/ui';
+import { useToast } from '@/components/ui';
 import diagnosticService from '../services/diagnosticService';
 import { LogFilters, MaintenanceTaskFilters, BackupFilters, ScheduledTaskFilters } from '../types/diagnosticTypes';
 
@@ -30,16 +30,16 @@ export const useDatabaseStats = () => {
  */
 export const useDataIntegrityCheck = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: () => diagnosticService.checkDataIntegrity(),
     onSuccess: (data) => {
-      showSuccess('Verificación de integridad completada');
+      toast.success('Verificación de integridad completada');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al verificar integridad: ${error.message}`);
+      toast.error(`Error al verificar integridad: ${error.message}`);
       throw error;
     },
   });
@@ -50,16 +50,16 @@ export const useDataIntegrityCheck = () => {
  */
 export const useFixDataIntegrityIssues = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (issueTypes: string[]) => diagnosticService.fixDataIntegrityIssues(issueTypes),
     onSuccess: (data) => {
-      showSuccess('Problemas de integridad reparados correctamente');
+      toast.success('Problemas de integridad reparados correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al reparar problemas: ${error.message}`);
+      toast.error(`Error al reparar problemas: ${error.message}`);
       throw error;
     },
   });
@@ -81,7 +81,7 @@ export const useSystemResources = () => {
  */
 export const useSystemLogs = (filters: LogFilters = {}) => {
   const { level = 'ERROR', limit = 100 } = filters;
-  
+
   return useQuery({
     queryKey: ['systemLogs', filters],
     queryFn: () => diagnosticService.getSystemLogs(level, limit),
@@ -93,18 +93,18 @@ export const useSystemLogs = (filters: LogFilters = {}) => {
  */
 export const useExecuteMaintenanceTask = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
-    mutationFn: ({ taskType, parameters }: { taskType: string; parameters?: Record<string, any> }) => 
+    mutationFn: ({ taskType, parameters }: { taskType: string; parameters?: Record<string, any> }) =>
       diagnosticService.executeMaintenanceTask(taskType, parameters),
     onSuccess: (data) => {
-      showSuccess(`Tarea de mantenimiento ${data.taskType} ejecutada correctamente`);
+      toast.success(`Tarea de mantenimiento ${data.taskType} ejecutada correctamente`);
       queryClient.invalidateQueries({ queryKey: ['maintenanceTasks'] });
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al ejecutar tarea de mantenimiento: ${error.message}`);
+      toast.error(`Error al ejecutar tarea de mantenimiento: ${error.message}`);
       throw error;
     },
   });
@@ -135,18 +135,18 @@ export const useBackupInfo = () => {
  */
 export const useCreateBackup = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
-    mutationFn: ({ type, destination }: { type: string; destination: string }) => 
+    mutationFn: ({ type, destination }: { type: string; destination: string }) =>
       diagnosticService.createBackup(type, destination),
     onSuccess: (data) => {
-      showSuccess('Backup iniciado correctamente');
+      toast.success('Backup iniciado correctamente');
       queryClient.invalidateQueries({ queryKey: ['backupInfo'] });
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al crear backup: ${error.message}`);
+      toast.error(`Error al crear backup: ${error.message}`);
       throw error;
     },
   });
@@ -157,16 +157,16 @@ export const useCreateBackup = () => {
  */
 export const useRestoreBackup = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (backupId: string) => diagnosticService.restoreBackup(backupId),
     onSuccess: (data) => {
-      showSuccess(data.message);
+      toast.success(data.message);
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al restaurar backup: ${error.message}`);
+      toast.error(`Error al restaurar backup: ${error.message}`);
       throw error;
     },
   });
@@ -187,18 +187,18 @@ export const useScheduledTasks = () => {
  */
 export const useUpdateScheduledTask = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
-    mutationFn: ({ taskId, status, cronExpression }: { taskId: string; status: string; cronExpression?: string }) => 
+    mutationFn: ({ taskId, status, cronExpression }: { taskId: string; status: string; cronExpression?: string }) =>
       diagnosticService.updateScheduledTask(taskId, status, cronExpression),
     onSuccess: (data) => {
-      showSuccess(`Tarea programada ${data.name} actualizada correctamente`);
+      toast.success(`Tarea programada ${data.name} actualizada correctamente`);
       queryClient.invalidateQueries({ queryKey: ['scheduledTasks'] });
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al actualizar tarea programada: ${error.message}`);
+      toast.error(`Error al actualizar tarea programada: ${error.message}`);
       throw error;
     },
   });
@@ -220,17 +220,17 @@ export const useCacheStats = () => {
  */
 export const useClearCache = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (cacheName?: string) => diagnosticService.clearCache(cacheName),
     onSuccess: (data) => {
-      showSuccess(data.message);
+      toast.success(data.message);
       queryClient.invalidateQueries({ queryKey: ['cacheStats'] });
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al limpiar caché: ${error.message}`);
+      toast.error(`Error al limpiar caché: ${error.message}`);
       throw error;
     },
   });

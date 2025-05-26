@@ -5,7 +5,7 @@
 
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '@/shared/components/ui/Toast/ToastProvider';
 import { useAuthEvents } from '@/core/hooks/useAuthEvents';
 import { AuthEventType } from '@/core/types/auth-events';
 import { useAppDispatch } from '@/core/store';
@@ -49,15 +49,15 @@ const AuthEventsListener: React.FC<AuthEventsListenerProps> = ({
       if (showToasts) {
         toast.info('Has cerrado sesión correctamente');
       }
-      
+
       // Actualizar el estado global
       dispatch(logoutAction());
-      
+
       // Redirigir si es necesario
       if (redirectOnLogout) {
         navigate(logoutRedirectPath);
       }
-      
+
       console.log('Evento de logout:', data);
     });
 
@@ -65,15 +65,15 @@ const AuthEventsListener: React.FC<AuthEventsListenerProps> = ({
       if (showToasts) {
         toast.warning('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
       }
-      
+
       // Actualizar el estado global
       dispatch(logoutAction());
-      
+
       // Redirigir si es necesario
       if (redirectOnTokenExpired) {
         navigate(logoutRedirectPath);
       }
-      
+
       console.log('Evento de token expirado:', data);
     });
 
@@ -81,15 +81,15 @@ const AuthEventsListener: React.FC<AuthEventsListenerProps> = ({
       if (showToasts) {
         toast.warning('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
       }
-      
+
       // Actualizar el estado global
       dispatch(logoutAction());
-      
+
       // Redirigir si es necesario
       if (redirectOnSessionExpired) {
         navigate(logoutRedirectPath);
       }
-      
+
       console.log('Evento de sesión expirada:', data);
     });
 
@@ -117,14 +117,14 @@ const AuthEventsListener: React.FC<AuthEventsListenerProps> = ({
       unsubscribeTokenRefreshed();
     };
   }, [
-    subscribe, 
-    toast, 
-    navigate, 
-    dispatch, 
-    showToasts, 
-    redirectOnLogout, 
-    redirectOnSessionExpired, 
-    redirectOnTokenExpired, 
+    subscribe,
+    toast,
+    navigate,
+    dispatch,
+    showToasts,
+    redirectOnLogout,
+    redirectOnSessionExpired,
+    redirectOnTokenExpired,
     logoutRedirectPath
   ]);
 

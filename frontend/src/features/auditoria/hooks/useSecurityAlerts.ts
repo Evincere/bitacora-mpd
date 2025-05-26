@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useToastContext } from '@/components/ui';
+import { toast } from 'react-toastify';
 import securityAlertService from '../services/securityAlertService';
-import { 
-  SecurityAlert, 
-  SecurityAlertFilter, 
+import {
+  SecurityAlert,
+  SecurityAlertFilter,
   SecurityAlertStatus,
   SecurityAlertRule
 } from '../types/securityAlertTypes';
@@ -34,26 +34,26 @@ export const useSecurityAlert = (id: string) => {
  */
 export const useUpdateAlertStatus = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
-    mutationFn: ({ id, status, note }: { id: string; status: SecurityAlertStatus; note?: string }) => 
+    mutationFn: ({ id, status, note }: { id: string; status: SecurityAlertStatus; note?: string }) =>
       securityAlertService.updateAlertStatus(id, status, note),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['securityAlerts'] });
       queryClient.invalidateQueries({ queryKey: ['securityAlert', data.id] });
-      
-      const statusMessages = {
+
+      const statusMessages: Record<SecurityAlertStatus, string> = {
+        [SecurityAlertStatus.NEW]: 'Alerta creada correctamente',
         [SecurityAlertStatus.ACKNOWLEDGED]: 'Alerta reconocida correctamente',
         [SecurityAlertStatus.RESOLVED]: 'Alerta resuelta correctamente',
         [SecurityAlertStatus.FALSE_POSITIVE]: 'Alerta marcada como falso positivo'
       };
-      
-      showSuccess(statusMessages[data.status] || 'Estado de alerta actualizado correctamente');
+
+      toast.success(statusMessages[data.status] || 'Estado de alerta actualizado correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al actualizar estado de alerta: ${error.message}`);
+      toast.error(`Error al actualizar estado de alerta: ${error.message}`);
       throw error;
     },
   });
@@ -74,18 +74,17 @@ export const useSecurityAlertRules = () => {
  */
 export const useCreateAlertRule = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
-    mutationFn: (rule: Omit<SecurityAlertRule, 'id' | 'createdAt' | 'updatedAt'>) => 
+    mutationFn: (rule: Omit<SecurityAlertRule, 'id' | 'createdAt' | 'updatedAt'>) =>
       securityAlertService.createAlertRule(rule),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['securityAlertRules'] });
-      showSuccess('Regla de alerta creada correctamente');
+      toast.success('Regla de alerta creada correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al crear regla de alerta: ${error.message}`);
+      toast.error(`Error al crear regla de alerta: ${error.message}`);
       throw error;
     },
   });
@@ -96,18 +95,17 @@ export const useCreateAlertRule = () => {
  */
 export const useUpdateAlertRule = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
-    mutationFn: ({ id, rule }: { id: string; rule: Partial<SecurityAlertRule> }) => 
+    mutationFn: ({ id, rule }: { id: string; rule: Partial<SecurityAlertRule> }) =>
       securityAlertService.updateAlertRule(id, rule),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['securityAlertRules'] });
-      showSuccess('Regla de alerta actualizada correctamente');
+      toast.success('Regla de alerta actualizada correctamente');
       return data;
     },
     onError: (error: Error) => {
-      showError(`Error al actualizar regla de alerta: ${error.message}`);
+      toast.error(`Error al actualizar regla de alerta: ${error.message}`);
       throw error;
     },
   });
@@ -118,16 +116,15 @@ export const useUpdateAlertRule = () => {
  */
 export const useDeleteAlertRule = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useToastContext();
 
   return useMutation({
     mutationFn: (id: string) => securityAlertService.deleteAlertRule(id),
-    onSuccess: (_, id) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['securityAlertRules'] });
-      showSuccess('Regla de alerta eliminada correctamente');
+      toast.success('Regla de alerta eliminada correctamente');
     },
     onError: (error: Error) => {
-      showError(`Error al eliminar regla de alerta: ${error.message}`);
+      toast.error(`Error al eliminar regla de alerta: ${error.message}`);
       throw error;
     },
   });
@@ -148,9 +145,9 @@ export const useSecurityAlertStatistics = (startDate?: string, endDate?: string)
  */
 export const useToggleAlertRule = () => {
   const updateAlertRule = useUpdateAlertRule();
-  
+
   return useMutation({
-    mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) => 
+    mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) =>
       updateAlertRule.mutateAsync({ id, rule: { enabled } }),
   });
 };

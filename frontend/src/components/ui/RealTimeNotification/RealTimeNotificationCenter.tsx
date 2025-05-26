@@ -7,7 +7,7 @@ import NotificationCategories from './NotificationCategories';
 import NotificationPreferences from './NotificationPreferences';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { RealTimeNotification } from '../../../types/notifications';
+import { RealTimeNotification } from '@/core/types/notifications';
 
 // Animaciones
 const slideIn = keyframes`
@@ -357,7 +357,18 @@ const RealTimeNotificationCenter: React.FC = () => {
               {filteredNotifications.length === 0 ? (
                 <EmptyState>
                   <FiBell />
-                  <p>{notifications.length === 0 ? 'No tienes notificaciones' : 'No hay notificaciones en esta categoría'}</p>
+                  <p>
+                    {notifications.length === 0
+                      ? 'No tienes notificaciones'
+                      : 'No hay notificaciones en esta categoría'
+                    }
+                  </p>
+                  <div style={{ fontSize: '12px', opacity: 0.7, marginTop: '8px' }}>
+                    {notifications.length === 0
+                      ? 'Las notificaciones aparecerán aquí cuando ocurran eventos importantes'
+                      : 'Intenta seleccionar una categoría diferente'
+                    }
+                  </div>
                 </EmptyState>
               ) : (
                 <NotificationList>

@@ -92,4 +92,40 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, Long> {
      */
     Page<UserEntity> findByUsernameContainingIgnoreCaseOrFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
             String query, String firstNameQuery, String lastNameQuery, Pageable pageable);
+
+    /**
+     * Busca usuarios por rol y estado activo.
+     *
+     * @param role     El rol
+     * @param active   El estado activo
+     * @param pageable La información de paginación
+     * @return Una página de usuarios que coinciden con los criterios
+     */
+    Page<UserEntity> findByRoleAndActive(String role, boolean active, Pageable pageable);
+
+    /**
+     * Busca usuarios por estado activo.
+     *
+     * @param active   El estado activo
+     * @param pageable La información de paginación
+     * @return Una página de usuarios que coinciden con el estado activo
+     */
+    Page<UserEntity> findByActive(boolean active, Pageable pageable);
+
+    /**
+     * Cuenta el número de usuarios por rol y estado activo.
+     *
+     * @param role   El rol
+     * @param active El estado activo
+     * @return El número de usuarios
+     */
+    long countByRoleAndActive(String role, boolean active);
+
+    /**
+     * Cuenta el número de usuarios por estado activo.
+     *
+     * @param active El estado activo
+     * @return El número de usuarios
+     */
+    long countByActive(boolean active);
 }

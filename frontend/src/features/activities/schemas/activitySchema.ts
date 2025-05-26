@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ActivityType, ActivityStatus } from '@/types/models';
+import { ActivityType, ActivityStatus } from '@/core/types/models';
 
 /**
  * Esquema de validación para la creación de actividades

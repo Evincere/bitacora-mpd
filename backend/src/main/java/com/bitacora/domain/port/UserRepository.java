@@ -112,4 +112,26 @@ public interface UserRepository {
      * @return Lista de usuarios que coinciden con la búsqueda
      */
     List<User> findByNameOrUsername(String query, int limit);
+
+    /**
+     * Busca usuarios aplicando múltiples filtros.
+     *
+     * @param role   Filtrar por rol (opcional)
+     * @param active Filtrar por estado activo (opcional)
+     * @param search Buscar por nombre, apellido o email (opcional)
+     * @param page   El número de página (comenzando desde 0)
+     * @param size   El tamaño de la página
+     * @return Lista de usuarios que cumplen con los filtros
+     */
+    List<User> findWithFilters(UserRole role, Boolean active, String search, int page, int size);
+
+    /**
+     * Cuenta el número de usuarios que cumplen con los filtros.
+     *
+     * @param role   Filtrar por rol (opcional)
+     * @param active Filtrar por estado activo (opcional)
+     * @param search Buscar por nombre, apellido o email (opcional)
+     * @return El número de usuarios que cumplen con los filtros
+     */
+    long countWithFilters(UserRole role, Boolean active, String search);
 }

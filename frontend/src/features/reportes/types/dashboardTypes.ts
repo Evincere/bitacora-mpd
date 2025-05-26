@@ -17,8 +17,10 @@ export interface DashboardMetrics {
  */
 export interface StatusDistribution {
   status: string;
+  statusName: string;
   count: number;
   percentage: number;
+  color?: string;
 }
 
 /**
@@ -48,6 +50,10 @@ export interface TaskStatusMetrics {
   statusDistribution: StatusDistribution[];
   statusByCategory: StatusByCategory[];
   statusByPriority: StatusByPriority[];
+  totalTasks?: number;
+  periodStart?: string;
+  periodEnd?: string;
+  generatedAt?: string;
 }
 
 /**
@@ -59,6 +65,9 @@ export interface ActiveUser {
   fullName: string;
   tasksCompleted: number;
   tasksAssigned: number;
+  completionRate?: number;
+  averageResolutionTimeHours?: number;
+  lastActivity?: string;
 }
 
 /**
@@ -87,15 +96,27 @@ export interface UserActivityMetrics {
   topActiveUsers: ActiveUser[];
   userActivityTimeline: DailyUserActivity[];
   userRoleDistribution: RoleDistribution[];
+  totalActiveUsers?: number;
+  averageTasksPerUser?: number;
+  averageCompletionRate?: number;
+  periodStart?: string;
+  periodEnd?: string;
+  generatedAt?: string;
 }
 
 /**
  * Categoría
  */
 export interface Category {
+  id?: number;
   name: string;
+  description?: string;
   count: number;
   percentage: number;
+  completedCount?: number;
+  completionRate?: number;
+  averageResolutionTimeHours?: number;
+  color?: string;
 }
 
 /**
@@ -112,6 +133,10 @@ export interface CategoryTrend {
 export interface CategoryDistribution {
   categories: Category[];
   categoryTrends: CategoryTrend[];
+  totalTasks?: number;
+  periodStart?: string;
+  periodEnd?: string;
+  generatedAt?: string;
 }
 
 /**
@@ -119,8 +144,15 @@ export interface CategoryDistribution {
  */
 export interface Priority {
   name: string;
+  displayName?: string;
+  priorityOrder?: number;
   count: number;
   percentage: number;
+  completedCount?: number;
+  completionRate?: number;
+  averageResolutionTimeHours?: number;
+  overdueCount?: number;
+  color?: string;
 }
 
 /**
@@ -137,6 +169,10 @@ export interface PriorityTrend {
 export interface PriorityDistribution {
   priorities: Priority[];
   priorityTrends: PriorityTrend[];
+  totalTasks?: number;
+  periodStart?: string;
+  periodEnd?: string;
+  generatedAt?: string;
 }
 
 /**

@@ -30,7 +30,7 @@ import useTareas from '../hooks/useTareas';
 import { api } from '@/core/api/api';
 
 // Tipos
-import { Activity, ActivityStatus } from '@/types/models';
+import { Activity, ActivityStatus } from '@/core/types/models';
 
 // Definición del esquema de validación con Zod
 const progresoSchema = z.object({

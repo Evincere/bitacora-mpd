@@ -181,49 +181,65 @@ public class CustomUserAuditLogRepository implements UserAuditLogRepository {
             Boolean suspicious,
             String module) {
 
-        Specification<UserAuditLogEntity> spec = Specification.where(null);
+        Specification<UserAuditLogEntity> spec = null;
 
         if (userId != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("userId"), userId));
+            Specification<UserAuditLogEntity> userIdSpec = (root, query, cb) -> cb.equal(root.get("userId"), userId);
+            spec = spec == null ? userIdSpec : spec.and(userIdSpec);
         }
 
         if (username != null && !username.isEmpty()) {
-            spec = spec.and(
-                    (root, query, cb) -> cb.like(cb.lower(root.get("username")), "%" + username.toLowerCase() + "%"));
+            Specification<UserAuditLogEntity> usernameSpec = (root, query, cb) -> cb
+                    .like(cb.lower(root.get("username")), "%" + username.toLowerCase() + "%");
+            spec = spec == null ? usernameSpec : spec.and(usernameSpec);
         }
 
         if (actionType != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("actionType"), actionType));
+            Specification<UserAuditLogEntity> actionTypeSpec = (root, query, cb) -> cb.equal(root.get("actionType"),
+                    actionType);
+            spec = spec == null ? actionTypeSpec : spec.and(actionTypeSpec);
         }
 
         if (entityType != null && !entityType.isEmpty()) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("entityType"), entityType));
+            Specification<UserAuditLogEntity> entityTypeSpec = (root, query, cb) -> cb.equal(root.get("entityType"),
+                    entityType);
+            spec = spec == null ? entityTypeSpec : spec.and(entityTypeSpec);
         }
 
         if (entityId != null && !entityId.isEmpty()) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("entityId"), entityId));
+            Specification<UserAuditLogEntity> entityIdSpec = (root, query, cb) -> cb.equal(root.get("entityId"),
+                    entityId);
+            spec = spec == null ? entityIdSpec : spec.and(entityIdSpec);
         }
 
         if (result != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("result"), result));
+            Specification<UserAuditLogEntity> resultSpec = (root, query, cb) -> cb.equal(root.get("result"), result);
+            spec = spec == null ? resultSpec : spec.and(resultSpec);
         }
 
         if (startDate != null) {
-            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("timestamp"), startDate));
+            Specification<UserAuditLogEntity> startDateSpec = (root, query, cb) -> cb
+                    .greaterThanOrEqualTo(root.get("timestamp"), startDate);
+            spec = spec == null ? startDateSpec : spec.and(startDateSpec);
         }
 
         if (endDate != null) {
-            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("timestamp"), endDate));
+            Specification<UserAuditLogEntity> endDateSpec = (root, query, cb) -> cb
+                    .lessThanOrEqualTo(root.get("timestamp"), endDate);
+            spec = spec == null ? endDateSpec : spec.and(endDateSpec);
         }
 
         if (suspicious != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("suspicious"), suspicious));
+            Specification<UserAuditLogEntity> suspiciousSpec = (root, query, cb) -> cb.equal(root.get("suspicious"),
+                    suspicious);
+            spec = spec == null ? suspiciousSpec : spec.and(suspiciousSpec);
         }
 
         if (module != null && !module.isEmpty()) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("module"), module));
+            Specification<UserAuditLogEntity> moduleSpec = (root, query, cb) -> cb.equal(root.get("module"), module);
+            spec = spec == null ? moduleSpec : spec.and(moduleSpec);
         }
 
-        return spec;
+        return spec != null ? spec : (root, query, cb) -> cb.conjunction();
     }
 }

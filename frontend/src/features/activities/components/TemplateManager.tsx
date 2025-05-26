@@ -4,7 +4,7 @@ import { FiX, FiEdit2, FiTrash2, FiFileText, FiClock, FiSearch, FiInfo } from 'r
 import useActivityTemplates, { ActivityTemplate } from '@/features/activities/hooks/useActivityTemplates';
 import { formatDistanceToNow, format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '@/shared/components/ui/Toast/ToastProvider';
 import ConfirmDialog from '../../../shared/components/common/ConfirmDialog';
 import EditTemplateDialog from './EditTemplateDialog';
 

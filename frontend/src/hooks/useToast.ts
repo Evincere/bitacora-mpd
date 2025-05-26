@@ -1,4 +1,4 @@
-import { useToast as useToastFromProvider } from '@/components/ui/Toast';
+import { useToast as useToastFromProvider } from '@/components/ui';
 
 /**
  * Hook para mostrar notificaciones toast

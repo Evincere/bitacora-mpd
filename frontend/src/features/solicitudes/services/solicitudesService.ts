@@ -1,6 +1,6 @@
 import { api } from '@/core/api/api';
-import { ActivityCategory, ActivityPriority } from '@/types/models';
-import { formatDateForBackend } from '@/utils/dateUtils';
+import { ActivityCategory, ActivityPriority } from '@/core/types/models';
+import { formatDateForBackend } from '@/core/utils/dateUtils';
 import { retryService } from '@/shared/services/retryService';
 
 export interface SolicitudRequest {

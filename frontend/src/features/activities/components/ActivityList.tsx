@@ -12,7 +12,7 @@ import {
 import { useDeleteActivity } from '@/hooks/useActivities';
 import ActivityDetail from './ActivityDetail';
 import ActivityForm from './ActivityForm';
-import ConfirmDialog from '@/components/common/ConfirmDialog';
+import ConfirmDialog from '@/shared/components/common/ConfirmDialog';
 import VirtualList from '@/components/common/VirtualList';
 import PresenceIndicator from '@/components/ui/Collaboration/PresenceIndicator';
 // Ya no necesitamos importar useActivityPresence porque no lo usamos directamente en renderActivityRow

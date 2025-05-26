@@ -1,0 +1,175 @@
+# Configuración de datos iniciales para desarrollo
+bitacora:
+  initial-data:
+    enabled: true
+    profile: dev
+    
+    users:
+      list:
+        # Usuarios base del sistema
+        - username: admin
+          password: ${ADMIN_PASSWORD:Admin@123}
+          email: admin@bitacora.com
+          firstName: Administrador
+          lastName: Sistema
+          role: ADMIN
+          position: Administrador de Sistema
+          department: Sistemas
+          active: true
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            - DELETE_ACTIVITIES
+            - READ_USERS
+            - WRITE_USERS
+            - DELETE_USERS
+            - GENERATE_REPORTS
+
+        - username: semper.evincere
+          password: ${SEMPER_PASSWORD:SemperPass@123}
+          email: semper.evincere@bitacora.com
+          firstName: Semper
+          lastName: Evincere
+          role: ADMIN
+          position: Administrador Principal
+          department: Dirección
+          active: true
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            - DELETE_ACTIVITIES
+            - READ_USERS
+            - WRITE_USERS
+            - DELETE_USERS
+            - GENERATE_REPORTS
+
+        # Usuarios de prueba para desarrollo
+        - username: testuser
+          password: ${TEST_PASSWORD:test123}
+          email: test@bitacora.com
+          firstName: Test
+          lastName: User
+          role: ADMIN
+          position: Tester
+          department: QA
+          active: true
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            - DELETE_ACTIVITIES
+            - READ_USERS
+            - WRITE_USERS
+            - DELETE_USERS
+            - GENERATE_REPORTS
+
+        # Usuario regular de ejemplo
+        - username: usuario.ejemplo
+          password: ${USER_PASSWORD:Usuario@123}
+          email: usuario@bitacora.com
+          firstName: Usuario
+          lastName: Ejemplo
+          role: USUARIO
+          position: Defensor Público
+          department: Defensoría
+          active: true
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+
+        # Usuarios específicos del sistema según las memorias
+        - username: adriana.sanchez
+          password: ${ADRIANA_PASSWORD:1008@pass}
+          email: adriana.sanchez@bitacora.com
+          firstName: Adriana
+          lastName: Sanchez
+          role: ASIGNADOR
+          position: Coordinadora
+          department: Coordinación
+          active: true
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+            - READ_USERS
+
+        # Usuario con DNI como username (formato del sistema)
+        - username: "25789012"
+          password: ${CARLOS_PASSWORD:1003@pass}
+          email: carlos.rodriguez@bitacora.com
+          firstName: Carlos
+          lastName: Rodriguez
+          role: EJECUTOR
+          position: Defensor
+          department: Defensoría Civil
+          active: true
+          permissions:
+            - READ_ACTIVITIES
+            - WRITE_ACTIVITIES
+
+    activities:
+      enabled: true
+      count: 5
+      list:
+        - type: REUNION
+          description: Reunión de planificación del sprint
+          person: Juan Pérez
+          role: Coordinador
+          dependency: Dirección de Sistemas
+          situation: Planificación del desarrollo
+          result: Se definieron las tareas prioritarias
+          status: COMPLETADA
+          comments: Reunión productiva con buenos resultados
+          agent: María López
+          assignedUsername: admin
+          daysOffset: -2
+
+        - type: AUDIENCIA
+          description: Audiencia de conciliación vecinal
+          person: Pedro Gómez
+          role: Defensor
+          dependency: Defensoría Civil
+          situation: Conflicto entre vecinos
+          result: Se llegó a un acuerdo satisfactorio
+          status: COMPLETADA
+          comments: Acuerdo firmado por ambas partes
+          agent: Ana Rodríguez
+          assignedUsername: "25789012"
+          daysOffset: -1
+
+        - type: ENTREVISTA
+          description: Entrevista con cliente para evaluación
+          person: Laura Martínez
+          role: Asistente Social
+          dependency: Defensoría Penal
+          situation: Evaluación socioeconómica
+          result: null
+          status: PENDIENTE
+          comments: Preparar documentación necesaria
+          agent: Carlos Sánchez
+          assignedUsername: usuario.ejemplo
+          daysOffset: 1
+
+        - type: CONSULTA
+          description: Consulta legal sobre derechos laborales
+          person: Roberto Silva
+          role: Trabajador
+          dependency: Defensoría Laboral
+          situation: Despido injustificado
+          result: null
+          status: EN_PROGRESO
+          comments: Revisar documentación laboral
+          agent: Adriana Sanchez
+          assignedUsername: adriana.sanchez
+          daysOffset: 0
+
+        - type: MEDIACION
+          description: Mediación familiar
+          person: Carmen López
+          role: Madre
+          dependency: Defensoría Familia
+          situation: Régimen de visitas
+          result: null
+          status: ASIGNADA
+          comments: Coordinar con ambas partes
+          agent: Luis Fernández
+          assignedUsername: "25789012"
+          daysOffset: 3

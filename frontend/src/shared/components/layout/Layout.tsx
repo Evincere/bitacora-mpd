@@ -2,7 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import Sidebar from './Sidebar';
 import Header from './Header';
-import Loader from '../common/Loader';
+import { Loader } from '../common';
 import PageTransition from '../ui/PageTransition';
 import { useAppSelector } from '@/core/store';
 import { useEffect } from 'react';

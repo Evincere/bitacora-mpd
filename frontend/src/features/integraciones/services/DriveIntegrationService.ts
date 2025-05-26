@@ -1,6 +1,6 @@
 /**
  * Interfaz para la integración con Google Drive
- * 
+ *
  * Esta interfaz define los métodos necesarios para interactuar con Google Drive
  * y será implementada cuando se realice la integración completa.
  */
@@ -44,19 +44,19 @@ export interface DriveIntegrationService {
    * @returns Promise<boolean> - True si el usuario está autenticado, false en caso contrario
    */
   isAuthenticated(): Promise<boolean>;
-  
+
   /**
    * Inicia el flujo de autenticación con Google Drive
    * @returns Promise<void>
    */
   authenticate(): Promise<void>;
-  
+
   /**
    * Cierra la sesión con Google Drive
    * @returns Promise<void>
    */
   logout(): Promise<void>;
-  
+
   /**
    * Sube un archivo a Google Drive
    * @param file - Archivo a subir
@@ -65,28 +65,28 @@ export interface DriveIntegrationService {
    * @returns Promise<DriveFile> - Información del archivo subido
    */
   uploadFile(file: File, folderId?: string, activityId?: number): Promise<DriveFile>;
-  
+
   /**
    * Descarga un archivo de Google Drive
    * @param fileId - ID del archivo a descargar
    * @returns Promise<Blob> - Contenido del archivo
    */
   downloadFile(fileId: string): Promise<Blob>;
-  
+
   /**
    * Elimina un archivo de Google Drive
    * @param fileId - ID del archivo a eliminar
    * @returns Promise<void>
    */
   deleteFile(fileId: string): Promise<void>;
-  
+
   /**
    * Obtiene información de un archivo
    * @param fileId - ID del archivo
    * @returns Promise<DriveFile> - Información del archivo
    */
   getFileInfo(fileId: string): Promise<DriveFile>;
-  
+
   /**
    * Crea una carpeta en Google Drive
    * @param name - Nombre de la carpeta
@@ -94,28 +94,28 @@ export interface DriveIntegrationService {
    * @returns Promise<DriveFolder> - Información de la carpeta creada
    */
   createFolder(name: string, parentId?: string): Promise<DriveFolder>;
-  
+
   /**
    * Obtiene la lista de archivos en una carpeta
    * @param folderId - ID de la carpeta
    * @returns Promise<DriveFile[]> - Lista de archivos
    */
   listFiles(folderId: string): Promise<DriveFile[]>;
-  
+
   /**
    * Obtiene la lista de carpetas
    * @param parentId - ID de la carpeta padre (opcional)
    * @returns Promise<DriveFolder[]> - Lista de carpetas
    */
   listFolders(parentId?: string): Promise<DriveFolder[]>;
-  
+
   /**
    * Busca archivos por nombre o contenido
    * @param query - Texto a buscar
    * @returns Promise<DriveFile[]> - Lista de archivos que coinciden con la búsqueda
    */
   searchFiles(query: string): Promise<DriveFile[]>;
-  
+
   /**
    * Comparte un archivo con otros usuarios
    * @param fileId - ID del archivo a compartir
@@ -124,261 +124,95 @@ export interface DriveIntegrationService {
    * @returns Promise<void>
    */
   shareFile(fileId: string, emails: string[], permission: 'view' | 'edit'): Promise<void>;
-  
+
   /**
    * Obtiene la configuración actual de la integración
    * @returns Promise<DriveIntegrationConfig> - Configuración actual
    */
   getConfig(): Promise<DriveIntegrationConfig>;
-  
+
   /**
    * Actualiza la configuración de la integración
    * @param config - Nueva configuración
    * @returns Promise<void>
    */
   updateConfig(config: DriveIntegrationConfig): Promise<void>;
-  
+
   /**
    * Sincroniza archivos entre la aplicación y Google Drive
    * @param activityId - ID de la actividad a sincronizar (opcional)
    * @returns Promise<{uploaded: number, downloaded: number, deleted: number}> - Resumen de la sincronización
    */
-  syncFiles(activityId?: number): Promise<{uploaded: number, downloaded: number, deleted: number}>;
+  syncFiles(activityId?: number): Promise<{ uploaded: number, downloaded: number, deleted: number }>;
 }
 
 /**
- * Implementación mock del servicio de integración con Google Drive
- * Esta implementación se utilizará hasta que se implemente la integración real
+ * Implementación placeholder del servicio de integración con Google Drive
+ * Esta implementación indica que la funcionalidad está pendiente de implementación
  */
-export class MockDriveIntegrationService implements DriveIntegrationService {
-  private authenticated = false;
-  private config: DriveIntegrationConfig = {
-    rootFolderId: 'root',
-    createActivityFolders: true,
-    organizeFoldersByType: true,
-    defaultPermissions: 'private',
-    autoSync: false,
-    syncFrequency: 60
-  };
-  
+export class NotImplementedDriveIntegrationService implements DriveIntegrationService {
+  private readonly FEATURE_NAME = 'Integración con Google Drive';
+
   async isAuthenticated(): Promise<boolean> {
-    return this.authenticated;
+    return false;
   }
-  
+
   async authenticate(): Promise<void> {
-    // Simulación de autenticación exitosa
-    this.authenticated = true;
-    console.log('Usuario autenticado con Google Drive (simulado)');
+    throw new Error(`${this.FEATURE_NAME} no está disponible actualmente. Esta funcionalidad será implementada en una versión futura.`);
   }
-  
+
   async logout(): Promise<void> {
-    this.authenticated = false;
-    console.log('Sesión cerrada con Google Drive (simulado)');
+    throw new Error(`${this.FEATURE_NAME} no está disponible actualmente. Esta funcionalidad será implementada en una versión futura.`);
   }
-  
+
   async uploadFile(file: File, folderId?: string, activityId?: number): Promise<DriveFile> {
-    if (!this.authenticated) {
-      throw new Error('Usuario no autenticado');
-    }
-    
-    // Simulación de subida de archivo
-    const fileId = `file_${Date.now()}`;
-    const driveFile: DriveFile = {
-      id: fileId,
-      name: file.name,
-      mimeType: file.type,
-      size: file.size,
-      webViewLink: `https://drive.google.com/file/d/${fileId}/view`,
-      webContentLink: `https://drive.google.com/uc?id=${fileId}`,
-      iconLink: 'https://drive-thirdparty.googleusercontent.com/16/type/application/pdf',
-      createdTime: new Date(),
-      modifiedTime: new Date(),
-      activityId,
-      folderId
-    };
-    
-    console.log('Archivo subido a Google Drive (simulado):', driveFile);
-    return driveFile;
+    throw new Error(`${this.FEATURE_NAME} no está disponible actualmente. Esta funcionalidad será implementada en una versión futura.`);
   }
-  
+
   async downloadFile(fileId: string): Promise<Blob> {
-    if (!this.authenticated) {
-      throw new Error('Usuario no autenticado');
-    }
-    
-    // Simulación de descarga de archivo
-    console.log('Descargando archivo de Google Drive (simulado):', fileId);
-    return new Blob(['Contenido simulado del archivo'], { type: 'text/plain' });
+    throw new Error(`${this.FEATURE_NAME} no está disponible actualmente. Esta funcionalidad será implementada en una versión futura.`);
   }
-  
+
   async deleteFile(fileId: string): Promise<void> {
-    if (!this.authenticated) {
-      throw new Error('Usuario no autenticado');
-    }
-    
-    // Simulación de eliminación de archivo
-    console.log('Archivo eliminado de Google Drive (simulado):', fileId);
+    throw new Error(`${this.FEATURE_NAME} no está disponible actualmente. Esta funcionalidad será implementada en una versión futura.`);
   }
-  
+
   async getFileInfo(fileId: string): Promise<DriveFile> {
-    if (!this.authenticated) {
-      throw new Error('Usuario no autenticado');
-    }
-    
-    // Datos de ejemplo
-    return {
-      id: fileId,
-      name: 'Documento de ejemplo.pdf',
-      mimeType: 'application/pdf',
-      size: 1024 * 1024,
-      webViewLink: `https://drive.google.com/file/d/${fileId}/view`,
-      webContentLink: `https://drive.google.com/uc?id=${fileId}`,
-      iconLink: 'https://drive-thirdparty.googleusercontent.com/16/type/application/pdf',
-      createdTime: new Date(),
-      modifiedTime: new Date()
-    };
+    throw new Error(`${this.FEATURE_NAME} no está disponible actualmente. Esta funcionalidad será implementada en una versión futura.`);
   }
-  
+
   async createFolder(name: string, parentId?: string): Promise<DriveFolder> {
-    if (!this.authenticated) {
-      throw new Error('Usuario no autenticado');
-    }
-    
-    // Simulación de creación de carpeta
-    const folderId = `folder_${Date.now()}`;
-    const folder: DriveFolder = {
-      id: folderId,
-      name,
-      parentId
-    };
-    
-    console.log('Carpeta creada en Google Drive (simulado):', folder);
-    return folder;
+    throw new Error(`${this.FEATURE_NAME} no está disponible actualmente. Esta funcionalidad será implementada en una versión futura.`);
   }
-  
+
   async listFiles(folderId: string): Promise<DriveFile[]> {
-    if (!this.authenticated) {
-      throw new Error('Usuario no autenticado');
-    }
-    
-    // Datos de ejemplo
-    return [
-      {
-        id: 'file_1',
-        name: 'Documento 1.pdf',
-        mimeType: 'application/pdf',
-        size: 1024 * 1024,
-        webViewLink: 'https://drive.google.com/file/d/file_1/view',
-        webContentLink: 'https://drive.google.com/uc?id=file_1',
-        iconLink: 'https://drive-thirdparty.googleusercontent.com/16/type/application/pdf',
-        createdTime: new Date(),
-        modifiedTime: new Date(),
-        folderId
-      },
-      {
-        id: 'file_2',
-        name: 'Imagen 1.jpg',
-        mimeType: 'image/jpeg',
-        size: 2 * 1024 * 1024,
-        webViewLink: 'https://drive.google.com/file/d/file_2/view',
-        webContentLink: 'https://drive.google.com/uc?id=file_2',
-        iconLink: 'https://drive-thirdparty.googleusercontent.com/16/type/image/jpeg',
-        createdTime: new Date(),
-        modifiedTime: new Date(),
-        folderId
-      }
-    ];
+    throw new Error(`${this.FEATURE_NAME} no está disponible actualmente. Esta funcionalidad será implementada en una versión futura.`);
   }
-  
+
   async listFolders(parentId?: string): Promise<DriveFolder[]> {
-    if (!this.authenticated) {
-      throw new Error('Usuario no autenticado');
-    }
-    
-    // Datos de ejemplo
-    return [
-      {
-        id: 'folder_1',
-        name: 'Documentos',
-        parentId
-      },
-      {
-        id: 'folder_2',
-        name: 'Imágenes',
-        parentId
-      },
-      {
-        id: 'folder_3',
-        name: 'Proyectos',
-        parentId
-      }
-    ];
+    throw new Error(`${this.FEATURE_NAME} no está disponible actualmente. Esta funcionalidad será implementada en una versión futura.`);
   }
-  
+
   async searchFiles(query: string): Promise<DriveFile[]> {
-    if (!this.authenticated) {
-      throw new Error('Usuario no autenticado');
-    }
-    
-    // Datos de ejemplo
-    return [
-      {
-        id: 'file_3',
-        name: `Resultado de búsqueda para "${query}" 1.pdf`,
-        mimeType: 'application/pdf',
-        size: 1024 * 1024,
-        webViewLink: 'https://drive.google.com/file/d/file_3/view',
-        webContentLink: 'https://drive.google.com/uc?id=file_3',
-        iconLink: 'https://drive-thirdparty.googleusercontent.com/16/type/application/pdf',
-        createdTime: new Date(),
-        modifiedTime: new Date()
-      },
-      {
-        id: 'file_4',
-        name: `Resultado de búsqueda para "${query}" 2.docx`,
-        mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        size: 512 * 1024,
-        webViewLink: 'https://drive.google.com/file/d/file_4/view',
-        webContentLink: 'https://drive.google.com/uc?id=file_4',
-        iconLink: 'https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        createdTime: new Date(),
-        modifiedTime: new Date()
-      }
-    ];
+    throw new Error(`${this.FEATURE_NAME} no está disponible actualmente. Esta funcionalidad será implementada en una versión futura.`);
   }
-  
+
   async shareFile(fileId: string, emails: string[], permission: 'view' | 'edit'): Promise<void> {
-    if (!this.authenticated) {
-      throw new Error('Usuario no autenticado');
-    }
-    
-    // Simulación de compartir archivo
-    console.log('Archivo compartido en Google Drive (simulado):', { fileId, emails, permission });
+    throw new Error(`${this.FEATURE_NAME} no está disponible actualmente. Esta funcionalidad será implementada en una versión futura.`);
   }
-  
+
   async getConfig(): Promise<DriveIntegrationConfig> {
-    return this.config;
+    throw new Error(`${this.FEATURE_NAME} no está disponible actualmente. Esta funcionalidad será implementada en una versión futura.`);
   }
-  
+
   async updateConfig(config: DriveIntegrationConfig): Promise<void> {
-    this.config = config;
-    console.log('Configuración actualizada (simulado):', config);
+    throw new Error(`${this.FEATURE_NAME} no está disponible actualmente. Esta funcionalidad será implementada en una versión futura.`);
   }
-  
-  async syncFiles(activityId?: number): Promise<{uploaded: number, downloaded: number, deleted: number}> {
-    if (!this.authenticated) {
-      throw new Error('Usuario no autenticado');
-    }
-    
-    // Simulación de sincronización
-    console.log('Sincronizando archivos con Google Drive (simulado):', { activityId });
-    return {
-      uploaded: 3,
-      downloaded: 2,
-      deleted: 1
-    };
+
+  async syncFiles(activityId?: number): Promise<{ uploaded: number, downloaded: number, deleted: number }> {
+    throw new Error(`${this.FEATURE_NAME} no está disponible actualmente. Esta funcionalidad será implementada en una versión futura.`);
   }
 }
 
-// Exportar una instancia del servicio mock para su uso en la aplicación
-export const driveIntegrationService = new MockDriveIntegrationService();
+// Exportar una instancia del servicio placeholder para su uso en la aplicación
+export const driveIntegrationService = new NotImplementedDriveIntegrationService();
